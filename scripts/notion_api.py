@@ -100,6 +100,103 @@ def block_to_markdown(block: dict) -> str:
     return text
 
 
+def paragraph_block(text: str) -> dict:
+    return {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+            "rich_text": [
+                {
+                    "type": "text",
+                    "text": {"content": text},
+                }
+            ]
+        },
+    }
+
+
+def rich_text_block(text: str, block_type: str) -> dict:
+    return {
+        "object": "block",
+        "type": block_type,
+        block_type: {
+            "rich_text": [
+                {
+                    "type": "text",
+                    "text": {"content": text},
+                }
+            ]
+        },
+    }
+
+
+def code_block(text: str, language: str = "plain text") -> dict:
+    return {
+        "object": "block",
+        "type": "code",
+        "code": {
+            "language": language,
+            "rich_text": [
+                {
+                    "type": "text",
+                    "text": {"content": text},
+                }
+            ],
+        },
+    }
+
+
+def markdown_to_blocks(markdown: str) -> list[dict]:
+    blocks: list[dict] = []
+    lines = markdown.splitlines()
+    idx = 0
+    while idx < len(lines):
+        line = lines[idx].rstrip()
+        stripped = line.strip()
+        if not stripped:
+            idx += 1
+            continue
+        if stripped.startswith("```"):
+            language = stripped[3:].strip() or "plain text"
+            idx += 1
+            body: list[str] = []
+            while idx < len(lines) and not lines[idx].strip().startswith("```"):
+                body.append(lines[idx].rstrip("\n"))
+                idx += 1
+            blocks.append(code_block("\n".join(body), language))
+            idx += 1
+            continue
+        if stripped.startswith("### "):
+            blocks.append(rich_text_block(stripped[4:], "heading_3"))
+        elif stripped.startswith("## "):
+            blocks.append(rich_text_block(stripped[3:], "heading_2"))
+        elif stripped.startswith("# "):
+            blocks.append(rich_text_block(stripped[2:], "heading_1"))
+        elif stripped.startswith("- ["):
+            checked = stripped.startswith("- [x]") or stripped.startswith("- [X]")
+            text = stripped[6:].strip()
+            blocks.append(
+                {
+                    "object": "block",
+                    "type": "to_do",
+                    "to_do": {
+                        "checked": checked,
+                        "rich_text": [{"type": "text", "text": {"content": text}}],
+                    },
+                }
+            )
+        elif stripped.startswith("- "):
+            blocks.append(rich_text_block(stripped[2:], "bulleted_list_item"))
+        elif re.match(r"^\d+\.\s", stripped):
+            blocks.append(rich_text_block(re.sub(r"^\d+\.\s+", "", stripped), "numbered_list_item"))
+        elif stripped.startswith("> "):
+            blocks.append(rich_text_block(stripped[2:], "quote"))
+        else:
+            blocks.append(paragraph_block(stripped))
+        idx += 1
+    return blocks
+
+
 def slugify(value: str) -> str:
     slug = re.sub(r"[^a-zA-Z0-9]+", "-", value.strip().lower()).strip("-")
     return slug or "prompt"
@@ -223,6 +320,41 @@ def fetch_prompts_from_page(
     return sorted(prompts, key=lambda item: (item["order"], item["title"]))
 
 
+def title_property_payload(title: str) -> list[dict]:
+    return [{"type": "text", "text": {"content": title}}]
+
+
+def create_page_payload(args: argparse.Namespace, blocks: list[dict]) -> dict:
+    if args.output_parent_page_id:
+        return {
+            "parent": {"page_id": args.output_parent_page_id},
+            "properties": {"title": {"title": title_property_payload(args.title)}},
+            "children": blocks,
+        }
+    return {
+        "parent": {"database_id": args.output_database_id},
+        "properties": {args.title_property: {"title": title_property_payload(args.title)}},
+        "children": blocks,
+    }
+
+
+def delete_existing_children(token: str, api_base_url: str, notion_version: str, page_id: str) -> None:
+    payload = notion_request(token, api_base_url, notion_version, "GET", f"/blocks/{page_id}/children?page_size=100")
+    for block in payload.get("results", []):
+        notion_request(token, api_base_url, notion_version, "DELETE", f"/blocks/{block['id']}")
+
+
+def append_children(token: str, api_base_url: str, notion_version: str, page_id: str, blocks: list[dict]) -> dict:
+    return notion_request(
+        token,
+        api_base_url,
+        notion_version,
+        "PATCH",
+        f"/blocks/{page_id}/children",
+        {"children": blocks},
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Minimal Notion API helper for Hypo-Workflow adapters.")
     parser.add_argument("--token-file")
@@ -238,6 +370,16 @@ def main() -> int:
     fetch.add_argument("--source-database-id")
     fetch.add_argument("--source-page-id")
     fetch.add_argument("--fixture-dir")
+    render = sub.add_parser("render-markdown", help="Convert markdown into Notion blocks.")
+    render.add_argument("--input-file", required=True)
+    upsert = sub.add_parser("upsert-report", help="Create or update a Notion report page.")
+    upsert.add_argument("--report-file", required=True)
+    upsert.add_argument("--title", required=True)
+    upsert.add_argument("--output-parent-page-id")
+    upsert.add_argument("--output-database-id")
+    upsert.add_argument("--existing-page-id")
+    upsert.add_argument("--title-property", default="Name")
+    upsert.add_argument("--dry-run", action="store_true")
 
     args = parser.parse_args()
     token = load_token(args.token_file)
@@ -271,6 +413,31 @@ def main() -> int:
                 notion_version=args.notion_version,
                 fixture_dir=args.fixture_dir,
                 page_id=args.source_page_id,
+            )
+    elif args.command == "render-markdown":
+        payload = markdown_to_blocks(Path(args.input_file).read_text(encoding="utf-8"))
+    elif args.command == "upsert-report":
+        if not args.output_parent_page_id and not args.output_database_id and not args.existing_page_id:
+            raise SystemExit("upsert-report requires --output-parent-page-id, --output-database-id, or --existing-page-id")
+        report = Path(args.report_file).read_text(encoding="utf-8")
+        blocks = markdown_to_blocks(report)
+        if args.dry_run:
+            payload = {
+                "mode": "update" if args.existing_page_id else "create",
+                "page_id": args.existing_page_id,
+                "request": create_page_payload(args, blocks) if not args.existing_page_id else {"children": blocks},
+            }
+        elif args.existing_page_id:
+            delete_existing_children(token, args.api_base_url, args.notion_version, args.existing_page_id)
+            payload = append_children(token, args.api_base_url, args.notion_version, args.existing_page_id, blocks)
+        else:
+            payload = notion_request(
+                token,
+                args.api_base_url,
+                args.notion_version,
+                "POST",
+                "/pages",
+                create_page_payload(args, blocks),
             )
     else:
         raise SystemExit(f"Unknown command: {args.command}")
