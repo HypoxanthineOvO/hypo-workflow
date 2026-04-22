@@ -1,6 +1,6 @@
 ---
 name: prompt-pipeline
-version: 5.0.0
+version: 5.1.0
 description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:plan`, or `/hw:review`.
 ---
 
@@ -37,10 +37,10 @@ V2.5 is a structural upgrade:
 - move stable templates into `assets/`
 - expose Claude plugin packaging through `.claude-plugin/plugin.json`
 
-The runtime guarantees in this version still focus on:
+The runtime guarantees in this version focus on:
 
-- `pipeline.source: local`
-- `pipeline.output: local`
+- `pipeline.source: local | notion`
+- `pipeline.output: local | notion`
 - `execution.mode: self | subagent`
 - recovery through `.pipeline/state.yaml`
 
@@ -97,6 +97,10 @@ Use these bundled files when relevant:
 
 - [`assets/state-init.yaml`](./assets/state-init.yaml)
 - [`assets/report-template.md`](./assets/report-template.md)
+- [`adapters/source/local.md`](./adapters/source/local.md)
+- [`adapters/source/notion.md`](./adapters/source/notion.md)
+- [`adapters/output/local.md`](./adapters/output/local.md)
+- [`adapters/output/notion.md`](./adapters/output/notion.md)
 - [`plan/PLAN-SKILL.md`](./plan/PLAN-SKILL.md)
 - [`references/tdd-spec.md`](./references/tdd-spec.md)
 - [`references/commands-spec.md`](./references/commands-spec.md)
@@ -178,6 +182,14 @@ For `source: local`:
 2. Collect `*.md` files.
 3. Sort them by filename ascending.
 4. Treat each file as one pipeline prompt.
+
+For `source: notion`:
+
+1. Read the `notion` config block.
+2. Resolve the token from `NOTION_TOKEN` or `notion.token_file`.
+3. Use [`adapters/source/notion.md`](./adapters/source/notion.md) as the source contract.
+4. If helper execution is needed, prefer `python3 scripts/notion_api.py fetch-prompts ...`.
+5. Convert Notion prompts into the same internal prompt structure used for local files.
 
 Prompt files should usually contain:
 
@@ -572,6 +584,20 @@ This skill is packaged for Claude plugin installation through:
 - [`.claude-plugin/plugin.json`](./.claude-plugin/plugin.json)
 
 That manifest should only point to this `SKILL.md`. Hooks, commands, and agent definitions can grow in later versions without changing the core state machine here.
+
+## Output Adapters
+
+For `output: local`:
+
+- persist reports to the configured reports directory
+
+For `output: notion`:
+
+1. read the `notion` config block
+2. resolve the token from `NOTION_TOKEN` or `notion.token_file`
+3. use [`adapters/output/notion.md`](./adapters/output/notion.md) as the write contract
+4. prefer `python3 scripts/notion_api.py upsert-report ...` when helper execution is needed
+5. if the Notion write fails, keep local report generation intact and report the adapter error explicitly
 
 ## Deprecated Layout
 

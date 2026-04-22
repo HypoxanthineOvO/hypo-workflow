@@ -13,6 +13,7 @@
 # 6. 如果 execution.mode=subagent，subagent_tool 必须存在
 # 7. 如果 hooks.enabled=true，hooks/ 目录必须存在
 # 8. platform 如果存在，必须是 auto|claude|codex 之一
+# 9. 如果 source/output 使用 notion，必须提供 notion 段并满足最小字段要求
 #
 # 输出：每条错误一行。退出码：0=通过, 1=有错误
 #
@@ -63,6 +64,11 @@ subagent_tool="$(extract_section execution subagent_tool)"
 preset="$(sed -nE 's/^[[:space:]]*preset:[[:space:]]*(.*)$/\1/p' "$config_path" | head -n1 | trim)"
 hooks_enabled="$(extract_section hooks enabled)"
 platform="$(extract_top platform)"
+notion_token_file="$(extract_section notion token_file)"
+notion_source_database_id="$(extract_section notion source_database_id)"
+notion_source_page_id="$(extract_section notion source_page_id)"
+notion_output_parent_page_id="$(extract_section notion output_parent_page_id)"
+notion_output_database_id="$(extract_section notion output_database_id)"
 
 if [[ -z "$pipeline_name" ]]; then
   echo "pipeline.name must not be empty"
@@ -111,6 +117,38 @@ if [[ -n "$platform" ]]; then
       errors=1
       ;;
   esac
+fi
+
+if [[ "$pipeline_source" == "notion" || "$pipeline_output" == "notion" ]]; then
+  if [[ -z "${NOTION_TOKEN:-}" && -z "$notion_token_file" ]]; then
+    echo "notion.token_file or NOTION_TOKEN is required when using notion adapters"
+    errors=1
+  fi
+
+  if [[ -n "$notion_token_file" ]]; then
+    token_candidate="$notion_token_file"
+    if [[ "$token_candidate" != /* ]]; then
+      token_candidate="$project_root/$token_candidate"
+    fi
+    if [[ ! -r "$token_candidate" ]]; then
+      echo "notion.token_file is not readable: $notion_token_file"
+      errors=1
+    fi
+  fi
+fi
+
+if [[ "$pipeline_source" == "notion" ]]; then
+  if [[ -z "$notion_source_database_id" && -z "$notion_source_page_id" ]]; then
+    echo "notion.source_database_id or notion.source_page_id is required when pipeline.source=notion"
+    errors=1
+  fi
+fi
+
+if [[ "$pipeline_output" == "notion" ]]; then
+  if [[ -z "$notion_output_parent_page_id" && -z "$notion_output_database_id" ]]; then
+    echo "notion.output_parent_page_id or notion.output_database_id is required when pipeline.output=notion"
+    errors=1
+  fi
 fi
 
 exit "$errors"

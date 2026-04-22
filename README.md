@@ -6,7 +6,7 @@
 
 TDD Pipeline · Self-Review · Interrupt Recovery · Multi-Dimensional Evaluation
 
-[![Version](https://img.shields.io/badge/version-5.0.0-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-5.1.0-blue)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex-purple)](#platform-support)
 
@@ -33,6 +33,7 @@ It ships as a **SKILL.md** file — not a service, not a CLI tool. Any AI agent 
 | 🔄 **TDD Pipeline** | Built-in test-driven sub-steps: write tests → review → red → implement → green → review code |
 | 🧭 **Slash Commands** | Explicit `/hw:*` commands for start / resume / status / skip / stop / report / plan / review |
 | 🗺️ **Plan Mode** | `/hw:plan` sub-skill with discover / decompose / generate / confirm phases |
+| 🧩 **Notion Adapter** | Read prompts from Notion and/or write reports back to Notion with graceful degradation |
 | ⏸️ **Interrupt Recovery** | `state.yaml` tracks progress to the sub-step level — resume exactly where you left off |
 | 🤖 **Subagent Delegation** | Offload code reviews to a subagent (Claude ↔ Codex), with automatic fallback |
 | 🪨 **Hook Integration** | Claude Code hooks for stop-check (`decision:block`) and session context injection (`additionalContext`) |
@@ -215,7 +216,9 @@ prompt-pipeline/
 
 │   ├── [diff-stats.sh](http://diff-stats.sh)            # Git diff statistics
 
-│   └── [validate-config.sh](http://validate-config.sh)       # Validate config.yaml
+│   ├── [validate-config.sh](http://validate-config.sh)       # Validate config.yaml
+
+│   └── notion_api.py             # Notion auth / fetch / render / upsert helper
 
 ├── references/
 
@@ -276,6 +279,15 @@ prompt-pipeline/
 | `self` | Agent executes everything directly |
 | `subagent` | Agent delegates to a subagent (with fallback to self) |
 
+### Adapters
+
+| Adapter | Modes |
+|---------|-------|
+| Source | `local`, `notion` |
+| Output | `local`, `notion` |
+
+Notion source and output are independently configurable, so mixed mode is supported.
+
 ### Slash Commands
 
 | Command | Behavior |
@@ -316,6 +328,28 @@ complexity: 0.15
 architecture_drift: 0.15
 
 ```
+
+### Notion Configuration
+
+```yaml
+
+pipeline:
+  source: notion
+  output: local
+
+notion:
+  token_file: ./Notion-API.md
+  source_database_id: "..."
+  # or source_page_id: "..."
+  output_parent_page_id: "..."
+  # or output_database_id: "..."
+
+```
+
+Token resolution order:
+
+1. `NOTION_TOKEN`
+2. `notion.token_file`
 
 #### Scoring Dimensions (V4)
 
@@ -412,6 +446,24 @@ Example:
 
 ```
 
+### Notion Adapter
+
+Example mixed modes:
+
+```yaml
+# Read prompts from Notion, write reports locally
+pipeline:
+  source: notion
+  output: local
+
+# Read prompts locally, write reports to Notion
+pipeline:
+  source: local
+  output: notion
+```
+
+If the Notion integration does not have access to the target page or database, Hypo-Workflow should fail explicitly for that adapter path while preserving local artifacts.
+
 ---
 
 ## How It Works
@@ -490,6 +542,7 @@ Hooks act as a passive safety net — they don’t drive the pipeline, but preve
 | V4 | Multi-dimensional evaluation + adaptive threshold + architecture drift |
 | V4.5 | Namespaced `/hw:*` slash commands for explicit pipeline control |
 | V5 | Plan Mode + Plan Review + template library |
+| V5.1 | Notion source/output adapters + mixed mode |
 
 ---
 

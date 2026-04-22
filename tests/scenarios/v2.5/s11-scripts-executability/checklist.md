@@ -33,7 +33,7 @@
 
 ### plugin.json
 - [ ] `python3 -m json.tool .claude-plugin/plugin.json` 通过
-- [ ] version = 5.0.0
+- [ ] version = 5.1.0
 - [ ] hooks 字段包含 Stop / SessionStart / InstructionsLoaded
 
 ## 结果
