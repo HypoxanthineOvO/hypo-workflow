@@ -39,6 +39,32 @@ Load planning resources in layers:
 - inspect the current repository when applicable
 - capture goals, constraints, tech stack, and deliverables
 - write or update `.pipeline/design-spec.md`
+- persist intermediate state in `.plan-state/discover.yaml`
+
+Discover should use a two-pass discussion shape:
+
+1. global framing
+   - project type
+   - target users
+   - delivery artifact
+   - constraints
+2. focused drilling
+   - architecture expectations
+   - testing expectations
+   - integration boundaries
+   - migration or compatibility constraints
+
+Repository scan rules:
+
+- if the repo already contains source files, summarize the current structure before proposing milestones
+- if `.pipeline/` already exists, treat the plan as append-or-revise rather than greenfield
+- if the repo is effectively empty, skip structural scan and say that the plan is greenfield
+
+Required Discover outputs:
+
+- `.pipeline/design-spec.md`
+- `.plan-state/discover.yaml`
+- a concise list of unresolved questions, if any
 
 ### Decompose
 
@@ -65,4 +91,11 @@ Load planning resources in layers:
 - identify downstream prompt impact
 - propose prompt updates before the next milestone runs
 
-Detailed behavior is filled in by later V5 milestones.
+## Shared Planning Artifacts
+
+Use these files when relevant:
+
+- `plan/assets/design-spec-template.md`
+- `.plan-state/discover.yaml`
+
+`.plan-state/` is runtime planning state and should not be committed. Use it for resumable planning phases in the same spirit as `.pipeline/state.yaml`.

@@ -2,6 +2,7 @@
 .pipeline/state.yaml
 .pipeline/reports/
 .pipeline/log.md
+.plan-state/
 
 # 测试产物
 tests/scenarios/**/results/
