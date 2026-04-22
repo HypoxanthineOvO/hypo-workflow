@@ -6,7 +6,7 @@
 
 TDD Pipeline · Self-Review · Interrupt Recovery · Multi-Dimensional Evaluation
 
-[![Version](https://img.shields.io/badge/version-4.0.0-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-4.5.0-blue)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex-purple)](#platform-support)
 
@@ -31,6 +31,7 @@ It ships as a **SKILL.md** file — not a service, not a CLI tool. Any AI agent 
 | Feature | Description |
 |---------|-------------|
 | 🔄 **TDD Pipeline** | Built-in test-driven sub-steps: write tests → review → red → implement → green → review code |
+| 🧭 **Slash Commands** | Explicit `/hw:*` commands for start / resume / status / skip / stop / report |
 | ⏸️ **Interrupt Recovery** | `state.yaml` tracks progress to the sub-step level — resume exactly where you left off |
 | 🤖 **Subagent Delegation** | Offload code reviews to a subagent (Claude ↔ Codex), with automatic fallback |
 | 🪨 **Hook Integration** | Claude Code hooks for stop-check (`decision:block`) and session context injection (`additionalContext`) |
@@ -147,6 +148,14 @@ Read .pipeline/config.yaml and start.
 
 ```
 
+Or use an explicit slash command:
+
+```
+
+/hw:start
+
+```
+
 The agent will:
 1. Read your config and prompts
 2. Execute each prompt through the TDD sub-step chain
@@ -194,6 +203,8 @@ prompt-pipeline/
 ├── references/
 
 │   ├── [tdd-spec.md](http://tdd-spec.md)              # Detailed TDD sub-step rules
+
+│   ├── [commands-spec.md](http://commands-spec.md)         # Slash command parsing & semantics
 
 │   ├── [evaluation-spec.md](http://evaluation-spec.md)       # Scoring dimensions & thresholds
 
@@ -411,6 +422,7 @@ Hooks act as a passive safety net — they don’t drive the pipeline, but preve
 | V2.5 | Progressive Disclosure + Plugin packaging |
 | V3 | Claude Code Hook integration (stop-check, session-start) |
 | V4 | Multi-dimensional evaluation + adaptive threshold + architecture drift |
+| V4.5 | Namespaced `/hw:*` slash commands for explicit pipeline control |
 
 ---
 

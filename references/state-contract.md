@@ -7,7 +7,7 @@ This file defines the full `state.yaml` contract used by the pipeline.
 ```yaml
 pipeline:
   name: ""
-  status: idle | running | blocked | aborted | completed
+  status: idle | running | blocked | aborted | stopped | completed
   prompts_total: 0
   prompts_completed: 0
   started: null
@@ -22,7 +22,7 @@ prompt_state:
   started_at: null
   updated_at: null
   finished_at: null
-  result: running | pass | blocked | aborted
+  result: running | pass | blocked | aborted | stopped | skipped
   diff_score: null
   code_quality: null
   steps: []
@@ -54,6 +54,8 @@ Write `state.yaml` at these moments:
 - step start
 - step finish
 - any skip cascade update
+- prompt skip
+- graceful stop
 - prompt finish
 - prompt blocked
 - abort or restart
@@ -63,6 +65,11 @@ Read `state.yaml` at these moments:
 - `start pipeline`
 - `continue`
 - `pipeline status`
+- `/hw:resume`
+- `/hw:status`
+- `/hw:skip`
+- `/hw:stop`
+- `/hw:report`
 - `skip step`
 - `abort`
 
@@ -75,6 +82,10 @@ Read `state.yaml` at these moments:
 - `prompt_state.code_quality` informs the `code_quality` evaluation check.
 - `executor=subagent` implies `subagent_tool` is not null and `subagent_result` should exist unless parsing failed.
 - `status=skipped` should carry a `reason`.
+- `pipeline.status=stopped` means the run is intentionally paused and resumable.
+- `prompt_state.result=stopped` means the current prompt was paused mid-flight and should resume from `current.step`.
+- prompt-level `result=skipped` should not increment `pipeline.prompts_completed`.
+- `history.completed_prompts` is a legacy field name and may contain non-pass entries such as `blocked`, `aborted`, or `skipped`.
 
 ## Version History
 
@@ -103,6 +114,15 @@ Added:
 - `executor`
 - `subagent_tool`
 - `subagent_result`
+
+### V4.5
+
+Added:
+
+- slash-command-aware resumable stop state through `pipeline.status=stopped`
+- prompt-level `result=stopped`
+- prompt-level `result=skipped`
+- prompt skip / graceful stop write timing
 
 ## V4 新增字段
 

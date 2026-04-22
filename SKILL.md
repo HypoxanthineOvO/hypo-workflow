@@ -1,8 +1,24 @@
 ---
 name: prompt-pipeline
-version: 4.0.0
-description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or otherwise asks to resume, inspect, or advance a prompt-driven implementation pipeline.
+version: 4.5.0
+description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, or `/hw:plan`.
 ---
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `/hw:start` | Initialize and start the pipeline from the first prompt |
+| `/hw:resume` | Resume from the last interrupted state |
+| `/hw:status` | Show current pipeline progress |
+| `/hw:skip` | Skip the current prompt and advance |
+| `/hw:stop` | Gracefully stop and save state |
+| `/hw:report` | Show the latest evaluation scores |
+| `/hw:plan` | Enter design discussion mode (V5, not yet implemented) |
+
+When the user types any `/hw:*` command, execute the corresponding action.
+Unrecognized `/hw:*` commands should be reported as unknown.
+Load [`references/commands-spec.md`](./references/commands-spec.md) when you need parsing rules, parameter semantics, or state-mutation details for slash commands.
 
 # Prompt Pipeline
 
@@ -62,6 +78,7 @@ Use these bundled files when relevant:
 - [`assets/state-init.yaml`](./assets/state-init.yaml)
 - [`assets/report-template.md`](./assets/report-template.md)
 - [`references/tdd-spec.md`](./references/tdd-spec.md)
+- [`references/commands-spec.md`](./references/commands-spec.md)
 - [`references/evaluation-spec.md`](./references/evaluation-spec.md)
 - [`references/subagent-spec.md`](./references/subagent-spec.md)
 - [`references/state-contract.md`](./references/state-contract.md)
@@ -78,16 +95,30 @@ Use these bundled files when relevant:
 
 Handle these commands directly:
 
-- `开始执行`, `start pipeline`
-  Resume unfinished state if present. Otherwise initialize from the first prompt.
-- `继续`, `continue`, `下一步`, `执行下一步`
-  Resume from `current.prompt_file` and `current.step`.
-- `pipeline status`, `状态`
-  Read config plus state and print a concise status summary without mutating work.
+- `/hw:start`, `开始执行`, `start pipeline`
+  Start the pipeline. Resume unfinished state if present unless `--clean` is given. With `--from <prompt>`, initialize the current prompt directly to the matched prompt file or prompt stem.
+- `/hw:resume`, `继续`, `continue`, `下一步`, `执行下一步`
+  Resume from `current.prompt_file` and `current.step`. Treat a user-facing interrupted session as persisted unfinished work, usually `pipeline.status=running|stopped`.
+- `/hw:status`, `pipeline status`, `状态`
+  Read config plus state and print a concise status summary without mutating work. When shell access is available, prefer [`scripts/state-summary.sh`](./scripts/state-summary.sh).
+- `/hw:skip`
+  Skip the current prompt, persist a prompt-level skip reason, append a prompt skip log event, and advance to the next prompt without incrementing `pipeline.prompts_completed`.
 - `跳过当前步骤`, `skip step`
   Mark the current step as skipped, apply cascade logic when needed, persist state, append log events, and move to the next runnable step.
+- `/hw:stop`
+  Gracefully stop without aborting the pipeline. Persist state, optionally write an intermediate report, and set `pipeline.status=stopped`. With `--no-report`, skip the intermediate report.
+- `/hw:report`
+  Load the most recent report file and summarize the latest scores, warnings, and decision.
+- `/hw:plan`
+  V5 reserved command. Acknowledge the command and respond that it is a V5 feature and not yet implemented.
 - `中止`, `abort`
   Mark the current prompt and pipeline as aborted, persist state, append a prompt-level log event, and stop.
+
+If a command starts with `/hw:` and is not listed above, return:
+
+`Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report`
+
+Slash commands are exact and take precedence over fuzzy natural-language matching. Detailed parsing and option semantics live in [`references/commands-spec.md`](./references/commands-spec.md).
 
 If the user command is ambiguous, prefer a safe resume and say which prompt and step you are about to run.
 
@@ -244,7 +275,7 @@ Core shape:
 ```yaml
 pipeline:
   name: Hypo-TODO
-  status: idle | running | blocked | aborted | completed
+  status: idle | running | blocked | aborted | stopped | completed
   prompts_total: 0
   prompts_completed: 0
   started: null
@@ -259,7 +290,7 @@ prompt_state:
   started_at: null
   updated_at: null
   finished_at: null
-  result: running | pass | blocked | aborted
+  result: running | pass | blocked | aborted | stopped | skipped
   diff_score: null
   code_quality: null
   steps:
@@ -313,6 +344,8 @@ Record only:
 - prompt start
 - prompt finish
 - prompt blocked
+- prompt skipped
+- prompt stopped
 
 Do not record pipeline-wide lifecycle events such as "pipeline initialized".
 
@@ -329,13 +362,13 @@ When shell access is available, prefer [`scripts/log-append.sh`](./scripts/log-a
 
 ## Main State Machine
 
-Use this loop for `start pipeline`, `continue`, `下一步`, and auto-continue decisions:
+Use this loop for `/hw:start`, `/hw:resume`, `start pipeline`, `continue`, `下一步`, and auto-continue decisions:
 
 1. Read config and normalize runtime values.
 2. Discover prompt files.
 3. Initialize state if missing.
-4. If pipeline is already `completed`, report completion and stop unless the user explicitly asks to restart.
-5. If pipeline is `aborted`, resume only on explicit continue/start.
+4. If pipeline is already `completed`, report completion and stop unless the user explicitly asks to restart or uses `/hw:start --clean`.
+5. If pipeline is `aborted` or `stopped`, resume only on explicit continue/start/resume.
 6. Load the current prompt.
 7. Find the next step whose status is not `done` or `skipped`.
 8. If this is a fresh prompt entry, append one prompt-level `prompt_start` log event.
@@ -466,6 +499,14 @@ If the user explicitly asks to restart:
 2. reinitialize state from `assets/state-init.yaml`
 3. set the first prompt and its first runnable step
 4. make it clear that the run is a restart, not a resume
+
+If the user asks to stop gracefully or invokes `/hw:stop`:
+
+1. persist the current prompt and pipeline state
+2. set `pipeline.status=stopped`
+3. if `--no-report` is not present, write an intermediate report for the current prompt
+4. append one prompt-level stop event
+5. stop without discarding context or marking the prompt aborted
 
 If the user asks to abort:
 
