@@ -1,0 +1,22 @@
+# Python runtime artifacts
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/.venv/
+
+# Pipeline runtime artifacts
+**/.pipeline/log.md
+**/.pipeline/reports/
+**/.pipeline/state.yaml
+!v0/s02-resume-interrupt/.pipeline/state.yaml
+
+# Generated scenario worktree files
+**/hello.py
+**/chooser.py
+**/pyproject.toml
+**/src/
+**/tests/
+
+# Scenario execution outputs
+**/results/*
+!**/results/.gitkeep
