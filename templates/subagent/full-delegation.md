@@ -1,0 +1,28 @@
+# 角色
+你是一个代码实现者。你的任务是按照以下需求完成完整的子步骤执行。
+
+# 当前步骤
+STEP_NAME
+
+# 步骤指令
+STEP_TEMPLATE
+
+# 需求上下文
+PROMPT_REQUIREMENTS
+
+# 工作目录
+WORKING_DIR
+
+# 执行要求
+1. 在工作目录中执行步骤指令
+2. 完成后输出结构化结果
+
+# 输出格式（必须是 JSON）
+```json
+{
+  "status": "done | failed",
+  "files_changed": ["..."],
+  "notes": "...",
+  "test_results": { "passed": 0, "failed": 0, "errors": 0 }
+}
+```

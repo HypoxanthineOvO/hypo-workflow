@@ -1,0 +1,265 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "https://example.local/prompt-pipeline/config.schema.yaml"
+title: Prompt Pipeline Config Schema
+description: Strict schema for Prompt Pipeline V4 configuration.
+type: object
+additionalProperties: false
+required:
+  - pipeline
+  - evaluation
+properties:
+  platform:
+    type: string
+    enum:
+      - auto
+      - claude
+      - codex
+    default: auto
+    description: |
+      指定目标平台。auto = 运行时检测。
+      影响 Hook 可用性、Subagent 调用方式、指令文件位置。
+  pipeline:
+    type: object
+    additionalProperties: false
+    required:
+      - name
+      - source
+      - output
+    properties:
+      name:
+        type: string
+        minLength: 1
+        description: Human-readable pipeline name.
+      source:
+        type: string
+        enum:
+          - local
+        description: Prompt source adapter. V2.5 runtime guarantees local support.
+      output:
+        type: string
+        enum:
+          - local
+        description: Output adapter. V2.5 runtime guarantees local support.
+      prompts_dir:
+        type: string
+        minLength: 1
+        default: ".pipeline/prompts"
+      reports_dir:
+        type: string
+        minLength: 1
+        default: ".pipeline/reports"
+      state_file:
+        type: string
+        minLength: 1
+        default: ".pipeline/state.yaml"
+      log_file:
+        type: string
+        minLength: 1
+        default: ".pipeline/log.md"
+  execution:
+    type: object
+    additionalProperties: false
+    properties:
+      mode:
+        type: string
+        enum:
+          - self
+          - subagent
+        default: self
+        description: Execution mode. V3 keeps self and subagent.
+      subagent_tool:
+        type: string
+        enum:
+          - codex
+          - claude
+          - auto
+        default: auto
+      steps:
+        type: object
+        additionalProperties: false
+        properties:
+          preset:
+            type: string
+            enum:
+              - tdd
+              - implement-only
+              - custom
+            default: tdd
+          sequence:
+            type: array
+            minItems: 1
+            items:
+              type: string
+              minLength: 1
+        default:
+          preset: tdd
+      step_overrides:
+        type: object
+        default: {}
+        propertyNames:
+          pattern: "^[A-Za-z0-9_-]+$"
+        additionalProperties:
+          type: object
+          additionalProperties: false
+          properties:
+            enabled:
+              type: boolean
+              default: true
+            reviewer:
+              type: string
+              enum:
+                - self
+                - subagent
+              default: self
+            subagent_tool:
+              type: string
+              enum:
+                - codex
+                - claude
+                - auto
+            strict:
+              type: boolean
+              default: false
+    default:
+      mode: self
+      subagent_tool: auto
+      steps:
+        preset: tdd
+  step_overrides:
+    type: object
+    default: {}
+    propertyNames:
+      pattern: "^[A-Za-z0-9_-]+$"
+    additionalProperties:
+      type: object
+      additionalProperties: false
+      properties:
+        enabled:
+          type: boolean
+          default: true
+        reviewer:
+          type: string
+          enum:
+            - self
+            - subagent
+          default: self
+        subagent_tool:
+          type: string
+          enum:
+            - codex
+            - claude
+            - auto
+        strict:
+          type: boolean
+          default: false
+  hooks:
+    type: object
+    additionalProperties: false
+    properties:
+      enabled:
+        type: boolean
+        default: false
+      stop_check:
+        type: boolean
+        default: true
+      session_inject:
+        type: boolean
+        default: true
+      instructions_monitor:
+        type: boolean
+        default: false
+      claude:
+        type: object
+        additionalProperties: false
+        properties:
+          stop_block_mode:
+            type: string
+            enum:
+              - strict
+              - lenient
+            default: strict
+          compact_reinject:
+            type: boolean
+            default: true
+      codex:
+        type: object
+        additionalProperties: false
+        properties:
+          notify_on_complete:
+            type: boolean
+            default: true
+          agents_md_discipline:
+            type: boolean
+            default: true
+  evaluation:
+    type: object
+    additionalProperties: false
+    properties:
+      auto_continue:
+        type: boolean
+        default: false
+      max_diff_score:
+        type: integer
+        minimum: 1
+        maximum: 5
+        default: 3
+      adaptive_threshold:
+        type: boolean
+        default: false
+      base_max_diff_score:
+        type: integer
+        minimum: 1
+        maximum: 5
+        default: 3
+      checks:
+        type: array
+        default:
+          - tests_pass
+          - no_regressions
+          - matches_plan
+          - code_quality
+        uniqueItems: true
+        items:
+          type: string
+          enum:
+            - tests_pass
+            - no_regressions
+            - matches_plan
+            - code_quality
+      weights:
+        type: object
+        description: 可自定义各维度权重，默认使用内置公式
+        additionalProperties: false
+        properties:
+          diff_score:
+            type: number
+          code_quality:
+            type: number
+          test_coverage:
+            type: number
+          complexity:
+            type: number
+          architecture_drift:
+            type: number
+allOf:
+  - if:
+      properties:
+        execution:
+          properties:
+            steps:
+              properties:
+                preset:
+                  const: custom
+              required:
+                - preset
+          required:
+            - steps
+      required:
+        - execution
+    then:
+      properties:
+        execution:
+          properties:
+            steps:
+              required:
+                - sequence

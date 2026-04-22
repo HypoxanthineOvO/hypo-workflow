@@ -1,0 +1,16 @@
+# Hypo-Workflow Pipeline State — 初始模板
+# 由 SKILL.md 在 pipeline 首次启动时复制到 .pipeline/state.yaml
+
+pipeline:
+  name: ""
+  status: idle
+  started: null
+  finished: null
+
+current:
+  prompt: null
+  prompt_file: null
+  step: null
+  step_index: 0
+
+history: []
