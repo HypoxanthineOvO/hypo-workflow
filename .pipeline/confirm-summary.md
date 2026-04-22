@@ -1,23 +1,22 @@
-# V5 Confirm Summary
+# V2 Confirm Summary
 
-- Project: Hypo-Workflow V5
-- Goal: implement Plan Mode and architecture tracking
-- Runtime preset: `implement-only`
-- Milestones: 5
-- Planned prompts:
-  - `00-plan-skeleton.md`
-  - `01-discover-state.md`
-  - `02-plan-generation.md`
-  - `03-plan-review.md`
-  - `04-template-library.md`
-- Primary files:
-  - `plan/PLAN-SKILL.md`
-  - `plan/assets/*`
-  - `plan/templates/*`
-  - `references/commands-spec.md`
-  - `references/plan-review-spec.md`
+- Project: Hypo-Workflow V2 Notion Adapter
+- Tech stack: Markdown + YAML + Shell + Python helper scripts
+- Preset: `tdd`
+- Milestones: 4
+- Test points:
+  - auth smoke
+  - source adapter page/database parsing
+  - output adapter block generation and upsert
+  - mixed mode
+  - full regression compatibility
+- Files to change:
+  - `adapters/source/notion.md`
+  - `adapters/output/notion.md`
+  - `config.schema.yaml`
   - `SKILL.md`
   - `README.md`
-  - `.claude-plugin/plugin.json`
+  - `scripts/*notion*`
+  - `tests/*`
 
-Confirmation: proceed with implementation using `/hw:start` semantics from the generated pipeline.
+Confirmation: proceed without waiting for user input.

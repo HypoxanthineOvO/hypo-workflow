@@ -1,148 +1,66 @@
-# V5 Design Spec
+# V2 Design Spec — Notion Adapter
 
-## Objective
+## Goal
 
-Implement Plan Mode for Hypo-Workflow so `/hw:plan` becomes a real planning entry point rather than a reserved placeholder.
+Add a Notion adapter to Hypo-Workflow so prompts can be read from Notion and reports can be written back to Notion.
 
-V5 must add:
+## Project Shape
 
-- a dedicated plan sub-skill
-- four explicit planning phases:
-  `discover`, `decompose`, `generate`, `confirm`
-- plan review and architecture tracking
-- reusable planning templates
-- explicit slash-command registration for the new planning and review commands
+- Project type: skill bundle with helper scripts
+- Primary deliverable: adapter docs + helper scripts + config/schema updates + regression coverage
+- Target platform: Claude Code and Codex
+- Expected users: agents running Hypo-Workflow with local or Notion-backed planning artifacts
 
-## Scope
+## Constraints
 
-In scope:
+- The current repo is file-first and markdown-driven
+- Existing V0-V5 behavior must remain backward compatible
+- Notion API access currently authenticates successfully, but no existing pages are visible to the integration
+- Internal integration cannot create workspace-root private pages without a shared parent page
 
-- `plan/PLAN-SKILL.md`
-- `plan/templates/`
-- `plan/assets/`
-- `references/commands-spec.md`
-- `references/plan-review-spec.md`
-- `SKILL.md`
-- `README.md`
-- `.claude-plugin/plugin.json`
-- self-bootstrap planning artifacts under `.pipeline/`
+## Existing Context
 
-Out of scope:
-
-- executable runtime code beyond the existing shell helper surface
-- remote orchestration or external services
-- automatic hook-driven plan execution
-
-## Existing Architecture Snapshot
-
-- runtime behavior is primarily defined in `SKILL.md`
-- detailed semantics live in `references/*.md`
-- deterministic helpers live in `scripts/*.sh`
-- Claude packaging lives in `.claude-plugin/plugin.json`
-- examples and system scenarios are repo-local and file-driven
-
-Implication:
-
-- V5 should stay documentation-driven and file-based
-- Plan Mode should mirror Progressive Disclosure:
-  main `SKILL.md` routes to `plan/PLAN-SKILL.md`, which routes to plan templates and plan references
+- Existing repo detected: yes
+- Existing `.pipeline/` detected: yes, repurposed for this V2 dogfooding run
+- Current adapters: only `adapters/source/local.md` and `adapters/output/local.md`
+- Existing helper scripts: validation, diff, state summary, log append
+- Existing config validation shell already accepts `local|notion`, but schema is still local-only
 
 ## Functional Requirements
 
-### Slash Commands
+- `pipeline.source: notion` should read prompts from Notion
+- `pipeline.output: notion` should write reports to Notion
+- mixed mode must work:
+  - `source: local` + `output: notion`
+  - `source: notion` + `output: local`
+- config must support:
+  - `notion.token_file`
+  - `notion.source_database_id`
+  - `notion.source_page_id`
+  - `notion.output_parent_page_id`
+  - `notion.output_database_id`
+  - env fallback `NOTION_TOKEN`
 
-Need explicit support for:
+## Testing Expectations
 
-- `/hw:plan`
-- `/hw:plan:discover`
-- `/hw:plan:decompose`
-- `/hw:plan:generate`
-- `/hw:plan:confirm`
-- `/hw:review`
-- `/hw:review --full`
+- auth smoke should hit `users/me`
+- source adapter tests should validate page/database parsing
+- output adapter tests should validate block generation and upsert behavior
+- live Notion write tests should degrade gracefully when no shared parent page is available
+- full regression `s01-s18` must remain green
 
-### Plan Mode Flow
+## Milestone Strategy
 
-1. Discover
-   - inspect current repository when present
-   - capture goals, constraints, tech stack, and delivery shape
-   - write `.pipeline/design-spec.md`
-2. Decompose
-   - split the plan into milestones
-   - include test specs and boundary coverage per milestone
-3. Generate
-   - write `.pipeline/config.yaml`
-   - write `.pipeline/prompts/*.md`
-   - write `.pipeline/architecture.md`
-   - choose a preset and template
-4. Confirm
-   - summarize the generated plan
-   - wait for explicit start confirmation
+- M0: schema + adapter contract + planning scaffold
+- M1: source adapter scripts + docs
+- M2: output adapter scripts + docs
+- M3: mixed mode + tests + docs + Notion reporting
 
-### Plan Review
+## Open Questions
 
-- add a review phase after milestone completion
-- record architecture deltas in `architecture.md`
-- expose `/hw:review` and `/hw:review --full`
-- detect downstream prompt impact and suggest updates
+- Should future versions add Notion database schema bootstrap helpers?
+- Should report upsert prefer page title matching or explicit page id pinning?
 
-### Template Library
+## Notes
 
-Need initial templates:
-
-- `tdd-python-cli`
-- `tdd-typescript-web`
-- `docs-writing`
-- `research`
-- `refactor`
-
-Each template must include:
-
-- `config.yaml`
-- at least three prompt files
-
-## Non-Functional Requirements
-
-- preserve V4.5 natural-language compatibility
-- do not change existing TDD execution semantics
-- keep Plan Mode file-first and auditable
-- keep `SKILL.md` roughly within 560-600 lines
-- use conventional commits, one commit per milestone
-
-## Milestone Proposal
-
-### M0
-
-Plan sub-skill skeleton and command registration.
-
-### M1
-
-Discover phase logic, design-spec template, and `.plan-state` scaffolding.
-
-### M2
-
-Decompose, generate, confirm flow plus prompt/config generation assets.
-
-### M3
-
-Plan review, architecture tracking, `/hw:review`, and main pipeline integration.
-
-### M4
-
-Template library, docs polish, version bump, and self-bootstrap validation report.
-
-## Risks
-
-- command sprawl may bloat `SKILL.md`
-- `history.completed_prompts` is legacy naming and may complicate skipped/review semantics
-- `.pipeline/` is both runtime workspace and dogfooding workspace, so state artifacts must stay ignored
-- architecture review semantics can overlap with V4 architecture drift evaluation unless clearly separated
-
-## Success Criteria
-
-- `/hw:plan` loads a dedicated plan sub-skill
-- all four `/hw:plan:*` phase commands are defined
-- `/hw:review` semantics are documented
-- templates exist and are selectable
-- plugin version is `5.0.0`
-- self-bootstrap report captures friction and design feedback
+- Decision: because the integration cannot currently see the existing Hypo-Workflow pages, V2 will implement graceful degradation and use live auth smoke plus offline/conditional API tests.

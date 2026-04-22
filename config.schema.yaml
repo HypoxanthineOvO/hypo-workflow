@@ -1,7 +1,7 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
 $id: "https://example.local/prompt-pipeline/config.schema.yaml"
 title: Prompt Pipeline Config Schema
-description: Strict schema for Prompt Pipeline V4 configuration.
+description: Strict schema for Prompt Pipeline V5.1 configuration.
 type: object
 additionalProperties: false
 required:
@@ -34,11 +34,13 @@ properties:
         type: string
         enum:
           - local
+          - notion
         description: Prompt source adapter. V2.5 runtime guarantees local support.
       output:
         type: string
         enum:
           - local
+          - notion
         description: Output adapter. V2.5 runtime guarantees local support.
       prompts_dir:
         type: string
@@ -241,6 +243,37 @@ properties:
             type: number
           architecture_drift:
             type: number
+  notion:
+    type: object
+    additionalProperties: false
+    properties:
+      token_file:
+        type: string
+        minLength: 1
+        description: Path to a file containing the Notion integration token.
+      source_database_id:
+        type: string
+        minLength: 1
+      source_page_id:
+        type: string
+        minLength: 1
+      output_parent_page_id:
+        type: string
+        minLength: 1
+      output_database_id:
+        type: string
+        minLength: 1
+      report_title_prefix:
+        type: string
+        minLength: 1
+      api_base_url:
+        type: string
+        minLength: 1
+        default: "https://api.notion.com/v1"
+      notion_version:
+        type: string
+        minLength: 1
+        default: "2022-06-28"
 allOf:
   - if:
       properties:
@@ -263,3 +296,35 @@ allOf:
             steps:
               required:
                 - sequence
+  - if:
+      properties:
+        pipeline:
+          properties:
+            source:
+              const: notion
+      required:
+        - pipeline
+    then:
+      properties:
+        notion:
+          anyOf:
+            - required:
+                - source_database_id
+            - required:
+                - source_page_id
+  - if:
+      properties:
+        pipeline:
+          properties:
+            output:
+              const: notion
+      required:
+        - pipeline
+    then:
+      properties:
+        notion:
+          anyOf:
+            - required:
+                - output_parent_page_id
+            - required:
+                - output_database_id
