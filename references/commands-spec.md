@@ -218,6 +218,7 @@ Behavior:
 - load `plan/PLAN-SKILL.md`
 - run Plan Review for the current milestone
 - with `--full`, review all completed milestones and architecture deltas
+- append or refresh `architecture.md` review notes using the Plan Review format
 
 ## Compatibility Notes
 

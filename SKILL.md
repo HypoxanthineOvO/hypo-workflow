@@ -101,6 +101,7 @@ Use these bundled files when relevant:
 - [`references/tdd-spec.md`](./references/tdd-spec.md)
 - [`references/commands-spec.md`](./references/commands-spec.md)
 - [`references/evaluation-spec.md`](./references/evaluation-spec.md)
+- [`references/plan-review-spec.md`](./references/plan-review-spec.md)
 - [`references/subagent-spec.md`](./references/subagent-spec.md)
 - [`references/state-contract.md`](./references/state-contract.md)
 - [`references/platform-claude.md`](./references/platform-claude.md)
@@ -401,9 +402,10 @@ Use this loop for `/hw:start`, `/hw:resume`, `start pipeline`, `continue`, `下�
 12. Persist state and append a step-finish log event.
 13. If the step blocks, mark prompt and pipeline as blocked, append a prompt-level block event, persist state, and stop.
 14. When all enabled steps finish, generate the prompt report, compute evaluation, write final prompt fields, append a prompt-finish log event, and persist state.
-15. If the prompt passed, add it to history and advance state to the next prompt immediately.
-16. If `auto_continue=false`, stop after the state advance and wait for the user to say `继续`.
-17. If there is no next prompt, mark the pipeline `completed`, persist state, and stop.
+15. If the prompt passed and architecture tracking is active, run Plan Review before advancing.
+16. After Plan Review, add the prompt to history and advance state to the next prompt immediately.
+17. If `auto_continue=false`, stop after the state advance and wait for the user to say `继续`.
+18. If there is no next prompt, mark the pipeline `completed`, persist state, and stop.
 
 ## Skip Cascade
 
@@ -513,6 +515,17 @@ The main skill should only own the routing and fallback. Template content and de
 - 使用 [`assets/report-template.md`](./assets/report-template.md)
 - 每个 prompt 写一份报告
 - 当需要目录变化和 diff 统计时，优先复用 [`scripts/diff-stats.sh`](./scripts/diff-stats.sh)
+
+## Plan Review
+
+When the pipeline was generated through Plan Mode and `.pipeline/architecture.md` exists:
+
+- run Plan Review after prompt evaluation and before prompt advance
+- compare the completed milestone against the current `architecture.md` baseline
+- record `ADDED`, `CHANGED`, `REASON`, and `IMPACT`
+- inspect whether downstream prompts should be revised before they run
+
+Detailed review behavior belongs in [`references/plan-review-spec.md`](./references/plan-review-spec.md).
 
 ## Restart And Abort
 

@@ -138,6 +138,14 @@ Do not auto-start execution from Confirm. Wait for an explicit `/hw:start`.
 - identify downstream prompt impact
 - propose prompt updates before the next milestone runs
 
+Review rules:
+
+- default `/hw:review` inspects the latest completed milestone
+- `/hw:review --full` summarizes all completed milestones
+- append review notes to `.pipeline/architecture.md`
+- use `ADDED`, `CHANGED`, `REASON`, and `IMPACT` headings
+- never silently rewrite future prompts; propose edits first
+
 ## Shared Planning Artifacts
 
 Use these files when relevant:
@@ -145,5 +153,6 @@ Use these files when relevant:
 - `plan/assets/design-spec-template.md`
 - `plan/assets/prompt-template.md`
 - `.plan-state/discover.yaml`
+- `references/plan-review-spec.md`
 
 `.plan-state/` is runtime planning state and should not be committed. Use it for resumable planning phases in the same spirit as `.pipeline/state.yaml`.

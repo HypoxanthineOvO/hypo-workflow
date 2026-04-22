@@ -1,0 +1,86 @@
+# Plan Review Spec
+
+Use this reference when the pipeline was created through Plan Mode and the system needs to review architecture impact after a milestone completes.
+
+## Goal
+
+Plan Review keeps later prompts aligned with reality after earlier milestones change the shape of the project.
+
+It complements V4 architecture drift scoring:
+
+- V4 evaluation asks whether the completed prompt drifted from the plan
+- Plan Review asks whether the plan itself now needs to change
+
+## Inputs
+
+- `.pipeline/architecture.md`
+- current prompt report
+- current prompt diff summary
+- latest completed milestone prompt
+- downstream prompt files that have not run yet
+
+## Triggers
+
+Run Plan Review:
+
+- automatically after a milestone completes in a plan-generated pipeline
+- manually through `/hw:review`
+- manually across all completed milestones through `/hw:review --full`
+
+## Review Procedure
+
+1. read the latest architecture baseline
+2. summarize what the completed milestone actually changed
+3. classify the change under:
+   - `ADDED`
+   - `CHANGED`
+   - `REASON`
+   - `IMPACT`
+4. inspect future prompts for stale assumptions
+5. list downstream prompts that may require edits
+6. provide concrete revision suggestions before the next prompt starts
+
+## Output Requirements
+
+`architecture.md` should append a review entry with:
+
+```markdown
+## Milestone Mx / Prompt xx-name
+
+### ADDED
+- ...
+
+### CHANGED
+- ...
+
+### REASON
+- ...
+
+### IMPACT
+- downstream prompts affected: ...
+- recommended prompt updates: ...
+```
+
+Plan Review should also summarize:
+
+- whether the architecture baseline still holds
+- whether downstream prompts are safe to run unchanged
+- whether user confirmation is required before rewriting future prompts
+
+## `/hw:review`
+
+Default behavior:
+
+- review the latest completed milestone only
+
+`--full` behavior:
+
+- replay review across all completed milestones
+- summarize cumulative architecture evolution
+
+## Safety Rules
+
+- do not silently rewrite downstream prompts
+- propose changes explicitly before mutating prompt files
+- keep architecture notes concise and decision-oriented
+- treat missing `architecture.md` as a non-fatal skip with an explicit warning
