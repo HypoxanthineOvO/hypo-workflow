@@ -96,3 +96,44 @@
 
 - Prompt 03 must define how Plan Review reacts to generated architecture baselines
 - Prompt 04 can build templates on top of the standardized prompt shape
+
+### Milestone M3 / Prompt 03-plan-review
+
+#### ADDED
+
+- `references/plan-review-spec.md`
+- explicit Plan Review hook point in the main pipeline flow
+
+#### CHANGED
+
+- `architecture.md` moved from static baseline to cumulative review ledger
+
+#### REASON
+
+- self-bootstrap needed a concrete place to record milestone-by-milestone architecture decisions
+
+#### IMPACT
+
+- Prompt 04 must align README, templates, and regression skeletons with the new review semantics
+
+### Milestone M4 / Prompt 04-template-library
+
+#### ADDED
+
+- `plan/templates/` with five starter templates
+- V5 scenario skeletons `s16-s18`
+- self-bootstrap validation report
+
+#### CHANGED
+
+- public docs now describe Plan Mode, template selection, and review commands
+- release version moves from `4.5.0` to `5.0.0`
+
+#### REASON
+
+- V5 needs a complete public surface, not only internal planning semantics
+
+#### IMPACT
+
+- future regression work should convert `s16-s18` from skeletons into executable scenario runs
+- template evolution now becomes part of the public compatibility surface

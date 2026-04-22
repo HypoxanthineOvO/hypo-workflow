@@ -17,7 +17,7 @@ Use this sub-skill when the user wants to design or revise a pipeline before imp
 | `/hw:plan:decompose` | Split the work into milestones with test specs |
 | `/hw:plan:generate` | Generate `.pipeline/` config, prompts, and architecture baseline |
 | `/hw:plan:confirm` | Summarize the plan and wait for explicit execution approval |
-| `/hw:review` | Review architecture and downstream prompt impact for the current milestone |
+| `/hw:review` | Review architecture and downstream prompt impact for the current milestone or all milestones with `--full` |
 
 If the user invokes `/hw:plan:xxx` and `xxx` is not recognized, return:
 
@@ -152,6 +152,7 @@ Use these files when relevant:
 
 - `plan/assets/design-spec-template.md`
 - `plan/assets/prompt-template.md`
+- `plan/templates/`
 - `.plan-state/discover.yaml`
 - `references/plan-review-spec.md`
 

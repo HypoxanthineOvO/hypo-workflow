@@ -1,6 +1,6 @@
 {
   "name": "hypo-workflow",
-  "version": "4.5.0",
+  "version": "5.0.0",
   "description": "序列化 Prompt 执行引擎 — TDD Pipeline + 自检报告 + 中断恢复",
   "author": "Hypoxanthine",
   "license": "MIT",

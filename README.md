@@ -6,7 +6,7 @@
 
 TDD Pipeline · Self-Review · Interrupt Recovery · Multi-Dimensional Evaluation
 
-[![Version](https://img.shields.io/badge/version-4.5.0-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-5.0.0-blue)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex-purple)](#platform-support)
 
@@ -31,7 +31,8 @@ It ships as a **SKILL.md** file — not a service, not a CLI tool. Any AI agent 
 | Feature | Description |
 |---------|-------------|
 | 🔄 **TDD Pipeline** | Built-in test-driven sub-steps: write tests → review → red → implement → green → review code |
-| 🧭 **Slash Commands** | Explicit `/hw:*` commands for start / resume / status / skip / stop / report |
+| 🧭 **Slash Commands** | Explicit `/hw:*` commands for start / resume / status / skip / stop / report / plan / review |
+| 🗺️ **Plan Mode** | `/hw:plan` sub-skill with discover / decompose / generate / confirm phases |
 | ⏸️ **Interrupt Recovery** | `state.yaml` tracks progress to the sub-step level — resume exactly where you left off |
 | 🤖 **Subagent Delegation** | Offload code reviews to a subagent (Claude ↔ Codex), with automatic fallback |
 | 🪨 **Hook Integration** | Claude Code hooks for stop-check (`decision:block`) and session context injection (`additionalContext`) |
@@ -156,6 +157,14 @@ Or use an explicit slash command:
 
 ```
 
+Or plan a new pipeline first:
+
+```
+
+/hw:plan --template tdd-python-cli
+
+```
+
 The agent will:
 1. Read your config and prompts
 2. Execute each prompt through the TDD sub-step chain
@@ -177,6 +186,14 @@ prompt-pipeline/
 ├── .claude-plugin/
 
 │   └── plugin.json              # Claude Code plugin manifest
+
+├── plan/
+
+│   ├── PLAN-SKILL.md            # Plan Mode sub-skill
+
+│   ├── assets/                  # Planning templates
+
+│   └── templates/               # Reusable planning presets
 
 ├── hooks/
 
@@ -206,6 +223,8 @@ prompt-pipeline/
 
 │   ├── [commands-spec.md](http://commands-spec.md)         # Slash command parsing & semantics
 
+│   ├── [plan-review-spec.md](http://plan-review-spec.md)      # Plan Review + architecture tracking
+
 │   ├── [evaluation-spec.md](http://evaluation-spec.md)       # Scoring dimensions & thresholds
 
 │   ├── [subagent-spec.md](http://subagent-spec.md)         # Subagent delegation protocol
@@ -234,7 +253,7 @@ prompt-pipeline/
 
 └── tests/
 
-└── scenarios/               # System test scenarios (s01-s15)
+└── scenarios/               # System test scenarios (s01-s18)
 
 ```
 
@@ -256,6 +275,19 @@ prompt-pipeline/
 |------|----------|
 | `self` | Agent executes everything directly |
 | `subagent` | Agent delegates to a subagent (with fallback to self) |
+
+### Slash Commands
+
+| Command | Behavior |
+|---------|----------|
+| `/hw:start` | Start the implementation pipeline |
+| `/hw:resume` | Resume the current run |
+| `/hw:status` | Show current progress |
+| `/hw:skip` | Skip the current prompt |
+| `/hw:stop` | Gracefully stop and save state |
+| `/hw:report` | Summarize the latest report |
+| `/hw:plan` | Enter Plan Mode |
+| `/hw:review` | Run Plan Review |
 
 ### Evaluation
 
@@ -362,6 +394,24 @@ cd examples/hypo-todo-adaptive
 
 ```
 
+### Plan Mode Templates
+
+Built-in templates:
+
+- `tdd-python-cli`
+- `tdd-typescript-web`
+- `docs-writing`
+- `research`
+- `refactor`
+
+Example:
+
+```
+
+/hw:plan --template tdd-python-cli
+
+```
+
 ---
 
 ## How It Works
@@ -379,6 +429,22 @@ L3  Agent needs details       →  reads references/*.md, runs scripts/*.sh
 ```
 
 This keeps the main file lean while providing full detail on demand.
+
+### Plan Mode
+
+```
+
+/hw:plan
+  -> plan/PLAN-SKILL.md
+  -> discover
+  -> decompose
+  -> generate
+  -> confirm
+  -> /hw:start
+
+```
+
+Plan Mode reuses the same file-first philosophy as the main pipeline, but focuses on generating `.pipeline/` artifacts before implementation begins.
 
 ### State Machine
 
@@ -423,6 +489,7 @@ Hooks act as a passive safety net — they don’t drive the pipeline, but preve
 | V3 | Claude Code Hook integration (stop-check, session-start) |
 | V4 | Multi-dimensional evaluation + adaptive threshold + architecture drift |
 | V4.5 | Namespaced `/hw:*` slash commands for explicit pipeline control |
+| V5 | Plan Mode + Plan Review + template library |
 
 ---
 

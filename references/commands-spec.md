@@ -28,7 +28,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 3. parse remaining tokens as command arguments
 4. flags are order-independent
 5. if a command is unknown, return exactly:
-   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report`
+   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:review`
 6. if a known command receives an unsupported flag, stop and report the unsupported flag explicitly instead of guessing
 7. if a prompt selector is ambiguous, list the candidates and stop
 8. plan and review commands load `plan/PLAN-SKILL.md` before execution
@@ -58,7 +58,7 @@ Behavior:
 
 Supported flags:
 
-- none
+- `--template <name>`
 
 Preconditions:
 
@@ -150,6 +150,7 @@ Behavior:
 
 - load `plan/PLAN-SKILL.md`
 - enter Plan Mode using the Discover-first flow
+- honor `--template <name>` as an initial template hint when present
 - default to `/hw:plan:discover` when no explicit sub-phase is given
 - do not start normal pipeline execution yet
 
