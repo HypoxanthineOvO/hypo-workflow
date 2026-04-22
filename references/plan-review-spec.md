@@ -39,6 +39,7 @@ Run Plan Review:
 4. inspect future prompts for stale assumptions
 5. list downstream prompts that may require edits
 6. provide concrete revision suggestions before the next prompt starts
+7. write proposed prompt edits to a machine-readable queue
 
 ## Output Requirements
 
@@ -66,6 +67,21 @@ Plan Review should also summarize:
 - whether the architecture baseline still holds
 - whether downstream prompts are safe to run unchanged
 - whether user confirmation is required before rewriting future prompts
+
+## Prompt Patch Queue
+
+When downstream prompts need edits, write `.plan-state/prompt-patch-queue.yaml`.
+
+Use `plan/assets/prompt-patch-queue-template.yaml` as the canonical shape.
+
+Queue rules:
+
+- each entry maps to one downstream prompt file
+- set `status=proposed` until a human or explicit command approves it
+- do not mutate prompt files directly from Plan Review
+- if multiple milestones affect the same downstream prompt, append a new proposal entry rather than overwriting history silently
+
+This queue is the safety boundary between architecture analysis and prompt mutation.
 
 ## `/hw:review`
 

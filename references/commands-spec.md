@@ -34,6 +34,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 8. plan and review commands load `plan/PLAN-SKILL.md` before execution
 9. if a command starts with `/hw:plan:` and is unknown, return exactly:
    `Unknown command: /hw:plan:xxx. Available: /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:review`
+10. append-mode conflicts must never silently renumber executed prompts
 
 ## Command Semantics
 
@@ -194,6 +195,7 @@ Behavior:
 - otherwise choose a template from planning context
 - detect append mode when an existing `.pipeline/` workspace is present
 - choose `implement-only` for planning-heavy or document-heavy plans unless the project clearly requires executable TDD
+- on prompt-number conflicts, preserve executed prompts and append new prompt numbers after the highest existing number unless explicit resequencing is approved
 
 ### `/hw:plan:confirm`
 
@@ -220,6 +222,7 @@ Behavior:
 - run Plan Review for the current milestone
 - with `--full`, review all completed milestones and architecture deltas
 - append or refresh `architecture.md` review notes using the Plan Review format
+- emit proposed downstream prompt edits to `.plan-state/prompt-patch-queue.yaml` instead of silently rewriting prompts
 
 ## Compatibility Notes
 

@@ -85,6 +85,15 @@ Decompose output rules:
 
 Persist milestone planning state in `.plan-state/decompose.yaml` when possible.
 
+Append conflict rules:
+
+- never silently renumber an existing executed prompt
+- when generated prompt numbers collide with existing prompts:
+  - preserve already-executed prompt filenames
+  - append new prompts after the highest existing sequence number by default
+  - create a patch proposal instead of rewriting history
+- if a full resequence is truly needed, summarize the proposed renumbering and require explicit approval before mutating prompt files
+
 ### Generate
 
 - write `.pipeline/config.yaml`
@@ -145,6 +154,8 @@ Review rules:
 - append review notes to `.pipeline/architecture.md`
 - use `ADDED`, `CHANGED`, `REASON`, and `IMPACT` headings
 - never silently rewrite future prompts; propose edits first
+- write downstream prompt edits to `.plan-state/prompt-patch-queue.yaml`
+- use `plan/assets/prompt-patch-queue-template.yaml` as the default queue shape
 
 ## Shared Planning Artifacts
 
@@ -152,6 +163,7 @@ Use these files when relevant:
 
 - `plan/assets/design-spec-template.md`
 - `plan/assets/prompt-template.md`
+- `plan/assets/prompt-patch-queue-template.yaml`
 - `plan/templates/`
 - `.plan-state/discover.yaml`
 - `references/plan-review-spec.md`

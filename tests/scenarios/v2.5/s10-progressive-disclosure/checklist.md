@@ -13,7 +13,7 @@
 - [ ] 在 TDD 步骤中，Agent 读取了 references/tdd-spec.md（L3）
 
 ### 结构完整性
-- [ ] references/ 目录下 6 个文件都可被 Agent 正常读取
+- [ ] references/ 目录下至少 6 个文件都可被 Agent 正常读取
 - [ ] scripts/ 目录下 4 个脚本都可被 Agent 正常执行
 - [ ] assets/ 目录下模板和示例可被 Agent 正常读取
 
