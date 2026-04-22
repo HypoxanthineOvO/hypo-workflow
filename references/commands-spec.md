@@ -20,13 +20,20 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
    - `/hw:stop`
    - `/hw:report`
    - `/hw:plan`
+   - `/hw:plan:discover`
+   - `/hw:plan:decompose`
+   - `/hw:plan:generate`
+   - `/hw:plan:confirm`
+   - `/hw:review`
 3. parse remaining tokens as command arguments
 4. flags are order-independent
 5. if a command is unknown, return exactly:
    `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report`
 6. if a known command receives an unsupported flag, stop and report the unsupported flag explicitly instead of guessing
 7. if a prompt selector is ambiguous, list the candidates and stop
-8. `/hw:plan` is recognized but not implemented in V4.5
+8. plan and review commands load `plan/PLAN-SKILL.md` before execution
+9. if a command starts with `/hw:plan:` and is unknown, return exactly:
+   `Unknown command: /hw:plan:xxx. Available: /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:review`
 
 ## Command Semantics
 
@@ -141,9 +148,73 @@ Supported flags:
 
 Behavior:
 
-- acknowledge the command
-- respond with: `V5 feature, not yet implemented.`
-- do not mutate state
+- load `plan/PLAN-SKILL.md`
+- enter Plan Mode using the Discover-first flow
+- default to `/hw:plan:discover` when no explicit sub-phase is given
+- do not start normal pipeline execution yet
+
+### `/hw:plan:discover`
+
+Supported flags:
+
+- `--template <name>`
+
+Behavior:
+
+- load `plan/PLAN-SKILL.md`
+- inspect the current repository when applicable
+- gather goals, constraints, and stack assumptions
+- write or update `.pipeline/design-spec.md`
+- persist intermediate planning state in `.plan-state/` when available
+
+### `/hw:plan:decompose`
+
+Supported flags:
+
+- none
+
+Behavior:
+
+- load `plan/PLAN-SKILL.md`
+- split the project into milestones
+- include test specs and boundary coverage expectations per milestone
+
+### `/hw:plan:generate`
+
+Supported flags:
+
+- `--template <name>`
+
+Behavior:
+
+- load `plan/PLAN-SKILL.md`
+- generate `.pipeline/config.yaml`, prompts, and `architecture.md`
+- use the requested template when provided
+- otherwise choose a template from planning context
+
+### `/hw:plan:confirm`
+
+Supported flags:
+
+- none
+
+Behavior:
+
+- load `plan/PLAN-SKILL.md`
+- summarize generated artifacts
+- wait for explicit confirmation to continue into `/hw:start`
+
+### `/hw:review`
+
+Supported flags:
+
+- `--full`
+
+Behavior:
+
+- load `plan/PLAN-SKILL.md`
+- run Plan Review for the current milestone
+- with `--full`, review all completed milestones and architecture deltas
 
 ## Compatibility Notes
 
@@ -152,4 +223,6 @@ Behavior:
 - `pipeline status`, `状态` are natural-language equivalents of `/hw:status`
 - `跳过当前步骤` remains a step-level skip and is not the same as `/hw:skip`
 - `中止`, `abort` remain hard-abort operations and are not the same as `/hw:stop`
+- `/hw:plan` enters planning mode and is not the same as `/hw:start`
+- `/hw:review` is a planning review surface and not the same as `review_code`
 - slash commands are entry shortcuts only; they do not change TDD, evaluation, or delegation semantics

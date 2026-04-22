@@ -1,7 +1,7 @@
 ---
 name: prompt-pipeline
 version: 4.5.0
-description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, or `/hw:plan`.
+description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:plan`, or `/hw:review`.
 ---
 
 ## Commands
@@ -14,7 +14,12 @@ description: Run a serialized prompt execution pipeline from a local `.pipeline/
 | `/hw:skip` | Skip the current prompt and advance |
 | `/hw:stop` | Gracefully stop and save state |
 | `/hw:report` | Show the latest evaluation scores |
-| `/hw:plan` | Enter design discussion mode (V5, not yet implemented) |
+| `/hw:plan` | Enter Plan Mode through `plan/PLAN-SKILL.md` |
+| `/hw:plan:discover` | Run the Discover phase of Plan Mode |
+| `/hw:plan:decompose` | Run the Decompose phase of Plan Mode |
+| `/hw:plan:generate` | Run the Generate phase of Plan Mode |
+| `/hw:plan:confirm` | Run the Confirm phase of Plan Mode |
+| `/hw:review` | Run Plan Review for the current or all milestones |
 
 When the user types any `/hw:*` command, execute the corresponding action.
 Unrecognized `/hw:*` commands should be reported as unknown.
@@ -54,6 +59,21 @@ Load the skill in three layers:
 
 Prefer not to inline long policy text into the main conversation when a bundled file already defines it.
 
+## Plan Sub-Skill
+
+Plan Mode is implemented as a dedicated sub-skill:
+
+- [`plan/PLAN-SKILL.md`](./plan/PLAN-SKILL.md) is the planning L2 entry point
+- `plan/assets/` and `plan/templates/` are planning L3 resources
+
+When the command namespace is:
+
+- `/hw:plan`
+- `/hw:plan:*`
+- `/hw:review`
+
+load `plan/PLAN-SKILL.md` before executing the command-specific behavior.
+
 ## First Actions
 
 1. Read `.pipeline/config.yaml`.
@@ -77,6 +97,7 @@ Use these bundled files when relevant:
 
 - [`assets/state-init.yaml`](./assets/state-init.yaml)
 - [`assets/report-template.md`](./assets/report-template.md)
+- [`plan/PLAN-SKILL.md`](./plan/PLAN-SKILL.md)
 - [`references/tdd-spec.md`](./references/tdd-spec.md)
 - [`references/commands-spec.md`](./references/commands-spec.md)
 - [`references/evaluation-spec.md`](./references/evaluation-spec.md)
@@ -109,8 +130,10 @@ Handle these commands directly:
   Gracefully stop without aborting the pipeline. Persist state, optionally write an intermediate report, and set `pipeline.status=stopped`. With `--no-report`, skip the intermediate report.
 - `/hw:report`
   Load the most recent report file and summarize the latest scores, warnings, and decision.
-- `/hw:plan`
-  V5 reserved command. Acknowledge the command and respond that it is a V5 feature and not yet implemented.
+- `/hw:plan`, `/hw:plan:discover`, `/hw:plan:decompose`, `/hw:plan:generate`, `/hw:plan:confirm`
+  Load [`plan/PLAN-SKILL.md`](./plan/PLAN-SKILL.md) and route execution to the corresponding Plan Mode phase.
+- `/hw:review`
+  Load [`plan/PLAN-SKILL.md`](./plan/PLAN-SKILL.md) and run Plan Review. With `--full`, review all completed milestones instead of only the latest one.
 - `中止`, `abort`
   Mark the current prompt and pipeline as aborted, persist state, append a prompt-level log event, and stop.
 
