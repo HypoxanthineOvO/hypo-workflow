@@ -72,6 +72,19 @@ Required Discover outputs:
 - attach test specs and boundary coverage expectations
 - keep milestones serial and reviewable
 
+Decompose output rules:
+
+- each milestone should map to one generated prompt file
+- every milestone must include:
+  - objective
+  - implementation scope
+  - test spec
+  - expected artifacts
+- prefer 3-6 milestones for medium projects
+- prefer narrower milestones when architecture review is likely to change downstream prompts
+
+Persist milestone planning state in `.plan-state/decompose.yaml` when possible.
+
 ### Generate
 
 - write `.pipeline/config.yaml`
@@ -79,11 +92,45 @@ Required Discover outputs:
 - write `.pipeline/architecture.md`
 - choose a preset and template
 
+Generate rules:
+
+- use `plan/assets/prompt-template.md` as the default prompt shape
+- detect append mode when `.pipeline/config.yaml` or `.pipeline/prompts/` already exists
+- in append mode:
+  - read the existing config and prompt list first
+  - preserve numbering unless the user explicitly wants a re-sequence
+  - summarize what is being appended versus revised
+
+Preset selection rules:
+
+- choose `tdd` for engineering projects with executable tests
+- choose `implement-only` for documentation, research, or planning-heavy work
+- choose `custom` only when the user explicitly needs a non-standard sequence
+
+Required Generate outputs:
+
+- `.pipeline/config.yaml`
+- `.pipeline/prompts/*.md`
+- `.pipeline/architecture.md`
+- `.plan-state/generate.yaml`
+
 ### Confirm
 
 - summarize generated artifacts
 - confirm project name, stack, preset, prompt count, and file list
 - wait for explicit `/hw:start` or natural-language equivalent
+
+Confirm summary must include:
+
+- project name
+- tech stack
+- selected preset
+- milestone count
+- test point count
+- generated file list
+- whether the plan is greenfield or append mode
+
+Do not auto-start execution from Confirm. Wait for an explicit `/hw:start`.
 
 ### Review
 
@@ -96,6 +143,7 @@ Required Discover outputs:
 Use these files when relevant:
 
 - `plan/assets/design-spec-template.md`
+- `plan/assets/prompt-template.md`
 - `.plan-state/discover.yaml`
 
 `.plan-state/` is runtime planning state and should not be committed. Use it for resumable planning phases in the same spirit as `.pipeline/state.yaml`.

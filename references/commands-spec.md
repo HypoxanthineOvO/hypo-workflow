@@ -191,6 +191,8 @@ Behavior:
 - generate `.pipeline/config.yaml`, prompts, and `architecture.md`
 - use the requested template when provided
 - otherwise choose a template from planning context
+- detect append mode when an existing `.pipeline/` workspace is present
+- choose `implement-only` for planning-heavy or document-heavy plans unless the project clearly requires executable TDD
 
 ### `/hw:plan:confirm`
 
@@ -202,6 +204,7 @@ Behavior:
 
 - load `plan/PLAN-SKILL.md`
 - summarize generated artifacts
+- include project name, stack, preset, milestone count, test point count, and generated files
 - wait for explicit confirmation to continue into `/hw:start`
 
 ### `/hw:review`
