@@ -1,238 +1,422 @@
-# Hypo-Workflow
+<div align="center">
 
-Serialized prompt execution engine for AI agents.
+# ⚙️ Hypo-Workflow
 
-Hypo-Workflow turns a local `.pipeline/` workspace into a resumable implementation pipeline with:
+**Serialized Prompt Execution Engine for AI Agents**
 
-- TDD, implement-only, and custom step presets
-- explicit state management through `.pipeline/state.yaml`
-- self-review or subagent-assisted review
-- interrupt recovery at prompt and sub-step granularity
-- Claude Code hook integration
-- V4 multi-dimensional evaluation, adaptive thresholding, and architecture drift detection
+TDD Pipeline · Self-Review · Interrupt Recovery · Multi-Dimensional Evaluation
 
-## What It Solves
+[![Version](https://img.shields.io/badge/version-4.0.0-blue)](.claude-plugin/plugin.json)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex-purple)](#platform-support)
 
-Most agent sessions are stateless and fragile. Once the context drifts or the session stops, it is easy to lose:
+</div>
 
-- which prompt is currently active
-- which sub-step has already finished
-- why a change was blocked
-- whether the implementation still matches the plan
+---
 
-Hypo-Workflow keeps the run serialized and observable. The agent always works on one prompt at a time, persists state after every meaningful transition, and can resume from the exact step recorded in `.pipeline/state.yaml`.
+## What is Hypo-Workflow?
 
-## Core Features
+Hypo-Workflow turns multi-step development tasks into an automated pipeline that an AI agent executes autonomously:
 
-- `SKILL.md` as the single entry point
-- Progressive Disclosure:
-  `SKILL.md` for runtime rules, `references/` for detailed policy, `scripts/` for deterministic helpers, `assets/` for stable templates
-- step presets:
-  `tdd`, `implement-only`, `custom`
-- recovery commands:
-  `开始执行`, `继续`, `执行下一步`, `pipeline status`, `跳过当前步骤`, `abort`
-- subagent delegation with fallback:
-  route review steps to Claude or Codex when available, fall back to self without blocking
-- Claude plugin packaging:
-  `.claude-plugin/plugin.json`
-- Claude hooks:
-  `hooks/stop-check.sh`, `hooks/session-start.sh`, `hooks/instructions-loaded.sh`
-- V4 evaluation:
-  `diff_score`, `code_quality`, `test_coverage`, `complexity`, `architecture_drift`, `overall`
-- adaptive threshold:
-  tighten after repeated low-drift prompts, relax after a stop
-
-## Repository Layout
-
-```text
-.
-├── SKILL.md
-├── config.schema.yaml
-├── adapters/
-├── assets/
-├── examples/
-├── hooks/
-├── references/
-├── scripts/
-├── templates/
-└── tests/
 ```
+
+Read Prompt → [Write Tests → Review → Run RED → Implement → Run GREEN → Review Code] → Report → Evaluate → Next / Stop
+
+```
+
+It ships as a **SKILL.md** file — not a service, not a CLI tool. Any AI agent that supports Skills (Claude Code, Codex CLI) can use it directly.
+
+### Key Features
+
+| Feature | Description |
+|---------|-------------|
+| 🔄 **TDD Pipeline** | Built-in test-driven sub-steps: write tests → review → red → implement → green → review code |
+| ⏸️ **Interrupt Recovery** | `state.yaml` tracks progress to the sub-step level — resume exactly where you left off |
+| 🤖 **Subagent Delegation** | Offload code reviews to a subagent (Claude ↔ Codex), with automatic fallback |
+| 🪨 **Hook Integration** | Claude Code hooks for stop-check (`decision:block`) and session context injection (`additionalContext`) |
+| 📊 **Multi-Dim Evaluation** | 5 scoring dimensions + adaptive threshold + architecture drift detection |
+| 📦 **Plugin Ready** | `.claude-plugin/plugin.json` for one-click installation in Claude Code |
+| 📁 **Progressive Disclosure** | 3-layer loading: metadata → SKILL.md → references/scripts/assets (on demand) |
+
+---
 
 ## Quick Start
 
-### 1. Put the skill where your agent can load it
+### 1. Install the Skill
 
-For Codex or Claude-style skill bundles, copy `prompt-pipeline/` into your skills directory or project workspace.
+Copy (or symlink) the `prompt-pipeline/` directory into your project:
 
-### 2. Create a local pipeline workspace
-
-```text
-your-project/
-└── .pipeline/
-    ├── config.yaml
-    └── prompts/
-        ├── 00-scaffold.md
-        └── 01-feature.md
 ```
 
-Minimal config:
+# Option A: Copy
 
-```yaml
+cp -r /path/to/hypo-workflow/prompt-pipeline/ ./prompt-pipeline/
+
+# Option B: Symlink
+
+ln -s /path/to/hypo-workflow/prompt-pipeline/ ./prompt-pipeline
+
+# Option C: Claude Code Plugin (if supported)
+
+# The .claude-plugin/plugin.json handles auto-discovery
+
+```
+
+### 2. Initialize a Pipeline
+
+Create a `.pipeline/` directory in your project with a config and prompts:
+
+```
+
+mkdir -p .pipeline/prompts .pipeline/reports
+
+```
+
+**`.pipeline/config.yaml`:**
+```
+
 pipeline:
-  name: "Example Pipeline"
-  source: local
-  output: local
+
+name: "My Project"
+
+source: local
+
+output: local
+
+prompts_dir: .pipeline/prompts
+
+reports_dir: .pipeline/reports
 
 execution:
-  mode: self
-  steps:
-    preset: tdd
+
+mode: self
+
+steps:
+
+preset: tdd         # tdd | implement-only | custom
 
 evaluation:
-  auto_continue: false
-  max_diff_score: 3
+
+auto_continue: false  # true = auto-advance, false = ask before next prompt
+
+max_diff_score: 3     # 1-5, higher = more lenient
+
 ```
 
-### 3. Ask the agent to run
+### 3. Write Prompts
 
-Typical commands:
+Add numbered prompt files:
 
-- `开始执行`
-- `继续`
-- `执行下一步`
-- `pipeline status`
-
-The agent should follow `SKILL.md`, validate `.pipeline/config.yaml`, initialize or resume `.pipeline/state.yaml`, and execute exactly one serialized pipeline flow.
-
-## Step Presets
-
-### TDD
-
-```text
-write_tests -> review_tests -> run_tests_red -> implement -> run_tests_green -> review_code
 ```
 
-### Implement-only
+.pipeline/prompts/
 
-```text
-implement -> run_tests -> review_code
+├── [00-scaffold.md](http://00-scaffold.md)
+
+├── [01-core-feature.md](http://01-core-feature.md)
+
+├── [02-ui-polish.md](http://02-ui-polish.md)
+
+└── [03-export.md](http://03-export.md)
+
 ```
 
-### Custom
+Each prompt describes what to build in that iteration. Example:
 
-Provide `execution.steps.sequence` explicitly in `config.yaml`.
+```
 
-## State Model
+# Prompt 00: Scaffold
 
-Hypo-Workflow persists runtime state after:
+Create the project skeleton:
 
-- pipeline initialization
-- prompt start
-- step start
-- step finish
-- skip cascade updates
-- prompt finish or prompt blocked
-- abort and restart actions
+- pyproject.toml with dependencies
+- src/myapp/**init**.py
+- tests/[conftest.py](http://conftest.py)
 
-The state contract is documented in [references/state-contract.md](references/state-contract.md).
+```
 
-Key files:
+### 4. Run
 
-- `.pipeline/state.yaml`
-- `.pipeline/log.md`
-- `.pipeline/reports/*.report.md`
+Open your AI agent (Claude Code or Codex) and say:
 
-## Evaluation Model
+```
 
-V4 extends the original diff-based gate into a multi-dimensional review model.
+Please follow prompt-pipeline/[SKILL.md](http://SKILL.md) to execute the pipeline.
 
-Scored dimensions:
+Read .pipeline/config.yaml and start.
 
-- `diff_score`
-- `code_quality`
-- `test_coverage`
-- `complexity`
-- `architecture_drift`
-- `overall`
+```
 
-Blocking rules:
+The agent will:
+1. Read your config and prompts
+2. Execute each prompt through the TDD sub-step chain
+3. Generate a report with evaluation scores
+4. Decide whether to continue or stop based on the scores
 
-- `diff_score > threshold`
-- `architecture_drift >= 4`
-- `overall > threshold + 1`
+---
 
-Detailed rules live in [references/evaluation-spec.md](references/evaluation-spec.md).
+## Directory Structure
 
-## Hooks And Plugin Packaging
+```
 
-Claude Code can use packaged hooks through [.claude-plugin/plugin.json](.claude-plugin/plugin.json).
+prompt-pipeline/
 
-Included hooks:
+├── [SKILL.md](http://SKILL.md)                     # ⭐ Main entry point (the Skill)
 
-- `Stop`
-  block session end when the pipeline is still running and required state/report updates are missing
-- `SessionStart`
-  inject current pipeline context on startup, resume, or compact
-- `InstructionsLoaded`
-  optional observability hook
+├── config.schema.yaml           # Configuration schema
 
-Hook behavior and platform differences are summarized in [hooks/README.md](hooks/README.md).
+├── .claude-plugin/
 
-## Scripts
+│   └── plugin.json              # Claude Code plugin manifest
 
-Helper scripts are intentionally small and deterministic:
+├── hooks/
 
-- `scripts/validate-config.sh`
-- `scripts/state-summary.sh`
-- `scripts/log-append.sh`
-- `scripts/diff-stats.sh`
+│   ├── [stop-check.sh](http://stop-check.sh)            # Prevents accidental session termination
 
-These are used both by the skill runtime and by regression scenarios.
+│   ├── [session-start.sh](http://session-start.sh)         # Injects pipeline context on session start
+
+│   ├── [instructions-loaded.sh](http://instructions-loaded.sh)   # Logs [CLAUDE.md](http://CLAUDE.md) load events
+
+│   ├── [codex-notify.sh](http://codex-notify.sh)          # Codex agent-turn-complete handler
+
+│   └── [README.md](http://README.md)
+
+├── scripts/
+
+│   ├── [state-summary.sh](http://state-summary.sh)         # Print pipeline state summary
+
+│   ├── [log-append.sh](http://log-append.sh)            # Append structured log entries
+
+│   ├── [diff-stats.sh](http://diff-stats.sh)            # Git diff statistics
+
+│   └── [validate-config.sh](http://validate-config.sh)       # Validate config.yaml
+
+├── references/
+
+│   ├── [tdd-spec.md](http://tdd-spec.md)              # Detailed TDD sub-step rules
+
+│   ├── [evaluation-spec.md](http://evaluation-spec.md)       # Scoring dimensions & thresholds
+
+│   ├── [subagent-spec.md](http://subagent-spec.md)         # Subagent delegation protocol
+
+│   ├── [state-contract.md](http://state-contract.md)        # state.yaml field reference
+
+│   ├── [platform-claude.md](http://platform-claude.md)       # Claude Code specifics
+
+│   └── [platform-codex.md](http://platform-codex.md)        # Codex CLI specifics
+
+├── assets/
+
+│   ├── state-init.yaml          # Initial state template
+
+│   ├── [report-template.md](http://report-template.md)       # Report format template
+
+│   └── config-examples/         # Example configurations
+
+├── examples/
+
+│   ├── hypo-todo/               # Basic TDD example
+
+│   ├── hypo-todo-subagent/      # Subagent delegation example
+
+│   └── hypo-todo-adaptive/      # Adaptive threshold example
+
+└── tests/
+
+└── scenarios/               # System test scenarios (s01-s15)
+
+```
+
+---
+
+## Configuration Reference
+
+### Presets
+
+| Preset | Steps | Use Case |
+|--------|-------|----------|
+| `tdd` | write_tests → review_tests → run_red → implement → run_green → review_code | Engineering projects (default) |
+| `implement-only` | implement → run_tests → review_code | Docs, LaTeX, no-TDD tasks |
+| `custom` | User-defined sequence | Any combination |
+
+### Execution Modes
+
+| Mode | Behavior |
+|------|----------|
+| `self` | Agent executes everything directly |
+| `subagent` | Agent delegates to a subagent (with fallback to self) |
+
+### Evaluation
+
+```
+
+evaluation:
+
+auto_continue: false       # Auto-advance to next prompt?
+
+max_diff_score: 3          # Base threshold (1-5)
+
+adaptive_threshold: false  # Enable dynamic threshold adjustment?
+
+base_max_diff_score: 3     # Starting threshold when adaptive=true
+
+weights:                   # Custom scoring weights (optional)
+
+diff_score: 0.3
+
+code_quality: 0.2
+
+test_coverage: 0.2
+
+complexity: 0.15
+
+architecture_drift: 0.15
+
+```
+
+#### Scoring Dimensions (V4)
+
+| Dimension | Range | Description |
+|-----------|-------|-------------|
+| `diff_score` | 1-5 | Deviation from prompt requirements |
+| `code_quality` | 1-5 | Code quality assessment |
+| `test_coverage` | 1-5 | Test coverage (TDD mode only) |
+| `complexity` | 1-5 | Implementation complexity |
+| `architecture_drift` | 1-5 | Structural deviation from design |
+| `overall` | 1-5 | Weighted composite score |
+
+#### Decision Rules
+
+- **STOP** (any triggers): `diff_score > threshold` \| `architecture_drift >= 4` \| `overall > threshold + 1`
+- **WARN** (logged, non-blocking): `complexity >= 4` \| `test_coverage <= 2`
+
+---
+
+## Platform Support
+
+### Claude Code ✨
+
+- Full Hook support (23+ events)
+- `decision:block` stop-check prevents accidental session termination during pipeline
+- `additionalContext` session-start injects pipeline state on resume/compact
+- Plugin installation via `.claude-plugin/plugin.json`
+- Subagent definitions in `.claude/agents/`
+
+### Codex CLI
+
+- Works via SKILL.md + AGENTS.md discipline
+- `notify` hook (agent-turn-complete) for logging
+- No Hook-based stop/session features (graceful degradation)
+- Subagent definitions in `.codex/agents/` (experimental)
+
+---
 
 ## Examples
 
-Included example pipelines:
+### Basic TDD Pipeline
 
-- `examples/hypo-todo/`
-- `examples/hypo-todo-subagent/`
-- `examples/hypo-todo-adaptive/`
+```
 
-They cover:
+cd examples/hypo-todo
 
-- baseline TDD flow
-- subagent-assisted review
-- adaptive threshold behavior
+# Then tell your agent:
 
-## Testing
+# "Follow prompt-pipeline/[SKILL.md](http://SKILL.md), read .pipeline/config.yaml, start."
 
-Regression scenarios live under `tests/scenarios/`.
+```
 
-Coverage currently includes:
+This runs a 4-prompt pipeline building a Python CLI TODO app:
+- `00-scaffold.md` — Project skeleton
+- `01-core-crud.md` — CRUD + SQLite
+- `02-rich-ui.md` — Rich library UI
+- `03-export.md` — JSON/CSV/Markdown export
 
-- V0 baseline pipeline behavior
-- V0.5 multi-prompt workflow
-- V1 subagent review and fallback
-- V2.5 Progressive Disclosure and script executability
-- V3 hook behavior
-- V4 multi-dimensional scoring and architecture drift detection
+### Subagent Delegation
 
-Scenario result artifacts are intentionally ignored from git.
+```
 
-## Version
+cd examples/hypo-todo-subagent
 
-Current public release target:
+# Config has step_overrides with reviewer: subagent
 
-- `v4.0.0`
+```
 
-Highlights:
+### Adaptive Threshold
 
-- serialized prompt pipeline
-- interrupt recovery via `state.yaml`
-- subagent delegation with safe fallback
-- Progressive Disclosure resource model
-- Claude plugin packaging
-- hook-based stop protection and session context injection
-- adaptive threshold and architecture drift detection
+```
+
+cd examples/hypo-todo-adaptive
+
+# Config has evaluation.adaptive_threshold: true
+
+```
+
+---
+
+## How It Works
+
+### Progressive Disclosure (3-Layer Loading)
+
+```
+
+L1  Agent discovers Skill     →  reads [SKILL.md](http://SKILL.md) frontmatter (name, version)
+
+L2  Agent activates Skill     →  reads [SKILL.md](http://SKILL.md) full text (~520 lines)
+
+L3  Agent needs details       →  reads references/*.md, runs scripts/*.sh
+
+```
+
+This keeps the main file lean while providing full detail on demand.
+
+### State Machine
+
+```
+
+idle → running → [per-prompt: step chain] → evaluate → continue/stop → completed
+
+│
+
+interrupted ←┘ (Ctrl+C / crash)
+
+│
+
+resume →┘
+
+```
+
+All state is persisted in `.pipeline/state.yaml`. You can interrupt at any point and resume later.
+
+### Hook Safety Net (Claude Code)
+
+```
+
+Stop event   →  hooks/[stop-check.sh](http://stop-check.sh)  →  pipeline running?  →  decision:block
+
+Session start →  hooks/[session-start.sh](http://session-start.sh) →  has state.yaml?  →  inject context
+
+```
+
+Hooks act as a passive safety net — they don’t drive the pipeline, but prevent accidental data loss.
+
+---
+
+## Versioning
+
+| Version | Milestone |
+|---------|-----------|
+| V0 | Core state machine + TDD pipeline |
+| V0.5 | Skip cascade + evaluation blocking |
+| V1 | Subagent delegation with fallback |
+| V2.5 | Progressive Disclosure + Plugin packaging |
+| V3 | Claude Code Hook integration (stop-check, session-start) |
+| V4 | Multi-dimensional evaluation + adaptive threshold + architecture drift |
+
+---
+
+## Contributing
+
+This is a personal project by [Hypoxanthine](https://github.com/Hypoxanthine). Issues and PRs are welcome.
 
 ## License
 
