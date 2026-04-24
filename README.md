@@ -6,7 +6,7 @@
 
 TDD Pipeline · Self-Review · Interrupt Recovery · Multi-Dimensional Evaluation
 
-[![Version](https://img.shields.io/badge/version-6.2.0-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-7.0.0-blue)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex-purple)](#platform-support)
 
@@ -31,7 +31,7 @@ It ships as a **SKILL.md** file — not a service, not a CLI tool. Any AI agent 
 | Feature | Description |
 |---------|-------------|
 | 🔄 **TDD Pipeline** | Built-in test-driven sub-steps: write tests → review → red → implement → green → review code |
-| 🧭 **Native Skills** | 20 native Claude Code skills exposed as `/hypo-workflow:*` plus `/hw:*` compatibility for Codex |
+| 🧭 **Native Skills** | 22 native Claude Code skills exposed as `/hypo-workflow:*` plus `/hw:*` compatibility for Codex |
 | 🗺️ **Plan Mode** | Auto and Interactive planning modes with discover / decompose / generate / confirm / review phases |
 | 🧩 **Notion Adapter** | Read prompts from Notion and/or write reports back to Notion with graceful degradation |
 | ⏸️ **Interrupt Recovery** | `state.yaml` tracks progress to the sub-step level — resume exactly where you left off |
@@ -41,6 +41,8 @@ It ships as a **SKILL.md** file — not a service, not a CLI tool. Any AI agent 
 | 🔁 **Lifecycle Closure** | `/hw:init` → `/hw:check` → `/hw:audit` → `/hw:debug` → `/hw:release` completes the project loop |
 | 📝 **Unified Logging** | `.pipeline/log.yaml` records milestones, fixes, audits, debug sessions, plan reviews, and releases |
 | 📈 **Progress Summary** | `.pipeline/PROGRESS.md` gives a human-readable milestone and step summary |
+| 🛠️ **Setup Wizard** | `/hypo-workflow:setup` configures environment, execution defaults, subagent backend, and dashboard preferences |
+| 🌐 **Dashboard** | `/hypo-workflow:dashboard` launches a live WebUI for state, config, progress, reports, and log activity |
 | 📦 **Plugin Ready** | Ships official `.claude-plugin` and `.codex-plugin` manifests plus marketplace metadata |
 | 📁 **Progressive Disclosure** | 3-layer loading: metadata → SKILL.md → references/scripts/assets (on demand) |
 
@@ -58,6 +60,7 @@ In Claude Code, add the repository marketplace and install the plugin:
 
 # Verify:
 /hypo-workflow:help
+/hypo-workflow:setup
 ```
 
 This repository publishes its Claude marketplace metadata from the repo root at [`.claude-plugin/marketplace.json`](./.claude-plugin/marketplace.json).
@@ -71,6 +74,7 @@ Use $skill-installer to install the GitHub repo HypoxanthineOvO/hypo-workflow wi
 
 # Then restart Codex and verify:
 /hw:help
+/hw:setup
 ```
 
 This installs the full repository root as one self-contained skill so the canonical [`SKILL.md`](./SKILL.md) can keep its existing Progressive Disclosure layout.
@@ -96,6 +100,7 @@ Use one of the installation methods above, then open a project where you want to
 
 ```
 /hypo-workflow:help
+/hypo-workflow:dashboard
 ```
 
 ### 2. Initialize a Pipeline
@@ -351,6 +356,12 @@ Notion source and output are independently configurable, so mixed mode is suppor
 Claude Code users should use `/hypo-workflow:<command>`.
 Codex users keep the compatible `/hw:*` path via the root `SKILL.md`.
 
+#### Setup
+
+| Command | Behavior |
+|---------|----------|
+| `/hypo-workflow:setup` | Configure plugin-level defaults for environment, plan mode, execution mode, subagent backend, and dashboard |
+
 ### Slash Commands
 
 #### Pipeline
@@ -389,6 +400,7 @@ Codex users keep the compatible `/hw:*` path via the root `SKILL.md`.
 
 | Command | Behavior |
 |---------|----------|
+| `/hypo-workflow:dashboard` | Launch the WebUI dashboard in the background and open the browser |
 | `/hw:help` | Show grouped help, quick help, or per-command usage |
 | `/hw:reset` | Reset state, generated artifacts, or the entire `.pipeline/` workspace |
 | `/hw:log` | Read and filter `.pipeline/log.yaml` |
@@ -654,6 +666,7 @@ Hooks act as a passive safety net — they don’t drive the pipeline, but preve
 | V6 | Lifecycle commands, unified `log.yaml`, `/hw:plan:review` migration, full 20-command namespace |
 | V6.1 | Claude marketplace distribution, Codex plugin metadata, and official installation docs |
 | V6.2 | 20 native skills, smart stop hooks, plan auto/interactive modes, PROGRESS.md, and failure triage |
+| V7 | Setup wizard, WebUI dashboard, and 22 native skills |
 
 ---
 

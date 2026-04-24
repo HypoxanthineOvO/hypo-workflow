@@ -5,10 +5,12 @@ description: Show the full Hypo-Workflow command map when the user needs a quick
 
 # /hypo-workflow:help
 
-Use this skill to explain the 20 native Hypo-Workflow skills.
+Use this skill to explain the 22 native Hypo-Workflow skills.
 
 ## Command Groups
 
+- Setup:
+  - `setup`
 - Pipeline:
   - `start`, `resume`, `status`, `skip`, `stop`, `report`
 - Plan:
@@ -16,11 +18,11 @@ Use this skill to explain the 20 native Hypo-Workflow skills.
 - Lifecycle:
   - `init`, `check`, `audit`, `release`, `debug`
 - Utility:
-  - `help`, `reset`, `log`
+  - `dashboard`, `help`, `reset`, `log`
 
 ## Execution Flow
 
-1. By default, list all 20 commands grouped by category.
+1. By default, list all 22 commands grouped by category.
 2. For a specific command, explain:
    - when to use it
    - required inputs or flags

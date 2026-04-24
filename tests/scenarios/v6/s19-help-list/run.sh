@@ -12,8 +12,9 @@ count="$(awk '
   in_table && /^When the user types/ {print c; exit}
 ' SKILL.md)"
 
-test "$count" = "20"
-rg -q '20 canonical commands grouped under Pipeline, Plan, Lifecycle, and Utility' references/commands-spec.md
+test "$count" = "22"
+rg -q '22 canonical commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility' references/commands-spec.md
+rg -q '^#### Setup$' README.md
 rg -q '^#### Pipeline$' README.md
 rg -q '^#### Plan$' README.md
 rg -q '^#### Lifecycle$' README.md

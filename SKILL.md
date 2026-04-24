@@ -1,10 +1,10 @@
 ---
 name: hypo-workflow
-version: 6.2.0
-description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:plan`, `/hw:plan:review`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, or `/hw:log`.
+version: 7.0.0
+description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:plan`, `/hw:plan:review`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, or `/hw:dashboard`.
 ---
 
-# Hypo-Workflow v6.2.0
+# Hypo-Workflow v7.0.0
 
 > **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 20 个可用指令。
 >
@@ -34,6 +34,8 @@ description: Run a serialized prompt execution pipeline from a local `.pipeline/
 | `/hw:help` | Show command help, grouped quick reference, or per-command usage |
 | `/hw:reset` | Reset pipeline runtime state with safe, full, or hard modes |
 | `/hw:log` | Read the unified lifecycle log from `.pipeline/log.yaml` |
+| `/hw:setup` | Run the plugin-level setup wizard for environment, execution, subagent, and dashboard defaults |
+| `/hw:dashboard` | Start or reopen the Hypo-Workflow WebUI dashboard server |
 
 When the user types any `/hw:*` command, execute the corresponding action.
 Unrecognized `/hw:*` commands should be reported as unknown.
@@ -165,6 +167,10 @@ Handle these commands directly:
   Reset runtime state only, or use `--full` / `--hard` for broader cleanup. Always list the affected files before deletion. `--hard` requires an explicit `YES` confirmation.
 - `/hw:log`
   Read `.pipeline/log.yaml`, show the latest 10 entries by default, and support `--all`, `--type <type>`, and `--since <milestone>` filters. If the file is missing, say `暂无日志，执行 Pipeline 后自动生成`.
+- `/hw:setup`
+  Configure the plugin itself: detect environment, choose plan mode, choose execution/subagent mode, and decide whether dashboard support should be enabled.
+- `/hw:dashboard`
+  Launch the background WebUI server, verify `/health`, and open the browser to the live dashboard.
 - `/hw:check`
   Run health checks for config, workspace completeness, state consistency, prompts, Notion connectivity, and architecture. Without `.pipeline/`, respond with `请先运行 /hw:init`.
 - `/hw:init`
@@ -184,7 +190,7 @@ Handle these commands directly:
 
 If a command starts with `/hw:` and is not listed above, return:
 
-`Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:review, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log`
+`Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:review, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
 
 Slash commands are exact and take precedence over fuzzy natural-language matching. Detailed parsing and option semantics live in [`references/commands-spec.md`](./references/commands-spec.md).
 
@@ -211,6 +217,10 @@ Key defaults:
 - lifecycle log defaults to `.pipeline/log.yaml`
 - `plan.mode=interactive`
 - `plan.interaction_depth=high`
+- `dashboard.enabled=false`
+- `dashboard.port=7700`
+- `dashboard.auto_start=false`
+- `dashboard.shutdown_delay=30`
 - `execution.mode=self`
 - `execution.subagent_tool=auto`
 - `execution.steps.preset=tdd`
@@ -262,6 +272,14 @@ Planning now supports two modes through `plan.mode`:
   - Claude completes P1-P4 without pausing for user feedback unless blocked by missing critical information
   - Confirm becomes a summary checkpoint instead of a hard gate
   - hooks should block premature turn end so planning continues automatically
+
+## Dashboard
+
+The dashboard is an optional WebUI for `.pipeline/` state, config, progress, and reports.
+
+- start it manually through `/hypo-workflow:dashboard` in Claude Code or `/hw:dashboard` in Codex compatibility mode
+- treat it as a background service that must not block normal agent execution
+- keep its configuration under the `dashboard` config block and plugin-level setup defaults
 
 ## Step Presets
 

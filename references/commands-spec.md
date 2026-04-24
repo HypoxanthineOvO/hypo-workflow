@@ -5,7 +5,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 ## Namespace
 
 - all explicit Hypo-Workflow commands use the `/hw:` prefix
-- V6 canonical namespace contains 20 commands across Pipeline, Plan, Lifecycle, and Utility groups
+- V7 canonical namespace contains 22 commands across Setup, Pipeline, Plan, Lifecycle, and Utility groups
 - slash commands are exact and namespace-scoped
 - slash commands take precedence over fuzzy natural-language matching
 - natural-language commands remain valid for backward compatibility
@@ -23,6 +23,8 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
    - `/hw:help`
    - `/hw:reset`
    - `/hw:log`
+   - `/hw:setup`
+   - `/hw:dashboard`
    - `/hw:check`
    - `/hw:init`
    - `/hw:release`
@@ -37,7 +39,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 3. parse remaining tokens as command arguments
 4. flags are order-independent
 5. if a command is unknown, return exactly:
-   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:review, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log`
+   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:review, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
 6. if a known command receives an unsupported flag, stop and report the unsupported flag explicitly instead of guessing
 7. if a prompt selector is ambiguous, list the candidates and stop
 8. plan and review commands load `plan/PLAN-SKILL.md` before execution
@@ -162,7 +164,7 @@ Supported forms:
 Behavior:
 
 - read `SKILL.md` command tables as the source of truth
-- `/hw:help` lists all 20 canonical commands grouped under Pipeline, Plan, Lifecycle, and Utility
+- `/hw:help` lists all 22 canonical commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility
 - `/hw:help --quick` returns a compact cheat sheet
 - `/hw:help <cmd>` returns detailed usage, flags, and examples for the requested command
 
@@ -194,6 +196,31 @@ Behavior:
 - show the newest 10 entries by default
 - filter entries by type or milestone when requested
 - if `log.yaml` is missing, return `暂无日志，执行 Pipeline 后自动生成`
+
+### `/hw:setup`
+
+Supported flags:
+
+- none
+
+Behavior:
+
+- run the plugin-level setup wizard
+- detect environment, execution preferences, and dashboard preferences
+- write plugin-level configuration outside the project pipeline state
+
+### `/hw:dashboard`
+
+Supported flags:
+
+- none
+
+Behavior:
+
+- ensure dashboard dependencies are installed
+- start or reuse the background dashboard server
+- verify `/health`
+- open the browser when possible
 
 ### `/hw:check`
 

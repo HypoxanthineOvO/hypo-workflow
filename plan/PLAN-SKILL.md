@@ -1,6 +1,6 @@
 ---
 name: hypo-workflow-plan
-version: 6.2.0
+version: 7.0.0
 description: Plan Mode sub-skill for Hypo-Workflow. Use this file when the user invokes `/hw:plan`, `/hw:plan:*`, `/hw:plan:review`, or the compatibility alias `/hw:review`.
 ---
 
