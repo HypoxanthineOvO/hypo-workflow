@@ -1,5 +1,5 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
-$id: "https://example.local/prompt-pipeline/config.schema.yaml"
+$id: "https://example.local/hypo-workflow/config.schema.yaml"
 title: Prompt Pipeline Config Schema
 description: Strict schema for Prompt Pipeline V6 configuration.
 type: object

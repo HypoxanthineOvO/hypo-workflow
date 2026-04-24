@@ -1,13 +1,13 @@
 # Scenario: s11 — Scripts 可执行性验证
 
 ## 初始 Prompt
-> 请按照 prompt-pipeline/SKILL.md 的规则，在当前目录执行 Pipeline。
+> 请按照 SKILL.md 的规则，在当前目录执行 Pipeline。
 > 读取 .pipeline/config.yaml，开始执行。
 > 执行过程中，请在以下时机手动调用对应脚本并报告输出：
-> 1. Pipeline 启动后立即运行 `bash prompt-pipeline/scripts/state-summary.sh`
-> 2. 每个子步骤完成后运行 `bash prompt-pipeline/scripts/log-append.sh --step <step> --status done --message "test"`
-> 3. review_code 完成后运行 `bash prompt-pipeline/scripts/diff-stats.sh`
-> 4. Pipeline 结束后运行 `bash prompt-pipeline/scripts/validate-config.sh`
+> 1. Pipeline 启动后立即运行 `bash scripts/state-summary.sh`
+> 2. 每个子步骤完成后运行 `bash scripts/log-append.sh --step <step> --status done --message "test"`
+> 3. review_code 完成后运行 `bash scripts/diff-stats.sh`
+> 4. Pipeline 结束后运行 `bash scripts/validate-config.sh`
 
 ## 验证清单
 

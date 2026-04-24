@@ -1,7 +1,7 @@
 # Scenario: s15 — 架构漂移检测专项
 
 ## 初始 Prompt
-> 请按照 prompt-pipeline/SKILL.md 的规则，在当前目录执行 Pipeline。
+> 请按照 SKILL.md 的规则，在当前目录执行 Pipeline。
 > 读取 .pipeline/config.yaml，开始执行。
 
 ## 验证清单

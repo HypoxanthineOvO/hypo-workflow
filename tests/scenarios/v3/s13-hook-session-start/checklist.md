@@ -8,7 +8,7 @@
 ```
 cd /tmp/empty-dir
 
-bash /path/to/prompt-pipeline/hooks/session-start.sh startup
+bash /path/to/hypo-workflow/hooks/session-start.sh startup
 ```
 - [ ] 输出合法 JSON
 - [ ] 输出 `{}` 或包含空 additionalContext（无 Pipeline 可注入）
@@ -25,7 +25,7 @@ pipeline:
   status: idle
 EOF
 
-bash /path/to/prompt-pipeline/hooks/session-start.sh startup
+bash /path/to/hypo-workflow/hooks/session-start.sh startup
 ```
 - [ ] 输出包含 `additionalContext`
 - [ ] additionalContext 包含 Pipeline 名称
@@ -42,7 +42,7 @@ current:
   step_index: 3
 EOF
 
-bash /path/to/prompt-pipeline/hooks/session-start.sh resume
+bash /path/to/hypo-workflow/hooks/session-start.sh resume
 ```
 - [ ] 输出包含 `additionalContext`
 - [ ] additionalContext 包含当前 prompt 和 step 信息
@@ -50,14 +50,14 @@ bash /path/to/prompt-pipeline/hooks/session-start.sh resume
 
 ### Case D：compact
 ```
-bash /path/to/prompt-pipeline/hooks/session-start.sh compact
+bash /path/to/hypo-workflow/hooks/session-start.sh compact
 ```
 - [ ] 输出包含 `additionalContext`
 - [ ] additionalContext 包含"上下文已压缩"类似警告
 
 ### Case E：clear
 ```
-bash /path/to/prompt-pipeline/hooks/session-start.sh clear
+bash /path/to/hypo-workflow/hooks/session-start.sh clear
 ```
 - [ ] 输出合法 JSON
 

@@ -6,7 +6,7 @@
 
 ### Case A：无 Pipeline 目录
 ```
-cd /tmp && bash /path/to/prompt-pipeline/hooks/stop-check.sh
+cd /tmp && bash /path/to/hypo-workflow/hooks/stop-check.sh
 ```
 - [ ] 输出 `{}` （空 JSON，允许停止）
 - [ ] 退出码 0
@@ -25,7 +25,7 @@ pipeline:
   status: completed
 EOF
 
-bash /path/to/prompt-pipeline/hooks/stop-check.sh
+bash /path/to/hypo-workflow/hooks/stop-check.sh
 ```
 - [ ] 输出 `{}` （允许停止）
 - [ ] 退出码 0
@@ -45,7 +45,7 @@ EOF
 touch -t $(date -d '2 minutes ago' '+%Y%m%d%H%M.%S') .pipeline/state.yaml 2>/dev/null || \
 touch -A -0200 .pipeline/state.yaml
 
-bash /path/to/prompt-pipeline/hooks/stop-check.sh
+bash /path/to/hypo-workflow/hooks/stop-check.sh
 ```
 - [ ] 输出包含 `"decision": "block"`
 - [ ] 输出包含 `"reason"` 字段
@@ -63,7 +63,7 @@ EOF
 
 # state.yaml 刚刚写入，mtime 就是现在
 
-bash /path/to/prompt-pipeline/hooks/stop-check.sh
+bash /path/to/hypo-workflow/hooks/stop-check.sh
 ```
 - [ ] 输出包含 `"decision": "block"`（Pipeline 运行中就应该阻止停止）
 - [ ] 退出码 0

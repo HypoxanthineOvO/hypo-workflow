@@ -18,7 +18,7 @@ Example `/.claude/settings.local.json`:
   "hooks": {},
   "agents": {},
   "plugins": [
-    "../prompt-pipeline/.claude-plugin/plugin.json"
+    "../.claude-plugin/plugin.json"
   ]
 }
 ```
@@ -35,7 +35,7 @@ Example `/.claude/settings.local.json`:
         "hooks": [
           {
             "type": "command",
-            "command": "bash prompt-pipeline/hooks/stop-check.sh",
+            "command": "bash hooks/stop-check.sh",
             "timeout": 5000
           }
         ]
@@ -47,7 +47,7 @@ Example `/.claude/settings.local.json`:
         "hooks": [
           {
             "type": "command",
-            "command": "bash prompt-pipeline/hooks/session-start.sh startup",
+            "command": "bash hooks/session-start.sh startup",
             "timeout": 3000
           }
         ]
@@ -57,7 +57,7 @@ Example `/.claude/settings.local.json`:
         "hooks": [
           {
             "type": "command",
-            "command": "bash prompt-pipeline/hooks/session-start.sh resume",
+            "command": "bash hooks/session-start.sh resume",
             "timeout": 3000
           }
         ]
@@ -67,7 +67,7 @@ Example `/.claude/settings.local.json`:
         "hooks": [
           {
             "type": "command",
-            "command": "bash prompt-pipeline/hooks/session-start.sh compact",
+            "command": "bash hooks/session-start.sh compact",
             "timeout": 3000
           }
         ]

@@ -27,7 +27,7 @@ Pipeline 纪律完全依赖 `SKILL.md` 内部逻辑（与 V1 行为一致）。
 `.codex/config.toml`:
 
 ```toml
-notify = ["bash", "prompt-pipeline/hooks/codex-notify.sh"]
+notify = ["bash", "hooks/codex-notify.sh"]
 ```
 
 ### AGENTS.md 纪律条款（建议）

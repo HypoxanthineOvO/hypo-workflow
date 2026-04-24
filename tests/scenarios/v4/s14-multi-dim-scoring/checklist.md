@@ -1,7 +1,7 @@
 # Scenario: s14 — 多维评分 + 自适应阈值
 
 ## 初始 Prompt
-> 请按照 prompt-pipeline/SKILL.md 的规则，在当前目录执行 Pipeline。
+> 请按照 SKILL.md 的规则，在当前目录执行 Pipeline。
 > 读取 .pipeline/config.yaml，开始执行。
 > 注意：evaluation.adaptive_threshold=true，请严格按照 references/evaluation-spec.md 中的多维评分和自适应阈值规则执行。
 
