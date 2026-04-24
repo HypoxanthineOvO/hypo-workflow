@@ -1,0 +1,20 @@
+{
+  "name": "hypo-workflow",
+  "version": "6.1.0",
+  "description": "Serialized prompt workflow for planning, execution, auditing, debugging, and release with /hw:* commands.",
+  "author": {
+    "name": "Hypoxanthine",
+    "url": "https://github.com/HypoxanthineOvO"
+  },
+  "homepage": "https://github.com/HypoxanthineOvO/hypo-workflow",
+  "license": "MIT",
+  "keywords": [
+    "workflow",
+    "planning",
+    "tdd",
+    "claude-code",
+    "codex"
+  ],
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json"
+}

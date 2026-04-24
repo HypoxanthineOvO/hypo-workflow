@@ -1,0 +1,17 @@
+{
+  "name": "hypoxanthine-hypo-workflow",
+  "interface": {
+    "displayName": "Hypo-Workflow Plugins"
+  },
+  "plugins": [
+    {
+      "name": "hypo-workflow",
+      "source": "./",
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

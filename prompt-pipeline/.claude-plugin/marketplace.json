@@ -1,0 +1,29 @@
+{
+  "name": "hypoxanthine-hypo-workflow",
+  "owner": {
+    "name": "Hypoxanthine"
+  },
+  "metadata": {
+    "description": "Official Hypo-Workflow marketplace for Claude Code installation."
+  },
+  "plugins": [
+    {
+      "name": "hypo-workflow",
+      "source": "./",
+      "version": "6.1.0",
+      "description": "Serialized prompt workflow for /hw:init, /hw:plan, /hw:start, /hw:audit, /hw:debug, and /hw:release.",
+      "author": {
+        "name": "Hypoxanthine",
+        "url": "https://github.com/HypoxanthineOvO"
+      },
+      "license": "MIT",
+      "homepage": "https://github.com/HypoxanthineOvO/hypo-workflow",
+      "tags": [
+        "workflow",
+        "planning",
+        "tdd",
+        "release"
+      ]
+    }
+  ]
+}

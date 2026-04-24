@@ -1,0 +1,73 @@
+entries:
+  - id: "M0"
+    type: milestone
+    ref: "/hw:help /hw:reset /hw:log"
+    status: completed
+    timestamp: "2026-04-24T09:00:00Z"
+    summary: "Established the unified lifecycle log spec and utility command foundations."
+    report: "references/log-spec.md"
+    trigger: auto
+    related_milestone: "M0"
+  - id: "M1"
+    type: milestone
+    ref: "/hw:check"
+    status: completed
+    timestamp: "2026-04-24T09:20:00Z"
+    summary: "Defined the six-surface health check command and its output contract."
+    report: "references/check-spec.md"
+    trigger: auto
+    related_milestone: "M1"
+  - id: "M2"
+    type: milestone
+    ref: "/hw:init"
+    status: completed
+    timestamp: "2026-04-24T09:40:00Z"
+    summary: "Defined architecture-aware initialization and upgraded Plan Generate to emit detailed implementation plans."
+    report: "references/init-spec.md"
+    trigger: auto
+    related_milestone: "M2"
+  - id: "M3"
+    type: milestone
+    ref: "/hw:release"
+    status: completed
+    timestamp: "2026-04-24T10:00:00Z"
+    summary: "Specified the automated release flow, changelog generation, and release logging."
+    report: "references/release-spec.md"
+    trigger: auto
+    related_milestone: "M3"
+  - id: "M4"
+    type: milestone
+    ref: "/hw:audit"
+    status: completed
+    timestamp: "2026-04-24T10:20:00Z"
+    summary: "Defined deep code auditing dimensions, grading, and report outputs."
+    report: "references/audit-spec.md"
+    trigger: auto
+    related_milestone: "M4"
+  - id: "M5"
+    type: milestone
+    ref: "/hw:debug"
+    status: completed
+    timestamp: "2026-04-24T10:40:00Z"
+    summary: "Defined symptom-driven debugging, hypothesis validation, and guarded auto-fix behavior."
+    report: "references/debug-spec.md"
+    trigger: auto
+    related_milestone: "M5"
+  - id: "M6"
+    type: milestone
+    ref: "/hw:plan:review migration + regression s19-s30"
+    status: completed
+    timestamp: "2026-04-24T11:10:00Z"
+    summary: "Completed the V6 compatibility migration, expanded the regression suite to 30 scenarios, and updated public docs."
+    report: "README.md"
+    trigger: auto
+    related_milestone: "M6"
+  - id: "REL-600"
+    type: release
+    ref: "v6.0.0"
+    status: completed
+    timestamp: "2026-04-24T11:15:00Z"
+    summary: "Prepared the V6.0.0 release metadata and lifecycle command surface."
+    report: ".claude-plugin/plugin.json"
+    trigger: user
+    related_milestone: "M6"

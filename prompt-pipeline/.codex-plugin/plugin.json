@@ -1,0 +1,28 @@
+{
+  "name": "hypo-workflow",
+  "version": "6.1.0",
+  "description": "Serialized prompt workflow for planning, execution, auditing, debugging, and release with /hw:* commands.",
+  "author": {
+    "name": "Hypoxanthine",
+    "url": "https://github.com/HypoxanthineOvO"
+  },
+  "homepage": "https://github.com/HypoxanthineOvO/hypo-workflow",
+  "repo_url": "https://github.com/HypoxanthineOvO/hypo-workflow",
+  "license": "MIT",
+  "keywords": [
+    "workflow",
+    "planning",
+    "tdd",
+    "debugging",
+    "release"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Hypo-Workflow",
+    "shortDescription": "Plan-to-release workflow automation for Claude Code and Codex.",
+    "longDescription": "Hypo-Workflow packages the prompt-pipeline engine and /hw lifecycle commands so agents can initialize, plan, execute, audit, debug, and release work from a local .pipeline workspace.",
+    "developerName": "Hypoxanthine",
+    "category": "Productivity",
+    "websiteURL": "https://github.com/HypoxanthineOvO/hypo-workflow"
+  }
+}

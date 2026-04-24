@@ -1,0 +1,20 @@
+pipeline:
+  name: "Hypo-Workflow V2 Notion Adapter"
+  source: local
+  output: local
+  prompts_dir: .pipeline/prompts
+  reports_dir: .pipeline/reports
+
+execution:
+  mode: self
+  steps:
+    preset: tdd
+
+evaluation:
+  auto_continue: false
+  max_diff_score: 3
+  checks:
+    - tests_pass
+    - no_regressions
+    - matches_plan
+    - code_quality
