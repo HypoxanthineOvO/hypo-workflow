@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "hypo-workflow",
-      "source": "./",
+      "source": "./prompt-pipeline",
       "version": "6.1.0",
       "description": "Serialized prompt workflow for /hw:init, /hw:plan, /hw:start, /hw:audit, /hw:debug, and /hw:release.",
       "author": {

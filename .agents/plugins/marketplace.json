@@ -6,7 +6,7 @@
   "plugins": [
     {
       "name": "hypo-workflow",
-      "source": "./",
+      "source": "./prompt-pipeline",
       "policy": {
         "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"

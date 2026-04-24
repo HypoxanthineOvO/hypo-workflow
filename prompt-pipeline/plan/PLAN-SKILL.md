@@ -1,6 +1,6 @@
 ---
 name: prompt-pipeline-plan
-version: 6.0.0
+version: 6.1.0
 description: Plan Mode sub-skill for Hypo-Workflow. Use this file when the user invokes `/hw:plan`, `/hw:plan:*`, `/hw:plan:review`, or the compatibility alias `/hw:review`.
 ---
 

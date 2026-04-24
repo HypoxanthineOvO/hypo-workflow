@@ -59,20 +59,20 @@ In Claude Code, add the repository marketplace and install the plugin:
 /hw:help
 ```
 
-This repository publishes its Claude marketplace metadata from [`.claude-plugin/marketplace.json`](./.claude-plugin/marketplace.json).
+This repository publishes its Claude marketplace metadata from the repo root at [`.claude-plugin/marketplace.json`](../.claude-plugin/marketplace.json).
 
 ### Codex CLI
 
-The repository ships official Codex plugin metadata in [`.codex-plugin/plugin.json`](./.codex-plugin/plugin.json) and a repo marketplace in [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json). OpenAI's plugin docs currently describe public self-serve publishing as "coming soon", so the most reliable install path today is the built-in `skill-installer` against the repo root:
+The repository ships official Codex plugin metadata in [`.codex-plugin/plugin.json`](./.codex-plugin/plugin.json) and a repo marketplace at [`.agents/plugins/marketplace.json`](../.agents/plugins/marketplace.json). OpenAI's plugin docs currently describe public self-serve publishing as "coming soon", so the most reliable install path today is the built-in `skill-installer` against the package directory that already contains the full skill:
 
 ```text
-Use $skill-installer to install https://github.com/HypoxanthineOvO/hypo-workflow/tree/main as skill name hypo-workflow
+Use $skill-installer to install https://github.com/HypoxanthineOvO/hypo-workflow/tree/main/prompt-pipeline as skill name hypo-workflow
 
 # Then restart Codex and verify:
 /hw:help
 ```
 
-This installs the full repo as one self-contained skill so the canonical [`SKILL.md`](./SKILL.md) can keep its existing Progressive Disclosure layout.
+This installs the full `prompt-pipeline/` package as one self-contained skill so the canonical [`SKILL.md`](./SKILL.md) can keep its existing Progressive Disclosure layout.
 
 ### Manual Install
 
@@ -80,10 +80,10 @@ If marketplace-based installation is unavailable:
 
 ```bash
 git clone https://github.com/HypoxanthineOvO/hypo-workflow.git
-claude --plugin-dir ./hypo-workflow
+claude --plugin-dir ./hypo-workflow/prompt-pipeline
 ```
 
-If your local checkout nests the repo under another workspace, point `--plugin-dir` at that nested repo root instead.
+If your local checkout nests the repo under another workspace, point `--plugin-dir` at that nested `prompt-pipeline/` directory instead.
 
 ---
 
@@ -217,17 +217,9 @@ prompt-pipeline/
 
 ├── config.schema.yaml           # Configuration schema
 
-├── .agents/
-
-│   └── plugins/
-
-│       └── marketplace.json     # Codex repo marketplace metadata
-
 ├── .claude-plugin/
 
-│   ├── plugin.json              # Claude Code plugin manifest
-
-│   └── marketplace.json         # Claude Code marketplace metadata
+│   └── plugin.json              # Claude Code plugin manifest
 
 ├── .codex-plugin/
 
@@ -324,6 +316,11 @@ prompt-pipeline/
 └── scenarios/               # System test scenarios (s01-s30)
 
 ```
+
+Repository root distribution metadata lives outside this package directory:
+
+- [`../.claude-plugin/marketplace.json`](../.claude-plugin/marketplace.json)
+- [`../.agents/plugins/marketplace.json`](../.agents/plugins/marketplace.json)
 
 ---
 
