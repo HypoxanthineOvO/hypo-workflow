@@ -15,6 +15,5 @@
     "claude-code",
     "codex"
   ],
-  "skills": "./skills/",
-  "hooks": "./hooks/hooks.json"
+  "skills": "./skills/"
 }
