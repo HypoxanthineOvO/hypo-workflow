@@ -283,6 +283,7 @@ Behavior:
 - load `plan/PLAN-SKILL.md`
 - enter Plan Mode using the Discover-first flow
 - honor `--template <name>` as an initial template hint when present
+- honor `plan.mode=auto|interactive` from config when available
 - default to `/hw:plan:discover` when no explicit sub-phase is given
 - do not start normal pipeline execution yet
 
@@ -299,6 +300,8 @@ Behavior:
 - gather goals, constraints, and stack assumptions
 - write or update `.pipeline/design-spec.md`
 - persist intermediate planning state in `.plan-state/` when available
+- in interactive mode, ask targeted follow-up questions in rounds
+- in auto mode, continue without pausing unless blocked by missing critical information
 
 ### `/hw:plan:decompose`
 
@@ -339,7 +342,8 @@ Behavior:
 - load `plan/PLAN-SKILL.md`
 - summarize generated artifacts
 - include project name, stack, preset, milestone count, test point count, and generated files
-- wait for explicit confirmation to continue into `/hw:start`
+- in interactive mode, wait for explicit confirmation to continue into `/hw:start`
+- in auto mode, treat confirm as a summary checkpoint rather than a hard stop
 
 ### `/hw:plan:review`
 

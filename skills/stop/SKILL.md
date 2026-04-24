@@ -1,0 +1,35 @@
+---
+name: stop
+description: Gracefully stop Hypo-Workflow when the user wants to pause execution without aborting the pipeline.
+---
+
+# /hypo-workflow:stop
+
+Use this skill to pause the current run while preserving resumable state.
+
+## Preconditions
+
+- active unfinished pipeline work exists
+
+## Execution Flow
+
+1. Read `.pipeline/state.yaml` and confirm the current run is unfinished.
+2. Persist current prompt and step state.
+3. Set `pipeline.status=stopped`.
+4. Preserve `current.phase` so a future resume can restore intent cleanly.
+5. Optionally write an intermediate report if the command does not disable report generation.
+6. Append a stop event to `.pipeline/log.yaml`.
+7. Update `.pipeline/PROGRESS.md` to show the paused status.
+
+## Safety Rules
+
+- do not mark the prompt aborted
+- do not discard partial work
+- stop should be resumable, not destructive
+
+## Reference Files
+
+- `references/commands-spec.md` — stop behavior and flags
+- `references/state-contract.md` — stopped state semantics
+- `references/progress-spec.md` — progress summary updates
+- `SKILL.md` — full runtime reference

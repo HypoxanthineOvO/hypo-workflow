@@ -53,6 +53,33 @@ extract_section() {
   ' "$file" | trim
 }
 
+extract_state_current() {
+  local file="$1"
+  local key="$2"
+  awk -v key="$key" '
+    /^current:/ { in_section=1; next }
+    in_section && /^[^[:space:]]/ { in_section=0 }
+    in_section && match($0, "^[[:space:]]*" key ":[[:space:]]*(.*)$", m) {
+      print m[1]
+      exit
+    }
+  ' "$file" | trim
+}
+
+count_unfinished_milestones() {
+  local file="$1"
+  awk '
+    /^milestones:/ { in_ms=1; next }
+    in_ms && /^[^[:space:]]/ { in_ms=0 }
+    in_ms && match($0, /^[[:space:]]*status:[[:space:]]*(.*)$/, m) {
+      status=m[1]
+      gsub(/^[[:space:]"]+|[[:space:]"]+$/, "", status)
+      if (status != "done" && status != "skipped") count++
+    }
+    END { print count + 0 }
+  ' "$file"
+}
+
 file_mtime() {
   local file="$1"
   if stat -c %Y "$file" >/dev/null 2>&1; then
@@ -124,6 +151,33 @@ pipeline_status="$(printf '%s\n' "$summary" | sed -n 's/^Status: //p' | head -n1
 if [[ "$pipeline_status" != "running" ]]; then
   emit_empty
   exit 0
+fi
+
+phase="$(extract_state_current "$state_file" phase)"
+plan_mode="interactive"
+if [[ -f "$config_file" ]]; then
+  detected_plan_mode="$(extract_section "$config_file" plan mode)"
+  if [[ -n "$detected_plan_mode" ]]; then
+    plan_mode="$detected_plan_mode"
+  fi
+fi
+
+if [[ "$phase" == plan_* && "$plan_mode" == "interactive" ]]; then
+  emit_empty
+  exit 0
+fi
+
+if [[ "$phase" == lifecycle_* || "$phase" == "completed" ]]; then
+  emit_empty
+  exit 0
+fi
+
+if [[ "$phase" == "executing" ]]; then
+  unfinished_milestones="$(count_unfinished_milestones "$state_file")"
+  if [[ "$unfinished_milestones" == "0" ]]; then
+    emit_empty
+    exit 0
+  fi
 fi
 
 now_epoch="$(date +%s)"

@@ -1,6 +1,6 @@
 ---
 name: hypo-workflow-plan
-version: 6.1.0
+version: 6.2.0
 description: Plan Mode sub-skill for Hypo-Workflow. Use this file when the user invokes `/hw:plan`, `/hw:plan:*`, `/hw:plan:review`, or the compatibility alias `/hw:review`.
 ---
 
@@ -32,6 +32,18 @@ Load planning resources in layers:
 3. `plan/templates/` for reusable scenario presets
 4. `references/commands-spec.md` and `references/plan-review-spec.md` for detailed semantics
 
+## Plan Modes
+
+Read `plan.mode` from `.pipeline/config.yaml` when present.
+
+- `interactive` is the default:
+  - Discover asks targeted questions in rounds
+  - the user participates at checkpoints
+  - Confirm must wait for explicit approval
+- `auto` is unattended:
+  - Claude completes P1-P4 without pausing unless blocked by missing critical information
+  - Confirm is a summary checkpoint, not a hard gate
+
 ## Phase Skeleton
 
 ### Discover
@@ -53,6 +65,13 @@ Discover should use a two-pass discussion shape:
    - testing expectations
    - integration boundaries
    - migration or compatibility constraints
+
+Interactive questioning rules:
+
+- ask 2-3 targeted questions per round
+- move from broad framing to detailed drilling
+- summarize what was learned after each round
+- do not leave Discover until the user signals that the requirement interview is sufficient
 
 Repository scan rules:
 
@@ -143,7 +162,7 @@ Confirm summary must include:
 - generated file list
 - whether the plan is greenfield or append mode
 
-Do not auto-start execution from Confirm. Wait for an explicit `/hw:start`.
+Interactive mode must wait for explicit `/hw:start`. Auto mode may treat Confirm as a pass-through summary and continue.
 
 ### Review
 

@@ -10,8 +10,8 @@
     {
       "name": "hypo-workflow",
       "source": "./",
-      "version": "6.1.0",
-      "description": "Serialized prompt workflow for /hw:init, /hw:plan, /hw:start, /hw:audit, /hw:debug, and /hw:release.",
+      "version": "6.2.0",
+      "description": "Serialized prompt workflow with 20 native skills covering init, planning, execution, debugging, auditing, and release.",
       "author": {
         "name": "Hypoxanthine",
         "url": "https://github.com/HypoxanthineOvO"

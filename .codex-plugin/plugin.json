@@ -1,7 +1,7 @@
 {
   "name": "hypo-workflow",
-  "version": "6.1.0",
-  "description": "Serialized prompt workflow for planning, execution, auditing, debugging, and release with /hw:* commands.",
+  "version": "6.2.0",
+  "description": "Serialized prompt workflow with planning, execution, auditing, debugging, release automation, and native command skills.",
   "author": {
     "name": "Hypoxanthine",
     "url": "https://github.com/HypoxanthineOvO"
@@ -13,14 +13,16 @@
     "workflow",
     "planning",
     "tdd",
+    "prompt-engineering",
+    "ai-agent",
     "debugging",
     "release"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Hypo-Workflow",
-    "shortDescription": "Plan-to-release workflow automation for Claude Code and Codex.",
-    "longDescription": "Hypo-Workflow packages the core workflow engine and /hw lifecycle commands so agents can initialize, plan, execute, audit, debug, and release work from a local .pipeline workspace.",
+    "shortDescription": "Plan-to-release workflow automation with native skills and progress tracking.",
+    "longDescription": "Hypo-Workflow packages a complete planning and execution workflow with native skills, smart stop hooks, dual plan modes, progress summaries, and serial subagent orchestration from a local .pipeline workspace.",
     "developerName": "Hypoxanthine",
     "category": "Productivity",
     "websiteURL": "https://github.com/HypoxanthineOvO/hypo-workflow"

@@ -1,7 +1,7 @@
 {
   "name": "hypo-workflow",
-  "version": "6.1.0",
-  "description": "Serialized prompt workflow for planning, execution, auditing, debugging, and release with /hw:* commands.",
+  "version": "6.2.0",
+  "description": "Serialized prompt workflow with 20 native Claude skills spanning plan, execute, review, debug, and release.",
   "author": {
     "name": "Hypoxanthine",
     "url": "https://github.com/HypoxanthineOvO"
@@ -12,6 +12,8 @@
     "workflow",
     "planning",
     "tdd",
+    "prompt-engineering",
+    "ai-agent",
     "claude-code",
     "codex"
   ],

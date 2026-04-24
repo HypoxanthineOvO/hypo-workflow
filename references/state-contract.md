@@ -13,11 +13,13 @@ pipeline:
   started: null
   finished: null
 current:
+  phase: idle | plan_discover | plan_decompose | plan_generate | plan_confirm | executing | lifecycle_init | lifecycle_check | lifecycle_audit | lifecycle_release | lifecycle_debug | completed
   prompt_index: 0
   prompt_file: null
   prompt_name: null
   step: null
   step_index: 0
+milestones: []
 prompt_state:
   started_at: null
   updated_at: null
@@ -29,6 +31,22 @@ prompt_state:
 history:
   completed_prompts: []
 ```
+
+## Milestone Record Fields
+
+Each `milestones[]` item may contain:
+
+- `name`
+- `status`
+- `deferred_reason`
+
+Allowed milestone status values:
+
+- `done`
+- `in_progress`
+- `deferred`
+- `failed`
+- `skipped`
 
 ## Step Record Fields
 
@@ -77,11 +95,13 @@ Read `state.yaml` at these moments:
 
 - `current.step` must always point to the next runnable or currently running step.
 - `current.step_index` must match the index of `current.step` inside `prompt_state.steps`.
+- `current.phase` should reflect whether the system is in planning, execution, lifecycle, or completion state.
 - `pipeline.prompts_completed` must equal the number of successful prompt entries in `history.completed_prompts`.
 - `prompt_state.diff_score` drives the final decision gate.
 - `prompt_state.code_quality` informs the `code_quality` evaluation check.
 - `executor=subagent` implies `subagent_tool` is not null and `subagent_result` should exist unless parsing failed.
 - `status=skipped` should carry a `reason`.
+- `milestones[].status=deferred` should carry `deferred_reason`.
 - `pipeline.status=stopped` means the run is intentionally paused and resumable.
 - `prompt_state.result=stopped` means the current prompt was paused mid-flight and should resume from `current.step`.
 - prompt-level `result=skipped` should not increment `pipeline.prompts_completed`.
@@ -123,6 +143,16 @@ Added:
 - prompt-level `result=stopped`
 - prompt-level `result=skipped`
 - prompt skip / graceful stop write timing
+
+### V6.2
+
+Added:
+
+- `current.phase`
+- milestone-level tracking through `milestones[]`
+- `milestones[].status=deferred`
+- `milestones[].deferred_reason`
+- explicit separation between machine-readable `log.yaml` and human-readable `PROGRESS.md`
 
 ## V4 新增字段
 
@@ -187,11 +217,19 @@ pipeline:
   started: 2026-04-22T10:00:00Z
   finished: null
 current:
+  phase: executing
   prompt_index: 1
   prompt_file: 01-core-crud.md
   prompt_name: core-crud
   step: review_code
   step_index: 5
+milestones:
+  - name: 00-scaffold
+    status: done
+    deferred_reason: null
+  - name: 01-core-crud
+    status: in_progress
+    deferred_reason: null
 prompt_state:
   started_at: 2026-04-22T10:10:00Z
   updated_at: 2026-04-22T10:18:00Z

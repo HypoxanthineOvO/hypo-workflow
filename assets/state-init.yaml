@@ -4,13 +4,20 @@
 pipeline:
   name: ""
   status: idle
+  prompts_total: 0
+  prompts_completed: 0
   started: null
   finished: null
 
 current:
-  prompt: null
+  phase: idle
+  prompt_index: 0
   prompt_file: null
+  prompt_name: null
   step: null
   step_index: 0
 
-history: []
+milestones: []
+
+history:
+  completed_prompts: []

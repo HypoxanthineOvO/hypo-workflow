@@ -6,7 +6,7 @@
 
 TDD Pipeline · Self-Review · Interrupt Recovery · Multi-Dimensional Evaluation
 
-[![Version](https://img.shields.io/badge/version-6.1.0-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-6.2.0-blue)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex-purple)](#platform-support)
 
@@ -31,8 +31,8 @@ It ships as a **SKILL.md** file — not a service, not a CLI tool. Any AI agent 
 | Feature | Description |
 |---------|-------------|
 | 🔄 **TDD Pipeline** | Built-in test-driven sub-steps: write tests → review → red → implement → green → review code |
-| 🧭 **Slash Commands** | 20 canonical `/hw:*` commands covering Pipeline / Plan / Lifecycle / Utility surfaces |
-| 🗺️ **Plan Mode** | `/hw:plan` sub-skill with discover / decompose / generate / confirm / review phases |
+| 🧭 **Native Skills** | 20 native Claude Code skills exposed as `/hypo-workflow:*` plus `/hw:*` compatibility for Codex |
+| 🗺️ **Plan Mode** | Auto and Interactive planning modes with discover / decompose / generate / confirm / review phases |
 | 🧩 **Notion Adapter** | Read prompts from Notion and/or write reports back to Notion with graceful degradation |
 | ⏸️ **Interrupt Recovery** | `state.yaml` tracks progress to the sub-step level — resume exactly where you left off |
 | 🤖 **Subagent Delegation** | Offload code reviews to a subagent (Claude ↔ Codex), with automatic fallback |
@@ -40,6 +40,7 @@ It ships as a **SKILL.md** file — not a service, not a CLI tool. Any AI agent 
 | 📊 **Multi-Dim Evaluation** | 5 scoring dimensions + adaptive threshold + architecture drift detection |
 | 🔁 **Lifecycle Closure** | `/hw:init` → `/hw:check` → `/hw:audit` → `/hw:debug` → `/hw:release` completes the project loop |
 | 📝 **Unified Logging** | `.pipeline/log.yaml` records milestones, fixes, audits, debug sessions, plan reviews, and releases |
+| 📈 **Progress Summary** | `.pipeline/PROGRESS.md` gives a human-readable milestone and step summary |
 | 📦 **Plugin Ready** | Ships official `.claude-plugin` and `.codex-plugin` manifests plus marketplace metadata |
 | 📁 **Progressive Disclosure** | 3-layer loading: metadata → SKILL.md → references/scripts/assets (on demand) |
 
@@ -56,7 +57,7 @@ In Claude Code, add the repository marketplace and install the plugin:
 /plugin install hypo-workflow@hypoxanthine-hypo-workflow
 
 # Verify:
-/hw:help
+/hypo-workflow:help
 ```
 
 This repository publishes its Claude marketplace metadata from the repo root at [`.claude-plugin/marketplace.json`](./.claude-plugin/marketplace.json).
@@ -94,8 +95,7 @@ If your local checkout nests the repo under another workspace, point `--plugin-d
 Use one of the installation methods above, then open a project where you want to run Hypo-Workflow.
 
 ```
-/hw:help
-
+/hypo-workflow:help
 ```
 
 ### 2. Initialize a Pipeline
@@ -305,11 +305,7 @@ hypo-workflow/
 
 │   └── hypo-todo-adaptive/      # Adaptive threshold example
 
-├── skills/
-
-│   └── hypo-workflow/
-
-│       └── [SKILL.md](http://SKILL.md)            # Plugin wrapper entry point
+├── skills/                    # 20 native Claude Code command skills
 
 └── tests/
 
@@ -349,6 +345,11 @@ Repository root distribution metadata is included directly in this flattened lay
 | Output | `local`, `notion` |
 
 Notion source and output are independently configurable, so mixed mode is supported.
+
+### Native Skills
+
+Claude Code users should use `/hypo-workflow:<command>`.
+Codex users keep the compatible `/hw:*` path via the root `SKILL.md`.
 
 ### Slash Commands
 
@@ -396,9 +397,15 @@ Compatibility note: `/hw:review` now shows a migration warning and redirects use
 
 ### Lifecycle Logging
 
-- `.pipeline/log.yaml` is the V6 lifecycle ledger
+- `.pipeline/log.yaml` is the lifecycle ledger
 - `/hw:log --all`, `--type <type>`, and `--since <milestone>` filter that ledger
 - legacy `log.md` remains the step trace for backward compatibility
+
+### Progress Summary
+
+- `.pipeline/PROGRESS.md` is the human-readable companion to `log.yaml`
+- it tracks current milestone, recent activity, and deferred work
+- it is updated during execution and failure triage
 
 ### Evaluation
 
@@ -646,6 +653,7 @@ Hooks act as a passive safety net — they don’t drive the pipeline, but preve
 | V5.1 | Notion source/output adapters + mixed mode |
 | V6 | Lifecycle commands, unified `log.yaml`, `/hw:plan:review` migration, full 20-command namespace |
 | V6.1 | Claude marketplace distribution, Codex plugin metadata, and official installation docs |
+| V6.2 | 20 native skills, smart stop hooks, plan auto/interactive modes, PROGRESS.md, and failure triage |
 
 ---
 
