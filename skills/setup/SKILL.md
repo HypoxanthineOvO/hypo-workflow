@@ -1,6 +1,6 @@
 ---
 name: setup
-description: Configure Hypo-Workflow itself when the user is installing the plugin for the first time or wants to choose plan mode, execution mode, subagent backend, and dashboard preferences.
+description: Configure Hypo-Workflow global defaults for agent platform, execution mode, subagents, plan mode, and dashboard.
 ---
 
 # /hypo-workflow:setup
