@@ -37,6 +37,7 @@ Use this reference for `/hw:init`, which bootstraps or refreshes a `.pipeline/` 
 
 - generate an architecture baseline
 - generate `config.yaml` with project name, language, preset, and test command hints
+- keep agent platform, default execution mode, subagent provider, dashboard defaults, and plan defaults in `~/.hypo-workflow/config.yaml` unless the project needs an explicit override
 - optionally suggest an initial development direction, but do not decompose milestones here
 
 ## Architecture Output Modes

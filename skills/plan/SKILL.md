@@ -24,17 +24,19 @@ Use this skill for the full P1-P4 planning flow.
 
 ## Execution Flow
 
-1. Read `plan.mode` and `plan.interaction_depth` from `.pipeline/config.yaml` when present.
-2. Run P1 Discover:
+1. Read `~/.hypo-workflow/config.yaml` if present.
+2. Read `plan.mode` and `plan.interaction_depth` from `.pipeline/config.yaml` when present.
+3. Resolve plan mode as project `plan.mode` > global `plan.default_mode` > `interactive`.
+4. Run P1 Discover:
    - collect goals, constraints, stack, users, and architecture expectations
-3. Run P2 Decompose:
+5. Run P2 Decompose:
    - split work into reviewable milestones with validation points
-4. Run P3 Generate:
+6. Run P3 Generate:
    - generate `.pipeline/` artifacts and architecture baseline
-5. Run P4 Confirm:
+7. Run P4 Confirm:
    - interactive mode waits for user confirmation
    - auto mode summarizes and moves on
-6. Set `current.phase` to the matching planning phase during each stage.
+8. Set `current.phase` to the matching planning phase during each stage.
 
 ## Interactive Checkpoints
 
@@ -46,4 +48,5 @@ Use this skill for the full P1-P4 planning flow.
 
 - `plan/PLAN-SKILL.md` — detailed P1-P4 planning system
 - `references/commands-spec.md` — command routing semantics
+- `references/config-spec.md` — plan-mode fallback rules
 - `SKILL.md` — overall pipeline context

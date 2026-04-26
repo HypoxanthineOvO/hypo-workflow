@@ -60,6 +60,8 @@ Supported flags:
 Behavior:
 
 - read `.pipeline/config.yaml`
+- read `~/.hypo-workflow/config.yaml` if present
+- resolve effective config as project > global > defaults before selecting execution mode or subagent provider
 - validate config before mutating state
 - if `--clean` is present, treat the action as a restart and reinitialize from `assets/state-init.yaml`
 - if unfinished state exists and `--clean` is absent, resume that state instead of silently discarding it
@@ -99,6 +101,7 @@ Behavior:
 
 - prefer `scripts/state-summary.sh`
 - if the script is unavailable, fall back to direct config/state inspection
+- include the effective execution mode when config files are available
 - do not mutate `state.yaml`, `log.md`, `log.yaml`, or reports
 
 ### `/hw:skip`
@@ -206,7 +209,11 @@ Supported flags:
 Behavior:
 
 - run the plugin-level setup wizard
-- detect environment, execution preferences, and dashboard preferences
+- create `~/.hypo-workflow/` if it is missing
+- create or update `~/.hypo-workflow/config.yaml`
+- detect or confirm `agent.platform` as `claude-code` or `codex`
+- configure `execution.default_mode`, `subagent.provider`, provider model settings, `dashboard.enabled`, `dashboard.port`, and `plan.default_mode`
+- preserve `created` on existing configs and update `updated`
 - write plugin-level configuration outside the project pipeline state
 
 ### `/hw:dashboard`
@@ -218,6 +225,7 @@ Supported flags:
 Behavior:
 
 - ensure dashboard dependencies are installed
+- resolve preferred port as project `dashboard.port` > global `dashboard.port` > `7700`
 - start or reuse the background dashboard server
 - verify `/health`
 - open the browser when possible
@@ -310,7 +318,7 @@ Behavior:
 - load `plan/PLAN-SKILL.md`
 - enter Plan Mode using the Discover-first flow
 - honor `--template <name>` as an initial template hint when present
-- honor `plan.mode=auto|interactive` from config when available
+- honor `plan.mode=auto|interactive` from project config, falling back to global `plan.default_mode` when available
 - default to `/hw:plan:discover` when no explicit sub-phase is given
 - do not start normal pipeline execution yet
 

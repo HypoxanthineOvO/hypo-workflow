@@ -155,6 +155,13 @@ fi
 
 phase="$(extract_state_current "$state_file" phase)"
 plan_mode="interactive"
+global_config="${HOME:-}/.hypo-workflow/config.yaml"
+if [[ -n "${HOME:-}" && -f "$global_config" ]]; then
+  detected_global_plan_mode="$(extract_section "$global_config" plan default_mode)"
+  if [[ -n "$detected_global_plan_mode" ]]; then
+    plan_mode="$detected_global_plan_mode"
+  fi
+fi
 if [[ -f "$config_file" ]]; then
   detected_plan_mode="$(extract_section "$config_file" plan mode)"
   if [[ -n "$detected_plan_mode" ]]; then

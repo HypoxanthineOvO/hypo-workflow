@@ -6,7 +6,7 @@ description: Run a serialized prompt execution pipeline from a local `.pipeline/
 
 # Hypo-Workflow v7.0.0
 
-> **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 20 个可用指令。
+> **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 22 个可用指令。
 >
 > **Codex 用户**：本文件是完整的 Skill 入口，继续使用 `/hw:*` 指令。
 
@@ -34,7 +34,7 @@ description: Run a serialized prompt execution pipeline from a local `.pipeline/
 | `/hw:help` | Show command help, grouped quick reference, or per-command usage |
 | `/hw:reset` | Reset pipeline runtime state with safe, full, or hard modes |
 | `/hw:log` | Read the unified lifecycle log from `.pipeline/log.yaml` |
-| `/hw:setup` | Run the plugin-level setup wizard for environment, execution, subagent, and dashboard defaults |
+| `/hw:setup` | Create or update `~/.hypo-workflow/config.yaml` for environment, execution, subagent, plan, and dashboard defaults |
 | `/hw:dashboard` | Start or reopen the Hypo-Workflow WebUI dashboard server |
 
 When the user types any `/hw:*` command, execute the corresponding action.
@@ -94,21 +94,22 @@ load `plan/PLAN-SKILL.md` before executing the command-specific behavior.
 
 ## First Actions
 
-1. Read `.pipeline/config.yaml`.
-2. Validate it against [`config.schema.yaml`](./config.schema.yaml).
-3. When shell access is available, prefer [`scripts/validate-config.sh`](./scripts/validate-config.sh) for a quick structural pre-check before deeper reasoning.
-4. Resolve runtime paths from config. Never hardcode prompts, reports, state, or legacy step-log paths if config overrides them.
-5. If `execution` is missing, assume:
+1. Read `~/.hypo-workflow/config.yaml` if present.
+2. Read `.pipeline/config.yaml`.
+3. Validate the project config against [`config.schema.yaml`](./config.schema.yaml).
+4. When shell access is available, prefer [`scripts/validate-config.sh`](./scripts/validate-config.sh) for a quick structural pre-check before deeper reasoning.
+5. Resolve effective config as project > global > defaults. Never hardcode prompts, reports, state, or legacy step-log paths if config overrides them.
+6. If `execution` is still missing after resolution, assume:
    - `mode=self`
    - `subagent_tool=auto`
    - `steps.preset=tdd`
-6. If `platform` is missing, assume `auto`.
-7. Normalize step overrides:
+7. If `platform` is still missing after resolution, assume `auto`.
+8. Normalize step overrides:
    - accept top-level `step_overrides`
    - also accept legacy `execution.step_overrides`
    - if both exist, top-level wins
-8. Read `.pipeline/state.yaml` if it exists. If not, initialize from [`assets/state-init.yaml`](./assets/state-init.yaml) and then fill in the prompt-specific fields.
-9. Read `.pipeline/log.yaml` when lifecycle history, milestone status, fixes, audits, release records, or debug context matters.
+9. Read `.pipeline/state.yaml` if it exists. If not, initialize from [`assets/state-init.yaml`](./assets/state-init.yaml) and then fill in the prompt-specific fields.
+10. Read `.pipeline/log.yaml` when lifecycle history, milestone status, fixes, audits, release records, or debug context matters.
 
 ## Runtime Resources
 
@@ -132,6 +133,7 @@ Use these bundled files when relevant:
 - [`references/plan-review-spec.md`](./references/plan-review-spec.md)
 - [`references/release-spec.md`](./references/release-spec.md)
 - [`references/progress-spec.md`](./references/progress-spec.md)
+- [`references/config-spec.md`](./references/config-spec.md)
 - [`references/subagent-spec.md`](./references/subagent-spec.md)
 - [`references/state-contract.md`](./references/state-contract.md)
 - [`references/platform-claude.md`](./references/platform-claude.md)
@@ -168,7 +170,7 @@ Handle these commands directly:
 - `/hw:log`
   Read `.pipeline/log.yaml`, show the latest 10 entries by default, and support `--all`, `--type <type>`, and `--since <milestone>` filters. If the file is missing, say `暂无日志，执行 Pipeline 后自动生成`.
 - `/hw:setup`
-  Configure the plugin itself: detect environment, choose plan mode, choose execution/subagent mode, and decide whether dashboard support should be enabled.
+  Configure the plugin itself: create or update `~/.hypo-workflow/config.yaml`, detect environment, choose plan mode, choose execution/subagent mode, and decide whether dashboard support should be enabled.
 - `/hw:dashboard`
   Launch the background WebUI server, verify `/health`, and open the browser to the live dashboard.
 - `/hw:check`
@@ -197,6 +199,27 @@ Slash commands are exact and take precedence over fuzzy natural-language matchin
 If the user command is ambiguous, prefer a safe resume and say which prompt and step you are about to run.
 
 ## Config Model
+
+Configuration has two layers:
+
+- global config: `~/.hypo-workflow/config.yaml`, created by `/hypo-workflow:setup`
+- project config: `.pipeline/config.yaml`, created by `/hypo-workflow:init` or `/hypo-workflow:plan-generate`
+
+Resolve effective values in this order:
+
+1. project config
+2. global config
+3. built-in defaults
+
+Key fallbacks:
+
+- `execution.mode` falls back to global `execution.default_mode`, then `self`
+- `execution.subagent_tool` falls back to global `subagent.provider`, then `auto`
+- `plan.mode` falls back to global `plan.default_mode`, then `interactive`
+- `dashboard.enabled` falls back to global `dashboard.enabled`, then `false`
+- `dashboard.port` falls back to global `dashboard.port`, then `7700`
+
+Read [`references/config-spec.md`](./references/config-spec.md) when resolving config precedence or field mapping.
 
 Expected top-level config groups:
 
@@ -280,6 +303,7 @@ The dashboard is an optional WebUI for `.pipeline/` state, config, progress, and
 - start it manually through `/hypo-workflow:dashboard` in Claude Code or `/hw:dashboard` in Codex compatibility mode
 - treat it as a background service that must not block normal agent execution
 - keep its configuration under the `dashboard` config block and plugin-level setup defaults
+- resolve the preferred port as project `dashboard.port` > global `dashboard.port` > `7700`
 
 ## Step Presets
 
@@ -296,8 +320,8 @@ Apply normalized step overrides after preset expansion:
 
 - skip steps whose override sets `enabled: false`
 - honor `strict`
-- honor `reviewer`
-- honor `subagent_tool`
+- honor `executor` or `reviewer`
+- honor `subagent_tool` or `subagent`
 
 > 📎 详细步骤规范见 `references/tdd-spec.md`
 
@@ -306,7 +330,8 @@ Apply normalized step overrides after preset expansion:
 Resolve platform in this order:
 
 1. config `platform`
-2. runtime auto-detection
+2. global `agent.platform`
+3. runtime auto-detection
 
 Platform guidance:
 
@@ -549,13 +574,13 @@ Inline validation means:
 Delegation is allowed only when:
 
 - `execution.mode=subagent`
-- the normalized step override resolves `reviewer=subagent`
+- the normalized step override resolves `executor=subagent` or `reviewer=subagent`
 
 Delegation flow:
 
 1. choose the correct subagent template
 2. assemble prompt context from the active prompt, changed files, and relevant tests
-3. resolve the actual tool from step override, execution default, and platform
+3. resolve the actual tool from step override, project execution default, global subagent provider, and platform
 4. try the delegated execution
 5. parse JSON output
 6. merge the structured result back into state

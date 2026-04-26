@@ -34,7 +34,7 @@ Load planning resources in layers:
 
 ## Plan Modes
 
-Read `plan.mode` from `.pipeline/config.yaml` when present.
+Read `plan.mode` from `.pipeline/config.yaml` when present. If it is missing, fall back to `~/.hypo-workflow/config.yaml` `plan.default_mode`, then `interactive`.
 
 - `interactive` is the default:
   - Discover asks targeted questions in rounds
@@ -142,6 +142,7 @@ Preset selection rules:
 Required Generate outputs:
 
 - `.pipeline/config.yaml`
+- `~/.hypo-workflow/config.yaml`
 - `.pipeline/prompts/*.md`
 - `.pipeline/architecture.md`
 - `.plan-state/generate.yaml`

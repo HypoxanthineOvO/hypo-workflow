@@ -13,15 +13,18 @@ Override precedence:
 
 1. top-level `step_overrides.<step_name>`
 2. legacy `execution.step_overrides.<step_name>`
-3. preset defaults
+3. global defaults from `~/.hypo-workflow/config.yaml`
+4. preset defaults
 
 ## Tool Selection
 
 Effective `subagent_tool` resolution:
 
 1. step override `subagent_tool`
-2. `execution.subagent_tool`
-3. default `auto`
+2. step override `subagent`
+3. `execution.subagent_tool`
+4. global `subagent.provider`
+5. default `auto`
 
 `auto` means:
 
@@ -37,6 +40,15 @@ Explicit modes:
   Prefer `codex exec`
 
 ## Prompt Assembly
+
+Step override executor fields:
+
+- prefer `executor` when present
+- otherwise accept legacy `reviewer`
+- `executor=subagent` and `reviewer=subagent` both delegate the step
+- when both fields appear, `executor` wins
+
+Mixed-mode examples may use `subagent: codex` or `subagent: claude`; normalize that alias to `subagent_tool`.
 
 Subagent prompts should include:
 

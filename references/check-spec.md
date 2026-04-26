@@ -11,7 +11,7 @@ Use this reference for `/hw:check`, the quick health probe for a `.pipeline/` wo
 
 | Check | What to inspect | Pass condition |
 |---|---|---|
-| Config | `config.yaml` exists, parses, and matches `config.schema.yaml` | parse succeeds and schema validation passes |
+| Config | `.pipeline/config.yaml` exists, parses, and matches `config.schema.yaml`; `~/.hypo-workflow/config.yaml` parses when present | project parse succeeds and schema validation passes; global config is either absent or readable |
 | Pipeline | `.pipeline/` directory completeness | `config.yaml` exists and `prompts/` is non-empty |
 | State | `state.yaml` consistency | referenced prompt exists and `step_index` is valid |
 | Prompts | prompt files referenced by state | each file exists and is non-empty |
@@ -51,6 +51,7 @@ Status meanings:
 ## Action Guidance
 
 - Config failure: fix `config.yaml` first
+- Global config warning: rerun `/hypo-workflow:setup` or edit `~/.hypo-workflow/config.yaml`
 - Pipeline failure: run `/hw:init`
 - State failure: repair or reset state before `/hw:resume`
 - Prompt failure: recreate or restore prompt files

@@ -13,17 +13,20 @@ Use this skill to inspect pipeline progress only.
 
 ## Execution Flow
 
-1. Read `.pipeline/config.yaml` if present.
-2. Read `.pipeline/state.yaml` if present.
-3. Prefer `scripts/state-summary.sh` for a quick summary when shell access is available.
-4. Report:
+1. Read `~/.hypo-workflow/config.yaml` if present.
+2. Read `.pipeline/config.yaml` if present.
+3. Read `.pipeline/state.yaml` if present.
+4. Resolve effective defaults as project > global > defaults without mutating either config file.
+5. Prefer `scripts/state-summary.sh` for a quick summary when shell access is available.
+6. Report:
    - pipeline name
    - overall status
    - current milestone or prompt
    - current step and step index
+   - effective execution mode and subagent provider
    - latest completed milestone
    - deferred items if any
-5. If `.pipeline/PROGRESS.md` exists, use it as a human-facing summary source, but do not rewrite it during status inspection.
+7. If `.pipeline/PROGRESS.md` exists, use it as a human-facing summary source, but do not rewrite it during status inspection.
 
 ## Safety Rules
 
@@ -36,4 +39,5 @@ Use this skill to inspect pipeline progress only.
 - `references/state-contract.md` — state layout
 - `references/progress-spec.md` — progress summary layout
 - `references/commands-spec.md` — status command semantics
+- `references/config-spec.md` — config priority and fallback rules
 - `SKILL.md` — broader system reference if needed

@@ -15,14 +15,19 @@ Use this skill to start execution from a local `.pipeline/` workspace. This is t
 
 ## Execution Flow
 
-1. Read `.pipeline/config.yaml`, normalize defaults, and validate it against `config.schema.yaml`.
-2. Read `.pipeline/state.yaml` if present; otherwise initialize state from `assets/state-init.yaml`.
-3. Set `current.phase=executing` before running milestones.
-4. Treat Claude as the orchestrator:
+1. Read `~/.hypo-workflow/config.yaml` if present.
+2. Read `.pipeline/config.yaml`, normalize defaults, and validate it against `config.schema.yaml`.
+3. Resolve effective config as project > global > defaults:
+   - `execution.mode` falls back to global `execution.default_mode`, then `self`
+   - `execution.subagent_tool` falls back to global `subagent.provider`, then `auto`
+   - `dashboard.*` and `plan.*` use the same priority when relevant
+4. Read `.pipeline/state.yaml` if present; otherwise initialize state from `assets/state-init.yaml`.
+5. Set `current.phase=executing` before running milestones.
+6. Treat Claude as the orchestrator:
    - Claude plans the current step
    - Claude delegates concrete sub-work to serial subagent tasks when appropriate
    - Claude verifies results, updates state, logging, and progress artifacts
-5. Execute the active milestone serially:
+7. Execute the active milestone serially:
    - `write_tests`
    - `review_tests`
    - `run_tests_red`
@@ -30,16 +35,16 @@ Use this skill to start execution from a local `.pipeline/` workspace. This is t
    - `run_tests_green`
    - `review_code`
    - report and commit work if the prompt requires it
-6. After every meaningful step, update:
+8. After every meaningful step, update:
    - `.pipeline/state.yaml`
    - `.pipeline/log.yaml`
    - `.pipeline/PROGRESS.md`
-7. On failure, Claude must choose one of:
+9. On failure, Claude must choose one of:
    - `retry`: revise instructions and rerun the failed step
    - `deferred`: mark the milestone deferred if downstream work can continue safely
    - `stop`: stop and surface the blocking reason to the user
-8. Keep moving automatically between milestones while unfinished work remains.
-9. Only allow the turn to end naturally when all milestones are complete or Claude has explicitly chosen the `stop` outcome.
+10. Keep moving automatically between milestones while unfinished work remains.
+11. Only allow the turn to end naturally when all milestones are complete or Claude has explicitly chosen the `stop` outcome.
 
 ## Failure Handling
 
@@ -60,4 +65,5 @@ Use this skill to start execution from a local `.pipeline/` workspace. This is t
 - `references/state-contract.md` — required state fields, including `current.phase`
 - `references/progress-spec.md` — `PROGRESS.md` format and update timing
 - `references/commands-spec.md` — exact command semantics
+- `references/config-spec.md` — global/project config fallback rules
 - `SKILL.md` — full system reference if broader pipeline context is needed

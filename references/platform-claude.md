@@ -84,6 +84,9 @@ Typical flow:
 1. place the skill directory in the repository
 2. point Claude Code at `.claude-plugin/plugin.json`
 3. verify that `SKILL.md` resolves through the plugin manifest
+4. run `/hypo-workflow:setup` to create `~/.hypo-workflow/config.yaml`
+
+To use Codex for delegated steps, install `@openai/codex`, configure `OPENAI_API_KEY`, and set global `subagent.provider=codex` through setup.
 
 ## Subagent Paths
 

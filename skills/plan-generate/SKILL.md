@@ -13,17 +13,18 @@ Use this skill for P3 Generate only.
 
 ## Execution Flow
 
-1. Generate `.pipeline/config.yaml`.
-2. Generate `.pipeline/prompts/*.md`.
-3. Generate architecture baseline files.
-4. Before writing each prompt, create a detailed implementation plan containing:
+1. Read `~/.hypo-workflow/config.yaml` if present.
+2. Generate `.pipeline/config.yaml` with project-specific values and only the overrides that should beat global defaults.
+3. Generate `.pipeline/prompts/*.md`.
+4. Generate architecture baseline files.
+5. Before writing each prompt, create a detailed implementation plan containing:
    - ordered steps
    - dependencies
    - verification points
    - test spec
    - constraints
-5. Convert that implementation plan into the final prompt file.
-6. Detect append mode and preserve already executed numbering.
+6. Convert that implementation plan into the final prompt file.
+7. Detect append mode and preserve already executed numbering.
 
 ## Interactive Behavior
 
@@ -34,4 +35,5 @@ Use this skill for P3 Generate only.
 
 - `plan/PLAN-SKILL.md` — Generate phase behavior
 - `references/commands-spec.md` — command semantics
+- `references/config-spec.md` — project/global config split
 - `SKILL.md` — full system context

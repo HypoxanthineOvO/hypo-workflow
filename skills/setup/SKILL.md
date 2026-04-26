@@ -5,79 +5,166 @@ description: Configure Hypo-Workflow global defaults for agent platform, executi
 
 # /hypo-workflow:setup
 
-Use this skill as the plugin-level setup wizard. It configures Hypo-Workflow itself, not a specific project pipeline.
+Use this skill as the plugin-level setup wizard. It configures Hypo-Workflow itself, not a project-local `.pipeline/` workspace.
 
-## What This Skill Configures
+## Configuration Target
 
-- environment detection:
-  - Claude Code
-  - Codex
-  - manual override when auto-detection is wrong
-- planning defaults:
-  - `plan.mode`
-  - `plan.interaction_depth`
-- execution defaults:
-  - `execution.mode`
-  - subagent backend (`codex` or `claude`) when subagent mode is chosen
-- dashboard defaults:
-  - whether the WebUI is enabled
-  - whether dependencies should be installed
-  - whether dashboard auto-start is preferred
+Always use the global file:
 
-## Configuration File Location
+- directory: `~/.hypo-workflow/`
+- config file: `~/.hypo-workflow/config.yaml`
 
-- project-local plugin install:
-  - write `.hypo-workflow-config.yaml` in the project root
-- global plugin install:
-  - write `~/.hypo-workflow/config.yaml`
+Do not write `.pipeline/config.yaml` from setup. Project-local configuration belongs to `/hypo-workflow:init` or `/hypo-workflow:plan-generate`.
 
-Choose the location based on where the plugin is installed.
+## Config Priority
+
+When another skill needs runtime defaults, resolve values in this order:
+
+1. project config: `.pipeline/config.yaml`
+2. global config: `~/.hypo-workflow/config.yaml`
+3. built-in defaults
+
+Important mappings:
+
+- project `execution.mode` > global `execution.default_mode` > `self`
+- project `execution.subagent_tool` > global `subagent.provider` > `auto`
+- project `plan.mode` > global `plan.default_mode` > `interactive`
+- project `dashboard.enabled` > global `dashboard.enabled` > `false`
+- project `dashboard.port` > global `dashboard.port` > `7700`
 
 ## Execution Flow
 
-1. Detect the runtime environment:
-   - Claude Code if `CLAUDE_CODE` or `.claude-plugin/` markers are present
-   - Codex if `.codex-plugin/` or Codex-specific markers are present
-2. Ask the user to confirm or override the detected environment.
-3. Ask for planning preferences:
-   - `plan.mode`: `auto` or `interactive`
-   - `plan.interaction_depth`: `low`, `medium`, or `high`
-4. Ask for execution preferences:
-   - `execution.mode`: `self` or `subagent`
-   - if subagent mode is chosen, ask for backend: `codex` or `claude`
-5. Ask whether Dashboard should be enabled.
-6. If Dashboard is enabled, instruct installation of dependencies with:
-   - `uv pip install -r dashboard/requirements.txt`
-7. Write the resulting configuration file in YAML form.
-8. Explain that:
-   - `setup` configures the plugin
-   - `init` configures a specific project pipeline
+1. Create the config directory if needed:
+   - `mkdir -p ~/.hypo-workflow`
+2. Check for an existing global config:
+   - if `~/.hypo-workflow/config.yaml` does not exist, start the first-run wizard
+   - if it exists, read it, summarize the current values, and ask whether the user wants to modify it
+3. Detect the current agent platform:
+   - Claude Code when Claude-specific markers or environment are visible
+   - Codex when Codex-specific markers or environment are visible
+   - otherwise ask the user to choose `claude-code` or `codex`
+4. Ask for execution mode:
+   - `self` is recommended for first-time users
+   - `subagent` enables delegation to another agent runtime
+5. If subagent mode is selected, ask for:
+   - provider: `codex` or `claude`
+   - model
+   - Codex `base_url` only when a custom API endpoint is used
+   - optional connection test command when the tool is available
+6. Ask for Dashboard defaults:
+   - enabled by default: `true` or `false`
+   - port, default `7700`
+7. Ask for Plan mode:
+   - `interactive` pauses for confirmation during planning
+   - `auto` runs planning phases without routine pauses
+8. Write `~/.hypo-workflow/config.yaml`.
+9. Print a concise configuration summary and remind the user that project config can override these values.
+
+## First-Run Questions
+
+Use short, concrete prompts:
+
+- "Current platform appears to be `<detected>`. Use this platform?"
+- "Default execution mode: `self` or `subagent`?"
+- "Subagent provider: `codex` or `claude`?"
+- "Subagent model?"
+- "Custom Codex base URL, or leave empty?"
+- "Enable Dashboard by default?"
+- "Dashboard port?"
+- "Plan mode: `interactive` or `auto`?"
 
 ## Default Values
 
-- `plan.mode=interactive`
-- `plan.interaction_depth=medium`
-- `execution.mode=self`
-- subagent backend default = `codex`
-- `dashboard.enabled=false`
+- `agent.platform=claude-code` when running in Claude Code, otherwise `codex`
+- `agent.model` should use the current session model when visible
+- `execution.default_mode=self`
+- `subagent.provider=codex`
+- `subagent.codex.model=gpt-5.4`
+- `subagent.claude.model=claude-sonnet-4-20250514`
+- `dashboard.enabled=true`
+- `dashboard.port=7700`
+- `plan.default_mode=interactive`
+- `version=7.1.0`
 
-## Example Config Shape
+## Config Shape
 
 ```yaml
-environment: claude
-plan:
-  mode: interactive
-  interaction_depth: medium
+# Hypo-Workflow global config
+# Generated by /hypo-workflow:setup
+
+agent:
+  platform: claude-code
+  model: claude-sonnet-4-20250514
+
 execution:
-  mode: self
-  subagent: codex
+  default_mode: self
+
+subagent:
+  provider: codex
+  codex:
+    model: gpt-5.4
+    base_url: https://api.vsplab.cn
+  claude:
+    model: claude-sonnet-4-20250514
+
 dashboard:
-  enabled: false
-  auto_start: false
+  enabled: true
+  port: 7700
+
+plan:
+  default_mode: interactive
+
+version: "7.1.0"
+created: "2026-04-26T14:00:00+08:00"
+updated: "2026-04-26T14:00:00+08:00"
 ```
+
+Omit `subagent.codex.base_url` when the default OpenAI endpoint is used.
+
+## Connection Checks
+
+Only run checks that match installed tools:
+
+- Codex provider:
+  - `codex --version`
+  - if custom API variables are needed, tell the user to set `OPENAI_BASE_URL` and `OPENAI_API_KEY`
+- Claude provider:
+  - `claude --version`
+
+If a check fails, keep the config but mark the provider as unverified in the summary. Do not block setup unless the user asks for a strict check.
+
+## Platform Notes
+
+Claude Code users:
+
+- invoke commands as `/hypo-workflow:<command>`
+- configure Codex as a subagent by installing `@openai/codex`, setting `OPENAI_API_KEY`, and choosing `subagent.provider=codex`
+- use `/hypo-workflow:dashboard` for the WebUI
+
+Codex users:
+
+- invoke the compatibility commands as `/hw:*`
+- configure Claude as a subagent by installing `@anthropic-ai/claude-code` and choosing `subagent.provider=claude`
+- keep project-specific overrides in `.pipeline/config.yaml`
+
+Mixed mode:
+
+- keep `execution.mode=self` for the main orchestrator
+- delegate individual steps with `step_overrides.<step>.executor=subagent`
+- set `step_overrides.<step>.subagent=codex` or `claude`
+
+## Existing Config Behavior
+
+When a config exists:
+
+1. show current values for platform, default mode, subagent provider/model, dashboard, and plan mode
+2. ask whether to edit
+3. preserve unspecified existing values
+4. update `updated`
+5. keep the original `created` timestamp
 
 ## Reference Files
 
-- `config.schema.yaml` — supported project-level config keys
-- `dashboard/requirements.txt` — dashboard dependency set
-- `SKILL.md` — full system reference if broader context is needed
+- `references/config-spec.md` - global/project config priority and field mapping
+- `config.schema.yaml` - project schema plus global config schema definition
+- `SKILL.md` - full system reference if broader context is needed

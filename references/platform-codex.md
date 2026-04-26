@@ -14,6 +14,8 @@ Use this reference when the pipeline runs inside Codex CLI.
 - Do not rely on SessionStart or SessionStop hooks.
 - Keep state transitions explicit inside `SKILL.md`.
 - Treat background notifications as optional observability, not control flow.
+- Use `/hw:setup` to create `~/.hypo-workflow/config.yaml`.
+- To use Claude for delegated steps, install `@anthropic-ai/claude-code` and set global `subagent.provider=claude` through setup.
 
 ## Hook 降级说明
 

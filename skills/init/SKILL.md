@@ -13,21 +13,24 @@ Use this skill to bootstrap `.pipeline/` and the architecture baseline.
 
 ## Execution Flow
 
-1. Detect which of the three cases applies:
+1. Read `~/.hypo-workflow/config.yaml` if present so generated project config can inherit defaults without duplicating them.
+2. Detect which of the three cases applies:
    - empty project
    - existing project without `.pipeline/`
    - existing pipeline
-2. Run the four exploration phases:
+3. Run the four exploration phases:
    - environment sensing
    - structure scan
    - deep reading when needed
    - output generation
-3. Generate architecture in single-file or folder mode based on project size unless forced.
-4. Use `--rescan` to refresh architecture for an existing pipeline.
-5. Set `current.phase=lifecycle_init` when tracking this command through state.
+4. Generate `.pipeline/config.yaml` with only project-specific values and overrides that differ from global defaults.
+5. Generate architecture in single-file or folder mode based on project size unless forced.
+6. Use `--rescan` to refresh architecture for an existing pipeline.
+7. Set `current.phase=lifecycle_init` when tracking this command through state.
 
 ## Reference Files
 
 - `references/init-spec.md` — init behavior and architecture strategy
 - `references/commands-spec.md`
+- `references/config-spec.md`
 - `SKILL.md`

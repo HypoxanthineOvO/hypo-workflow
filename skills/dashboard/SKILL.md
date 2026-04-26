@@ -15,16 +15,21 @@ Use this skill to launch the Hypo-Workflow dashboard server in the background.
 
 ## Startup Flow
 
-1. Check whether dashboard dependencies are installed.
-2. If not, install them with:
+1. Read `~/.hypo-workflow/config.yaml` if present.
+2. Read `.pipeline/config.yaml` if present.
+3. Resolve dashboard defaults as project > global > defaults:
+   - `dashboard.enabled`: project value > global value > `false`
+   - `dashboard.port`: project value > global value > `7700`
+4. Check whether dashboard dependencies are installed.
+5. If not, install them with:
    - `uv pip install -r dashboard/requirements.txt`
-3. Check whether a dashboard instance is already listening on the preferred port.
-4. If one is already running:
+6. Check whether a dashboard instance is already listening on the preferred port.
+7. If one is already running:
    - tell the user
    - open the browser if possible
-5. Otherwise start the server in the background with `nohup` and `&`.
-6. Wait briefly, then check `/health`.
-7. Open the browser to the running dashboard.
+8. Otherwise start the server in the background with `nohup` and `&`.
+9. Wait briefly, then check `/health`.
+10. Open the browser to the running dashboard.
 
 ## Runtime Behavior
 
@@ -32,6 +37,7 @@ Use this skill to launch the Hypo-Workflow dashboard server in the background.
 - it should run in the background
 - if all websocket clients disconnect, the server should auto-exit after 30 seconds with no reconnection
 - default port is `7700`
+- global setup can override the default port through `~/.hypo-workflow/config.yaml`
 - if `7700` is busy, probe upward until a free port is found
 
 ## Troubleshooting
@@ -48,4 +54,5 @@ Use this skill to launch the Hypo-Workflow dashboard server in the background.
 - `dashboard/server.py` — backend routes, websocket logic, and file watching
 - `dashboard/__main__.py` — CLI entrypoint
 - `dashboard/requirements.txt` — dependencies
+- `references/config-spec.md` — dashboard config fallback rules
 - `SKILL.md` — broader pipeline context if needed

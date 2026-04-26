@@ -92,6 +92,122 @@ If your local checkout nests the repo under another workspace, point `--plugin-d
 
 ---
 
+## Platform-Specific Setup
+
+### Claude Code Installation and Use
+
+#### Install
+
+```bash
+# Option 1: clone as a global skill/plugin checkout
+git clone https://github.com/HypoxanthineOvO/hypo-workflow.git ~/.claude/skills/hypo-workflow
+
+# Option 2: use the Claude Code plugin marketplace
+/plugin marketplace add HypoxanthineOvO/hypo-workflow
+/plugin install hypo-workflow@hypoxanthine-hypo-workflow
+```
+
+For a project-local reference, add the checkout path in the project `.claude/settings.json`.
+
+#### First Setup
+
+```bash
+# In Claude Code:
+/hypo-workflow:setup
+```
+
+The setup wizard creates `~/.hypo-workflow/config.yaml`. Project config in `.pipeline/config.yaml` overrides global defaults.
+
+#### Daily Commands
+
+```bash
+/hypo-workflow:init
+/hypo-workflow:plan
+/hypo-workflow:start
+/hypo-workflow:dashboard
+```
+
+#### Configure Codex as a Subagent
+
+```bash
+# 1. Ensure Codex CLI is installed
+npm i -g @openai/codex
+
+# 2. Configure environment variables when using a custom API endpoint
+export OPENAI_BASE_URL=https://api.vsplab.cn
+export OPENAI_API_KEY=your-key
+
+# 3. In /hypo-workflow:setup choose:
+#    execution mode -> subagent
+#    subagent provider -> codex
+#    subagent model -> gpt-5.4
+#    base URL -> https://api.vsplab.cn
+
+# 4. Review the global config
+cat ~/.hypo-workflow/config.yaml
+```
+
+### Codex Installation and Use
+
+#### Install
+
+```bash
+git clone https://github.com/HypoxanthineOvO/hypo-workflow.git
+cd your-project
+codex
+```
+
+Inside Codex, use the root skill compatibility commands:
+
+```text
+/hw:setup
+/hw:init
+/hw:plan
+/hw:start
+```
+
+#### Configure Claude as a Subagent
+
+```bash
+# Ensure Claude Code is installed
+npm i -g @anthropic-ai/claude-code
+
+# In setup choose:
+#    execution mode -> subagent
+#    subagent provider -> claude
+#    subagent model -> claude-sonnet-4-20250514
+```
+
+### Mixed Mode Examples
+
+#### Claude Code Plans and Reviews, Codex Implements
+
+```yaml
+# .pipeline/config.yaml
+execution:
+  mode: self
+step_overrides:
+  implement:
+    executor: subagent
+    subagent: codex
+  review_code:
+    reviewer: self
+```
+
+#### Codex Runs Automatically, Claude Reviews Code
+
+```yaml
+# .pipeline/config.yaml
+execution:
+  mode: self
+step_overrides:
+  review_code:
+    reviewer: subagent
+    subagent: claude
+```
+
+---
+
 ## Quick Start
 
 ### 1. Install the Skill
@@ -310,7 +426,7 @@ hypo-workflow/
 
 │   └── hypo-todo-adaptive/      # Adaptive threshold example
 
-├── skills/                    # 20 native Claude Code command skills
+├── skills/                    # 22 native Claude Code command skills
 
 └── tests/
 
@@ -326,6 +442,15 @@ Repository root distribution metadata is included directly in this flattened lay
 ---
 
 ## Configuration Reference
+
+### Config Layers
+
+| Layer | Path | Created By | Purpose |
+|-------|------|------------|---------|
+| Global | `~/.hypo-workflow/config.yaml` | `/hypo-workflow:setup` | Agent platform, default execution mode, subagent provider, dashboard defaults, plan defaults |
+| Project | `.pipeline/config.yaml` | `/hypo-workflow:init` | Project name, prompt source/output, reports, preset, evaluation rules |
+
+Priority is project > global > defaults. For example, `.pipeline/config.yaml` `execution.mode` overrides global `execution.default_mode`.
 
 ### Presets
 
@@ -360,7 +485,7 @@ Codex users keep the compatible `/hw:*` path via the root `SKILL.md`.
 
 | Command | Behavior |
 |---------|----------|
-| `/hypo-workflow:setup` | Configure plugin-level defaults for environment, plan mode, execution mode, subagent backend, and dashboard |
+| `/hypo-workflow:setup` | Create or update `~/.hypo-workflow/config.yaml` for platform, plan mode, execution mode, subagent backend, and dashboard |
 
 ### Slash Commands
 
@@ -667,6 +792,7 @@ Hooks act as a passive safety net — they don’t drive the pipeline, but preve
 | V6.1 | Claude marketplace distribution, Codex plugin metadata, and official installation docs |
 | V6.2 | 20 native skills, smart stop hooks, plan auto/interactive modes, PROGRESS.md, and failure triage |
 | V7 | Setup wizard, WebUI dashboard, and 22 native skills |
+| V7.1 | Global setup config, config fallback priority, and platform-specific subagent tutorials |
 
 ---
 

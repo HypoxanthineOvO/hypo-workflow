@@ -13,19 +13,21 @@ Use this skill for the six-surface health check.
 
 ## Execution Flow
 
-1. Run the six checks from `references/check-spec.md`:
+1. Read `~/.hypo-workflow/config.yaml` if present and warn if it is malformed.
+2. Run the six checks from `references/check-spec.md`:
    - Config
    - Pipeline
    - State
    - Prompts
    - Notion
    - Architecture
-2. Print `✅`, `⚠️`, or `❌` for each surface.
-3. Summarize overall health and recommended next action.
-4. Set `current.phase=lifecycle_check` when tracking this command through state.
+3. Print `✅`, `⚠️`, or `❌` for each surface.
+4. Summarize overall health, effective config source, and recommended next action.
+5. Set `current.phase=lifecycle_check` when tracking this command through state.
 
 ## Reference Files
 
 - `references/check-spec.md`
 - `references/commands-spec.md`
+- `references/config-spec.md`
 - `SKILL.md`

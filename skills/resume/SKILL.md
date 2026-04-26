@@ -14,16 +14,18 @@ Use this skill to continue from `.pipeline/state.yaml` without restarting comple
 
 ## Execution Flow
 
-1. Read `.pipeline/config.yaml` and `.pipeline/state.yaml`.
-2. Validate that `current.prompt_file`, `current.step`, and `current.step_index` still point to a valid prompt and step.
-3. Set `current.phase=executing` when resuming active milestone execution.
-4. Continue from the next runnable step instead of replaying completed steps.
-5. Use the same serial orchestration model as `/hypo-workflow:start`:
+1. Read `~/.hypo-workflow/config.yaml` if present.
+2. Read `.pipeline/config.yaml` and `.pipeline/state.yaml`.
+3. Resolve effective execution and subagent defaults as project > global > defaults before selecting the next step.
+4. Validate that `current.prompt_file`, `current.step`, and `current.step_index` still point to a valid prompt and step.
+5. Set `current.phase=executing` when resuming active milestone execution.
+6. Continue from the next runnable step instead of replaying completed steps.
+7. Use the same serial orchestration model as `/hypo-workflow:start`:
    - Claude coordinates
    - subagent tasks execute concrete work
    - Claude validates, scores, and updates artifacts
-6. Update `.pipeline/PROGRESS.md`, `.pipeline/log.yaml`, and `.pipeline/state.yaml` after each meaningful transition.
-7. Apply the same `retry` / `deferred` / `stop` decision model on failures.
+8. Update `.pipeline/PROGRESS.md`, `.pipeline/log.yaml`, and `.pipeline/state.yaml` after each meaningful transition.
+9. Apply the same `retry` / `deferred` / `stop` decision model on failures.
 
 ## Safety Rules
 
@@ -36,4 +38,5 @@ Use this skill to continue from `.pipeline/state.yaml` without restarting comple
 - `references/state-contract.md` — resume semantics and required fields
 - `references/commands-spec.md` — command behavior
 - `references/progress-spec.md` — progress summary rules
+- `references/config-spec.md` — global/project config fallback rules
 - `SKILL.md` — full execution context if needed
