@@ -6,8 +6,8 @@
     "name": "Hypoxanthine",
     "url": "https://github.com/HypoxanthineOvO"
   },
-  "homepage": "https://github.com/HypoxanthineOvO/hypo-workflow",
-  "repo_url": "https://github.com/HypoxanthineOvO/hypo-workflow",
+  "homepage": "https://github.com/HypoxanthineOvO/Hypo-Workflow",
+  "repo_url": "https://github.com/HypoxanthineOvO/Hypo-Workflow",
   "license": "MIT",
   "keywords": [
     "workflow",
@@ -26,6 +26,6 @@
     "longDescription": "Hypo-Workflow packages a complete planning and execution workflow with native skills, smart stop hooks, dual plan modes, progress summaries, serial subagent orchestration, plugin setup, and a live dashboard for a local .pipeline workspace.",
     "developerName": "Hypoxanthine",
     "category": "Productivity",
-    "websiteURL": "https://github.com/HypoxanthineOvO/hypo-workflow"
+    "websiteURL": "https://github.com/HypoxanthineOvO/Hypo-Workflow"
   }
 }

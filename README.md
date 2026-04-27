@@ -55,7 +55,7 @@ It ships as a **SKILL.md** file — not a service, not a CLI tool. Any AI agent 
 In Claude Code, add the repository marketplace and install the plugin:
 
 ```bash
-/plugin marketplace add HypoxanthineOvO/hypo-workflow
+/plugin marketplace add HypoxanthineOvO/Hypo-Workflow
 /plugin install hypo-workflow@hypoxanthine-hypo-workflow
 
 # Verify:
@@ -70,7 +70,7 @@ This repository publishes its Claude marketplace metadata from the repo root at 
 The repository ships official Codex plugin metadata in [`.codex-plugin/plugin.json`](./.codex-plugin/plugin.json) and a repo marketplace at [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json). OpenAI's plugin docs currently describe public self-serve publishing as "coming soon", so the most reliable install path today is the built-in `skill-installer` against the repository root that already contains the full skill:
 
 ```text
-Use $skill-installer to install the GitHub repo HypoxanthineOvO/hypo-workflow with path . as skill name hypo-workflow
+Use $skill-installer to install the GitHub repo HypoxanthineOvO/Hypo-Workflow with path . as skill name hypo-workflow
 
 # Then restart Codex and verify:
 /hw:help
@@ -84,7 +84,7 @@ This installs the full repository root as one self-contained skill so the canoni
 If marketplace-based installation is unavailable:
 
 ```bash
-git clone https://github.com/HypoxanthineOvO/hypo-workflow.git
+git clone https://github.com/HypoxanthineOvO/Hypo-Workflow.git
 claude --plugin-dir ./hypo-workflow
 ```
 
@@ -100,10 +100,10 @@ If your local checkout nests the repo under another workspace, point `--plugin-d
 
 ```bash
 # Option 1: clone as a global skill/plugin checkout
-git clone https://github.com/HypoxanthineOvO/hypo-workflow.git ~/.claude/skills/hypo-workflow
+git clone https://github.com/HypoxanthineOvO/Hypo-Workflow.git ~/.claude/skills/hypo-workflow
 
 # Option 2: use the Claude Code plugin marketplace
-/plugin marketplace add HypoxanthineOvO/hypo-workflow
+/plugin marketplace add HypoxanthineOvO/Hypo-Workflow
 /plugin install hypo-workflow@hypoxanthine-hypo-workflow
 ```
 
@@ -152,7 +152,7 @@ cat ~/.hypo-workflow/config.yaml
 #### Install
 
 ```bash
-git clone https://github.com/HypoxanthineOvO/hypo-workflow.git
+git clone https://github.com/HypoxanthineOvO/Hypo-Workflow.git
 cd your-project
 codex
 ```
