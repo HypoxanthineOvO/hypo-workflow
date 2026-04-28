@@ -1,6 +1,6 @@
 ---
 name: hypo-workflow-plan
-version: 7.0.0
+version: 8.0.0
 description: Plan Mode sub-skill for Hypo-Workflow. Use this file when the user invokes `/hw:plan`, `/hw:plan:*`, `/hw:plan:review`, or the compatibility alias `/hw:review`.
 ---
 
@@ -17,11 +17,12 @@ Use this sub-skill when the user wants to design or revise a pipeline before imp
 | `/hw:plan:decompose` | Split the work into milestones with test specs |
 | `/hw:plan:generate` | Generate `.pipeline/` config, prompts, and architecture baseline |
 | `/hw:plan:confirm` | Summarize the plan and wait for explicit execution approval |
+| `/hw:plan:extend` | Append milestones to the active Cycle without closing it |
 | `/hw:plan:review` | Review architecture and downstream prompt impact for the current milestone or all milestones with `--full` |
 
 If the user invokes `/hw:plan:xxx` and `xxx` is not recognized, return:
 
-`Unknown command: /hw:plan:xxx. Available: /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:review`
+`Unknown command: /hw:plan:xxx. Available: /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review`
 
 ## Progressive Disclosure
 
@@ -40,6 +41,12 @@ Read `plan.mode` from `.pipeline/config.yaml` when present. If it is missing, fa
   - Discover asks targeted questions in rounds
   - the user participates at checkpoints
   - Confirm must wait for explicit approval
+  - read `plan.interaction_depth`:
+    - `low` -> at least 2 question rounds
+    - `medium` -> at least 3 question rounds
+    - `high` -> at least 5 question rounds
+  - `plan.interactive.min_rounds` can raise the floor
+  - P1 may enter P2 only after the user explicitly says「够了」「开始吧」「可以了」or an equivalent end signal
 - `auto` is unattended:
   - Claude completes P1-P4 without pausing unless blocked by missing critical information
   - Confirm is a summary checkpoint, not a hard gate
@@ -71,7 +78,20 @@ Interactive questioning rules:
 - ask 2-3 targeted questions per round
 - move from broad framing to detailed drilling
 - summarize what was learned after each round
-- do not leave Discover until the user signals that the requirement interview is sufficient
+- do not leave Discover until the configured minimum question rounds are complete and the user signals that the requirement interview is sufficient
+- never treat "确认一下" or a plain answer as permission to enter Decompose
+
+Context injection:
+
+- `/hw:plan --context audit,patches,deferred,debug` preloads Discover with selected evidence
+- `cycle.context_sources` is used when `/hw:plan` has no explicit `--context`
+- supported sources:
+  - `audit`: newest `.pipeline/audits/` report
+  - `patches`: open Patch files in `.pipeline/patches/`
+  - `deferred`: all `.pipeline/archives/*/deferred.yaml`
+  - `debug`: newest `.pipeline/debug/` report
+- injected context must be presented to the user before questions begin
+- injected context must not skip the interactive round requirement
 
 Repository scan rules:
 
@@ -103,6 +123,12 @@ Decompose output rules:
 - prefer narrower milestones when architecture review is likely to change downstream prompts
 
 Persist milestone planning state in `.plan-state/decompose.yaml` when possible.
+
+Interactive P2 checkpoint:
+
+- show the complete milestone split after Decompose
+- ask the user to confirm before entering Generate
+- do not write `.pipeline/` files, prompt files, or architecture files until P3
 
 Append conflict rules:
 
@@ -163,7 +189,21 @@ Confirm summary must include:
 - generated file list
 - whether the plan is greenfield or append mode
 
-Interactive mode must wait for explicit `/hw:start`. Auto mode may treat Confirm as a pass-through summary and continue.
+Interactive mode is a hard gate and must wait for explicit `确认`, `/hw:start`, or a natural-language equivalent. Auto mode may treat Confirm as a pass-through summary and continue.
+
+### Extend
+
+- require `.pipeline/cycle.yaml` with `cycle.status=active`
+- require `.pipeline/state.yaml`
+- list current milestones before asking for additions
+- ask at least one targeted question round
+- propose appended milestones and wait for explicit confirmation
+- generate prompt files under `.pipeline/prompts/`
+- append new milestone records to `.pipeline/state.yaml`
+- start numbering from the current highest milestone number + 1
+- never renumber or reorder existing milestones
+
+Detailed behavior lives in `skills/plan-extend/SKILL.md`.
 
 ### Review
 
