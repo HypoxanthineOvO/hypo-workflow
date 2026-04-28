@@ -508,6 +508,7 @@ Codex users keep the compatible `/hw:*` path via the root `SKILL.md`.
 | Command | Behavior |
 |---------|----------|
 | `/hw:plan` | Enter Plan Mode |
+| `/hw:plan --context audit,patches,deferred,debug` | Start Discover with injected evidence from prior reports, open patches, deferred work, or debug output |
 | `/hw:plan:discover` | Discover repo context, goals, and constraints |
 | `/hw:plan:decompose` | Split work into milestones with test specs |
 | `/hw:plan:generate` | Generate `.pipeline/` artifacts from the plan |
@@ -538,6 +539,32 @@ Codex users keep the compatible `/hw:*` path via the root `SKILL.md`.
 
 Compatibility note: `/hw:review` now shows a migration warning and redirects users to `/hw:plan:review`.
 
+### Plan Context
+
+`/hw:plan --context <sources>` preloads P1 Discover with existing evidence. It does not skip the interactive interview.
+
+| Source | Reads From | Use |
+|--------|------------|-----|
+| `audit` | newest `.pipeline/audits/` report | turn audit findings into milestones |
+| `patches` | open `.pipeline/patches/P*.md` files | batch small fixes into a Cycle |
+| `deferred` | `.pipeline/archives/*/deferred.yaml` | revive unfinished work from older Cycles |
+| `debug` | newest `.pipeline/debug/` report | plan from a confirmed root cause |
+
+Example:
+
+```text
+/hw:plan --context audit,patches,deferred
+```
+
+### Plan Extend
+
+Use `/hw:plan:extend` when a Cycle is already active and you need to append milestones without closing or recreating it. It lists current milestones, asks at least one focused question round, then appends new prompt files and state entries after explicit confirmation.
+
+Relationship to `/hw:plan`:
+
+- `/hw:plan` creates or revises a full plan before execution.
+- `/hw:plan:extend` appends to the current active Cycle and never renumbers completed milestones.
+
 ### Lifecycle Logging
 
 - `.pipeline/log.yaml` is the lifecycle ledger
@@ -565,17 +592,48 @@ output:
 - `.pipeline/patches/P001-*.md` stores persistent lightweight patches
 - project-root `PROJECT-SUMMARY.md` summarizes Cycle history, open patches, and deferred items
 
-Common commands:
+Cycle commands:
 
 ```text
 /hw:cycle new "V8 implementation" --type feature --context audit,patches
 /hw:cycle list
-/hw:cycle close
-/hw:patch "Fix login layout" --severity normal
-/hw:patch list --open
-/hw:plan --context audit,patches,deferred
-/hw:plan:extend
+/hw:cycle view C1
+/hw:cycle close --paused
+/hw:cycle close --reason "superseded by upstream rewrite"
 ```
+
+Cycle options:
+
+| Option | Values | Notes |
+|--------|--------|-------|
+| `--type` | `feature`, `bugfix`, `refactor`, `spike`, `hotfix` | maps to a default preset |
+| `--context` | `audit`, `patches`, `deferred`, `debug` | saved in `cycle.context_sources` for later planning |
+| `--paused` | flag | closes the Cycle as paused |
+| `--reason` | text | closes the Cycle as abandoned and records lessons |
+
+Default preset mapping:
+
+| Cycle Type | Default Preset |
+|------------|----------------|
+| `feature`, `refactor` | `tdd` |
+| `bugfix`, `spike`, `hotfix` | `implement-only` |
+
+Patch commands:
+
+```text
+/hw:patch "Fix login layout" --severity normal
+/hw:patch "Production payment failure" --severity critical
+/hw:patch list --open
+/hw:patch list --severity critical
+/hw:patch close P001
+```
+
+Patch rules:
+
+- Patch IDs are global and monotonic: `P001`, `P002`, `P003`, and so on.
+- Severity is `critical`, `normal`, or `minor`; default is `normal`.
+- Patches are not archived with Cycles.
+- Use `/hw:plan --context patches` to promote open patches into Cycle milestones.
 
 ### Auto Resume Watchdog
 
@@ -591,7 +649,48 @@ watchdog:
   notify: true
 ```
 
-When enabled, `/hw:start` registers `scripts/watchdog.sh`, execution updates `last_heartbeat`, and `.pipeline/.lock` prevents reentry.
+Manual cron setup:
+
+```bash
+*/5 * * * * /path/to/hypo-workflow/scripts/watchdog.sh /path/to/project >> /tmp/hypo-watchdog.log 2>&1
+```
+
+Runtime behavior:
+
+- `/hw:start` and `/hw:resume` update `last_heartbeat` in `.pipeline/state.yaml`.
+- `.pipeline/.lock` prevents watchdog reentry while an agent is already running.
+- stale execution triggers `/hw:resume` after `heartbeat_timeout`.
+- after 3 consecutive failures the watchdog backs off; after `max_retries` it stops retrying and logs the failure.
+- when `watchdog.enabled=false`, no cron entry should be registered.
+
+Use `scripts/watchdog.sh /path/to/project --dry-run` to test detection without resuming.
+
+### V8 Configuration
+
+Project config can override these V8 defaults:
+
+```yaml
+plan:
+  mode: interactive
+  interaction_depth: medium
+  interactive:
+    min_rounds: 3
+    require_explicit_confirm: true
+
+output:
+  language: en
+  timezone: UTC
+
+watchdog:
+  enabled: false
+  interval: 300
+  heartbeat_timeout: 300
+  max_retries: 5
+  max_consecutive_milestones: 10
+  notify: true
+```
+
+Terminology note: V8 design notes may call these `plan.interactive.min_question_rounds` and `plan.interactive.checkpoints`. In the shipped schema, use `plan.interactive.min_rounds` and `plan.interactive.require_explicit_confirm`; checkpoints are enforced by Discover, Decompose, and Confirm.
 
 ### Evaluation
 
@@ -824,7 +923,18 @@ Hooks act as a passive safety net — they don’t drive the pipeline, but preve
 
 ---
 
-## Versioning
+## Changelog
+
+### v8.0.0
+
+- Added `/hw:cycle new|list|view|close` for explicit delivery Cycles, archives, deferred items, and project summaries.
+- Added `/hw:patch` for persistent lightweight fixes with global `P001` numbering and severity filtering.
+- Added `/hw:plan:extend` for appending milestones to an active Cycle.
+- Added `/hw:plan --context audit,patches,deferred,debug` to preload Discover with existing evidence.
+- Added optional Auto Resume watchdog support with heartbeat, lockfile, cron, and retry backoff.
+- Added `output.language` and `output.timezone` for reports and `PROGRESS.md`.
+- Strengthened Interactive Plan gates with minimum question rounds and explicit P2/P4 confirmation.
+- Updated the public command set to 25 user-facing commands.
 
 | Version | Milestone |
 |---------|-----------|
