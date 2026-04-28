@@ -66,6 +66,42 @@ Flags:
 - `/hw:init --folder` forces folder mode
 - `/hw:init --single` forces single-file mode
 - `/hw:init --rescan` rescans an existing pipeline and diffs against the current architecture baseline
+- `/hw:init --import-history` imports pre-Workflow Git first-parent history into `.pipeline/archives/cycle-0-legacy/`
+- `/hw:init --import-history --interactive` previews the split plan and waits for explicit confirmation before writing files
+
+## History Import
+
+History Import is a V8.1 extension of init. It does not run unless `--import-history` is present.
+
+### Split Signals
+
+In `history_import.split_method: auto`, choose the first signal that creates at least two milestones:
+
+1. Git tags from `git tag --sort=creatordate`
+2. Milestone keywords from `history_import.keyword_patterns`
+3. merge commits from `git log --merges --first-parent`
+4. time gaps larger than `history_import.time_gap_threshold`
+
+If fewer than five commits are eligible, import all commits as `M0-legacy`.
+
+### Generated Files
+
+```text
+.pipeline/archives/cycle-0-legacy/
+├── cycle.yaml
+├── summary.md
+└── M{x}-{name}/report.md
+```
+
+Milestone reports use `templates/legacy-report.md`; they must not include TDD step fields.
+
+### Edge Behavior
+
+- non-Git repos stop with `❌ 当前目录不是 git 仓库，请先执行 git init`
+- existing `.pipeline/state.yaml` acts as an import cutoff
+- `project_root` filters monorepo history
+- only the current branch first-parent history is scanned
+- reports cap commit tables at 50 entries for very long histories
 
 ## Relationship To Other Commands
 
