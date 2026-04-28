@@ -25,7 +25,7 @@ Supported forms:
 
 - `/hw:cycle new "名称" [--type feature|bugfix|refactor|spike|hotfix] [--context audit,patches,deferred,debug]`
 - `/hw:cycle list`
-- `/hw:cycle view C{N}`
+- `/hw:cycle view C{N}` or `/hw:cycle view 0`
 - `/hw:cycle close [--reason "..."] [--paused]`
 
 ## Cycle File
@@ -89,6 +89,8 @@ Compatibility: projects without `.pipeline/cycle.yaml` are treated as an implici
 ## `/hw:cycle close`
 
 Close the active Cycle and archive its local artifacts.
+
+Cycle 0 Legacy is already closed by definition. If the user asks to close Cycle 0, stop and report that Legacy history cannot be closed again.
 
 Status rules:
 
@@ -157,10 +159,17 @@ Write the summary in `output.language`; default language is English.
 
 List all Cycles from:
 
+- `.pipeline/archives/cycle-0-legacy/cycle.yaml`
 - `.pipeline/archives/*/cycle.yaml`
 - current `.pipeline/cycle.yaml` when present
 
 Show number, name, type, status, started/finished date, and one-line summary. Include implicit `C1` only when there is no explicit Cycle metadata and the old project has `.pipeline/state.yaml` or prompts.
+
+When `.pipeline/archives/cycle-0-legacy/cycle.yaml` exists, show it first as:
+
+```text
+C0 [Legacy] Legacy (pre-Workflow) — closed — <total_commits> commits / <total_milestones> milestones
+```
 
 ## `/hw:cycle view C{N}`
 
@@ -174,6 +183,14 @@ Find the Cycle in current metadata or archives. Display:
 - architecture snapshot path when present
 
 If the Cycle is missing, list available Cycle numbers.
+
+For `/hw:cycle view 0` or `/hw:cycle view C0`, read `.pipeline/archives/cycle-0-legacy/cycle.yaml` and display:
+
+- Legacy import method
+- total commits and milestone count
+- imported milestone list with commit counts and date spans
+- summary path
+- per-milestone report paths
 
 ## Project Summary
 

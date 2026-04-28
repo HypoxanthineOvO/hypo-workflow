@@ -74,13 +74,13 @@ If `plan.interactive.min_rounds` is set, use it as an additional floor after res
 
 - `audit`: read the newest report under `.pipeline/audits/`
 - `patches`: read all open Patch files under `.pipeline/patches/`
-- `deferred`: read every `.pipeline/archives/*/deferred.yaml`
+- `deferred`: read every `.pipeline/archives/*/deferred.yaml`; also read `.pipeline/archives/cycle-0-legacy/summary.md` when present
 - `debug`: read the newest report under `.pipeline/debug/`
 
 Context injection behavior:
 
 1. Load the selected sources before the first question round.
-2. Present a concise source summary, including counts such as open patches or deferred milestones.
+2. Present a concise source summary, including counts such as open patches, deferred milestones, or imported Legacy milestones.
 3. Ask the first 2-3 targeted questions based on that evidence.
 4. Never treat injected context as user confirmation or as permission to skip the minimum rounds.
 5. If no selected source exists, say which source was empty and continue normal Discover.
