@@ -267,12 +267,17 @@ Supported flags:
 - `--rescan`
 - `--folder`
 - `--single`
+- `--import-history`
+- `--interactive` with `--import-history`
 
 Behavior:
 
 - detect whether the repo is empty, is an existing codebase without `.pipeline/`, or already has a pipeline
 - follow the exploration and output rules in `references/init-spec.md`
 - on existing pipelines, check completeness first and use `--rescan` to refresh architecture
+- with `--import-history`, scan Git first-parent history and create `.pipeline/archives/cycle-0-legacy/`
+- with `--import-history --interactive`, show the proposed split and wait for explicit user confirmation before writing history archive files
+- `--import-history` must not change normal init behavior when omitted
 
 ### `/hw:release`
 

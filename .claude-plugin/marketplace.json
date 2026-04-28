@@ -10,7 +10,7 @@
     {
       "name": "hypo-workflow",
       "source": "./",
-      "version": "8.0.0",
+      "version": "8.1.0",
       "description": "Serialized prompt workflow with 25 user-facing skills covering setup, planning, execution, cycles, patches, debugging, auditing, release, watchdog, and dashboard.",
       "author": {
         "name": "Hypoxanthine",

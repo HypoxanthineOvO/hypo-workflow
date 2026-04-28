@@ -6,7 +6,7 @@
 
 TDD Pipeline · Self-Review · Interrupt Recovery · Multi-Dimensional Evaluation
 
-[![Version](https://img.shields.io/badge/version-8.0.0-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-8.1.0-blue)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex-purple)](#platform-support)
 
@@ -520,7 +520,7 @@ Codex users keep the compatible `/hw:*` path via the root `SKILL.md`.
 
 | Command | Behavior |
 |---------|----------|
-| `/hw:init` | Initialize or rescan `.pipeline/` with architecture awareness |
+| `/hw:init` | Initialize or rescan `.pipeline/` with architecture awareness; supports `--import-history` |
 | `/hw:check` | Run health checks on config, state, prompts, Notion, and architecture |
 | `/hw:audit` | Run graded preventive code audits |
 | `/hw:release` | Run the automated publishing flow |
@@ -564,6 +564,25 @@ Relationship to `/hw:plan`:
 
 - `/hw:plan` creates or revises a full plan before execution.
 - `/hw:plan:extend` appends to the current active Cycle and never renumbers completed milestones.
+
+### History Import
+
+Use `/hw:init --import-history` to import pre-Workflow Git history into Cycle 0 before normal pipeline work starts.
+
+```text
+/hw:init --import-history
+/hw:init --import-history --interactive
+```
+
+Import behavior:
+
+- scans only the current branch with `git log --first-parent`
+- chooses the first useful split signal: tags, milestone keywords, merge commits, then time gaps
+- writes `.pipeline/archives/cycle-0-legacy/cycle.yaml`, `summary.md`, and one `report.md` per imported milestone
+- creates or preserves the active `.pipeline/cycle.yaml` as Cycle 1
+- `--interactive` previews the split plan and waits for confirmation before writing files
+
+Legacy reports use `templates/legacy-report.md` and summarize commits and diff stats; they do not include TDD step fields.
 
 ### Lifecycle Logging
 
@@ -691,6 +710,19 @@ watchdog:
 ```
 
 Terminology note: V8 design notes may call these `plan.interactive.min_question_rounds` and `plan.interactive.checkpoints`. In the shipped schema, use `plan.interactive.min_rounds` and `plan.interactive.require_explicit_confirm`; checkpoints are enforced by Discover, Decompose, and Confirm.
+
+### V8.1 History Import Configuration
+
+```yaml
+history_import:
+  split_method: auto           # auto | tag | keyword | merge | time_gap
+  time_gap_threshold: 24h
+  max_milestones: 20
+  keyword_patterns:
+    - 'feat\(M(\d+)\):'
+    - 'M(\d+)-'
+    - 'milestone-(\d+)'
+```
 
 ### Evaluation
 
@@ -925,6 +957,14 @@ Hooks act as a passive safety net — they don’t drive the pipeline, but preve
 
 ## Changelog
 
+### v8.1.0
+
+- Extended `/hw:init` with `--import-history` for importing Git first-parent history into Cycle 0 Legacy.
+- Added `--interactive` preview mode for History Import split plans.
+- Added `templates/legacy-report.md` for non-TDD legacy milestone reports.
+- Added `history_import.*` config for split method, time-gap threshold, milestone cap, and keyword patterns.
+- Updated Cycle and Plan context behavior so Cycle 0 Legacy appears in `/hw:cycle list`, `/hw:cycle view 0`, and deferred context.
+
 ### v8.0.0
 
 - Added `/hw:cycle new|list|view|close` for explicit delivery Cycles, archives, deferred items, and project summaries.
@@ -953,6 +993,7 @@ Hooks act as a passive safety net — they don’t drive the pipeline, but preve
 | V7 | Setup wizard, WebUI dashboard, and 22 native skills |
 | V7.1 | Global setup config, config fallback priority, and platform-specific subagent tutorials |
 | V8 | Interactive planning hard gates, Cycle archives, Patch track, context-injected planning, output language/timezone, project summary, plan extend, and Auto Resume watchdog |
+| V8.1 | History Import for Git legacy history, Cycle 0 reports, interactive split preview, and `history_import` config |
 
 ---
 

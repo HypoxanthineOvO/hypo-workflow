@@ -1,6 +1,6 @@
 {
   "name": "hypo-workflow",
-  "version": "8.0.0",
+  "version": "8.1.0",
   "description": "Serialized prompt workflow with setup, planning, execution, cycles, patches, auditing, debugging, release automation, watchdog, and WebUI support.",
   "author": {
     "name": "Hypoxanthine",

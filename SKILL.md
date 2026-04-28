@@ -1,10 +1,10 @@
 ---
 name: hypo-workflow
-version: 8.0.0
+version: 8.1.0
 description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:plan`, `/hw:plan:extend`, `/hw:plan:review`, `/hw:cycle`, `/hw:patch`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, or `/hw:dashboard`.
 ---
 
-# Hypo-Workflow v8.0.0
+# Hypo-Workflow v8.1.0
 
 > **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 25 个用户指令。
 >
@@ -183,7 +183,7 @@ Handle these commands directly:
 - `/hw:check`
   Run health checks for config, workspace completeness, state consistency, prompts, Notion connectivity, and architecture. Without `.pipeline/`, respond with `请先运行 /hw:init`.
 - `/hw:init`
-  Detect whether the repo is empty, already has source code, or already has a pipeline, then create or refresh `.pipeline/` plus the architecture baseline. Support `--rescan`, `--folder`, and `--single`.
+  Detect whether the repo is empty, already has source code, or already has a pipeline, then create or refresh `.pipeline/` plus the architecture baseline. Support `--rescan`, `--folder`, `--single`, `--import-history`, and `--import-history --interactive`.
 - `/hw:release`
   Run the seven-step release flow. Support `--dry-run`, `--skip-tests`, and explicit `--patch` / `--minor` / `--major` version overrides.
 - `/hw:audit`
@@ -233,6 +233,7 @@ Key fallbacks:
 - `output.language` falls back to global `output.language`, then `en`
 - `output.timezone` falls back to global `output.timezone`, then `UTC`
 - `watchdog.enabled` falls back to global `watchdog.enabled`, then `false`
+- `history_import.split_method` falls back to global `history_import.split_method`, then `auto`
 
 Read [`references/config-spec.md`](./references/config-spec.md) when resolving config precedence or field mapping.
 
@@ -244,6 +245,7 @@ Expected top-level config groups:
 - `plan` optional
 - `output` optional
 - `watchdog` optional
+- `history_import` optional
 - `platform` optional
 - `step_overrides` optional
 - `hooks` optional
@@ -267,6 +269,10 @@ Key defaults:
 - `watchdog.max_retries=5`
 - `watchdog.max_consecutive_milestones=10`
 - `watchdog.notify=true`
+- `history_import.split_method=auto`
+- `history_import.time_gap_threshold=24h`
+- `history_import.max_milestones=20`
+- `history_import.keyword_patterns=['feat\\(M(\\d+)\\):','M(\\d+)-','milestone-(\\d+)']`
 - `dashboard.enabled=false`
 - `dashboard.port=7700`
 - `dashboard.auto_start=false`

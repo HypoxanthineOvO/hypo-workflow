@@ -47,6 +47,13 @@ TARGET_SCENARIOS = {
     "s28-log-filters",
     "s29-plan-review-migration",
     "s30-init-rescan",
+    "s31-import-history-tags",
+    "s32-import-history-keyword",
+    "s33-import-history-merge",
+    "s34-import-history-time-gap",
+    "s35-import-history-interactive",
+    "s36-import-history-non-git",
+    "s37-import-history-existing-pipeline",
 }
 
 
@@ -153,7 +160,7 @@ def scenario_specific(scene: Path, result: ScenarioResult) -> None:
         diff = run(f'bash "{ROOT / "scripts" / "diff-stats.sh"}"', cwd=gitrepo)
         add(result, "diff_stats", "changed_files=" in diff.stdout and "added_lines=" in diff.stdout, diff.stdout.strip())
         plugin = run(f'python3 -m json.tool "{PLUGIN_JSON}"')
-        add(result, "plugin_json", plugin.returncode == 0 and '"version": "8.0.0"' in plugin.stdout)
+        add(result, "plugin_json", plugin.returncode == 0 and '"version": "8.1.0"' in plugin.stdout)
     elif name == "s12-hook-stop-check":
         tmp = Path(tempfile.mkdtemp(prefix="hw-s12-"))
         case_a = run(f'bash "{ROOT / "hooks" / "stop-check.sh"}"', cwd=tmp)
@@ -209,6 +216,13 @@ def scenario_specific(scene: Path, result: ScenarioResult) -> None:
         "s28-log-filters",
         "s29-plan-review-migration",
         "s30-init-rescan",
+        "s31-import-history-tags",
+        "s32-import-history-keyword",
+        "s33-import-history-merge",
+        "s34-import-history-time-gap",
+        "s35-import-history-interactive",
+        "s36-import-history-non-git",
+        "s37-import-history-existing-pipeline",
     }:
         proc = run(f'bash "{scene / "run.sh"}"', cwd=scene)
         add(result, "run_sh", proc.returncode == 0, (proc.stdout + proc.stderr).strip())
