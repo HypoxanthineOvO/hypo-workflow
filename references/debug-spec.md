@@ -40,11 +40,15 @@ Use this reference for `/hw:debug`, the symptom-driven debugging workflow.
 - provide a concrete fix suggestion, preferably as a diff
 - assess impact radius and whether architecture documentation needs an update
 - `--auto-fix` may apply the fix only if verification passes
+- write the report in `output.language`
+- render timestamps in `output.timezone`
 
 ## Report Template
 
 ```markdown
 # Debug-NNN: [symptom title]
+
+> Language: {output_language} | Timezone: {output_timezone}
 
 ## Symptom
 [user description or error output]

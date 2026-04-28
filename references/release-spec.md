@@ -36,6 +36,8 @@ Use this reference for `/hw:release`, the automated publishing workflow for Hypo
 - diff from the last git tag to `HEAD`
 - group commits by conventional type
 - write the newest release block to the top of `CHANGELOG.md`
+- use `output.language` for generated changelog prose
+- render dates in `output.timezone`
 
 Preferred shape:
 

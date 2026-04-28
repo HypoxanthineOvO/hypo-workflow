@@ -21,11 +21,12 @@ Use this skill for the seven-step release workflow.
 2. Run regression unless the user explicitly confirms skipping tests.
 3. Calculate the next version unless an explicit bump flag is given.
 4. Update versioned files.
-5. Generate changelog content.
-6. Commit, tag, and push.
-7. Optionally create the remote release entry.
-8. Append a lifecycle log entry.
-9. Set `current.phase=lifecycle_release` when state tracking is used.
+5. Resolve `output.language` and `output.timezone`.
+6. Generate changelog content in `output.language` with timestamps in `output.timezone`.
+7. Commit, tag, and push.
+8. Optionally create the remote release entry.
+9. Append a lifecycle log entry.
+10. Set `current.phase=lifecycle_release` when state tracking is used.
 
 ## Reference Files
 

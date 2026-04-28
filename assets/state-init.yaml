@@ -9,6 +9,8 @@ pipeline:
   started: null
   finished: null
 
+last_heartbeat: null
+
 current:
   phase: idle
   prompt_index: 0

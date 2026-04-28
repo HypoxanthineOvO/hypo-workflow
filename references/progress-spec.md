@@ -18,7 +18,7 @@ Use this reference for the human-readable progress summary file at `.pipeline/PR
 ```markdown
 # <project name> — 开发进度
 
-> 最后更新：2026-04-24 15:30 | 状态：进行中 | 进度：3/5 Milestone
+> 最后更新：15:30 | 状态：进行中 | 进度：3/5 Milestone
 
 ## 当前状态
 🔄 **M3: Rich UI** — 实现中（step: run_green）
@@ -61,6 +61,21 @@ Update `PROGRESS.md`:
 - milestone table
 - recent activity list
 - deferred section when applicable
+
+## Output Language And Timezone
+
+Resolve output settings as project `.pipeline/config.yaml` > global `~/.hypo-workflow/config.yaml` > built-in defaults:
+
+- `output.language`: default `en`
+- `output.timezone`: default `UTC`
+
+All `PROGRESS.md` prose, status labels, and recent-activity text should use `output.language`. All timestamps should be converted to `output.timezone`.
+
+Compact time format:
+
+- same local day: `HH:MM`
+- cross-day within the current month: `DD日 HH:MM` when `output.language=zh-CN`; otherwise `DD HH:MM`
+- include full ISO timestamps only when debugging a timezone or audit issue
 
 ## Relationship To State
 

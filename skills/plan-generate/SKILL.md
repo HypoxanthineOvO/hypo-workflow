@@ -14,7 +14,7 @@ Use this skill for P3 Generate only.
 ## Execution Flow
 
 1. Read `~/.hypo-workflow/config.yaml` if present.
-2. Generate `.pipeline/config.yaml` with project-specific values and only the overrides that should beat global defaults.
+2. Generate `.pipeline/config.yaml` with project-specific values and only the overrides that should beat global defaults, including `output.*`, `plan.interactive.*`, and `watchdog.*` only when the project needs explicit overrides.
 3. Generate `.pipeline/prompts/*.md`.
 4. Generate architecture baseline files.
 5. Before writing each prompt, create a detailed implementation plan containing:

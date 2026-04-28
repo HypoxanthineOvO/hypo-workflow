@@ -38,11 +38,15 @@ Use this reference for `/hw:audit`, the preventive code auditing workflow.
 - terminal summary with counts and top five findings
 - full report at `.pipeline/audits/audit-NNN.md`
 - lifecycle entry in `.pipeline/log.yaml` with `type: audit`
+- write report prose in `output.language`
+- render timestamps in `output.timezone`
 
 ## Report Template
 
 ```markdown
 # Audit Report — YYYY-MM-DD
+
+> Language: {output_language} | Timezone: {output_timezone}
 
 ## Summary
 - Scope: [full project / dir]

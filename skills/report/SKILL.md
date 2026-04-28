@@ -14,16 +14,23 @@ Use this skill to summarize the latest generated report file.
 ## Execution Flow
 
 1. Read `.pipeline/state.yaml` if present.
-2. Locate the latest report:
+2. Resolve `output.language` and `output.timezone` from project > global > defaults.
+3. Locate the latest report:
    - prefer `history.completed_prompts[-1].report_file`
    - otherwise use the newest report in `.pipeline/reports/`
-3. Summarize:
+4. Summarize in `output.language`:
    - milestone or prompt name
    - final decision
    - key scores
    - warnings
    - deferred or blocking notes if present
-4. If `.pipeline/PROGRESS.md` exists, keep its summary consistent conceptually, but do not mutate it from a read-only report command.
+5. If `.pipeline/PROGRESS.md` exists, keep its summary consistent conceptually, but do not mutate it from a read-only report command.
+
+## Output Rules
+
+- report summaries must use `output.language`; default is `en`
+- timestamps must be converted to `output.timezone`; default is `UTC`
+- for Chinese output, use compact progress times: same day `HH:MM`, cross-day `DD日 HH:MM`
 
 ## Reference Files
 

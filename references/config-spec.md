@@ -6,7 +6,7 @@ Use this reference whenever a command needs Hypo-Workflow configuration defaults
 
 | Layer | Path | Owner | Purpose |
 |---|---|---|---|
-| Global | `~/.hypo-workflow/config.yaml` | `/hypo-workflow:setup` | Agent platform, default execution mode, subagent backend, dashboard defaults, plan defaults |
+| Global | `~/.hypo-workflow/config.yaml` | `/hypo-workflow:setup` | Agent platform, default execution mode, subagent backend, dashboard defaults, plan defaults, output defaults, watchdog defaults |
 | Project | `.pipeline/config.yaml` | `/hypo-workflow:init` or `/hypo-workflow:plan-generate` | Project name, prompt source/output, reports, preset, evaluation rules, project-specific overrides |
 
 `setup` must never create project config. `init` and `plan-generate` must not overwrite global config.
@@ -27,8 +27,16 @@ Resolve every configurable value in this order:
 | execution mode | `execution.mode` | `execution.default_mode` | `self` |
 | subagent provider | `execution.subagent_tool` | `subagent.provider` | `auto` |
 | plan mode | `plan.mode` | `plan.default_mode` | `interactive` |
+| plan interaction depth | `plan.interaction_depth` | `plan.interaction_depth` | `medium` |
+| plan interactive min rounds | `plan.interactive.min_rounds` | `plan.interactive.min_rounds` | `3` |
+| plan explicit confirm | `plan.interactive.require_explicit_confirm` | `plan.interactive.require_explicit_confirm` | `true` |
 | dashboard enabled | `dashboard.enabled` | `dashboard.enabled` | `false` |
 | dashboard port | `dashboard.port` | `dashboard.port` | `7700` |
+| output language | `output.language` | `output.language` | `en` |
+| output timezone | `output.timezone` | `output.timezone` | `UTC` |
+| watchdog enabled | `watchdog.enabled` | `watchdog.enabled` | `false` |
+| watchdog interval | `watchdog.interval` | `watchdog.interval` | `300` |
+| watchdog heartbeat timeout | `watchdog.heartbeat_timeout` | `watchdog.heartbeat_timeout` | `300` |
 
 Normalize global `agent.platform=claude-code` to the runtime platform value `claude` when applying existing project-platform logic.
 
@@ -69,7 +77,21 @@ dashboard:
   port: 7700
 plan:
   default_mode: interactive
-version: "7.1.0"
+  interaction_depth: medium
+  interactive:
+    min_rounds: 3
+    require_explicit_confirm: true
+output:
+  language: en
+  timezone: UTC
+watchdog:
+  enabled: false
+  interval: 300
+  heartbeat_timeout: 300
+  max_retries: 5
+  max_consecutive_milestones: 10
+  notify: true
+version: "8.0.0"
 created: "2026-04-26T14:00:00+08:00"
 updated: "2026-04-26T14:00:00+08:00"
 ```
@@ -82,3 +104,4 @@ updated: "2026-04-26T14:00:00+08:00"
 - Global config is defined under `$defs.global_config` in the same schema file.
 - A missing global config is valid; use built-in defaults.
 - A malformed global config should be reported by `/hypo-workflow:check` but should not prevent reading project config.
+- New V8 fields are optional and must not break older project configs.

@@ -67,6 +67,8 @@ Interpretation:
 
 Every completed prompt writes one report based on `assets/report-template.md`.
 
+Reports must use `output.language` for prose and `output.timezone` for timestamps. Defaults are `en` and `UTC` when no output config is set.
+
 Minimum report content:
 
 - prompt summary

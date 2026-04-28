@@ -12,8 +12,9 @@ pipeline:
   prompts_completed: 0
   started: null
   finished: null
+last_heartbeat: null
 current:
-  phase: idle | plan_discover | plan_decompose | plan_generate | plan_confirm | executing | lifecycle_init | lifecycle_check | lifecycle_audit | lifecycle_release | lifecycle_debug | completed
+  phase: idle | plan_discover | plan_decompose | plan_generate | plan_confirm | executing | lifecycle_init | lifecycle_check | lifecycle_audit | lifecycle_release | lifecycle_debug | lifecycle_cycle | lifecycle_patch | completed
   prompt_index: 0
   prompt_file: null
   prompt_name: null
@@ -96,6 +97,7 @@ Read `state.yaml` at these moments:
 - `current.step` must always point to the next runnable or currently running step.
 - `current.step_index` must match the index of `current.step` inside `prompt_state.steps`.
 - `current.phase` should reflect whether the system is in planning, execution, lifecycle, or completion state.
+- `last_heartbeat` should be updated with an ISO-8601 timestamp whenever execution state is persisted during `/hw:start` or `/hw:resume`.
 - `pipeline.prompts_completed` must equal the number of successful prompt entries in `history.completed_prompts`.
 - `prompt_state.diff_score` drives the final decision gate.
 - `prompt_state.code_quality` informs the `code_quality` evaluation check.
@@ -153,6 +155,14 @@ Added:
 - `milestones[].status=deferred`
 - `milestones[].deferred_reason`
 - explicit separation between machine-readable `log.yaml` and human-readable `PROGRESS.md`
+
+### V8
+
+Added:
+
+- optional `last_heartbeat` for Auto Resume watchdog detection
+- Cycle and Patch lifecycle phases
+- Cycle-local milestone numbering semantics through `.pipeline/cycle.yaml`
 
 ## V4 新增字段
 

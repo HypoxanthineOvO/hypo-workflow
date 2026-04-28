@@ -18,11 +18,13 @@ Use this skill for deep project auditing.
    - `--scope <dir>`
    - `--since <milestone>`
 2. Read the architecture baseline first.
-3. Scan the six audit dimensions.
-4. Grade findings as `Critical`, `Warning`, or `Info`.
-5. Write the report to `.pipeline/audits/audit-NNN.md`.
-6. Append a lifecycle log entry.
-7. Set `current.phase=lifecycle_audit` when state tracking is used.
+3. Resolve `output.language` and `output.timezone`.
+4. Scan the six audit dimensions.
+5. Grade findings as `Critical`, `Warning`, or `Info`.
+6. Write the report to `.pipeline/audits/audit-NNN.md` in `output.language`.
+7. Render report timestamps in `output.timezone`.
+8. Append a lifecycle log entry.
+9. Set `current.phase=lifecycle_audit` when state tracking is used.
 
 ## Reference Files
 

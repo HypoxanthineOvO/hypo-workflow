@@ -19,12 +19,13 @@ Use this skill for the five-step debug workflow.
    - lifecycle log
    - recent milestone report
    - recent git changes
-3. Generate 3-5 ranked hypotheses.
-4. Validate them in order.
-5. Produce a root-cause report and optional fix suggestion.
-6. With `--auto-fix`, only claim success after validation passes.
-7. Write the report to `.pipeline/debug/` and append a debug lifecycle entry.
-8. Set `current.phase=lifecycle_debug` when state tracking is used.
+3. Resolve `output.language` and `output.timezone`.
+4. Generate 3-5 ranked hypotheses.
+5. Validate them in order.
+6. Produce a root-cause report and optional fix suggestion in `output.language`.
+7. With `--auto-fix`, only claim success after validation passes.
+8. Write the report to `.pipeline/debug/` with timestamps in `output.timezone` and append a debug lifecycle entry.
+9. Set `current.phase=lifecycle_debug` when state tracking is used.
 
 ## Reference Files
 

@@ -24,9 +24,12 @@ Use this skill to inspect pipeline progress only.
    - current milestone or prompt
    - current step and step index
    - effective execution mode and subagent provider
+   - active Cycle when `.pipeline/cycle.yaml` exists
    - latest completed milestone
    - deferred items if any
+   - `last_heartbeat` and watchdog state when present
 7. If `.pipeline/PROGRESS.md` exists, use it as a human-facing summary source, but do not rewrite it during status inspection.
+8. If project-root `PROJECT-SUMMARY.md` exists, include its top summary line and Open Patches / Deferred counts.
 
 ## Safety Rules
 

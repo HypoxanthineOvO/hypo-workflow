@@ -1,5 +1,8 @@
 # Execution Report: {prompt_name}
 
+> Language: {output_language} | Timezone: {output_timezone}
+> Write this report in `{output_language}` and render all timestamps in `{output_timezone}`.
+
 ## Summary
 - Prompt: {prompt_id} — {prompt_name}
 - Started: {started_at}

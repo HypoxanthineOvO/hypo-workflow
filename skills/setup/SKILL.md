@@ -29,8 +29,12 @@ Important mappings:
 - project `execution.mode` > global `execution.default_mode` > `self`
 - project `execution.subagent_tool` > global `subagent.provider` > `auto`
 - project `plan.mode` > global `plan.default_mode` > `interactive`
+- project `plan.interaction_depth` > global `plan.interaction_depth` > `medium`
 - project `dashboard.enabled` > global `dashboard.enabled` > `false`
 - project `dashboard.port` > global `dashboard.port` > `7700`
+- project `output.language` > global `output.language` > `en`
+- project `output.timezone` > global `output.timezone` > `UTC`
+- project `watchdog.enabled` > global `watchdog.enabled` > `false`
 
 ## Execution Flow
 
@@ -57,8 +61,14 @@ Important mappings:
 7. Ask for Plan mode:
    - `interactive` pauses for confirmation during planning
    - `auto` runs planning phases without routine pauses
-8. Write `~/.hypo-workflow/config.yaml`.
-9. Print a concise configuration summary and remind the user that project config can override these values.
+8. Ask for output defaults:
+   - language, default `en`
+   - timezone, default `UTC`
+9. Ask whether to enable watchdog defaults:
+   - default `false`
+   - interval and heartbeat timeout default `300`
+10. Write `~/.hypo-workflow/config.yaml`.
+11. Print a concise configuration summary and remind the user that project config can override these values.
 
 ## First-Run Questions
 
@@ -72,6 +82,10 @@ Use short, concrete prompts:
 - "Enable Dashboard by default?"
 - "Dashboard port?"
 - "Plan mode: `interactive` or `auto`?"
+- "Interaction depth: `low`, `medium`, or `high`?"
+- "Output language?"
+- "Output timezone?"
+- "Enable Auto Resume watchdog by default?"
 
 ## Default Values
 
@@ -84,7 +98,18 @@ Use short, concrete prompts:
 - `dashboard.enabled=true`
 - `dashboard.port=7700`
 - `plan.default_mode=interactive`
-- `version=7.1.0`
+- `plan.interaction_depth=medium`
+- `plan.interactive.min_rounds=3`
+- `plan.interactive.require_explicit_confirm=true`
+- `output.language=en`
+- `output.timezone=UTC`
+- `watchdog.enabled=false`
+- `watchdog.interval=300`
+- `watchdog.heartbeat_timeout=300`
+- `watchdog.max_retries=5`
+- `watchdog.max_consecutive_milestones=10`
+- `watchdog.notify=true`
+- `version=8.0.0`
 
 ## Config Shape
 
@@ -113,8 +138,24 @@ dashboard:
 
 plan:
   default_mode: interactive
+  interaction_depth: medium
+  interactive:
+    min_rounds: 3
+    require_explicit_confirm: true
 
-version: "7.1.0"
+output:
+  language: en
+  timezone: UTC
+
+watchdog:
+  enabled: false
+  interval: 300
+  heartbeat_timeout: 300
+  max_retries: 5
+  max_consecutive_milestones: 10
+  notify: true
+
+version: "8.0.0"
 created: "2026-04-26T14:00:00+08:00"
 updated: "2026-04-26T14:00:00+08:00"
 ```

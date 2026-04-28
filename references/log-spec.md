@@ -19,7 +19,7 @@ Use this reference for the V6 lifecycle ledger at `.pipeline/log.yaml`.
 ```yaml
 entries:
   - id: "M0"
-    type: milestone | fix | audit | debug | plan_review | release
+    type: milestone | fix | audit | debug | plan_review | release | cycle | patch | watchdog
     ref: "milestone-m0"
     status: completed | warning | blocked | failed | proposed
     timestamp: "2026-04-24T10:00:00Z"
@@ -32,7 +32,7 @@ entries:
 Field rules:
 
 - `id`: stable entry id such as `M0`, `FIX-003`, `AUDIT-002`
-- `type`: one of `milestone`, `fix`, `audit`, `debug`, `plan_review`, `release`
+- `type`: one of `milestone`, `fix`, `audit`, `debug`, `plan_review`, `release`, `cycle`, `patch`, `watchdog`
 - `ref`: human-readable pointer to a prompt, command, report, release tag, or issue
 - `status`: lifecycle result for the entry
 - `timestamp`: ISO-8601 timestamp
@@ -51,6 +51,9 @@ Write a new entry when:
 - a debug investigation finishes
 - a plan review produces architecture delta notes
 - a release is prepared or published
+- a Cycle opens, closes, archives, pauses, or is abandoned
+- a Patch opens, closes, or is resolved by a milestone
+- watchdog retries are exhausted or automatic resume succeeds
 
 ## Read Behavior
 
@@ -62,6 +65,8 @@ Write a new entry when:
 - `--since <milestone>`: show entries whose `related_milestone` is that milestone or later
 
 If `log.yaml` does not exist, respond with `暂无日志，执行 Pipeline 后自动生成`.
+
+When displaying entries, use `output.language` and convert timestamps to `output.timezone`.
 
 ## Fix Report Template
 

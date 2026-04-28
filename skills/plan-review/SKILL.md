@@ -15,15 +15,16 @@ Use this skill for Plan Review after execution changes project reality.
 ## Execution Flow
 
 1. Read the architecture baseline.
-2. Summarize what the completed milestone actually changed.
-3. Record:
+2. Resolve `output.language` and `output.timezone`.
+3. Summarize what the completed milestone actually changed in `output.language`.
+4. Record:
    - `ADDED`
    - `CHANGED`
    - `REASON`
    - `IMPACT`
-4. Check downstream prompts for stale assumptions.
-5. Propose edits in `.plan-state/prompt-patch-queue.yaml` instead of silently rewriting prompts.
-6. Append a lifecycle log entry and update progress context if this review materially changes the plan.
+5. Check downstream prompts for stale assumptions.
+6. Propose edits in `.plan-state/prompt-patch-queue.yaml` instead of silently rewriting prompts.
+7. Append a lifecycle log entry and update progress context if this review materially changes the plan.
 
 ## Reference Files
 

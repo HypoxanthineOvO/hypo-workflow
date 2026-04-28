@@ -20,12 +20,16 @@ Use this skill to pause the current run while preserving resumable state.
 5. Optionally write an intermediate report if the command does not disable report generation.
 6. Append a stop event to `.pipeline/log.yaml`.
 7. Update `.pipeline/PROGRESS.md` to show the paused status.
+8. Update top-level `last_heartbeat`.
+9. Remove `.pipeline/.lock` if it belongs to the current execution.
+10. Unregister the watchdog cron entry because this stop is intentional.
 
 ## Safety Rules
 
 - do not mark the prompt aborted
 - do not discard partial work
 - stop should be resumable, not destructive
+- do not leave `.pipeline/.lock` behind after a successful stop
 
 ## Reference Files
 

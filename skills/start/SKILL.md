@@ -22,12 +22,14 @@ Use this skill to start execution from a local `.pipeline/` workspace. This is t
    - `execution.subagent_tool` falls back to global `subagent.provider`, then `auto`
    - `dashboard.*` and `plan.*` use the same priority when relevant
 4. Read `.pipeline/state.yaml` if present; otherwise initialize state from `assets/state-init.yaml`.
-5. Set `current.phase=executing` before running milestones.
-6. Treat Claude as the orchestrator:
+5. If `watchdog.enabled=true`, register the project watchdog cron entry before long-running execution begins.
+6. Create `.pipeline/.lock` before entering active execution.
+7. Set `current.phase=executing` and update top-level `last_heartbeat` with an ISO-8601 timestamp before running milestones.
+8. Treat Claude as the orchestrator:
    - Claude plans the current step
    - Claude delegates concrete sub-work to serial subagent tasks when appropriate
    - Claude verifies results, updates state, logging, and progress artifacts
-7. Execute the active milestone serially:
+9. Execute the active milestone serially:
    - `write_tests`
    - `review_tests`
    - `run_tests_red`
@@ -35,16 +37,28 @@ Use this skill to start execution from a local `.pipeline/` workspace. This is t
    - `run_tests_green`
    - `review_code`
    - report and commit work if the prompt requires it
-8. After every meaningful step, update:
+10. After every meaningful step, update:
    - `.pipeline/state.yaml`
    - `.pipeline/log.yaml`
    - `.pipeline/PROGRESS.md`
-9. On failure, Claude must choose one of:
+   - top-level `last_heartbeat`
+11. On failure, Claude must choose one of:
    - `retry`: revise instructions and rerun the failed step
    - `deferred`: mark the milestone deferred if downstream work can continue safely
    - `stop`: stop and surface the blocking reason to the user
-10. Keep moving automatically between milestones while unfinished work remains.
-11. Only allow the turn to end naturally when all milestones are complete or Claude has explicitly chosen the `stop` outcome.
+12. Keep moving automatically between milestones while unfinished work remains.
+13. Remove `.pipeline/.lock` when the execution turn completes, stops, blocks, aborts, or finishes.
+14. If the pipeline completes or stops intentionally, unregister the watchdog cron entry.
+15. Only allow the turn to end naturally when all milestones are complete or Claude has explicitly chosen the `stop` outcome.
+
+## Watchdog Integration
+
+- resolve `watchdog.*` from project > global > defaults
+- when `watchdog.enabled=false`, do not register cron
+- when enabled, register `scripts/watchdog.sh <project-root>` with marker `# hypo-workflow-watchdog:<project-root>`
+- write `last_heartbeat` every time state is persisted during execution
+- create `.pipeline/.lock` before executing steps so watchdog cannot reenter the same run
+- remove `.pipeline/.lock` on all clean exits and blocking exits
 
 ## Failure Handling
 
