@@ -6,7 +6,7 @@ Use this reference whenever a command needs Hypo-Workflow configuration defaults
 
 | Layer | Path | Owner | Purpose |
 |---|---|---|---|
-| Global | `~/.hypo-workflow/config.yaml` | `/hypo-workflow:setup` | Agent platform, default execution mode, subagent backend, dashboard defaults, plan defaults, output defaults, watchdog defaults |
+| Global | `~/.hypo-workflow/config.yaml` | `/hypo-workflow:setup` | Agent platform, default execution mode, subagent backend, dashboard defaults, plan defaults, output defaults, watchdog defaults, history import defaults |
 | Project | `.pipeline/config.yaml` | `/hypo-workflow:init` or `/hypo-workflow:plan-generate` | Project name, prompt source/output, reports, preset, evaluation rules, project-specific overrides |
 
 `setup` must never create project config. `init` and `plan-generate` must not overwrite global config.
@@ -37,6 +37,10 @@ Resolve every configurable value in this order:
 | watchdog enabled | `watchdog.enabled` | `watchdog.enabled` | `false` |
 | watchdog interval | `watchdog.interval` | `watchdog.interval` | `300` |
 | watchdog heartbeat timeout | `watchdog.heartbeat_timeout` | `watchdog.heartbeat_timeout` | `300` |
+| history import split method | `history_import.split_method` | `history_import.split_method` | `auto` |
+| history import time gap | `history_import.time_gap_threshold` | `history_import.time_gap_threshold` | `24h` |
+| history import max milestones | `history_import.max_milestones` | `history_import.max_milestones` | `20` |
+| history import keyword patterns | `history_import.keyword_patterns` | `history_import.keyword_patterns` | built-in V8.1 patterns |
 
 Normalize global `agent.platform=claude-code` to the runtime platform value `claude` when applying existing project-platform logic.
 
@@ -91,7 +95,15 @@ watchdog:
   max_retries: 5
   max_consecutive_milestones: 10
   notify: true
-version: "8.0.0"
+history_import:
+  split_method: auto
+  time_gap_threshold: 24h
+  max_milestones: 20
+  keyword_patterns:
+    - 'feat\(M(\d+)\):'
+    - 'M(\d+)-'
+    - 'milestone-(\d+)'
+version: "8.1.0"
 created: "2026-04-26T14:00:00+08:00"
 updated: "2026-04-26T14:00:00+08:00"
 ```

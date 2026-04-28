@@ -86,6 +86,7 @@ Use short, concrete prompts:
 - "Output language?"
 - "Output timezone?"
 - "Enable Auto Resume watchdog by default?"
+- "History import split method?"
 
 ## Default Values
 
@@ -109,7 +110,10 @@ Use short, concrete prompts:
 - `watchdog.max_retries=5`
 - `watchdog.max_consecutive_milestones=10`
 - `watchdog.notify=true`
-- `version=8.0.0`
+- `history_import.split_method=auto`
+- `history_import.time_gap_threshold=24h`
+- `history_import.max_milestones=20`
+- `version=8.1.0`
 
 ## Config Shape
 
@@ -155,7 +159,16 @@ watchdog:
   max_consecutive_milestones: 10
   notify: true
 
-version: "8.0.0"
+history_import:
+  split_method: auto
+  time_gap_threshold: 24h
+  max_milestones: 20
+  keyword_patterns:
+    - 'feat\(M(\d+)\):'
+    - 'M(\d+)-'
+    - 'milestone-(\d+)'
+
+version: "8.1.0"
 created: "2026-04-26T14:00:00+08:00"
 updated: "2026-04-26T14:00:00+08:00"
 ```

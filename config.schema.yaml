@@ -139,6 +139,46 @@ $defs:
           max_retries: 5
           max_consecutive_milestones: 10
           notify: true
+      history_import:
+        type: object
+        additionalProperties: false
+        properties:
+          split_method:
+            type: string
+            enum:
+              - auto
+              - tag
+              - keyword
+              - merge
+              - time_gap
+            default: auto
+          time_gap_threshold:
+            type: string
+            pattern: "^[0-9]+[hmd]$"
+            default: 24h
+          max_milestones:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 20
+          keyword_patterns:
+            type: array
+            minItems: 1
+            default:
+              - 'feat\(M(\d+)\):'
+              - 'M(\d+)-'
+              - 'milestone-(\d+)'
+            items:
+              type: string
+              minLength: 1
+        default:
+          split_method: auto
+          time_gap_threshold: 24h
+          max_milestones: 20
+          keyword_patterns:
+            - 'feat\(M(\d+)\):'
+            - 'M(\d+)-'
+            - 'milestone-(\d+)'
       plan:
         type: object
         additionalProperties: false
@@ -174,7 +214,7 @@ $defs:
               require_explicit_confirm: true
       version:
         type: string
-        pattern: "^(7\\.1\\.0|8\\.0\\.0)$"
+        pattern: "^(7\\.1\\.0|8\\.0\\.0|8\\.1\\.0)$"
       created:
         type: string
         minLength: 1
@@ -429,6 +469,46 @@ properties:
       max_retries: 5
       max_consecutive_milestones: 10
       notify: true
+  history_import:
+    type: object
+    additionalProperties: false
+    properties:
+      split_method:
+        type: string
+        enum:
+          - auto
+          - tag
+          - keyword
+          - merge
+          - time_gap
+        default: auto
+      time_gap_threshold:
+        type: string
+        pattern: "^[0-9]+[hmd]$"
+        default: 24h
+      max_milestones:
+        type: integer
+        minimum: 1
+        maximum: 20
+        default: 20
+      keyword_patterns:
+        type: array
+        minItems: 1
+        default:
+          - 'feat\(M(\d+)\):'
+          - 'M(\d+)-'
+          - 'milestone-(\d+)'
+        items:
+          type: string
+          minLength: 1
+    default:
+      split_method: auto
+      time_gap_threshold: 24h
+      max_milestones: 20
+      keyword_patterns:
+        - 'feat\(M(\d+)\):'
+        - 'M(\d+)-'
+        - 'milestone-(\d+)'
   step_overrides:
     type: object
     default: {}
