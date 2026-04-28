@@ -91,6 +91,54 @@ $defs:
             minimum: 1
             maximum: 65535
             default: 7700
+      output:
+        type: object
+        additionalProperties: false
+        properties:
+          language:
+            type: string
+            minLength: 1
+            default: en
+          timezone:
+            type: string
+            minLength: 1
+            default: UTC
+        default:
+          language: en
+          timezone: UTC
+      watchdog:
+        type: object
+        additionalProperties: false
+        properties:
+          enabled:
+            type: boolean
+            default: false
+          interval:
+            type: integer
+            minimum: 1
+            default: 300
+          heartbeat_timeout:
+            type: integer
+            minimum: 1
+            default: 300
+          max_retries:
+            type: integer
+            minimum: 1
+            default: 5
+          max_consecutive_milestones:
+            type: integer
+            minimum: 1
+            default: 10
+          notify:
+            type: boolean
+            default: true
+        default:
+          enabled: false
+          interval: 300
+          heartbeat_timeout: 300
+          max_retries: 5
+          max_consecutive_milestones: 10
+          notify: true
       plan:
         type: object
         additionalProperties: false
@@ -103,9 +151,30 @@ $defs:
               - interactive
               - auto
             default: interactive
+          interaction_depth:
+            type: string
+            enum:
+              - low
+              - medium
+              - high
+            default: medium
+          interactive:
+            type: object
+            additionalProperties: false
+            properties:
+              min_rounds:
+                type: integer
+                minimum: 1
+                default: 3
+              require_explicit_confirm:
+                type: boolean
+                default: true
+            default:
+              min_rounds: 3
+              require_explicit_confirm: true
       version:
         type: string
-        pattern: "^7\\.1\\.0$"
+        pattern: "^(7\\.1\\.0|8\\.0\\.0)$"
       created:
         type: string
         minLength: 1
@@ -144,10 +213,27 @@ properties:
           - low
           - medium
           - high
-        default: high
+        default: medium
+      interactive:
+        type: object
+        additionalProperties: false
+        properties:
+          min_rounds:
+            type: integer
+            minimum: 1
+            default: 3
+          require_explicit_confirm:
+            type: boolean
+            default: true
+        default:
+          min_rounds: 3
+          require_explicit_confirm: true
     default:
       mode: interactive
-      interaction_depth: high
+      interaction_depth: medium
+      interactive:
+        min_rounds: 3
+        require_explicit_confirm: true
   dashboard:
     type: object
     additionalProperties: false
@@ -293,6 +379,56 @@ properties:
       subagent_tool: auto
       steps:
         preset: tdd
+  output:
+    type: object
+    additionalProperties: false
+    properties:
+      language:
+        type: string
+        minLength: 1
+        default: en
+        description: Report and PROGRESS language. Use zh-CN for Chinese output.
+      timezone:
+        type: string
+        minLength: 1
+        default: UTC
+        description: IANA timezone used for PROGRESS and report timestamps.
+    default:
+      language: en
+      timezone: UTC
+  watchdog:
+    type: object
+    additionalProperties: false
+    properties:
+      enabled:
+        type: boolean
+        default: false
+      interval:
+        type: integer
+        minimum: 1
+        default: 300
+      heartbeat_timeout:
+        type: integer
+        minimum: 1
+        default: 300
+      max_retries:
+        type: integer
+        minimum: 1
+        default: 5
+      max_consecutive_milestones:
+        type: integer
+        minimum: 1
+        default: 10
+      notify:
+        type: boolean
+        default: true
+    default:
+      enabled: false
+      interval: 300
+      heartbeat_timeout: 300
+      max_retries: 5
+      max_consecutive_milestones: 10
+      notify: true
   step_overrides:
     type: object
     default: {}
