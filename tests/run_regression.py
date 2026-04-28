@@ -134,7 +134,7 @@ def scenario_specific(scene: Path, result: ScenarioResult) -> None:
         scripts = len(list((ROOT / "scripts").glob("*.sh")))
         assets = len([p for p in (ROOT / "assets").rglob("*") if p.is_file()])
         add(result, "references_count", refs >= 6, str(refs))
-        add(result, "scripts_count", scripts == 4, str(scripts))
+        add(result, "scripts_count", scripts >= 5 and (ROOT / "scripts" / "watchdog.sh").exists(), str(scripts))
         add(result, "assets_present", assets >= 5, str(assets))
     elif name == "s11-scripts-executability":
         tmpdir = Path(tempfile.mkdtemp(prefix="hw-s11-"))
@@ -153,7 +153,7 @@ def scenario_specific(scene: Path, result: ScenarioResult) -> None:
         diff = run(f'bash "{ROOT / "scripts" / "diff-stats.sh"}"', cwd=gitrepo)
         add(result, "diff_stats", "changed_files=" in diff.stdout and "added_lines=" in diff.stdout, diff.stdout.strip())
         plugin = run(f'python3 -m json.tool "{PLUGIN_JSON}"')
-        add(result, "plugin_json", plugin.returncode == 0 and '"version": "7.0.0"' in plugin.stdout)
+        add(result, "plugin_json", plugin.returncode == 0 and '"version": "8.0.0"' in plugin.stdout)
     elif name == "s12-hook-stop-check":
         tmp = Path(tempfile.mkdtemp(prefix="hw-s12-"))
         case_a = run(f'bash "{ROOT / "hooks" / "stop-check.sh"}"', cwd=tmp)

@@ -6,7 +6,7 @@
 
 TDD Pipeline · Self-Review · Interrupt Recovery · Multi-Dimensional Evaluation
 
-[![Version](https://img.shields.io/badge/version-7.0.0-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-8.0.0-blue)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex-purple)](#platform-support)
 
@@ -31,8 +31,8 @@ It ships as a **SKILL.md** file — not a service, not a CLI tool. Any AI agent 
 | Feature | Description |
 |---------|-------------|
 | 🔄 **TDD Pipeline** | Built-in test-driven sub-steps: write tests → review → red → implement → green → review code |
-| 🧭 **Native Skills** | 22 native Claude Code skills exposed as `/hypo-workflow:*` plus `/hw:*` compatibility for Codex |
-| 🗺️ **Plan Mode** | Auto and Interactive planning modes with discover / decompose / generate / confirm / review phases |
+| 🧭 **Native Skills** | 25 user-facing Claude Code skills exposed as `/hypo-workflow:*` plus `/hw:*` compatibility for Codex |
+| 🗺️ **Plan Mode** | Auto and Interactive planning modes with enforced discovery gates, context injection, extend, decompose / generate / confirm / review phases |
 | 🧩 **Notion Adapter** | Read prompts from Notion and/or write reports back to Notion with graceful degradation |
 | ⏸️ **Interrupt Recovery** | `state.yaml` tracks progress to the sub-step level — resume exactly where you left off |
 | 🤖 **Subagent Delegation** | Offload code reviews to a subagent (Claude ↔ Codex), with automatic fallback |
@@ -41,6 +41,9 @@ It ships as a **SKILL.md** file — not a service, not a CLI tool. Any AI agent 
 | 🔁 **Lifecycle Closure** | `/hw:init` → `/hw:check` → `/hw:audit` → `/hw:debug` → `/hw:release` completes the project loop |
 | 📝 **Unified Logging** | `.pipeline/log.yaml` records milestones, fixes, audits, debug sessions, plan reviews, and releases |
 | 📈 **Progress Summary** | `.pipeline/PROGRESS.md` gives a human-readable milestone and step summary |
+| 🔄 **Cycles** | Delivery Cycles archive state, prompts, reports, deferred work, and summaries across project history |
+| 🩹 **Patch Track** | Persistent lightweight `P001` style patches stay outside Cycle archives and can feed future plans |
+| ⏱️ **Auto Resume Watchdog** | Optional heartbeat + cron watchdog resumes stale executing pipelines safely |
 | 🛠️ **Setup Wizard** | `/hypo-workflow:setup` configures environment, execution defaults, subagent backend, and dashboard preferences |
 | 🌐 **Dashboard** | `/hypo-workflow:dashboard` launches a live WebUI for state, config, progress, reports, and log activity |
 | 📦 **Plugin Ready** | Ships official `.claude-plugin` and `.codex-plugin` manifests plus marketplace metadata |
@@ -426,7 +429,7 @@ hypo-workflow/
 
 │   └── hypo-todo-adaptive/      # Adaptive threshold example
 
-├── skills/                    # 22 native Claude Code command skills
+├── skills/                    # 25 user-facing skills + internal watchdog
 
 └── tests/
 
@@ -447,8 +450,8 @@ Repository root distribution metadata is included directly in this flattened lay
 
 | Layer | Path | Created By | Purpose |
 |-------|------|------------|---------|
-| Global | `~/.hypo-workflow/config.yaml` | `/hypo-workflow:setup` | Agent platform, default execution mode, subagent provider, dashboard defaults, plan defaults |
-| Project | `.pipeline/config.yaml` | `/hypo-workflow:init` | Project name, prompt source/output, reports, preset, evaluation rules |
+| Global | `~/.hypo-workflow/config.yaml` | `/hypo-workflow:setup` | Agent platform, default execution mode, subagent provider, dashboard, plan, output, and watchdog defaults |
+| Project | `.pipeline/config.yaml` | `/hypo-workflow:init` | Project name, prompt source/output, reports, preset, evaluation rules, optional Cycle/output/watchdog overrides |
 
 Priority is project > global > defaults. For example, `.pipeline/config.yaml` `execution.mode` overrides global `execution.default_mode`.
 
@@ -509,6 +512,7 @@ Codex users keep the compatible `/hw:*` path via the root `SKILL.md`.
 | `/hw:plan:decompose` | Split work into milestones with test specs |
 | `/hw:plan:generate` | Generate `.pipeline/` artifacts from the plan |
 | `/hw:plan:confirm` | Summarize the generated plan and wait for `/hw:start` |
+| `/hw:plan:extend` | Append milestones to the active Cycle without reopening planning from scratch |
 | `/hw:plan:review` | Review architecture deltas and downstream prompt impact |
 
 #### Lifecycle
@@ -520,6 +524,8 @@ Codex users keep the compatible `/hw:*` path via the root `SKILL.md`.
 | `/hw:audit` | Run graded preventive code audits |
 | `/hw:release` | Run the automated publishing flow |
 | `/hw:debug` | Investigate a symptom and propose or apply a verified fix |
+| `/hw:cycle` | Create, list, view, close, and archive delivery Cycles |
+| `/hw:patch` | Create, list, and close persistent lightweight Patches |
 
 #### Utility
 
@@ -543,6 +549,49 @@ Compatibility note: `/hw:review` now shows a migration warning and redirects use
 - `.pipeline/PROGRESS.md` is the human-readable companion to `log.yaml`
 - it tracks current milestone, recent activity, and deferred work
 - it is updated during execution and failure triage
+- output obeys `output.language` and `output.timezone`; default is English + UTC
+- Chinese projects can set:
+
+```yaml
+output:
+  language: zh-CN
+  timezone: Asia/Shanghai
+```
+
+### Cycles And Patches
+
+- `.pipeline/cycle.yaml` describes the active Cycle
+- `.pipeline/archives/C{N}-{slug}/` stores closed Cycle artifacts
+- `.pipeline/patches/P001-*.md` stores persistent lightweight patches
+- project-root `PROJECT-SUMMARY.md` summarizes Cycle history, open patches, and deferred items
+
+Common commands:
+
+```text
+/hw:cycle new "V8 implementation" --type feature --context audit,patches
+/hw:cycle list
+/hw:cycle close
+/hw:patch "Fix login layout" --severity normal
+/hw:patch list --open
+/hw:plan --context audit,patches,deferred
+/hw:plan:extend
+```
+
+### Auto Resume Watchdog
+
+The watchdog is opt-in and disabled by default:
+
+```yaml
+watchdog:
+  enabled: false
+  interval: 300
+  heartbeat_timeout: 300
+  max_retries: 5
+  max_consecutive_milestones: 10
+  notify: true
+```
+
+When enabled, `/hw:start` registers `scripts/watchdog.sh`, execution updates `last_heartbeat`, and `.pipeline/.lock` prevents reentry.
 
 ### Evaluation
 
@@ -793,6 +842,7 @@ Hooks act as a passive safety net — they don’t drive the pipeline, but preve
 | V6.2 | 20 native skills, smart stop hooks, plan auto/interactive modes, PROGRESS.md, and failure triage |
 | V7 | Setup wizard, WebUI dashboard, and 22 native skills |
 | V7.1 | Global setup config, config fallback priority, and platform-specific subagent tutorials |
+| V8 | Interactive planning hard gates, Cycle archives, Patch track, context-injected planning, output language/timezone, project summary, plan extend, and Auto Resume watchdog |
 
 ---
 

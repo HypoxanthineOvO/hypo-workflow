@@ -5,7 +5,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 ## Namespace
 
 - all explicit Hypo-Workflow commands use the `/hw:` prefix
-- V7 canonical namespace contains 22 commands across Setup, Pipeline, Plan, Lifecycle, and Utility groups
+- V8 canonical namespace contains 25 user-facing commands across Setup, Pipeline, Plan, Lifecycle, and Utility groups, plus an internal cron-only watchdog skill
 - slash commands are exact and namespace-scoped
 - slash commands take precedence over fuzzy natural-language matching
 - natural-language commands remain valid for backward compatibility
@@ -35,16 +35,19 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
    - `/hw:plan:decompose`
    - `/hw:plan:generate`
    - `/hw:plan:confirm`
+   - `/hw:plan:extend`
    - `/hw:plan:review`
+   - `/hw:cycle`
+   - `/hw:patch`
 3. parse remaining tokens as command arguments
 4. flags are order-independent
 5. if a command is unknown, return exactly:
-   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:review, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
+   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
 6. if a known command receives an unsupported flag, stop and report the unsupported flag explicitly instead of guessing
 7. if a prompt selector is ambiguous, list the candidates and stop
 8. plan and review commands load `plan/PLAN-SKILL.md` before execution
 9. if a command starts with `/hw:plan:` and is unknown, return exactly:
-   `Unknown command: /hw:plan:xxx. Available: /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:review`
+   `Unknown command: /hw:plan:xxx. Available: /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review`
 10. append-mode conflicts must never silently renumber executed prompts
 11. `/hw:review` is a compatibility alias that prints a migration warning instead of running the review directly
 
@@ -68,6 +71,9 @@ Behavior:
 - if `--from <prompt>` is present, resolve against prompt filename or prompt stem prefix
 - when `--from` is used, initialize `current.prompt_file` directly to the matched prompt
 - do not fabricate history entries for prompts that were never executed
+- create `.pipeline/.lock` during active execution
+- update top-level `last_heartbeat` whenever state is persisted
+- if `watchdog.enabled=true`, register cron for `scripts/watchdog.sh`
 
 ### `/hw:resume`
 
@@ -88,8 +94,11 @@ Notes:
 Behavior:
 
 - read `state.yaml`
+- stop if `.pipeline/.lock` already exists
+- create `.pipeline/.lock` before active execution
 - locate `current.prompt_file` and `current.step`
 - continue from the next runnable step
+- update top-level `last_heartbeat` whenever state is persisted
 
 ### `/hw:status`
 
@@ -102,6 +111,8 @@ Behavior:
 - prefer `scripts/state-summary.sh`
 - if the script is unavailable, fall back to direct config/state inspection
 - include the effective execution mode when config files are available
+- include active Cycle metadata, `last_heartbeat`, and watchdog state when present
+- include project-root `PROJECT-SUMMARY.md` top summary when present
 - do not mutate `state.yaml`, `log.md`, `log.yaml`, or reports
 
 ### `/hw:skip`
@@ -143,6 +154,8 @@ Behavior:
 - append one prompt-level stop event
 - do not advance the prompt
 - do not mark the prompt aborted
+- remove `.pipeline/.lock`
+- unregister watchdog cron because the stop is intentional
 
 ### `/hw:report`
 
@@ -167,7 +180,7 @@ Supported forms:
 Behavior:
 
 - read `SKILL.md` command tables as the source of truth
-- `/hw:help` lists all 22 canonical commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility
+- `/hw:help` lists all 25 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility
 - `/hw:help --quick` returns a compact cheat sheet
 - `/hw:help <cmd>` returns detailed usage, flags, and examples for the requested command
 
@@ -212,7 +225,7 @@ Behavior:
 - create `~/.hypo-workflow/` if it is missing
 - create or update `~/.hypo-workflow/config.yaml`
 - detect or confirm `agent.platform` as `claude-code` or `codex`
-- configure `execution.default_mode`, `subagent.provider`, provider model settings, `dashboard.enabled`, `dashboard.port`, and `plan.default_mode`
+- configure `execution.default_mode`, `subagent.provider`, provider model settings, `dashboard.enabled`, `dashboard.port`, `plan.default_mode`, optional output defaults, and optional watchdog defaults
 - preserve `created` on existing configs and update `updated`
 - write plugin-level configuration outside the project pipeline state
 
@@ -221,6 +234,7 @@ Behavior:
 Supported flags:
 
 - none
+- `--context audit,patches,deferred,debug`
 
 Behavior:
 
@@ -318,6 +332,8 @@ Behavior:
 - load `plan/PLAN-SKILL.md`
 - enter Plan Mode using the Discover-first flow
 - honor `--template <name>` as an initial template hint when present
+- honor `--context` as comma-separated P1 context sources
+- when `--context` is omitted, use active `cycle.context_sources` when present
 - honor `plan.mode=auto|interactive` from project config, falling back to global `plan.default_mode` when available
 - default to `/hw:plan:discover` when no explicit sub-phase is given
 - do not start normal pipeline execution yet
@@ -336,6 +352,9 @@ Behavior:
 - write or update `.pipeline/design-spec.md`
 - persist intermediate planning state in `.plan-state/` when available
 - in interactive mode, ask targeted follow-up questions in rounds
+- in interactive mode, enforce minimum rounds from `plan.interaction_depth`: low=2, medium=3, high=5
+- in interactive mode, do not enter P2 until the user explicitly says「够了」「开始吧」「可以了」or equivalent
+- if context is injected, present it before the first question round but do not skip Discover
 - in auto mode, continue without pausing unless blocked by missing critical information
 
 ### `/hw:plan:decompose`
@@ -349,6 +368,7 @@ Behavior:
 - load `plan/PLAN-SKILL.md`
 - split the project into milestones
 - include test specs and boundary coverage expectations per milestone
+- in interactive mode, show the proposed milestone split and wait for confirmation before P3 Generate
 
 ### `/hw:plan:generate`
 
@@ -377,8 +397,27 @@ Behavior:
 - load `plan/PLAN-SKILL.md`
 - summarize generated artifacts
 - include project name, stack, preset, milestone count, test point count, and generated files
-- in interactive mode, wait for explicit confirmation to continue into `/hw:start`
+- in interactive mode, treat Confirm as a hard gate and wait for explicit `确认` or equivalent before `/hw:start`
 - in auto mode, treat confirm as a summary checkpoint rather than a hard stop
+
+### `/hw:plan:extend`
+
+Supported flags:
+
+- none
+
+Behavior:
+
+- load `plan/PLAN-SKILL.md`
+- require active `.pipeline/cycle.yaml`
+- require `.pipeline/state.yaml`
+- show the current Cycle milestone list
+- ask at least one targeted interactive question round
+- propose appended milestones and wait for explicit confirmation
+- generate new prompt files under `.pipeline/prompts/`
+- append milestone records to `.pipeline/state.yaml`
+- start numbering at current max milestone number + 1
+- never renumber or reorder existing milestones
 
 ### `/hw:plan:review`
 
@@ -393,6 +432,39 @@ Behavior:
 - with `--full`, review all completed milestones and architecture deltas
 - append or refresh `architecture.md` review notes using the Plan Review format
 - emit proposed downstream prompt edits to `.plan-state/prompt-patch-queue.yaml` instead of silently rewriting prompts
+
+### `/hw:cycle`
+
+Supported forms:
+
+- `/hw:cycle new "名称" [--type feature|bugfix|refactor|spike|hotfix] [--context audit,patches,deferred,debug]`
+- `/hw:cycle list`
+- `/hw:cycle view C{N}`
+- `/hw:cycle close [--reason "..."] [--paused]`
+
+Behavior:
+
+- load `skills/cycle/SKILL.md`
+- create explicit `.pipeline/cycle.yaml` only on `new`
+- do not let `/hw:init` create `cycle.yaml`
+- archive active Cycle artifacts on `close` or before a new Cycle starts
+- leave old projects without `cycle.yaml` compatible as implicit `C1`
+
+### `/hw:patch`
+
+Supported forms:
+
+- `/hw:patch "描述" [--severity critical|normal|minor]`
+- `/hw:patch list [--open] [--severity critical|normal|minor]`
+- `/hw:patch close P{NNN}`
+
+Behavior:
+
+- load `skills/patch/SKILL.md`
+- store Patch files under `.pipeline/patches/`
+- assign global monotonically increasing IDs `P001`, `P002`, ...
+- keep Patches outside Cycle archives
+- close patches by updating status without deleting notes
 
 ### `/hw:review`
 
@@ -414,6 +486,9 @@ Behavior:
 - `跳过当前步骤` remains a step-level skip and is not the same as `/hw:skip`
 - `中止`, `abort` remain hard-abort operations and are not the same as `/hw:stop`
 - `/hw:plan` enters planning mode and is not the same as `/hw:start`
+- `/hw:plan:extend` appends to an active Cycle and is not the same as opening a new Cycle
 - `/hw:plan:review` is a planning review surface and not the same as `review_code`
+- `/hw:cycle` manages Cycle metadata and archives, not normal milestone execution
+- `/hw:patch` manages persistent side-track issues, not prompt patch queues under `.plan-state/`
 - `/hw:review --full` remains a compatibility reminder during V6 only
 - slash commands are entry shortcuts only; they do not change TDD, evaluation, or delegation semantics

@@ -5,7 +5,7 @@ description: Show the full Hypo-Workflow command map when the user needs a quick
 
 # /hypo-workflow:help
 
-Use this skill to explain the 22 native Hypo-Workflow skills.
+Use this skill to explain the 25 user-facing Hypo-Workflow commands and the internal watchdog skill.
 
 ## Command Groups
 
@@ -14,15 +14,17 @@ Use this skill to explain the 22 native Hypo-Workflow skills.
 - Pipeline:
   - `start`, `resume`, `status`, `skip`, `stop`, `report`
 - Plan:
-  - `plan`, `plan-discover`, `plan-decompose`, `plan-generate`, `plan-confirm`, `plan-review`
+  - `plan`, `plan-discover`, `plan-decompose`, `plan-generate`, `plan-confirm`, `plan-extend`, `plan-review`
 - Lifecycle:
-  - `init`, `check`, `audit`, `release`, `debug`
+  - `init`, `check`, `audit`, `release`, `debug`, `cycle`, `patch`
 - Utility:
   - `dashboard`, `help`, `reset`, `log`
+- Internal:
+  - `watchdog` (cron-only; hidden from normal quick help unless explicitly requested)
 
 ## Execution Flow
 
-1. By default, list all 22 commands grouped by category.
+1. By default, list all 25 user-facing commands grouped by category.
 2. For a specific command, explain:
    - when to use it
    - required inputs or flags
@@ -33,6 +35,8 @@ Use this skill to explain the 22 native Hypo-Workflow skills.
    - Codex can configure Claude as the subagent provider
    - mixed mode can delegate individual steps through `step_overrides`
 5. Mention that Codex still uses the root `SKILL.md` and `/hw:*` compatibility path.
+6. Include `/hw:cycle`, `/hw:patch`, and `/hw:plan:extend` in normal help output.
+7. Mention `/hw:watchdog` only when the user asks about watchdog or auto resume internals.
 
 ## Reference Files
 

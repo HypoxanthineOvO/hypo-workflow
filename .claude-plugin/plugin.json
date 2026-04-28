@@ -1,7 +1,7 @@
 {
   "name": "hypo-workflow",
-  "version": "7.0.0",
-  "description": "Serialized prompt workflow with 22 native skills covering setup, plan, execute, review, debug, release, and dashboard.",
+  "version": "8.0.0",
+  "description": "Serialized prompt workflow with 25 user-facing skills covering setup, plan, execute, cycles, patches, review, debug, release, watchdog, and dashboard.",
   "author": {
     "name": "Hypoxanthine",
     "url": "https://github.com/HypoxanthineOvO"
