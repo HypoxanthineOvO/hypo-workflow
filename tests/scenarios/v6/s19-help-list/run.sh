@@ -20,10 +20,10 @@ rg -q '\| `/hw:compact` \|' SKILL.md
 rg -q '\| `/hw:guide` \|' SKILL.md
 rg -q '\| `/hw:showcase` \|' SKILL.md
 rg -q '\| `/hw:plan:extend` \|' SKILL.md
-rg -q '^#### Setup$' README.md
+rg -q '^#### 设置$' README.md
 rg -q '^#### Pipeline$' README.md
 rg -q '^#### Plan$' README.md
-rg -q '^#### Lifecycle$' README.md
-rg -q '^#### Utility$' README.md
+rg -q '^#### 生命周期$' README.md
+rg -q '^#### 工具$' README.md
 
 echo "s19-help-list: PASS"

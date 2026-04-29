@@ -2,181 +2,181 @@
 
 # Hypo-Workflow
 
-**Serialized workflow engine for AI agents**
+**面向 AI Agent 的串行工作流引擎**
 
 Plan -> Execute -> Review -> Report -> Recover -> Showcase
 
 [![Version](https://img.shields.io/badge/version-8.3.0-blue)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex-purple)](#platform-support)
+[![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex-purple)](#平台支持)
 
 </div>
 
 ---
 
-## Overview
+## 概览
 
-Hypo-Workflow turns long AI-agent work into a local, inspectable workflow. Instead of asking an agent to "finish everything" in one fragile session, you give it a `.pipeline/` workspace with prompts, state, logs, reports, and lifecycle metadata.
+Hypo-Workflow 把长周期 AI Agent 工作变成可规划、可恢复、可审查的本地工作流。你不需要让 Agent 在一个脆弱会话里“一次做完所有事”，而是给它一个 `.pipeline/` 工作区，用文件记录 prompts、状态、日志、报告和生命周期数据。
 
-The agent then works through a structured loop:
+核心执行循环：
 
 ```text
 Plan -> Prompt -> Step Chain -> Tests -> Review -> Report -> Evaluate -> Next / Stop
 ```
 
-It is not a SaaS service and not a daemon. It is a Skill-based repository that Claude Code or Codex can read directly.
+它不是 SaaS，也不是后台 daemon。它是一套 Skill 驱动的仓库结构，Claude Code 和 Codex 都可以直接读取并执行。
 
-### What It Gives You
+### 它提供什么
 
-| Area | What it does |
+| 能力 | 说明 |
 |---|---|
-| Pipeline execution | Runs prompts through TDD, implement-only, or custom step presets |
-| Recovery | Persists `state.yaml`, heartbeat, logs, and progress so interrupted work can resume |
-| Planning | Interactive and auto Plan Mode with discovery, decomposition, generation, confirmation, review, and extension |
-| Lifecycle | Initializes projects, checks health, audits code, debugs issues, releases versions, and archives Cycles |
-| Patch track | Records `P001` style lightweight issues and can fix them outside the main Milestone flow |
-| Context Compact | Generates `.compact` views so session startup loads less history |
-| Showcase | Generates project intro docs, technical docs, Markdown slides, and optional posters |
-| Multi-platform | Claude Code uses `/hypo-workflow:*`; Codex uses `/hw:*` compatibility commands |
+| Pipeline 执行 | 按 TDD、implement-only 或 custom preset 串行执行 prompts |
+| 中断恢复 | 用 `state.yaml`、heartbeat、log 和 PROGRESS 保留可恢复状态 |
+| Plan Mode | 支持交互式/自动规划、需求澄清、里程碑拆解、生成、确认和扩展 |
+| Lifecycle | 覆盖 init、check、audit、debug、release、cycle archive 等项目生命周期动作 |
+| Patch Track | 用 `P001` 轨道记录小问题，并可通过 Patch Fix 直接修复 |
+| Context Compact | 生成 `.compact` 视图，减少 SessionStart 加载上下文 |
+| Showcase | 生成项目介绍文档、技术文档、Markdown slides 和可选海报 |
+| 多平台 | Claude Code 使用 `/hypo-workflow:*`，Codex 使用兼容命令 `/hw:*` |
 
-Hypo-Workflow currently exposes **29 user-facing commands** plus one internal watchdog skill.
+当前版本提供 **29 个用户指令**，另有一个内部 watchdog skill。
 
 ---
 
-## Quick Start
+## 快速开始
 
-### 1. Install
+### 1. 安装
 
-Claude Code:
+Claude Code：
 
 ```bash
 /plugin marketplace add HypoxanthineOvO/Hypo-Workflow
 /plugin install hypo-workflow@hypoxanthine-hypo-workflow
 ```
 
-Codex:
+Codex：
 
 ```text
 Use $skill-installer to install the GitHub repo HypoxanthineOvO/Hypo-Workflow with path . as skill name hypo-workflow
 ```
 
-Manual checkout:
+手动安装：
 
 ```bash
 git clone https://github.com/HypoxanthineOvO/Hypo-Workflow.git ~/.claude/skills/hypo-workflow
 ```
 
-### 2. Configure Once
+### 2. 初始化全局配置
 
 ```text
 /hw:setup
 ```
 
-This creates `~/.hypo-workflow/config.yaml` for platform, execution mode, subagent provider, dashboard, output language, and default behavior. Project-level `.pipeline/config.yaml` overrides global defaults.
+该命令会创建 `~/.hypo-workflow/config.yaml`，用于保存平台、执行模式、subagent、dashboard、输出语言和默认行为。项目内的 `.pipeline/config.yaml` 优先级更高。
 
-### 3. Initialize A Project
+### 3. 初始化项目
 
 ```text
 /hw:init
 ```
 
-For an existing Git project that predates Hypo-Workflow:
+如果这是一个已经有 Git 历史的旧项目：
 
 ```text
 /hw:init --import-history
 /hw:init --import-history --interactive
 ```
 
-### 4. Plan And Run
+### 4. 规划并执行
 
 ```text
 /hw:plan
 /hw:start
 ```
 
-If the session stops later:
+如果会话中断：
 
 ```text
-/hw:resume
 /hw:status
+/hw:resume
 ```
 
-### 5. Generate Showcase Material
+### 5. 生成项目展示物料
 
 ```text
 /hw:showcase --all
 ```
 
-This writes project material under `.pipeline/showcase/`.
+生成结果位于 `.pipeline/showcase/`。
 
 ---
 
-## Command Summary
+## 指令简介
 
-Claude Code users can call `/hypo-workflow:<command>`. Codex users can call `/hw:<command>`.
+Claude Code 用户可以调用 `/hypo-workflow:<command>`。Codex 用户可以调用 `/hw:<command>`。
 
-#### Setup
+#### 设置
 
-| Command | Use |
+| 指令 | 用途 |
 |---|---|
-| `/hw:setup` | Create or update global defaults in `~/.hypo-workflow/config.yaml` |
+| `/hw:setup` | 创建或更新 `~/.hypo-workflow/config.yaml` |
 
 #### Pipeline
 
-| Command | Use |
+| 指令 | 用途 |
 |---|---|
-| `/hw:start` | Start or continue execution from the first runnable prompt |
-| `/hw:resume` | Resume an interrupted or stopped pipeline |
-| `/hw:status` | Show concise progress; use `--full` to bypass compact context |
-| `/hw:skip` | Skip the current prompt or step safely |
-| `/hw:stop` | Gracefully stop and persist state |
-| `/hw:report` | Show report summaries; use `--view M<N>` for a full report |
+| `/hw:start` | 从第一个可执行 prompt 开始或继续执行 |
+| `/hw:resume` | 从中断或停止状态继续 |
+| `/hw:status` | 查看当前进度；`--full` 可跳过 compact 视图 |
+| `/hw:skip` | 安全跳过当前 prompt 或 step |
+| `/hw:stop` | 优雅停止并持久化状态 |
+| `/hw:report` | 查看报告摘要；`--view M<N>` 查看完整报告 |
 
 #### Plan
 
-| Command | Use |
+| 指令 | 用途 |
 |---|---|
-| `/hw:plan` | Start Plan Mode |
-| `/hw:plan --context audit,patches,deferred,debug` | Inject existing evidence into discovery |
-| `/hw:plan:discover` | Gather requirements, constraints, and repo context |
-| `/hw:plan:decompose` | Split work into Milestones |
-| `/hw:plan:generate` | Generate `.pipeline/` prompts and config |
-| `/hw:plan:confirm` | Confirm the generated plan |
-| `/hw:plan:extend` | Append Milestones to an active Cycle |
-| `/hw:plan:review` | Review architecture drift and downstream prompt impact |
+| `/hw:plan` | 进入 Plan Mode |
+| `/hw:plan --context audit,patches,deferred,debug` | 把已有证据注入 Discover 阶段 |
+| `/hw:plan:discover` | 收集需求、约束和仓库上下文 |
+| `/hw:plan:decompose` | 拆分 Milestones |
+| `/hw:plan:generate` | 生成 `.pipeline/` prompts 和配置 |
+| `/hw:plan:confirm` | 确认生成的计划 |
+| `/hw:plan:extend` | 在 active Cycle 中追加 Milestones |
+| `/hw:plan:review` | 审查架构漂移和下游 prompt 影响 |
 
-#### Lifecycle
+#### 生命周期
 
-| Command | Use |
+| 指令 | 用途 |
 |---|---|
-| `/hw:init` | Initialize or rescan `.pipeline/` |
-| `/hw:check` | Validate config, state, prompts, and architecture health |
-| `/hw:audit` | Run preventive code audit |
-| `/hw:debug` | Investigate a concrete failure |
-| `/hw:release` | Run release automation |
-| `/hw:cycle` | Manage delivery Cycles and archives |
-| `/hw:patch` | Create, list, close, and fix lightweight Patches |
-| `/hw:patch fix` | Run the six-step Patch Fix lane |
+| `/hw:init` | 初始化或重新扫描 `.pipeline/` |
+| `/hw:check` | 检查 config、state、prompts 和 architecture 健康度 |
+| `/hw:audit` | 执行预防性代码审计 |
+| `/hw:debug` | 分析具体故障 |
+| `/hw:release` | 执行 release 自动化 |
+| `/hw:cycle` | 管理交付 Cycle 和 archives |
+| `/hw:patch` | 创建、列出、关闭和修复轻量 Patch |
+| `/hw:patch fix` | 执行六步 Patch Fix 流程 |
 
-#### Utility
+#### 工具
 
-| Command | Use |
+| 指令 | 用途 |
 |---|---|
-| `/hw:help` | Show grouped or per-command help |
-| `/hw:reset` | Reset runtime state or generated artifacts |
-| `/hw:log` | Read lifecycle log; use `--full` to bypass compact log |
-| `/hw:compact` | Generate compact context files |
-| `/hw:guide` | Ask an interactive guide what to do next |
-| `/hw:showcase` | Generate project introduction material |
-| `/hw:dashboard` | Launch the WebUI dashboard |
+| `/hw:help` | 查看分组帮助或单个指令帮助 |
+| `/hw:reset` | 重置运行状态或生成物 |
+| `/hw:log` | 查看 lifecycle log；`--full` 可跳过 compact log |
+| `/hw:compact` | 生成 compact 上下文文件 |
+| `/hw:guide` | 交互式推荐下一步操作 |
+| `/hw:showcase` | 生成项目介绍物料 |
+| `/hw:dashboard` | 启动 WebUI dashboard |
 
-`/hw:review` is a compatibility alias and redirects to `/hw:plan:review`.
+`/hw:review` 是兼容别名，会提示迁移到 `/hw:plan:review`。
 
 ---
 
-## Common Workflows
+## 常见 Workflow
 
-### New Project
+### 新项目
 
 ```text
 /hw:setup
@@ -185,9 +185,9 @@ Claude Code users can call `/hypo-workflow:<command>`. Codex users can call `/hw
 /hw:start
 ```
 
-Use this when the repository has no pipeline yet and you want Hypo-Workflow to help discover the project shape.
+适合还没有 `.pipeline/` 的仓库。`init` 会理解项目结构，`plan` 会拆解 Milestones，`start` 开始执行。
 
-### Existing Project With Git History
+### 旧项目接入
 
 ```text
 /hw:init --import-history --interactive
@@ -195,25 +195,25 @@ Use this when the repository has no pipeline yet and you want Hypo-Workflow to h
 /hw:plan --context deferred
 ```
 
-History Import creates Cycle 0 Legacy under `.pipeline/archives/cycle-0-legacy/` and keeps current work in Cycle 1.
+History Import 会把 Git first-parent 历史导入 Cycle 0 Legacy，并把当前工作保留在 Cycle 1。
 
-### Continue Work After Interruption
+### 中断后继续
 
 ```text
 /hw:status
 /hw:resume
 ```
 
-`state.yaml` stores the current prompt, step, and heartbeat. SessionStart hooks can reinject the current state for Claude Code.
+`state.yaml` 保存当前 prompt、step 和 heartbeat。Claude Code 的 SessionStart hook 还可以自动重新注入状态上下文。
 
-### Fix A Small Bug Without Opening A Milestone
+### 修一个小问题，不开 Milestone
 
 ```text
 /hw:patch "Fix login layout regression" --severity normal
 /hw:patch fix P001
 ```
 
-Patch Fix is intentionally small:
+Patch Fix 是小修复专用流程：
 
 1. Step 1: 读取 Patch
 2. Step 2: 定位代码
@@ -222,18 +222,18 @@ Patch Fix is intentionally small:
 5. Step 5: 提交
 6. Step 6: 关闭
 
-It does not start Plan Discover, does not run the full TDD pipeline, does not write `state.yaml`, and does not generate `report.md`.
+它不会进入 Plan Discover，不会跑完整 TDD pipeline，不会写 `state.yaml`，也不会生成 `report.md`。
 
-### Audit Then Plan
+### 审计后规划
 
 ```text
 /hw:audit
 /hw:plan --context audit
 ```
 
-Use this when you want findings to become a structured implementation plan.
+适合把审计发现转成结构化 Milestones。
 
-### Reduce Context Load
+### 降低上下文加载
 
 ```text
 /hw:compact
@@ -241,78 +241,78 @@ Use this when you want findings to become a structured implementation plan.
 /hw:log --full
 ```
 
-Compact files are derived views. They reduce startup context but never replace canonical source files.
+Compact 文件是派生视图，用来减少 SessionStart 上下文，但不会替代原始文件。
 
-### Generate Project Materials
+### 生成项目物料
 
 ```text
 /hw:showcase --all
 /hw:showcase --new --doc
 ```
 
-Showcase creates `.pipeline/showcase/PROJECT-INTRO.md`, `TECHNICAL-DOC.md`, `slides.md`, and optionally `poster.png`.
+Showcase 会生成 `PROJECT-INTRO.md`、`TECHNICAL-DOC.md`、`slides.md`，以及可选的 `poster.png`。
 
-### Close A Delivery Cycle
+### 关闭一个交付周期
 
 ```text
 /hw:cycle close
 /hw:cycle new "Next release" --type feature --context patches,deferred
 ```
 
-Closing archives Cycle-local state, prompts, reports, progress, deferred items, and summaries.
+Cycle close 会归档 Cycle 内的 state、prompts、reports、PROGRESS、deferred items 和 summary。
 
 ---
 
-## Command Reference
+## 指令详解
 
 ### `/hw:init`
 
-Initializes `.pipeline/` for empty repos, existing repos, or existing pipelines.
+初始化 `.pipeline/`。支持空仓库、已有代码仓库和已有 pipeline。
 
-Key flags:
+常用参数：
 
-| Flag | Behavior |
+| 参数 | 行为 |
 |---|---|
-| `--rescan` | Refresh architecture baseline for an existing pipeline |
-| `--folder` | Force folder-style architecture output |
-| `--single` | Force single-file architecture output |
-| `--import-history` | Import current Git first-parent history into Cycle 0 Legacy |
-| `--interactive` | With `--import-history`, preview split plan and wait for confirmation |
+| `--rescan` | 重新扫描已有 pipeline 的 architecture baseline |
+| `--folder` | 强制输出 folder-style architecture |
+| `--single` | 强制输出单文件 architecture |
+| `--import-history` | 把当前 Git first-parent 历史导入 Cycle 0 Legacy |
+| `--interactive` | 与 `--import-history` 配合，先预览拆分方案并等待确认 |
 
-History Import split signals are tried in this order: tags, milestone keywords, merge commits, then time gaps.
+History Import 的拆分信号顺序是：tag、milestone keyword、merge commit、time gap。
 
 ### `/hw:plan`
 
-Plan Mode creates implementation-ready Milestones before execution.
+Plan Mode 在执行前生成可落地的 Milestones。
 
-Main phases:
+阶段：
 
 ```text
 discover -> decompose -> generate -> confirm
 ```
 
-Interactive mode enforces discovery question rounds and explicit confirmation. Auto mode proceeds unless blocked by missing critical information.
+Interactive 模式会强制问题轮次和明确确认。Auto 模式只在缺少关键信息时停下。
 
-Context injection:
+Context 注入：
 
-| Source | Reads |
+| 来源 | 读取内容 |
 |---|---|
-| `audit` | latest `.pipeline/audits/` report |
-| `patches` | open `.pipeline/patches/P*.md` files |
-| `deferred` | archived `deferred.yaml` and Legacy summary |
-| `debug` | latest `.pipeline/debug/` report |
+| `audit` | 最新 `.pipeline/audits/` 报告 |
+| `patches` | open `.pipeline/patches/P*.md` |
+| `deferred` | archives 中的 `deferred.yaml` 和 Legacy summary |
+| `debug` | 最新 `.pipeline/debug/` 报告 |
 
-### `/hw:start` and `/hw:resume`
+### `/hw:start` 和 `/hw:resume`
 
-Execution uses the configured preset:
+执行阶段根据 preset 展开步骤：
 
-| Preset | Sequence |
+| Preset | 步骤 |
 |---|---|
 | `tdd` | write_tests -> review_tests -> run_tests_red -> implement -> run_tests_green -> review_code |
 | `implement-only` | implement -> run_tests -> review_code |
-| `custom` | user-defined step sequence |
+| `custom` | 用户自定义 sequence |
 
-State updates happen after meaningful transitions:
+运行过程中会更新：
 
 - `.pipeline/state.yaml`
 - `.pipeline/log.yaml`
@@ -322,7 +322,7 @@ State updates happen after meaningful transitions:
 
 ### `/hw:cycle`
 
-Cycles group a sequence of Milestones and archive them as a delivery unit.
+Cycle 用于把一组 Milestones 作为交付周期管理。
 
 ```text
 /hw:cycle new "V8 implementation" --type feature --context audit,patches
@@ -332,16 +332,16 @@ Cycles group a sequence of Milestones and archive them as a delivery unit.
 /hw:cycle close --reason "superseded by upstream rewrite"
 ```
 
-Cycle type maps to preset:
+Cycle type 到 preset 的默认映射：
 
-| Type | Default preset |
+| Type | 默认 preset |
 |---|---|
 | `feature`, `refactor` | `tdd` |
 | `bugfix`, `spike`, `hotfix` | `implement-only` |
 
 ### `/hw:patch`
 
-Patches are persistent small issues under `.pipeline/patches/`.
+Patch 是 `.pipeline/patches/` 下的持久轻量问题记录。
 
 ```text
 /hw:patch "Fix X" --severity critical
@@ -350,11 +350,11 @@ Patches are persistent small issues under `.pipeline/patches/`.
 /hw:patch fix P001 P003
 ```
 
-Patch IDs are global and do not reset across Cycles.
+Patch ID 全局递增，不随 Cycle 重置。
 
 ### `/hw:compact`
 
-Generates derived compact files:
+生成派生 compact 文件：
 
 ```text
 .pipeline/PROGRESS.compact.md
@@ -364,11 +364,11 @@ Generates derived compact files:
 .pipeline/patches.compact.md
 ```
 
-SessionStart loads compact versions first and falls back to full files.
+SessionStart 会优先加载 compact 版本；缺失时回退到完整文件。
 
 ### `/hw:showcase`
 
-Generates project-facing material.
+生成项目展示物料：
 
 ```text
 /hw:showcase
@@ -379,54 +379,54 @@ Generates project-facing material.
 /hw:showcase --new --all
 ```
 
-Without flags, it asks which artifacts to generate and waits for the user. `--new` archives the previous version under `.pipeline/showcase/history/v<N>/`.
+无参数时会询问要生成哪些物料并等待用户回复。`--new` 会把旧版本归档到 `.pipeline/showcase/history/v<N>/`。
 
 ### `/hw:release`
 
-Runs release automation. Typical release flow includes regression, validation, version updates, changelog checks, commits, and publication steps. Use `--dry-run` to preview.
+执行 release 自动化。通常包括 regression、validate、版本更新、changelog 检查、commit 和发布步骤。可用 `--dry-run` 预览。
 
 ---
 
-## Architecture And Internals
+## 架构与内部细节
 
-### Repository Layout
+### 仓库结构
 
 ```text
 Hypo-Workflow/
-├── SKILL.md                    # Root command router and runtime rules
-├── skills/                     # 29 user-facing skills plus internal watchdog
-├── plan/PLAN-SKILL.md          # Plan Mode L2 entrypoint
-├── references/                 # Detailed behavior specs
-├── templates/                  # Root fallback templates
-├── templates/en/               # English templates
-├── templates/zh/               # Chinese templates
-├── assets/                     # State/report assets and config examples
-├── scripts/                    # Helper scripts
-├── hooks/                      # Claude Code hook integration
-├── adapters/                   # Source/output adapter contracts
+├── SKILL.md                    # 根命令路由和运行规则
+├── skills/                     # 29 个用户指令 + 内部 watchdog
+├── plan/PLAN-SKILL.md          # Plan Mode 二级入口
+├── references/                 # 详细行为规范
+├── templates/                  # 根 fallback 模板
+├── templates/en/               # 英文模板
+├── templates/zh/               # 中文模板
+├── assets/                     # 状态/报告资产和配置示例
+├── scripts/                    # 辅助脚本
+├── hooks/                      # Claude Code hook
+├── adapters/                   # source/output adapter 契约
 ├── dashboard/                  # WebUI dashboard
-└── tests/scenarios/            # Regression scenarios
+└── tests/scenarios/            # 回归场景
 ```
 
-### `.pipeline/` Workspace
+### `.pipeline/` 工作区
 
 ```text
 .pipeline/
-├── config.yaml                 # Project config
-├── state.yaml                  # Runtime state, ignored by git
-├── log.yaml                    # Lifecycle log
-├── PROGRESS.md                 # Human-readable progress
-├── architecture.md             # Architecture baseline
+├── config.yaml                 # 项目配置
+├── state.yaml                  # 运行状态，通常不进 git
+├── log.yaml                    # 生命周期日志
+├── PROGRESS.md                 # 人类可读进度
+├── architecture.md             # 架构基线
 ├── prompts/                    # Milestone prompts
 ├── reports/                    # Milestone reports
-├── archives/                   # Closed Cycle archives
-├── patches/                    # Persistent Patch track
-└── showcase/                   # Generated project materials
+├── archives/                   # 已关闭 Cycle 归档
+├── patches/                    # 持久 Patch 轨道
+└── showcase/                   # 项目展示物料
 ```
 
-### State Model
+### 状态模型
 
-`state.yaml` tracks:
+`state.yaml` 记录：
 
 - pipeline status
 - current prompt and step
@@ -436,47 +436,47 @@ Hypo-Workflow/
 - completed history
 - heartbeat
 
-`log.yaml` tracks lifecycle events such as milestone completion, patch fixes, audits, debug sessions, releases, and plan reviews. `PROGRESS.md` is optimized for humans.
+`log.yaml` 记录 milestone 完成、patch fix、audit、debug、release、plan review 等生命周期事件。`PROGRESS.md` 面向人类阅读。
 
 ### Progressive Disclosure
 
-Hypo-Workflow keeps context usage controlled:
+Hypo-Workflow 用分层加载控制上下文：
 
-1. Read root `SKILL.md` for command routing.
-2. Load only the relevant `skills/<command>/SKILL.md`.
-3. Read references, templates, assets, and scripts only when needed.
-4. Use `.compact` files for large runtime context.
+1. 读取根 `SKILL.md` 做命令路由。
+2. 只加载相关的 `skills/<command>/SKILL.md`。
+3. 需要时再读取 references、templates、assets 和 scripts。
+4. 大型运行时上下文优先使用 `.compact` 文件。
 
 ### Hooks
 
-Claude Code hooks provide a passive safety net:
+Claude Code hooks 是被动安全网：
 
-| Hook | Purpose |
+| Hook | 作用 |
 |---|---|
-| `stop-check.sh` | Blocks accidental stop while the pipeline is running |
-| `session-start.sh` | Injects state and compact context on startup/resume/compact |
-| `instructions-loaded.sh` | Observes instruction reloads |
-| `codex-notify.sh` | Codex turn-complete notification fallback |
+| `stop-check.sh` | Pipeline 运行中阻止误停 |
+| `session-start.sh` | 启动/恢复/compact 后注入状态和 compact context |
+| `instructions-loaded.sh` | 观察指令重新加载 |
+| `codex-notify.sh` | Codex turn-complete 通知 fallback |
 
-Codex works without Claude hook semantics. Recovery still works through files.
+Codex 没有 Claude hook 语义，但仍可通过文件恢复。
 
 ### i18n
 
-User-facing output follows `output.language`:
+用户可见输出跟随 `output.language`：
 
-| Config | Template path |
+| 配置 | 模板路径 |
 |---|---|
 | `zh-CN`, `zh` | `templates/zh/` |
 | `en`, `en-US` | `templates/en/` |
-| missing localized file | root `templates/` fallback |
+| 本地化模板缺失 | 根目录 `templates/` fallback |
 
-Internal `state.yaml` and `log.yaml` keys remain English.
+内部 `state.yaml` 和 `log.yaml` key 始终保持英文。
 
 ---
 
-## Configuration
+## 配置
 
-### Minimal Project Config
+### 最小项目配置
 
 ```yaml
 pipeline:
@@ -501,7 +501,7 @@ evaluation:
     - code_quality
 ```
 
-### Useful Optional Config
+### 常用可选配置
 
 ```yaml
 output:
@@ -550,30 +550,30 @@ notion:
   output_parent_page_id: "..."
 ```
 
-Token resolution order:
+Token 解析顺序：
 
 1. `NOTION_TOKEN`
 2. `notion.token_file`
 
 ---
 
-## Platform Support
+## 平台支持
 
 ### Claude Code
 
-- Native `/hypo-workflow:*` skills
-- Marketplace metadata in `.claude-plugin/marketplace.json`
-- Stop and SessionStart hooks
-- Can use Codex as a subagent
+- 原生 `/hypo-workflow:*` skills
+- Marketplace metadata 位于 `.claude-plugin/marketplace.json`
+- 支持 Stop 和 SessionStart hooks
+- 可配置 Codex 作为 subagent
 
 ### Codex
 
-- Uses root `SKILL.md` and `/hw:*`
-- Metadata in `.codex-plugin/plugin.json`
-- Can use Claude as a subagent when configured
-- Hook behavior degrades gracefully
+- 使用根 `SKILL.md` 和 `/hw:*`
+- Metadata 位于 `.codex-plugin/plugin.json`
+- 可配置 Claude 作为 subagent
+- Hook 行为降级，但文件恢复仍可用
 
-### Subagent Example
+### Subagent 示例
 
 ```yaml
 execution:
@@ -589,9 +589,9 @@ step_overrides:
 
 ---
 
-## Validation
+## 验证
 
-Run the same checks used by this repository:
+本仓库使用以下检查：
 
 ```bash
 claude plugin validate .
@@ -599,7 +599,7 @@ python3 tests/run_regression.py
 git diff --check
 ```
 
-Current expected regression count is `49/49`.
+当前预期回归数量为 `49/49`。
 
 ---
 
