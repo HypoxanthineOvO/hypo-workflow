@@ -4,6 +4,14 @@ description: Summarize the latest Hypo-Workflow report when the user asks for th
 ---
 
 # /hypo-workflow:report
+## Output Language Rules
+
+📌 输出语言规则：
+读取 config.yaml → output.language
+- zh-CN / zh：所有用户可见的输出使用中文（PROGRESS、报告、状态提示、错误消息、交互提问）
+- en：使用英文
+- auto：跟随用户对话语言
+内部日志（log.yaml、state.yaml）始终英文。
 
 Use this skill to summarize the latest generated report file.
 
@@ -38,6 +46,7 @@ Use this skill to summarize the latest generated report file.
 - report summaries must use `output.language`; default is `en`
 - timestamps must be converted to `output.timezone`; default is `UTC`
 - for Chinese output, use compact progress times: same day `HH:MM`, cross-day `DD日 HH:MM`
+- template loading maps `zh-CN` / `zh` to `templates/zh/report.md`, maps `en` / `en-US` to `templates/en/report.md`, and falls back to `templates/report.md` when localized templates are missing
 
 ## Reference Files
 

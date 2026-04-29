@@ -4,6 +4,14 @@ description: Manage Hypo-Workflow Cycles with independent milestone sequences, s
 ---
 
 # /hypo-workflow:cycle
+## Output Language Rules
+
+📌 输出语言规则：
+读取 config.yaml → output.language
+- zh-CN / zh：所有用户可见的输出使用中文（PROGRESS、报告、状态提示、错误消息、交互提问）
+- en：使用英文
+- auto：跟随用户对话语言
+内部日志（log.yaml、state.yaml）始终英文。
 
 Use this skill when the user invokes `/hw:cycle` or `/hypo-workflow:cycle`.
 
@@ -198,6 +206,15 @@ For `/hw:cycle view 0` or `/hw:cycle view C0`, read `.pipeline/archives/cycle-0-
 ## Project Summary
 
 After every close or archive, regenerate project-root `PROJECT-SUMMARY.md` using the rules in `/hypo-workflow:status` and this skill. This file is cross-Cycle project context and should not be moved into Cycle archives.
+
+`PROJECT-SUMMARY.md` must follow `output.language` for:
+
+- title and intro text
+- table headers such as Cycle, Milestone, Status, Time, and Highlights
+- status labels such as Done, In Progress, Paused, Abandoned, and Deferred
+- Open Patches and Deferred Items section names
+
+When `output.language` is missing, default to English for backward compatibility.
 
 ## Reference Files
 

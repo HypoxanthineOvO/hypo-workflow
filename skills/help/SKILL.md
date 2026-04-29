@@ -4,8 +4,16 @@ description: Show the full Hypo-Workflow command map when the user needs a quick
 ---
 
 # /hypo-workflow:help
+## Output Language Rules
 
-Use this skill to explain the 28 user-facing Hypo-Workflow commands and the internal watchdog skill.
+📌 输出语言规则：
+读取 config.yaml → output.language
+- zh-CN / zh：所有用户可见的输出使用中文（PROGRESS、报告、状态提示、错误消息、交互提问）
+- en：使用英文
+- auto：跟随用户对话语言
+内部日志（log.yaml、state.yaml）始终英文。
+
+Use this skill to explain the 29 user-facing Hypo-Workflow commands and the internal watchdog skill.
 
 ## Command Groups
 
@@ -18,13 +26,13 @@ Use this skill to explain the 28 user-facing Hypo-Workflow commands and the inte
 - Lifecycle:
   - `init`, `check`, `audit`, `release`, `debug`, `cycle`, `patch`
 - Utility:
-  - `dashboard`, `help`, `reset`, `log`, `compact`, `guide`
+  - `dashboard`, `help`, `reset`, `log`, `compact`, `guide`, `showcase`
 - Internal:
   - `watchdog` (cron-only; hidden from normal quick help unless explicitly requested)
 
 ## Execution Flow
 
-1. By default, list all 28 user-facing commands grouped by category.
+1. By default, list all 29 user-facing commands grouped by category.
 2. For a specific command, explain:
    - when to use it
    - required inputs or flags
@@ -35,7 +43,7 @@ Use this skill to explain the 28 user-facing Hypo-Workflow commands and the inte
    - Codex can configure Claude as the subagent provider
    - mixed mode can delegate individual steps through `step_overrides`
 5. Mention that Codex still uses the root `SKILL.md` and `/hw:*` compatibility path.
-6. Include `/hw:cycle`, `/hw:patch`, `/hw:patch fix`, `/hw:compact`, `/hw:guide`, and `/hw:plan:extend` in normal help output.
+6. Include `/hw:cycle`, `/hw:patch`, `/hw:patch fix`, `/hw:compact`, `/hw:guide`, `/hw:showcase`, and `/hw:plan:extend` in normal help output.
 7. Mention `/hw:watchdog` only when the user asks about watchdog or auto resume internals.
 
 ## Reference Files

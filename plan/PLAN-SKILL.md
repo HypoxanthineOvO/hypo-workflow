@@ -1,6 +1,6 @@
 ---
 name: hypo-workflow-plan
-version: 8.2.0
+version: 8.3.0
 description: Plan Mode sub-skill for Hypo-Workflow. Use this file when the user invokes `/hw:plan`, `/hw:plan:*`, `/hw:plan:review`, or the compatibility alias `/hw:review`.
 ---
 
@@ -32,6 +32,16 @@ Load planning resources in layers:
 2. `plan/assets/` for shared plan-generation templates
 3. `plan/templates/` for reusable scenario presets
 4. `references/commands-spec.md` and `references/plan-review-spec.md` for detailed semantics
+
+## Template Language
+
+Resolve `output.language` before reading reusable planning or evaluation templates.
+
+- `zh-CN` / `zh` -> prefer localized Chinese templates when present
+- `en` / `en-US` -> prefer English templates
+- missing localized template -> fall back to the existing root template
+
+All user-facing planning prompts, status summaries, and generated PROGRESS/report prose must follow `output.language`; internal `state.yaml` and `log.yaml` keys remain English.
 
 ## Plan Modes
 

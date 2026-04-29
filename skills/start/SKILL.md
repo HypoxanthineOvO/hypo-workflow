@@ -4,6 +4,14 @@ description: Start Hypo-Workflow execution when the user wants to begin running 
 ---
 
 # /hypo-workflow:start
+## Output Language Rules
+
+📌 输出语言规则：
+读取 config.yaml → output.language
+- zh-CN / zh：所有用户可见的输出使用中文（PROGRESS、报告、状态提示、错误消息、交互提问）
+- en：使用英文
+- auto：跟随用户对话语言
+内部日志（log.yaml、state.yaml）始终英文。
 
 Use this skill to start execution from a local `.pipeline/` workspace. This is the Claude Code native entrypoint for the same behavior described by the root `SKILL.md` `/hw:start` command.
 
@@ -72,6 +80,16 @@ Use this skill to start execution from a local `.pipeline/` workspace. This is t
 - create `.pipeline/PROGRESS.md` if it does not exist
 - update current milestone status after every step
 - summarize recent activity and deferred items for human readers
+
+## Template Language
+
+When loading report or TDD step templates, resolve `output.language` from project > global > defaults.
+
+- `zh-CN` / `zh` -> load `templates/zh/...`
+- `en` / `en-US` -> load `templates/en/...`
+- any missing localized template -> fall back to root `templates/...`
+
+All user-visible report and PROGRESS prose must follow `output.language`. Internal `state.yaml` and `log.yaml` keys remain English.
 
 ## Reference Files
 

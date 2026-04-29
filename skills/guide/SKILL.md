@@ -4,6 +4,14 @@ description: Interactive onboarding guide that senses the current project state 
 ---
 
 # /hypo-workflow:guide
+## Output Language Rules
+
+📌 输出语言规则：
+读取 config.yaml → output.language
+- zh-CN / zh：所有用户可见的输出使用中文（PROGRESS、报告、状态提示、错误消息、交互提问）
+- en：使用英文
+- auto：跟随用户对话语言
+内部日志（log.yaml、state.yaml）始终英文。
 
 Use this skill when the user invokes `/hw:guide` or `/hypo-workflow:guide`.
 

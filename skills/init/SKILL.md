@@ -4,6 +4,14 @@ description: Initialize or rescan a Hypo-Workflow project when the user wants ar
 ---
 
 # /hypo-workflow:init
+## Output Language Rules
+
+📌 输出语言规则：
+读取 config.yaml → output.language
+- zh-CN / zh：所有用户可见的输出使用中文（PROGRESS、报告、状态提示、错误消息、交互提问）
+- en：使用英文
+- auto：跟随用户对话语言
+内部日志（log.yaml、state.yaml）始终英文。
 
 Use this skill to bootstrap `.pipeline/` and the architecture baseline. V8.1 also lets init import pre-Workflow Git history into a closed Legacy Cycle.
 
@@ -40,6 +48,16 @@ Use this skill to bootstrap `.pipeline/` and the architecture baseline. V8.1 als
 ## History Import
 
 `/hw:init --import-history` imports commits that happened before Hypo-Workflow started tracking the project. It must not change normal init behavior when the flag is absent.
+
+### Template Language
+
+When generating Legacy reports, resolve `output.language` from project > global > defaults.
+
+- `zh-CN` / `zh` -> load `templates/zh/legacy-report.md`
+- `en` / `en-US` -> load `templates/en/legacy-report.md`
+- missing localized template -> fall back to `templates/legacy-report.md`
+
+PROJECT-SUMMARY generation must use the same language for headings, table headers, status labels, and prose. Internal `state.yaml` and `log.yaml` remain English.
 
 ### Preconditions
 

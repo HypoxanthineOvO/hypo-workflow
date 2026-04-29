@@ -4,6 +4,14 @@ description: Internal cron-invoked Auto Resume watchdog for stalled executing pi
 ---
 
 # /hypo-workflow:watchdog
+## Output Language Rules
+
+📌 输出语言规则：
+读取 config.yaml → output.language
+- zh-CN / zh：所有用户可见的输出使用中文（PROGRESS、报告、状态提示、错误消息、交互提问）
+- en：使用英文
+- auto：跟随用户对话语言
+内部日志（log.yaml、state.yaml）始终英文。
 
 This is an internal skill. It is not a normal user-facing command. It exists so `scripts/watchdog.sh` and cron-driven agents have a precise policy for deciding when to trigger `/hw:resume`.
 
