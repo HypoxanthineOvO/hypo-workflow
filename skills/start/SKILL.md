@@ -42,14 +42,15 @@ Use this skill to start execution from a local `.pipeline/` workspace. This is t
    - `.pipeline/log.yaml`
    - `.pipeline/PROGRESS.md`
    - top-level `last_heartbeat`
-11. On failure, Claude must choose one of:
+11. After a Milestone report is generated and the Milestone reaches a final state, resolve `compact.auto` from project > global > defaults. If `compact.auto=true`, run the `/hw:compact` generation rules before advancing to the next Milestone.
+12. On failure, Claude must choose one of:
    - `retry`: revise instructions and rerun the failed step
    - `deferred`: mark the milestone deferred if downstream work can continue safely
    - `stop`: stop and surface the blocking reason to the user
-12. Keep moving automatically between milestones while unfinished work remains.
-13. Remove `.pipeline/.lock` when the execution turn completes, stops, blocks, aborts, or finishes.
-14. If the pipeline completes or stops intentionally, unregister the watchdog cron entry.
-15. Only allow the turn to end naturally when all milestones are complete or Claude has explicitly chosen the `stop` outcome.
+13. Keep moving automatically between milestones while unfinished work remains.
+14. Remove `.pipeline/.lock` when the execution turn completes, stops, blocks, aborts, or finishes.
+15. If the pipeline completes or stops intentionally, unregister the watchdog cron entry.
+16. Only allow the turn to end naturally when all milestones are complete or Claude has explicitly chosen the `stop` outcome.
 
 ## Watchdog Integration
 

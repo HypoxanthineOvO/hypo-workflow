@@ -27,9 +27,10 @@ Use this skill to continue from `.pipeline/state.yaml` without restarting comple
    - subagent tasks execute concrete work
    - Claude validates, scores, and updates artifacts
 10. Update `.pipeline/PROGRESS.md`, `.pipeline/log.yaml`, `.pipeline/state.yaml`, and `last_heartbeat` after each meaningful transition.
-11. Apply the same `retry` / `deferred` / `stop` decision model on failures.
-12. Remove `.pipeline/.lock` when the resume turn completes, stops, blocks, aborts, or finishes.
-13. If the pipeline completes or stops intentionally, unregister the watchdog cron entry.
+11. After a Milestone report is generated and the Milestone reaches a final state, run `/hw:compact` automatically when `compact.auto=true`; skip it when `compact.auto=false`.
+12. Apply the same `retry` / `deferred` / `stop` decision model on failures.
+13. Remove `.pipeline/.lock` when the resume turn completes, stops, blocks, aborts, or finishes.
+14. If the pipeline completes or stops intentionally, unregister the watchdog cron entry.
 
 ## Safety Rules
 

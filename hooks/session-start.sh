@@ -42,6 +42,67 @@ if [[ ! -f "$state_file" ]]; then
   exit 0
 fi
 
+line_count() {
+  local file="$1"
+  if [[ -f "$file" ]]; then
+    wc -l < "$file" | tr -d ' '
+  else
+    printf '0'
+  fi
+}
+
+append_context_file() {
+  local label="$1"
+  local file="$2"
+  if [[ -f "$file" ]]; then
+    additional_context+=$'\n\n'"[${label}: ${file#$cwd/}]"$'\n'
+    additional_context+="$(sed -n '1,240p' "$file")"
+  fi
+}
+
+append_compact_or_full() {
+  local label="$1"
+  local compact_file="$2"
+  local full_file="$3"
+  if [[ -f "$compact_file" ]]; then
+    local compact_lines full_lines saved
+    compact_lines="$(line_count "$compact_file")"
+    full_lines="$(line_count "$full_file")"
+    saved=0
+    if [[ "$full_lines" =~ ^[0-9]+$ && "$compact_lines" =~ ^[0-9]+$ && "$full_lines" -gt "$compact_lines" ]]; then
+      saved=$((full_lines - compact_lines))
+    fi
+    context_load_log+=$'\n'"Loaded ${compact_file#$pipeline_dir/} (${compact_lines} lines, saved ~${saved} lines)"
+    append_context_file "$label compact" "$compact_file"
+  elif [[ -f "$full_file" ]]; then
+    local full_lines
+    full_lines="$(line_count "$full_file")"
+    context_load_log+=$'\n'"Loaded ${full_file#$pipeline_dir/} (${full_lines} lines, fallback full)"
+    append_context_file "$label full" "$full_file"
+  fi
+}
+
+append_open_patches() {
+  local patch_dir="$pipeline_dir/patches"
+  [[ -d "$patch_dir" ]] || return 0
+  local found=0
+  local patch
+  for patch in "$patch_dir"/P*.md; do
+    [[ -f "$patch" ]] || continue
+    if grep -Eq '^- (状态|Status|status):[[:space:]]*open' "$patch"; then
+      if [[ "$found" -eq 0 ]]; then
+        additional_context+=$'\n\n[Open Patches]\n'
+      fi
+      found=1
+      additional_context+=$'\n\n'
+      additional_context+="$(sed -n '1,120p' "$patch")"
+    fi
+  done
+  if [[ "$found" -eq 1 ]]; then
+    context_load_log+=$'\n'"Loaded patches/ open only"
+  fi
+}
+
 summary="$("$scripts_dir/state-summary.sh" "$pipeline_dir" 2>/dev/null || true)"
 if [[ -z "$summary" || "$summary" == "No active pipeline" ]]; then
   emit_empty
@@ -56,6 +117,7 @@ last_line="$(printf '%s\n' "$summary" | sed -n 's/^Last completed: //p' | head -
 current_prompt="$(printf '%s\n' "$current_line" | sed -n 's#^\(.*\) / .* (step_index: .*#\1#p' | head -n1)"
 current_step="$(printf '%s\n' "$current_line" | sed -n 's#^.* / \(.*\) (step_index: .*#\1#p' | head -n1)"
 current_step_index="$(printf '%s\n' "$current_line" | sed -n 's#^.*(step_index: \(.*\))#\1#p' | head -n1)"
+context_load_log="[Context Load Log]"
 
 case "$matcher" in
   startup|clear)
@@ -94,6 +156,24 @@ Status: ${pipeline_status}
 当前步骤: ${current_step} (step_index: ${current_step_index})"
     ;;
 esac
+
+append_context_file "config.yaml full" "$pipeline_dir/config.yaml"
+append_context_file "architecture.md full" "$pipeline_dir/architecture.md"
+append_context_file "cycle.yaml full" "$pipeline_dir/cycle.yaml"
+
+if [[ -n "$current_prompt" ]]; then
+  append_context_file "current prompt full" "$pipeline_dir/prompts/$current_prompt"
+  report_base="${current_prompt%.md}.report.md"
+  append_context_file "current report full" "$pipeline_dir/reports/$report_base"
+fi
+
+append_compact_or_full "PROGRESS" "$pipeline_dir/PROGRESS.compact.md" "$pipeline_dir/PROGRESS.md"
+append_compact_or_full "state" "$pipeline_dir/state.compact.yaml" "$pipeline_dir/state.yaml"
+append_compact_or_full "log" "$pipeline_dir/log.compact.yaml" "$pipeline_dir/log.yaml"
+append_context_file "patches compact" "$pipeline_dir/patches.compact.md"
+append_open_patches
+
+additional_context+=$'\n\n'"$context_load_log"
 
 system_message="🔄 Pipeline: ${pipeline_name} | Step: ${current_step}"
 
