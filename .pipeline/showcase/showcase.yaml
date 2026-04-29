@@ -1,0 +1,16 @@
+showcase:
+  version: 1
+  last_run: "2026-04-29T21:51:16+08:00"
+  artifacts:
+    - type: intro_doc
+      file: PROJECT-INTRO.md
+      generated: "2026-04-29T21:51:16+08:00"
+    - type: tech_doc
+      file: TECHNICAL-DOC.md
+      generated: "2026-04-29T21:51:16+08:00"
+    - type: slides
+      file: slides.md
+      generated: "2026-04-29T21:51:16+08:00"
+  skipped:
+    - type: poster
+      reason: "OPENAI_API_KEY missing"

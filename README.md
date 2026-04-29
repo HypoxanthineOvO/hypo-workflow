@@ -6,7 +6,7 @@
 
 TDD Pipeline · Self-Review · Interrupt Recovery · Multi-Dimensional Evaluation
 
-[![Version](https://img.shields.io/badge/version-8.2.0-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-8.3.0-blue)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex-purple)](#platform-support)
 
@@ -31,7 +31,7 @@ It ships as a **SKILL.md** file — not a service, not a CLI tool. Any AI agent 
 | Feature | Description |
 |---------|-------------|
 | 🔄 **TDD Pipeline** | Built-in test-driven sub-steps: write tests → review → red → implement → green → review code |
-| 🧭 **Native Skills** | 28 user-facing Claude Code skills exposed as `/hypo-workflow:*` plus `/hw:*` compatibility for Codex |
+| 🧭 **Native Skills** | 29 user-facing Claude Code skills exposed as `/hypo-workflow:*` plus `/hw:*` compatibility for Codex |
 | 🗺️ **Plan Mode** | Auto and Interactive planning modes with enforced discovery gates, context injection, extend, decompose / generate / confirm / review phases |
 | 🧩 **Notion Adapter** | Read prompts from Notion and/or write reports back to Notion with graceful degradation |
 | ⏸️ **Interrupt Recovery** | `state.yaml` tracks progress to the sub-step level — resume exactly where you left off |
@@ -45,6 +45,7 @@ It ships as a **SKILL.md** file — not a service, not a CLI tool. Any AI agent 
 | 🩹 **Patch Track** | Persistent lightweight `P001` style patches stay outside Cycle archives, can feed future plans, and can be fixed directly |
 | 📦 **Context Compact** | `.compact` views reduce SessionStart context while preserving full source files |
 | 🧭 **Interactive Guide** | `/hw:guide` senses project state and recommends the next command flow |
+| 🎨 **Showcase** | `/hw:showcase` generates project intro docs, technical docs, slides, and an optional poster |
 | ⏱️ **Auto Resume Watchdog** | Optional heartbeat + cron watchdog resumes stale executing pipelines safely |
 | 🛠️ **Setup Wizard** | `/hypo-workflow:setup` configures environment, execution defaults, subagent backend, and dashboard preferences |
 | 🌐 **Dashboard** | `/hypo-workflow:dashboard` launches a live WebUI for state, config, progress, reports, and log activity |
@@ -431,7 +432,7 @@ hypo-workflow/
 
 │   └── hypo-todo-adaptive/      # Adaptive threshold example
 
-├── skills/                    # 28 user-facing skills + internal watchdog
+├── skills/                    # 29 user-facing skills + internal watchdog
 
 └── tests/
 
@@ -541,6 +542,7 @@ Codex users keep the compatible `/hw:*` path via the root `SKILL.md`.
 | `/hw:log` | Read and filter `.pipeline/log.yaml`; `--full` bypasses compact log context |
 | `/hw:compact` | Generate compact context views for PROGRESS, state, log, reports, and closed patches |
 | `/hw:guide` | Start an interactive guide that recommends the next command flow |
+| `/hw:showcase` | Generate project showcase docs, slides, and an optional poster |
 
 Compatibility note: `/hw:review` now shows a migration warning and redirects users to `/hw:plan:review`.
 
@@ -710,6 +712,28 @@ Typical recommendations:
 | Reduce context usage | `/hw:compact` |
 | Release | `/hw:release` |
 
+### Showcase
+
+Use `/hw:showcase` to generate public-facing project material under `.pipeline/showcase/`.
+
+```text
+/hw:showcase
+/hw:showcase --all
+/hw:showcase --doc
+/hw:showcase --slides
+/hw:showcase --poster
+/hw:showcase --new --all
+```
+
+Generated artifacts:
+
+- `PROJECT-INTRO.md`: user-friendly project overview
+- `TECHNICAL-DOC.md`: developer-oriented architecture and extension guide
+- `slides.md`: Markdown slides separated by `---`, with Mermaid support
+- `poster.png`: optional GPT Image poster when the configured API key exists
+
+Showcase always runs `analyze` first and `review` last. Without flags it asks which artifacts to generate and waits for the user; it must not assume `--all`. `--new` archives the previous version into `.pipeline/showcase/history/v<N>/` and increments `showcase.yaml` version.
+
 ### Auto Resume Watchdog
 
 The watchdog is opt-in and disabled by default:
@@ -790,6 +814,20 @@ compact:
   log_recent: 20
   reports_summary_lines: 3
 ```
+
+### V8.3 Showcase And i18n Configuration
+
+```yaml
+showcase:
+  language: auto          # auto | zh | en | bilingual
+  poster:
+    api_key_env: OPENAI_API_KEY
+    size: "1024x1536"
+    quality: high         # high | standard
+    style: auto           # auto | minimal | tech | marketing
+```
+
+Template loading follows `output.language`: `zh-CN` and `zh` use `templates/zh/`, `en` and `en-US` use `templates/en/`, and missing localized templates fall back to root `templates/`.
 
 ### Evaluation
 
@@ -1024,6 +1062,15 @@ Hooks act as a passive safety net — they don’t drive the pipeline, but preve
 
 ## Changelog
 
+### v8.3.0
+
+- Added `/hw:showcase` for project intro docs, technical docs, Markdown slides, and optional GPT Image posters.
+- Added the `showcase` preset and `.pipeline/showcase/` lifecycle with reuse, `--new` archive history, `showcase.yaml`, and review summaries.
+- Added localized template directories under `templates/en/` and `templates/zh/`, with root template fallback.
+- Strengthened i18n rules so user-facing output, reports, PROGRESS, and PROJECT-SUMMARY follow `output.language`.
+- Bootstrapped Hypo-Workflow's own Chinese showcase artifacts under `.pipeline/showcase/`.
+- Updated the public command set to 29 user-facing commands.
+
 ### v8.2.0
 
 - Added `/hw:patch fix P<N>` for direct lightweight Patch repairs with independent commits, Patch closure, PROGRESS updates, and `patch_fix` log events.
@@ -1071,6 +1118,7 @@ Hooks act as a passive safety net — they don’t drive the pipeline, but preve
 | V8 | Interactive planning hard gates, Cycle archives, Patch track, context-injected planning, output language/timezone, project summary, plan extend, and Auto Resume watchdog |
 | V8.1 | History Import for Git legacy history, Cycle 0 reports, interactive split preview, and `history_import` config |
 | V8.2 | Patch Fix execution lane, Context Compact views, compact-aware SessionStart, full-view flags, and Interactive Guide |
+| V8.3 | Showcase preset, project intro materials, Markdown slides, optional poster generation, and i18n template loading |
 
 ---
 

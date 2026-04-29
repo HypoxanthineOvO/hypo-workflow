@@ -1,7 +1,7 @@
 {
   "name": "hypo-workflow",
-  "version": "8.2.0",
-  "description": "Serialized prompt workflow with setup, planning, execution, cycles, patches, compact context, guide, auditing, debugging, release automation, watchdog, and WebUI support.",
+  "version": "8.3.0",
+  "description": "Serialized prompt workflow with setup, planning, execution, cycles, patches, compact context, guide, showcase, auditing, debugging, release automation, watchdog, and WebUI support.",
   "author": {
     "name": "Hypoxanthine",
     "url": "https://github.com/HypoxanthineOvO"
