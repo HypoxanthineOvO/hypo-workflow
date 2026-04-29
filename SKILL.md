@@ -1,12 +1,12 @@
 ---
 name: hypo-workflow
-version: 8.2.0
-description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:plan`, `/hw:plan:extend`, `/hw:plan:review`, `/hw:cycle`, `/hw:patch`, `/hw:compact`, `/hw:guide`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, or `/hw:dashboard`.
+version: 8.3.0
+description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:plan`, `/hw:plan:extend`, `/hw:plan:review`, `/hw:cycle`, `/hw:patch`, `/hw:compact`, `/hw:guide`, `/hw:showcase`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, or `/hw:dashboard`.
 ---
 
-# Hypo-Workflow v8.2.0
+# Hypo-Workflow v8.3.0
 
-> **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 28 个用户指令。
+> **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 29 个用户指令。
 >
 > **Codex 用户**：本文件是完整的 Skill 入口，继续使用 `/hw:*` 指令。
 
@@ -32,6 +32,7 @@ description: Run a serialized prompt execution pipeline from a local `.pipeline/
 | `/hw:patch fix` | Execute the lightweight six-step Patch repair lane |
 | `/hw:compact` | Generate `.compact` context views for large runtime files |
 | `/hw:guide` | Start an interactive guide that recommends the next command path |
+| `/hw:showcase` | Generate project intro docs, technical docs, slides, and an optional poster |
 | `/hw:init` | Initialize or rescan `.pipeline/` with architecture-aware project discovery |
 | `/hw:check` | Run pipeline health checks for config, state, prompts, Notion, and architecture |
 | `/hw:audit` | Run preventive code audits and emit graded findings with report output |
@@ -50,6 +51,17 @@ Unrecognized `/hw:*` commands should be reported as unknown.
 Load [`references/commands-spec.md`](./references/commands-spec.md) when you need parsing rules, parameter semantics, or state-mutation details for slash commands.
 
 Compatibility alias: `/hw:review` now prints `⚠️ \`/hw:review\` 已迁移到 \`/hw:plan:review\`。请使用新命令。此兼容提示将在 V7 中移除。`
+
+## Output Language Rules
+
+📌 输出语言规则：
+读取 config.yaml → output.language
+- zh-CN / zh：所有用户可见的输出使用中文（PROGRESS、报告、状态提示、错误消息、交互提问）
+- en：使用英文
+- auto：跟随用户对话语言
+内部日志（log.yaml、state.yaml）始终英文。
+
+Template loading maps `zh-CN` / `zh` to `templates/zh/`, maps `en` / `en-US` to `templates/en/`, and falls back to root `templates/` when the localized template is missing.
 
 # Prompt Pipeline
 
@@ -156,6 +168,7 @@ Use these bundled files when relevant:
 - [`scripts/watchdog.sh`](./scripts/watchdog.sh)
 - [`skills/compact/SKILL.md`](./skills/compact/SKILL.md)
 - [`skills/guide/SKILL.md`](./skills/guide/SKILL.md)
+- [`skills/showcase/SKILL.md`](./skills/showcase/SKILL.md)
 
 ## Supported Commands
 
@@ -205,6 +218,8 @@ Handle these commands directly:
   Load [`skills/compact/SKILL.md`](./skills/compact/SKILL.md). Generate `.compact` context views for PROGRESS, state, log, reports, and closed patches without mutating source files.
 - `/hw:guide`
   Load [`skills/guide/SKILL.md`](./skills/guide/SKILL.md). Sense project state, ask what the user wants, recommend a short command flow, and execute the first command only after confirmation.
+- `/hw:showcase`
+  Load [`skills/showcase/SKILL.md`](./skills/showcase/SKILL.md). Generate project introduction documents, technical docs, slides, and an optional GPT Image poster under `.pipeline/showcase/`.
 - `/hw:review`
   Emit the V6 migration warning and redirect the user to `/hw:plan:review`. Keep this alias only for compatibility.
 - `中止`, `abort`
@@ -212,7 +227,7 @@ Handle these commands directly:
 
 If a command starts with `/hw:` and is not listed above, return:
 
-`Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:compact, /hw:guide, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
+`Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:compact, /hw:guide, /hw:showcase, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
 
 Slash commands are exact and take precedence over fuzzy natural-language matching. Detailed parsing and option semantics live in [`references/commands-spec.md`](./references/commands-spec.md).
 
@@ -244,6 +259,7 @@ Key fallbacks:
 - `watchdog.enabled` falls back to global `watchdog.enabled`, then `false`
 - `history_import.split_method` falls back to global `history_import.split_method`, then `auto`
 - `compact.auto` falls back to global `compact.auto`, then `true`
+- `showcase.language` falls back to global `showcase.language`, then `auto`
 
 Read [`references/config-spec.md`](./references/config-spec.md) when resolving config precedence or field mapping.
 
@@ -257,6 +273,7 @@ Expected top-level config groups:
 - `watchdog` optional
 - `history_import` optional
 - `compact` optional
+- `showcase` optional
 - `platform` optional
 - `step_overrides` optional
 - `hooks` optional
@@ -289,6 +306,11 @@ Key defaults:
 - `compact.state_history_full=1`
 - `compact.log_recent=20`
 - `compact.reports_summary_lines=3`
+- `showcase.language=auto`
+- `showcase.poster.api_key_env=OPENAI_API_KEY`
+- `showcase.poster.size=1024x1536`
+- `showcase.poster.quality=high`
+- `showcase.poster.style=auto`
 - `dashboard.enabled=false`
 - `dashboard.port=7700`
 - `dashboard.auto_start=false`

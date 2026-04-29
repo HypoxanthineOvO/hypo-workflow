@@ -5,7 +5,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 ## Namespace
 
 - all explicit Hypo-Workflow commands use the `/hw:` prefix
-- V8.2 canonical namespace contains 28 user-facing commands across Setup, Pipeline, Plan, Lifecycle, and Utility groups, plus an internal cron-only watchdog skill
+- V8.3 canonical namespace contains 29 user-facing commands across Setup, Pipeline, Plan, Lifecycle, and Utility groups, plus an internal cron-only watchdog skill
 - slash commands are exact and namespace-scoped
 - slash commands take precedence over fuzzy natural-language matching
 - natural-language commands remain valid for backward compatibility
@@ -27,6 +27,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
    - `/hw:dashboard`
    - `/hw:compact`
    - `/hw:guide`
+   - `/hw:showcase`
    - `/hw:check`
    - `/hw:init`
    - `/hw:release`
@@ -44,7 +45,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 3. parse remaining tokens as command arguments
 4. flags are order-independent
 5. if a command is unknown, return exactly:
-   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:compact, /hw:guide, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
+   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:compact, /hw:guide, /hw:showcase, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
 6. if a known command receives an unsupported flag, stop and report the unsupported flag explicitly instead of guessing
 7. if a prompt selector is ambiguous, list the candidates and stop
 8. plan and review commands load `plan/PLAN-SKILL.md` before execution
@@ -188,7 +189,7 @@ Supported forms:
 Behavior:
 
 - read `SKILL.md` command tables as the source of truth
-- `/hw:help` lists all 28 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility
+- `/hw:help` lists all 29 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility
 - `/hw:help --quick` returns a compact cheat sheet
 - `/hw:help <cmd>` returns detailed usage, flags, and examples for the requested command
 
@@ -509,6 +510,28 @@ Behavior:
 - ask what the user wants
 - recommend a 1-3 command flow
 - execute the first recommended command only after explicit confirmation
+
+### `/hw:showcase`
+
+Supported flags:
+
+- none
+- `--all`
+- `--doc`
+- `--slides`
+- `--poster`
+- `--new`
+
+Behavior:
+
+- load `skills/showcase/SKILL.md`
+- create `.pipeline/showcase/` and `showcase.yaml` on first run
+- without selection flags, ask which artifacts to generate and wait for the user
+- always run `analyze` and `review`
+- generate selected artifacts: `PROJECT-INTRO.md`, `TECHNICAL-DOC.md`, `slides.md`, and optional `poster.png`
+- with `--new`, archive current artifacts into `history/v{N}/` and increment Showcase version
+- obey `showcase.*`, `output.language`, and `output.timezone`
+- poster API failures must not block docs or slides
 
 ### `/hw:review`
 
