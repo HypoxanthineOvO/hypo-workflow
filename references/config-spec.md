@@ -6,7 +6,7 @@ Use this reference whenever a command needs Hypo-Workflow configuration defaults
 
 | Layer | Path | Owner | Purpose |
 |---|---|---|---|
-| Global | `~/.hypo-workflow/config.yaml` | `/hypo-workflow:setup` | Agent platform, default execution mode, subagent backend, dashboard defaults, plan defaults, output defaults, watchdog defaults, history import defaults, compact defaults |
+| Global | `~/.hypo-workflow/config.yaml` | `/hypo-workflow:setup` | Agent platform, default execution mode, subagent backend, dashboard defaults, plan defaults, output defaults, watchdog defaults, history import defaults, compact defaults, showcase defaults |
 | Project | `.pipeline/config.yaml` | `/hypo-workflow:init` or `/hypo-workflow:plan-generate` | Project name, prompt source/output, reports, preset, evaluation rules, project-specific overrides |
 
 `setup` must never create project config. `init` and `plan-generate` must not overwrite global config.
@@ -46,6 +46,11 @@ Resolve every configurable value in this order:
 | compact full state history | `compact.state_history_full` | `compact.state_history_full` | `1` |
 | compact recent log events | `compact.log_recent` | `compact.log_recent` | `20` |
 | compact report summary lines | `compact.reports_summary_lines` | `compact.reports_summary_lines` | `3` |
+| showcase language | `showcase.language` | `showcase.language` | `auto` |
+| showcase poster API key env | `showcase.poster.api_key_env` | `showcase.poster.api_key_env` | `OPENAI_API_KEY` |
+| showcase poster size | `showcase.poster.size` | `showcase.poster.size` | `1024x1536` |
+| showcase poster quality | `showcase.poster.quality` | `showcase.poster.quality` | `high` |
+| showcase poster style | `showcase.poster.style` | `showcase.poster.style` | `auto` |
 
 Normalize global `agent.platform=claude-code` to the runtime platform value `claude` when applying existing project-platform logic.
 
@@ -114,7 +119,14 @@ compact:
   state_history_full: 1
   log_recent: 20
   reports_summary_lines: 3
-version: "8.2.0"
+showcase:
+  language: auto
+  poster:
+    api_key_env: OPENAI_API_KEY
+    size: "1024x1536"
+    quality: high
+    style: auto
+version: "8.3.0"
 created: "2026-04-26T14:00:00+08:00"
 updated: "2026-04-26T14:00:00+08:00"
 ```

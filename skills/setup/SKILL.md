@@ -4,6 +4,14 @@ description: Configure Hypo-Workflow global defaults for agent platform, executi
 ---
 
 # /hypo-workflow:setup
+## Output Language Rules
+
+📌 输出语言规则：
+读取 config.yaml → output.language
+- zh-CN / zh：所有用户可见的输出使用中文（PROGRESS、报告、状态提示、错误消息、交互提问）
+- en：使用英文
+- auto：跟随用户对话语言
+内部日志（log.yaml、state.yaml）始终英文。
 
 Use this skill as the plugin-level setup wizard. It configures Hypo-Workflow itself, not a project-local `.pipeline/` workspace.
 
@@ -118,7 +126,12 @@ Use short, concrete prompts:
 - `compact.state_history_full=1`
 - `compact.log_recent=20`
 - `compact.reports_summary_lines=3`
-- `version=8.2.0`
+- `showcase.language=auto`
+- `showcase.poster.api_key_env=OPENAI_API_KEY`
+- `showcase.poster.size=1024x1536`
+- `showcase.poster.quality=high`
+- `showcase.poster.style=auto`
+- `version=8.3.0`
 
 ## Config Shape
 
@@ -180,7 +193,15 @@ compact:
   log_recent: 20
   reports_summary_lines: 3
 
-version: "8.2.0"
+showcase:
+  language: auto
+  poster:
+    api_key_env: OPENAI_API_KEY
+    size: "1024x1536"
+    quality: high
+    style: auto
+
+version: "8.3.0"
 created: "2026-04-26T14:00:00+08:00"
 updated: "2026-04-26T14:00:00+08:00"
 ```

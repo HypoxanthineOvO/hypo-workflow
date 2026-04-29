@@ -208,6 +208,59 @@ $defs:
           state_history_full: 1
           log_recent: 20
           reports_summary_lines: 3
+      showcase:
+        type: object
+        additionalProperties: false
+        properties:
+          language:
+            type: string
+            enum:
+              - auto
+              - zh
+              - en
+              - bilingual
+            default: auto
+          poster:
+            type: object
+            additionalProperties: false
+            properties:
+              api_key_env:
+                type: string
+                minLength: 1
+                default: OPENAI_API_KEY
+              size:
+                type: string
+                enum:
+                  - "1024x1024"
+                  - "1024x1536"
+                  - "1536x1024"
+                default: "1024x1536"
+              quality:
+                type: string
+                enum:
+                  - high
+                  - standard
+                default: high
+              style:
+                type: string
+                enum:
+                  - auto
+                  - minimal
+                  - tech
+                  - marketing
+                default: auto
+            default:
+              api_key_env: OPENAI_API_KEY
+              size: "1024x1536"
+              quality: high
+              style: auto
+        default:
+          language: auto
+          poster:
+            api_key_env: OPENAI_API_KEY
+            size: "1024x1536"
+            quality: high
+            style: auto
       plan:
         type: object
         additionalProperties: false
@@ -243,7 +296,7 @@ $defs:
               require_explicit_confirm: true
       version:
         type: string
-        pattern: "^(7\\.1\\.0|8\\.0\\.0|8\\.1\\.0|8\\.2\\.0)$"
+        pattern: "^(7\\.1\\.0|8\\.0\\.0|8\\.1\\.0|8\\.2\\.0|8\\.3\\.0)$"
       created:
         type: string
         minLength: 1
@@ -567,6 +620,59 @@ properties:
       state_history_full: 1
       log_recent: 20
       reports_summary_lines: 3
+  showcase:
+    type: object
+    additionalProperties: false
+    properties:
+      language:
+        type: string
+        enum:
+          - auto
+          - zh
+          - en
+          - bilingual
+        default: auto
+      poster:
+        type: object
+        additionalProperties: false
+        properties:
+          api_key_env:
+            type: string
+            minLength: 1
+            default: OPENAI_API_KEY
+          size:
+            type: string
+            enum:
+              - "1024x1024"
+              - "1024x1536"
+              - "1536x1024"
+            default: "1024x1536"
+          quality:
+            type: string
+            enum:
+              - high
+              - standard
+            default: high
+          style:
+            type: string
+            enum:
+              - auto
+              - minimal
+              - tech
+              - marketing
+            default: auto
+        default:
+          api_key_env: OPENAI_API_KEY
+          size: "1024x1536"
+          quality: high
+          style: auto
+    default:
+      language: auto
+      poster:
+        api_key_env: OPENAI_API_KEY
+        size: "1024x1536"
+        quality: high
+        style: auto
   step_overrides:
     type: object
     default: {}
