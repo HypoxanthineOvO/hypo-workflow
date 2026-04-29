@@ -14,6 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SCENARIOS_ROOT = ROOT / "tests" / "scenarios"
 RESULTS_ROOT = ROOT / "tests" / "results"
+TEST_BIN = ROOT / "tests" / "bin"
 VALIDATE_CONFIG = ROOT / "scripts" / "validate-config.sh"
 PLUGIN_JSON = ROOT / ".claude-plugin" / "plugin.json"
 TARGET_SCENARIOS = {
@@ -54,6 +55,12 @@ TARGET_SCENARIOS = {
     "s35-import-history-interactive",
     "s36-import-history-non-git",
     "s37-import-history-existing-pipeline",
+    "s38-patch-fix-flow",
+    "s39-compact-generator",
+    "s40-compact-session-start",
+    "s41-full-view-flags",
+    "s42-guide-flow",
+    "s43-v8-2-registration",
 }
 
 
@@ -77,12 +84,15 @@ class ScenarioResult:
 
 
 def run(cmd: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
+    env = os.environ.copy()
+    env["PATH"] = f"{TEST_BIN}:{env.get('PATH', '')}"
     return subprocess.run(
         cmd,
         cwd=str(cwd or ROOT),
         shell=True,
         text=True,
         capture_output=True,
+        env=env,
     )
 
 
@@ -160,7 +170,7 @@ def scenario_specific(scene: Path, result: ScenarioResult) -> None:
         diff = run(f'bash "{ROOT / "scripts" / "diff-stats.sh"}"', cwd=gitrepo)
         add(result, "diff_stats", "changed_files=" in diff.stdout and "added_lines=" in diff.stdout, diff.stdout.strip())
         plugin = run(f'python3 -m json.tool "{PLUGIN_JSON}"')
-        add(result, "plugin_json", plugin.returncode == 0 and '"version": "8.1.0"' in plugin.stdout)
+        add(result, "plugin_json", plugin.returncode == 0 and '"version": "8.2.0"' in plugin.stdout)
     elif name == "s12-hook-stop-check":
         tmp = Path(tempfile.mkdtemp(prefix="hw-s12-"))
         case_a = run(f'bash "{ROOT / "hooks" / "stop-check.sh"}"', cwd=tmp)
@@ -223,6 +233,12 @@ def scenario_specific(scene: Path, result: ScenarioResult) -> None:
         "s35-import-history-interactive",
         "s36-import-history-non-git",
         "s37-import-history-existing-pipeline",
+        "s38-patch-fix-flow",
+        "s39-compact-generator",
+        "s40-compact-session-start",
+        "s41-full-view-flags",
+        "s42-guide-flow",
+        "s43-v8-2-registration",
     }:
         proc = run(f'bash "{scene / "run.sh"}"', cwd=scene)
         add(result, "run_sh", proc.returncode == 0, (proc.stdout + proc.stderr).strip())

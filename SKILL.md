@@ -1,12 +1,12 @@
 ---
 name: hypo-workflow
-version: 8.1.0
-description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:plan`, `/hw:plan:extend`, `/hw:plan:review`, `/hw:cycle`, `/hw:patch`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, or `/hw:dashboard`.
+version: 8.2.0
+description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:plan`, `/hw:plan:extend`, `/hw:plan:review`, `/hw:cycle`, `/hw:patch`, `/hw:compact`, `/hw:guide`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, or `/hw:dashboard`.
 ---
 
-# Hypo-Workflow v8.1.0
+# Hypo-Workflow v8.2.0
 
-> **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 25 个用户指令。
+> **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 28 个用户指令。
 >
 > **Codex 用户**：本文件是完整的 Skill 入口，继续使用 `/hw:*` 指令。
 
@@ -16,10 +16,10 @@ description: Run a serialized prompt execution pipeline from a local `.pipeline/
 |---------|-------------|
 | `/hw:start` | Initialize and start the pipeline from the first prompt |
 | `/hw:resume` | Resume from the last interrupted state |
-| `/hw:status` | Show current pipeline progress |
+| `/hw:status` | Show current pipeline progress; use `--full` to bypass compact context |
 | `/hw:skip` | Skip the current prompt and advance |
 | `/hw:stop` | Gracefully stop and save state |
-| `/hw:report` | Show the latest evaluation scores |
+| `/hw:report` | Show compact report summaries, latest scores, or `--view <M>` full report |
 | `/hw:plan` | Enter Plan Mode through `plan/PLAN-SKILL.md` |
 | `/hw:plan:discover` | Run the Discover phase of Plan Mode |
 | `/hw:plan:decompose` | Run the Decompose phase of Plan Mode |
@@ -28,7 +28,10 @@ description: Run a serialized prompt execution pipeline from a local `.pipeline/
 | `/hw:plan:extend` | Append milestones to an active Cycle |
 | `/hw:plan:review` | Run Plan Review for the current or all milestones |
 | `/hw:cycle` | Create, list, view, close, and archive delivery Cycles |
-| `/hw:patch` | Create, list, and close persistent lightweight Patches |
+| `/hw:patch` | Create, list, close, and `fix` persistent lightweight Patches |
+| `/hw:patch fix` | Execute the lightweight six-step Patch repair lane |
+| `/hw:compact` | Generate `.compact` context views for large runtime files |
+| `/hw:guide` | Start an interactive guide that recommends the next command path |
 | `/hw:init` | Initialize or rescan `.pipeline/` with architecture-aware project discovery |
 | `/hw:check` | Run pipeline health checks for config, state, prompts, Notion, and architecture |
 | `/hw:audit` | Run preventive code audits and emit graded findings with report output |
@@ -36,7 +39,7 @@ description: Run a serialized prompt execution pipeline from a local `.pipeline/
 | `/hw:debug` | Run symptom-driven debugging with hypotheses, validation, and optional auto-fix |
 | `/hw:help` | Show command help, grouped quick reference, or per-command usage |
 | `/hw:reset` | Reset pipeline runtime state with safe, full, or hard modes |
-| `/hw:log` | Read the unified lifecycle log from `.pipeline/log.yaml` |
+| `/hw:log` | Read the unified lifecycle log; use `--full` to bypass compact log context |
 | `/hw:setup` | Create or update `~/.hypo-workflow/config.yaml` for environment, execution, subagent, plan, and dashboard defaults |
 | `/hw:dashboard` | Start or reopen the Hypo-Workflow WebUI dashboard server |
 
@@ -151,6 +154,8 @@ Use these bundled files when relevant:
 - [`scripts/log-append.sh`](./scripts/log-append.sh)
 - [`scripts/diff-stats.sh`](./scripts/diff-stats.sh)
 - [`scripts/watchdog.sh`](./scripts/watchdog.sh)
+- [`skills/compact/SKILL.md`](./skills/compact/SKILL.md)
+- [`skills/guide/SKILL.md`](./skills/guide/SKILL.md)
 
 ## Supported Commands
 
@@ -161,7 +166,7 @@ Handle these commands directly:
 - `/hw:resume`, `继续`, `continue`, `下一步`, `执行下一步`
   Resume from `current.prompt_file` and `current.step`. Treat a user-facing interrupted session as persisted unfinished work, usually `pipeline.status=running|stopped`.
 - `/hw:status`, `pipeline status`, `状态`
-  Read config plus state and print a concise status summary without mutating work. When shell access is available, prefer [`scripts/state-summary.sh`](./scripts/state-summary.sh).
+  Read config plus state and print a concise status summary without mutating work. Use compact state/progress when available unless `--full` is present. When shell access is available, prefer [`scripts/state-summary.sh`](./scripts/state-summary.sh).
 - `/hw:skip`
   Skip the current prompt, persist a prompt-level skip reason, append a prompt skip log event, and advance to the next prompt without incrementing `pipeline.prompts_completed`.
 - `跳过当前步骤`, `skip step`
@@ -169,13 +174,13 @@ Handle these commands directly:
 - `/hw:stop`
   Gracefully stop without aborting the pipeline. Persist state, optionally write an intermediate report, and set `pipeline.status=stopped`. With `--no-report`, skip the intermediate report.
 - `/hw:report`
-  Load the most recent report file and summarize the latest scores, warnings, and decision.
+  Load compact report summaries when available. With `--view <M>`, load the specified Milestone report in full. Otherwise summarize the latest scores, warnings, and decision.
 - `/hw:help`
   Show grouped command help. Use `--quick` for a compact cheat sheet or `/hw:help <cmd>` for detailed usage, arguments, and examples sourced from this file.
 - `/hw:reset`
   Reset runtime state only, or use `--full` / `--hard` for broader cleanup. Always list the affected files before deletion. `--hard` requires an explicit `YES` confirmation.
 - `/hw:log`
-  Read `.pipeline/log.yaml`, show the latest 10 entries by default, and support `--all`, `--type <type>`, and `--since <milestone>` filters. If the file is missing, say `暂无日志，执行 Pipeline 后自动生成`.
+  Read `.pipeline/log.compact.yaml` when available, otherwise `.pipeline/log.yaml`; show the latest 10 entries by default, and support `--all`, `--type <type>`, `--since <milestone>`, and `--full` filters. If the file is missing, say `暂无日志，执行 Pipeline 后自动生成`.
 - `/hw:setup`
   Configure the plugin itself: create or update `~/.hypo-workflow/config.yaml`, detect environment, choose plan mode, choose execution/subagent mode, and decide whether dashboard support should be enabled.
 - `/hw:dashboard`
@@ -195,7 +200,11 @@ Handle these commands directly:
 - `/hw:cycle`
   Load [`skills/cycle/SKILL.md`](./skills/cycle/SKILL.md). Manage explicit Cycles, archives, deferred items, and project summaries. Old projects without `.pipeline/cycle.yaml` remain compatible as implicit `C1`.
 - `/hw:patch`
-  Load [`skills/patch/SKILL.md`](./skills/patch/SKILL.md). Manage persistent lightweight patches under `.pipeline/patches/`.
+  Load [`skills/patch/SKILL.md`](./skills/patch/SKILL.md). Manage persistent lightweight patches under `.pipeline/patches/`. Support `/hw:patch fix P001 [P...]` for the lightweight six-step fix lane.
+- `/hw:compact`
+  Load [`skills/compact/SKILL.md`](./skills/compact/SKILL.md). Generate `.compact` context views for PROGRESS, state, log, reports, and closed patches without mutating source files.
+- `/hw:guide`
+  Load [`skills/guide/SKILL.md`](./skills/guide/SKILL.md). Sense project state, ask what the user wants, recommend a short command flow, and execute the first command only after confirmation.
 - `/hw:review`
   Emit the V6 migration warning and redirect the user to `/hw:plan:review`. Keep this alias only for compatibility.
 - `中止`, `abort`
@@ -203,7 +212,7 @@ Handle these commands directly:
 
 If a command starts with `/hw:` and is not listed above, return:
 
-`Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
+`Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:compact, /hw:guide, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
 
 Slash commands are exact and take precedence over fuzzy natural-language matching. Detailed parsing and option semantics live in [`references/commands-spec.md`](./references/commands-spec.md).
 
@@ -234,6 +243,7 @@ Key fallbacks:
 - `output.timezone` falls back to global `output.timezone`, then `UTC`
 - `watchdog.enabled` falls back to global `watchdog.enabled`, then `false`
 - `history_import.split_method` falls back to global `history_import.split_method`, then `auto`
+- `compact.auto` falls back to global `compact.auto`, then `true`
 
 Read [`references/config-spec.md`](./references/config-spec.md) when resolving config precedence or field mapping.
 
@@ -246,6 +256,7 @@ Expected top-level config groups:
 - `output` optional
 - `watchdog` optional
 - `history_import` optional
+- `compact` optional
 - `platform` optional
 - `step_overrides` optional
 - `hooks` optional
@@ -273,6 +284,11 @@ Key defaults:
 - `history_import.time_gap_threshold=24h`
 - `history_import.max_milestones=20`
 - `history_import.keyword_patterns=['feat\\(M(\\d+)\\):','M(\\d+)-','milestone-(\\d+)']`
+- `compact.auto=true`
+- `compact.progress_recent=15`
+- `compact.state_history_full=1`
+- `compact.log_recent=20`
+- `compact.reports_summary_lines=3`
 - `dashboard.enabled=false`
 - `dashboard.port=7700`
 - `dashboard.auto_start=false`
@@ -362,6 +378,23 @@ Patch rules:
 - Patch numbering is global, `P001`, `P002`, and so on
 - Patches are never archived with a Cycle
 - `/hw:plan --context patches` can inject open Patches into P1 Discover
+
+### ⚠️ Patch Fix 执行约束
+
+❌ 绝对禁止：
+1. 启动 brainstorming 或 Plan Discover
+2. 走完整 TDD 流水线（write_tests → run_red → ...）
+3. 写入 state.yaml（Patch 不是 Milestone）
+4. 生成 report.md
+5. 单个 Patch 改动超过 5 个文件时不提醒用户
+6. 顺手重构不相关代码
+
+✅ 必须做到：
+1. 读取 Patch 描述后直接定位和修复
+2. 跑现有测试验证不破坏其他功能
+3. 单次 commit，message 格式：fix(P<NNN>): <描述>
+4. 自动关闭 Patch 并更新文件
+5. 超出范围时停下来建议升级为 Milestone
 
 ## Step Presets
 
@@ -592,6 +625,26 @@ Maintain `.pipeline/PROGRESS.md` as the human-readable execution summary.
 - format times in `output.timezone` as same-day `HH:MM` or cross-day `DD日 HH:MM` for `zh-CN`
 
 Detailed format rules live in [`references/progress-spec.md`](./references/progress-spec.md).
+
+## Context Compact
+
+V8.2 adds derived compact views for large runtime files. Generate them with `/hw:compact` or automatically when `compact.auto=true`.
+
+Compact files:
+
+- `.pipeline/PROGRESS.compact.md`
+- `.pipeline/state.compact.yaml`
+- `.pipeline/log.compact.yaml`
+- `.pipeline/reports.compact.md`
+- `.pipeline/patches.compact.md`
+
+Rules:
+
+- compact files are read-only context views and must never replace source files for mutation
+- SessionStart loads compact files first, then falls back to full source files when compact views are absent
+- current prompt and current report are always loaded in full
+- open Patch files are loaded in full; closed Patch details are represented through `patches.compact.md`
+- `/hw:status --full`, `/hw:log --full`, and `/hw:report --view <M>` bypass compact views for the requested data
 
 ## Main State Machine
 

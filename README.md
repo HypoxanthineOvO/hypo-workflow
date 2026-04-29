@@ -6,7 +6,7 @@
 
 TDD Pipeline · Self-Review · Interrupt Recovery · Multi-Dimensional Evaluation
 
-[![Version](https://img.shields.io/badge/version-8.1.0-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-8.2.0-blue)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex-purple)](#platform-support)
 
@@ -31,7 +31,7 @@ It ships as a **SKILL.md** file — not a service, not a CLI tool. Any AI agent 
 | Feature | Description |
 |---------|-------------|
 | 🔄 **TDD Pipeline** | Built-in test-driven sub-steps: write tests → review → red → implement → green → review code |
-| 🧭 **Native Skills** | 25 user-facing Claude Code skills exposed as `/hypo-workflow:*` plus `/hw:*` compatibility for Codex |
+| 🧭 **Native Skills** | 28 user-facing Claude Code skills exposed as `/hypo-workflow:*` plus `/hw:*` compatibility for Codex |
 | 🗺️ **Plan Mode** | Auto and Interactive planning modes with enforced discovery gates, context injection, extend, decompose / generate / confirm / review phases |
 | 🧩 **Notion Adapter** | Read prompts from Notion and/or write reports back to Notion with graceful degradation |
 | ⏸️ **Interrupt Recovery** | `state.yaml` tracks progress to the sub-step level — resume exactly where you left off |
@@ -42,7 +42,9 @@ It ships as a **SKILL.md** file — not a service, not a CLI tool. Any AI agent 
 | 📝 **Unified Logging** | `.pipeline/log.yaml` records milestones, fixes, audits, debug sessions, plan reviews, and releases |
 | 📈 **Progress Summary** | `.pipeline/PROGRESS.md` gives a human-readable milestone and step summary |
 | 🔄 **Cycles** | Delivery Cycles archive state, prompts, reports, deferred work, and summaries across project history |
-| 🩹 **Patch Track** | Persistent lightweight `P001` style patches stay outside Cycle archives and can feed future plans |
+| 🩹 **Patch Track** | Persistent lightweight `P001` style patches stay outside Cycle archives, can feed future plans, and can be fixed directly |
+| 📦 **Context Compact** | `.compact` views reduce SessionStart context while preserving full source files |
+| 🧭 **Interactive Guide** | `/hw:guide` senses project state and recommends the next command flow |
 | ⏱️ **Auto Resume Watchdog** | Optional heartbeat + cron watchdog resumes stale executing pipelines safely |
 | 🛠️ **Setup Wizard** | `/hypo-workflow:setup` configures environment, execution defaults, subagent backend, and dashboard preferences |
 | 🌐 **Dashboard** | `/hypo-workflow:dashboard` launches a live WebUI for state, config, progress, reports, and log activity |
@@ -429,7 +431,7 @@ hypo-workflow/
 
 │   └── hypo-todo-adaptive/      # Adaptive threshold example
 
-├── skills/                    # 25 user-facing skills + internal watchdog
+├── skills/                    # 28 user-facing skills + internal watchdog
 
 └── tests/
 
@@ -498,10 +500,10 @@ Codex users keep the compatible `/hw:*` path via the root `SKILL.md`.
 |---------|----------|
 | `/hw:start` | Start the implementation pipeline |
 | `/hw:resume` | Resume the current run |
-| `/hw:status` | Show current progress |
+| `/hw:status` | Show current progress; `--full` bypasses compact context |
 | `/hw:skip` | Skip the current prompt |
 | `/hw:stop` | Gracefully stop and save state |
-| `/hw:report` | Summarize the latest report |
+| `/hw:report` | Show compact report summaries, latest report, or `--view M<N>` full report |
 
 #### Plan
 
@@ -526,7 +528,8 @@ Codex users keep the compatible `/hw:*` path via the root `SKILL.md`.
 | `/hw:release` | Run the automated publishing flow |
 | `/hw:debug` | Investigate a symptom and propose or apply a verified fix |
 | `/hw:cycle` | Create, list, view, close, and archive delivery Cycles |
-| `/hw:patch` | Create, list, and close persistent lightweight Patches |
+| `/hw:patch` | Create, list, close, and fix persistent lightweight Patches |
+| `/hw:patch fix` | Run the lightweight six-step Patch repair lane |
 
 #### Utility
 
@@ -535,7 +538,9 @@ Codex users keep the compatible `/hw:*` path via the root `SKILL.md`.
 | `/hypo-workflow:dashboard` | Launch the WebUI dashboard in the background and open the browser |
 | `/hw:help` | Show grouped help, quick help, or per-command usage |
 | `/hw:reset` | Reset state, generated artifacts, or the entire `.pipeline/` workspace |
-| `/hw:log` | Read and filter `.pipeline/log.yaml` |
+| `/hw:log` | Read and filter `.pipeline/log.yaml`; `--full` bypasses compact log context |
+| `/hw:compact` | Generate compact context views for PROGRESS, state, log, reports, and closed patches |
+| `/hw:guide` | Start an interactive guide that recommends the next command flow |
 
 Compatibility note: `/hw:review` now shows a migration warning and redirects users to `/hw:plan:review`.
 
@@ -645,6 +650,8 @@ Patch commands:
 /hw:patch list --open
 /hw:patch list --severity critical
 /hw:patch close P001
+/hw:patch fix P001
+/hw:patch fix P001 P003 P007
 ```
 
 Patch rules:
@@ -653,6 +660,55 @@ Patch rules:
 - Severity is `critical`, `normal`, or `minor`; default is `normal`.
 - Patches are not archived with Cycles.
 - Use `/hw:plan --context patches` to promote open patches into Cycle milestones.
+
+Patch Fix is a direct six-step lane for small repairs:
+
+1. Step 1: 读取 Patch
+2. Step 2: 定位代码
+3. Step 3: 修复
+4. Step 4: 测试
+5. Step 5: 提交
+6. Step 6: 关闭
+
+It does not start Plan Discover, does not run the full TDD pipeline, does not write `state.yaml`, and does not generate `report.md`. If one Patch needs more than 5 changed files, stop and upgrade it to a Milestone. Successful fixes commit as `fix(P001): <Patch title>`, close the Patch file, append one `PROGRESS.md` line, and add a `patch_fix` event to `log.yaml`.
+
+### Context Compact
+
+Use `/hw:compact` to generate derived context views next to the original files:
+
+```text
+.pipeline/PROGRESS.compact.md
+.pipeline/state.compact.yaml
+.pipeline/log.compact.yaml
+.pipeline/reports.compact.md
+.pipeline/patches.compact.md
+```
+
+SessionStart loads compact files first and falls back to full files when compact files are missing. It still loads `config.yaml`, `architecture.md`, `cycle.yaml`, the current prompt, the current report, and open Patch files in full. Closed Patch details are summarized by `patches.compact.md`.
+
+Use full views when needed:
+
+```text
+/hw:status --full
+/hw:log --full
+/hw:report --view M3
+```
+
+### Interactive Guide
+
+Use `/hw:guide` when you are unsure what to run next. It gives a short introduction, senses whether `.pipeline/` exists, reads current Cycle/state/open Patch context, asks what you want to do, recommends a 1-3 command flow, and executes the first command only after confirmation.
+
+Typical recommendations:
+
+| Intent | Flow |
+|--------|------|
+| New project | `/hw:init` → `/hw:plan` → `/hw:start` |
+| Continue work | `/hw:resume` or `/hw:cycle new` |
+| Fix a bug | `/hw:patch "description"` → `/hw:patch fix P<N>` |
+| Code quality review | `/hw:audit` → `/hw:plan --context audit` |
+| Legacy Git project | `/hw:init --import-history` |
+| Reduce context usage | `/hw:compact` |
+| Release | `/hw:release` |
 
 ### Auto Resume Watchdog
 
@@ -722,6 +778,17 @@ history_import:
     - 'feat\(M(\d+)\):'
     - 'M(\d+)-'
     - 'milestone-(\d+)'
+```
+
+### V8.2 Compact Configuration
+
+```yaml
+compact:
+  auto: true
+  progress_recent: 15
+  state_history_full: 1
+  log_recent: 20
+  reports_summary_lines: 3
 ```
 
 ### Evaluation
@@ -957,6 +1024,15 @@ Hooks act as a passive safety net — they don’t drive the pipeline, but preve
 
 ## Changelog
 
+### v8.2.0
+
+- Added `/hw:patch fix P<N>` for direct lightweight Patch repairs with independent commits, Patch closure, PROGRESS updates, and `patch_fix` log events.
+- Added `/hw:compact` and compact context views for progress, state, log, reports, and closed Patches.
+- Updated SessionStart to prefer `.compact` files, fallback to full files, and keep current prompt/report plus open Patches complete.
+- Added `/hw:status --full`, `/hw:log --full`, and `/hw:report --view <M>` for on-demand full data loading.
+- Added `/hw:guide` as an interactive project-aware command guide.
+- Updated the public command set to 28 user-facing commands.
+
 ### v8.1.0
 
 - Extended `/hw:init` with `--import-history` for importing Git first-parent history into Cycle 0 Legacy.
@@ -994,6 +1070,7 @@ Hooks act as a passive safety net — they don’t drive the pipeline, but preve
 | V7.1 | Global setup config, config fallback priority, and platform-specific subagent tutorials |
 | V8 | Interactive planning hard gates, Cycle archives, Patch track, context-injected planning, output language/timezone, project summary, plan extend, and Auto Resume watchdog |
 | V8.1 | History Import for Git legacy history, Cycle 0 reports, interactive split preview, and `history_import` config |
+| V8.2 | Patch Fix execution lane, Context Compact views, compact-aware SessionStart, full-view flags, and Interactive Guide |
 
 ---
 
