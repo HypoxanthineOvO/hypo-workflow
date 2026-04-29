@@ -5,7 +5,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 ## Namespace
 
 - all explicit Hypo-Workflow commands use the `/hw:` prefix
-- V8 canonical namespace contains 25 user-facing commands across Setup, Pipeline, Plan, Lifecycle, and Utility groups, plus an internal cron-only watchdog skill
+- V8.2 canonical namespace contains 28 user-facing commands across Setup, Pipeline, Plan, Lifecycle, and Utility groups, plus an internal cron-only watchdog skill
 - slash commands are exact and namespace-scoped
 - slash commands take precedence over fuzzy natural-language matching
 - natural-language commands remain valid for backward compatibility
@@ -25,6 +25,8 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
    - `/hw:log`
    - `/hw:setup`
    - `/hw:dashboard`
+   - `/hw:compact`
+   - `/hw:guide`
    - `/hw:check`
    - `/hw:init`
    - `/hw:release`
@@ -42,7 +44,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 3. parse remaining tokens as command arguments
 4. flags are order-independent
 5. if a command is unknown, return exactly:
-   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
+   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:compact, /hw:guide, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
 6. if a known command receives an unsupported flag, stop and report the unsupported flag explicitly instead of guessing
 7. if a prompt selector is ambiguous, list the candidates and stop
 8. plan and review commands load `plan/PLAN-SKILL.md` before execution
@@ -105,10 +107,13 @@ Behavior:
 Supported flags:
 
 - none
+- `--full`
 
 Behavior:
 
 - prefer `scripts/state-summary.sh`
+- without `--full`, prefer `.pipeline/state.compact.yaml` and `.pipeline/PROGRESS.compact.md` when present
+- with `--full`, ignore compact files and load complete `.pipeline/state.yaml` plus `.pipeline/PROGRESS.md`
 - if the script is unavailable, fall back to direct config/state inspection
 - include the effective execution mode when config files are available
 - include active Cycle metadata, `last_heartbeat`, and watchdog state when present
@@ -162,9 +167,12 @@ Behavior:
 Supported flags:
 
 - none
+- `--view M<N>`
 
 Behavior:
 
+- without `--view`, list `.pipeline/reports.compact.md` summaries when available
+- with `--view M<N>`, load the specified Milestone report in full
 - locate the most recent report using `history.completed_prompts[-1].report_file` when available
 - otherwise fall back to the newest report file in the reports directory
 - summarize the latest scores, warnings, and decision
@@ -180,7 +188,7 @@ Supported forms:
 Behavior:
 
 - read `SKILL.md` command tables as the source of truth
-- `/hw:help` lists all 25 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility
+- `/hw:help` lists all 28 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility
 - `/hw:help --quick` returns a compact cheat sheet
 - `/hw:help <cmd>` returns detailed usage, flags, and examples for the requested command
 
@@ -205,10 +213,12 @@ Supported flags:
 - `--all`
 - `--type <type>`
 - `--since <milestone>`
+- `--full`
 
 Behavior:
 
-- read `.pipeline/log.yaml`
+- read `.pipeline/log.compact.yaml` when available unless `--full` is present
+- with `--full`, read `.pipeline/log.yaml` directly
 - show the newest 10 entries by default
 - filter entries by type or milestone when requested
 - if `log.yaml` is missing, return `暂无日志，执行 Pipeline 后自动生成`
@@ -462,6 +472,7 @@ Supported forms:
 - `/hw:patch "描述" [--severity critical|normal|minor]`
 - `/hw:patch list [--open] [--severity critical|normal|minor]`
 - `/hw:patch close P{NNN}`
+- `/hw:patch fix P{NNN} [P{NNN} ...]`
 
 Behavior:
 
@@ -470,6 +481,34 @@ Behavior:
 - assign global monotonically increasing IDs `P001`, `P002`, ...
 - keep Patches outside Cycle archives
 - close patches by updating status without deleting notes
+- fix patches through the six-step lightweight lane in `skills/patch/SKILL.md`; never write `state.yaml` or generate `report.md` for Patch fix
+
+### `/hw:compact`
+
+Supported flags:
+
+- none
+
+Behavior:
+
+- load `skills/compact/SKILL.md`
+- generate `.pipeline/PROGRESS.compact.md`, `.pipeline/state.compact.yaml`, `.pipeline/log.compact.yaml`, `.pipeline/reports.compact.md`, and `.pipeline/patches.compact.md` when source files exist
+- never mutate source files while compacting
+- obey `compact.*`, `output.language`, and `output.timezone`
+
+### `/hw:guide`
+
+Supported flags:
+
+- none
+
+Behavior:
+
+- load `skills/guide/SKILL.md`
+- inspect `.pipeline/`, active Cycle, current state, and open Patches
+- ask what the user wants
+- recommend a 1-3 command flow
+- execute the first recommended command only after explicit confirmation
 
 ### `/hw:review`
 

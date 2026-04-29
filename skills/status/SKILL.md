@@ -15,10 +15,11 @@ Use this skill to inspect pipeline progress only.
 
 1. Read `~/.hypo-workflow/config.yaml` if present.
 2. Read `.pipeline/config.yaml` if present.
-3. Read `.pipeline/state.yaml` if present.
-4. Resolve effective defaults as project > global > defaults without mutating either config file.
-5. Prefer `scripts/state-summary.sh` for a quick summary when shell access is available.
-6. Report:
+3. If the user passed `--full`, read `.pipeline/state.yaml` and `.pipeline/PROGRESS.md` directly and print `加载完整版 state.yaml` / `加载完整版 PROGRESS.md` with line counts when possible.
+4. If `--full` is absent, prefer `.pipeline/state.compact.yaml` and `.pipeline/PROGRESS.compact.md` when they exist; otherwise fall back to `.pipeline/state.yaml` and `.pipeline/PROGRESS.md`.
+5. Resolve effective defaults as project > global > defaults without mutating either config file.
+6. Prefer `scripts/state-summary.sh` for a quick summary when shell access is available; use compact files only as supplemental context because canonical state mutations still belong to `state.yaml`.
+7. Report:
    - pipeline name
    - overall status
    - current milestone or prompt
@@ -28,8 +29,13 @@ Use this skill to inspect pipeline progress only.
    - latest completed milestone
    - deferred items if any
    - `last_heartbeat` and watchdog state when present
-7. If `.pipeline/PROGRESS.md` exists, use it as a human-facing summary source, but do not rewrite it during status inspection.
-8. If project-root `PROJECT-SUMMARY.md` exists, include its top summary line and Open Patches / Deferred counts.
+8. If `.pipeline/PROGRESS.md` or `.pipeline/PROGRESS.compact.md` exists, use it as a human-facing summary source, but do not rewrite it during status inspection.
+9. If project-root `PROJECT-SUMMARY.md` exists, include its top summary line and Open Patches / Deferred counts.
+
+## Flags
+
+- `/hw:status --full`: ignore compact files and load the complete `.pipeline/state.yaml` and `.pipeline/PROGRESS.md`.
+- `/hw:status`: use compact files when available, with full-file fallback when compact files are absent.
 
 ## Safety Rules
 

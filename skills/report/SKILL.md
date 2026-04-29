@@ -15,16 +15,23 @@ Use this skill to summarize the latest generated report file.
 
 1. Read `.pipeline/state.yaml` if present.
 2. Resolve `output.language` and `output.timezone` from project > global > defaults.
-3. Locate the latest report:
+3. If the user passed `/hw:report --view M<N>`, locate the matching report in `.pipeline/reports/` or archived Cycle report directories and load the complete report content. Do not use `reports.compact.md` for `--view`.
+4. If no `--view` target is provided and `.pipeline/reports.compact.md` exists, show the compact report summary list first.
+5. Locate the latest report when a detailed latest summary is needed:
    - prefer `history.completed_prompts[-1].report_file`
    - otherwise use the newest report in `.pipeline/reports/`
-4. Summarize in `output.language`:
+6. Summarize in `output.language`:
    - milestone or prompt name
    - final decision
    - key scores
    - warnings
    - deferred or blocking notes if present
-5. If `.pipeline/PROGRESS.md` exists, keep its summary consistent conceptually, but do not mutate it from a read-only report command.
+7. If `.pipeline/PROGRESS.md` exists, keep its summary consistent conceptually, but do not mutate it from a read-only report command.
+
+## Flags
+
+- `/hw:report --view M3`: load and display the complete report for Milestone `M3`.
+- `/hw:report`: list compact report summaries from `.pipeline/reports.compact.md` when available; otherwise summarize the latest report.
 
 ## Output Rules
 
