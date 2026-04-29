@@ -1,6 +1,6 @@
 ---
 name: showcase
-description: Generate a complete project showcase package: introduction docs, technical docs, slides, and an optional poster.
+description: "Generate a complete project showcase package for introduction docs, technical docs, slides, and an optional poster."
 ---
 
 # /hypo-workflow:showcase
