@@ -6,7 +6,7 @@ Use this reference whenever a command needs Hypo-Workflow configuration defaults
 
 | Layer | Path | Owner | Purpose |
 |---|---|---|---|
-| Global | `~/.hypo-workflow/config.yaml` | `/hypo-workflow:setup` | Agent platform, default execution mode, subagent backend, dashboard defaults, plan defaults, output defaults, watchdog defaults, history import defaults |
+| Global | `~/.hypo-workflow/config.yaml` | `/hypo-workflow:setup` | Agent platform, default execution mode, subagent backend, dashboard defaults, plan defaults, output defaults, watchdog defaults, history import defaults, compact defaults |
 | Project | `.pipeline/config.yaml` | `/hypo-workflow:init` or `/hypo-workflow:plan-generate` | Project name, prompt source/output, reports, preset, evaluation rules, project-specific overrides |
 
 `setup` must never create project config. `init` and `plan-generate` must not overwrite global config.
@@ -41,6 +41,11 @@ Resolve every configurable value in this order:
 | history import time gap | `history_import.time_gap_threshold` | `history_import.time_gap_threshold` | `24h` |
 | history import max milestones | `history_import.max_milestones` | `history_import.max_milestones` | `20` |
 | history import keyword patterns | `history_import.keyword_patterns` | `history_import.keyword_patterns` | built-in V8.1 patterns |
+| compact auto generation | `compact.auto` | `compact.auto` | `true` |
+| compact recent progress lines | `compact.progress_recent` | `compact.progress_recent` | `15` |
+| compact full state history | `compact.state_history_full` | `compact.state_history_full` | `1` |
+| compact recent log events | `compact.log_recent` | `compact.log_recent` | `20` |
+| compact report summary lines | `compact.reports_summary_lines` | `compact.reports_summary_lines` | `3` |
 
 Normalize global `agent.platform=claude-code` to the runtime platform value `claude` when applying existing project-platform logic.
 
@@ -103,7 +108,13 @@ history_import:
     - 'feat\(M(\d+)\):'
     - 'M(\d+)-'
     - 'milestone-(\d+)'
-version: "8.1.0"
+compact:
+  auto: true
+  progress_recent: 15
+  state_history_full: 1
+  log_recent: 20
+  reports_summary_lines: 3
+version: "8.2.0"
 created: "2026-04-26T14:00:00+08:00"
 updated: "2026-04-26T14:00:00+08:00"
 ```

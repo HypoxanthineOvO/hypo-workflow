@@ -113,7 +113,12 @@ Use short, concrete prompts:
 - `history_import.split_method=auto`
 - `history_import.time_gap_threshold=24h`
 - `history_import.max_milestones=20`
-- `version=8.1.0`
+- `compact.auto=true`
+- `compact.progress_recent=15`
+- `compact.state_history_full=1`
+- `compact.log_recent=20`
+- `compact.reports_summary_lines=3`
+- `version=8.2.0`
 
 ## Config Shape
 
@@ -168,7 +173,14 @@ history_import:
     - 'M(\d+)-'
     - 'milestone-(\d+)'
 
-version: "8.1.0"
+compact:
+  auto: true
+  progress_recent: 15
+  state_history_full: 1
+  log_recent: 20
+  reports_summary_lines: 3
+
+version: "8.2.0"
 created: "2026-04-26T14:00:00+08:00"
 updated: "2026-04-26T14:00:00+08:00"
 ```

@@ -179,6 +179,35 @@ $defs:
             - 'feat\(M(\d+)\):'
             - 'M(\d+)-'
             - 'milestone-(\d+)'
+      compact:
+        type: object
+        additionalProperties: false
+        properties:
+          auto:
+            type: boolean
+            default: true
+          progress_recent:
+            type: integer
+            minimum: 1
+            default: 15
+          state_history_full:
+            type: integer
+            minimum: 0
+            default: 1
+          log_recent:
+            type: integer
+            minimum: 1
+            default: 20
+          reports_summary_lines:
+            type: integer
+            minimum: 1
+            default: 3
+        default:
+          auto: true
+          progress_recent: 15
+          state_history_full: 1
+          log_recent: 20
+          reports_summary_lines: 3
       plan:
         type: object
         additionalProperties: false
@@ -214,7 +243,7 @@ $defs:
               require_explicit_confirm: true
       version:
         type: string
-        pattern: "^(7\\.1\\.0|8\\.0\\.0|8\\.1\\.0)$"
+        pattern: "^(7\\.1\\.0|8\\.0\\.0|8\\.1\\.0|8\\.2\\.0)$"
       created:
         type: string
         minLength: 1
@@ -509,6 +538,35 @@ properties:
         - 'feat\(M(\d+)\):'
         - 'M(\d+)-'
         - 'milestone-(\d+)'
+  compact:
+    type: object
+    additionalProperties: false
+    properties:
+      auto:
+        type: boolean
+        default: true
+      progress_recent:
+        type: integer
+        minimum: 1
+        default: 15
+      state_history_full:
+        type: integer
+        minimum: 0
+        default: 1
+      log_recent:
+        type: integer
+        minimum: 1
+        default: 20
+      reports_summary_lines:
+        type: integer
+        minimum: 1
+        default: 3
+    default:
+      auto: true
+      progress_recent: 15
+      state_history_full: 1
+      log_recent: 20
+      reports_summary_lines: 3
   step_overrides:
     type: object
     default: {}
