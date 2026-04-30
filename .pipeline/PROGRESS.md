@@ -23,3 +23,4 @@
 16:05 M9 completed — V9 docs/version/bootstrap finalized; final validate, core tests, diff check, and regression passed (59/59).
 16:05 C1 completed — V9 OpenCode Native Adapter implementation ready for commit/release.
 16:12 release v9.0.0 — final validate/core/regression passed; committing, tagging, and publishing.
+16:28 P001 closed — 完整补齐 README 的 OpenCode 中文安装和使用教程。

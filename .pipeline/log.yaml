@@ -206,3 +206,11 @@ entries:
     report: "CHANGELOG.md"
     trigger: user
     related_milestone: "V9"
+  - id: "P001"
+    type: patch_fix
+    patch: "P001"
+    status: closed
+    timestamp: "2026-04-30T16:28:00+08:00"
+    commit: "self"
+    summary: "Expanded README with Chinese OpenCode installation, setup, project initialization, command mapping, workflows, platform behavior, and validation scope."
+    tests: "python3 tests/run_regression.py (59/59); claude plugin validate .; git diff --check"
