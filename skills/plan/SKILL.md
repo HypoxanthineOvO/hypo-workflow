@@ -64,6 +64,15 @@ Interactive planning is a hard conversational gate, not a suggestion.
 
 When `--context` is present, injected context can sharpen the first questions but must not skip the required interaction rounds.
 
+## Plan Tool Discipline
+
+The `plan-tool-required` built-in rule is active for Plan Mode unless disabled in `.pipeline/rules.yaml`.
+
+- OpenCode: use native `todowrite` for the visible planning state and native `question` / Ask for every interactive hard gate.
+- Codex: use the available plan/update tool when present; otherwise keep a visible checklist in the conversation.
+- Claude Code: maintain an explicit plan/checkpoint list in the conversation or configured planning surface.
+- Each P1/P2/P3/P4 checkpoint must synchronize plan state before continuing.
+
 ## Execution Flow
 
 1. Read `~/.hypo-workflow/config.yaml` if present.

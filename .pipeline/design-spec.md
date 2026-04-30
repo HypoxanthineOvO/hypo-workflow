@@ -1,66 +1,57 @@
-# V2 Design Spec — Notion Adapter
+# V9 Design Spec — OpenCode Native Adapter
 
 ## Goal
 
-Add a Notion adapter to Hypo-Workflow so prompts can be read from Notion and reports can be written back to Notion.
+Bring Hypo-Workflow to OpenCode as a native plugin-backed experience while keeping Codex and Claude Code behavior intact.
 
-## Project Shape
+V9 is not a rewrite into a standalone runner. Agents still execute workflow tasks. Hypo-Workflow provides setup, platform configuration, command prompts, state conventions, rules, context injection, event handling, and guardrails.
 
-- Project type: skill bundle with helper scripts
-- Primary deliverable: adapter docs + helper scripts + config/schema updates + regression coverage
-- Target platform: Claude Code and Codex
-- Expected users: agents running Hypo-Workflow with local or Notion-backed planning artifacts
+## Confirmed Decisions
 
-## Constraints
+- OpenCode support is delivered primarily as a plugin.
+- OpenCode commands use platform-native mapped names such as `/hw-plan`, `/hw-start`, and `/hw-rules`; Codex/Claude keep `/hw:*`.
+- `core/` is a shared deterministic configuration and artifact generation kernel, not a pipeline execution engine.
+- Global `hypo-workflow` CLI/TUI handles setup, doctor, sync, profile, install, and project adapter initialization only.
+- OpenCode first version targets full V8.4 user capability parity.
+- OpenCode auto continue defaults to enabled with `safe` mode.
+- Interactive checkpoints use OpenCode Ask/question unless automation is explicitly enabled.
+- `todowrite` is enabled by default and synced to `.plan-state/todo.yaml`.
+- OpenCode file guard uses standard mode:
+  - critical `.pipeline/state.yaml`, `.pipeline/cycle.yaml`, `.pipeline/rules.yaml` writes are error-gated outside valid command context
+  - ordinary `.pipeline/` writes warn
+- MCP is supported by config generation when available, but it is not the first critical path.
+- Codex/Claude Plan discipline is improved with a `plan-tool-required` rule and stronger planning instructions.
 
-- The current repo is file-first and markdown-driven
-- Existing V0-V5 behavior must remain backward compatible
-- Notion API access currently authenticates successfully, but no existing pages are visible to the integration
-- Internal integration cannot create workspace-root private pages without a shared parent page
+## OpenCode Native Mapping
 
-## Existing Context
+| HW Surface | OpenCode Native Capability | V9 Handling |
+|---|---|---|
+| Slash commands | `.opencode/commands/*.md` | Generate mapped `/hw-*` commands for all 30 user commands |
+| Plan interaction | Plan primary agent, question tool, permissions | `/hw-plan*` binds `hw-plan`, Ask gates interactive checkpoints |
+| Todo tracking | `todowrite`, `todo.updated` | Sync to `.plan-state/todo.yaml` |
+| Context restore | plugin events, session compacted | Inject state/progress/cycle/rules/patch compact context |
+| Auto continue | session/tool events | `tool.execute.after` updates facts, `session.idle` decides continue |
+| Rules | AGENTS.md / instructions + plugin guard | Map always rules to OpenCode rules, keep HW severity model |
+| Subagents | OpenCode agents/subagents | Generate `hw-plan`, `hw-build`, `hw-explore`, `hw-review`, `hw-debug`, `hw-docs` |
+| Permissions | allow/ask/deny | Standard file guard and hard-gate Ask behavior |
+| MCP | OpenCode MCP config | Generate config when requested; not required for first critical path |
 
-- Existing repo detected: yes
-- Existing `.pipeline/` detected: yes, repurposed for this V2 dogfooding run
-- Current adapters: only `adapters/source/local.md` and `adapters/output/local.md`
-- Existing helper scripts: validation, diff, state summary, log append
-- Existing config validation shell already accepts `local|notion`, but schema is still local-only
+## Non-Goals
 
-## Functional Requirements
+- Do not make `hypo-workflow` CLI run the pipeline.
+- Do not make OpenCode plugin write business code or reports automatically.
+- Do not remove Codex or Claude Code compatibility paths.
+- Do not force a unified model router on platforms that do not support it.
 
-- `pipeline.source: notion` should read prompts from Notion
-- `pipeline.output: notion` should write reports to Notion
-- mixed mode must work:
-  - `source: local` + `output: notion`
-  - `source: notion` + `output: local`
-- config must support:
-  - `notion.token_file`
-  - `notion.source_database_id`
-  - `notion.source_page_id`
-  - `notion.output_parent_page_id`
-  - `notion.output_database_id`
-  - env fallback `NOTION_TOKEN`
+## Milestones
 
-## Testing Expectations
-
-- auth smoke should hit `users/me`
-- source adapter tests should validate page/database parsing
-- output adapter tests should validate block generation and upsert behavior
-- live Notion write tests should degrade gracefully when no shared parent page is available
-- full regression `s01-s18` must remain green
-
-## Milestone Strategy
-
-- M0: schema + adapter contract + planning scaffold
-- M1: source adapter scripts + docs
-- M2: output adapter scripts + docs
-- M3: mixed mode + tests + docs + Notion reporting
-
-## Open Questions
-
-- Should future versions add Notion database schema bootstrap helpers?
-- Should report upsert prefer page title matching or explicit page id pinning?
-
-## Notes
-
-- Decision: because the integration cannot currently see the existing Hypo-Workflow pages, V2 will implement graceful degradation and use live auth smoke plus offline/conditional API tests.
+1. V9 architecture and OpenCode capability matrix
+2. `core/` shared config and artifact kernel
+3. Global CLI/TUI setup
+4. OpenCode plugin scaffold and project adapter
+5. OpenCode slash command mapping
+6. OpenCode agents, Ask, todowrite, and Plan discipline
+7. OpenCode events: auto continue, context restore, file guard
+8. OpenCode full V8.4 parity
+9. V9 regression and smoke tests
+10. V9 docs, bootstrap, and release

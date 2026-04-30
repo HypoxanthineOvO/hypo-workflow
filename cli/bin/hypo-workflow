@@ -1,0 +1,239 @@
+#!/usr/bin/env node
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
+import { constants } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { homedir } from "node:os";
+import { spawnSync } from "node:child_process";
+import {
+  DEFAULT_GLOBAL_CONFIG,
+  loadConfig,
+  normalizeProfile,
+  stringifyYaml,
+  writeConfig,
+  writeOpenCodeArtifacts,
+} from "../../core/src/index.js";
+
+const args = process.argv.slice(2);
+const command = args[0];
+const repoRoot = resolve(new URL("../..", import.meta.url).pathname);
+
+try {
+  if (!command) {
+    if (!(await exists(globalConfigPath()))) {
+      await setup(args);
+    } else {
+      showMenu();
+    }
+  } else if (command === "--help" || command === "-h" || command === "help") {
+    help();
+  } else if (command === "setup") {
+    await setup(args.slice(1));
+  } else if (command === "doctor") {
+    await doctor();
+  } else if (command === "sync") {
+    await sync(args.slice(1));
+  } else if (command === "profile") {
+    await profile(args.slice(1));
+  } else if (command === "install") {
+    await install(args.slice(1));
+  } else if (command === "init-project") {
+    await initProject(args.slice(1));
+  } else {
+    throw new Error(`Unknown command: ${command}`);
+  }
+} catch (error) {
+  process.stderr.write(`${error.message}\n`);
+  process.exit(1);
+}
+
+async function setup(flags) {
+  const platform = valueAfter(flags, "--platform") || "codex";
+  const model = valueAfter(flags, "--model") || "default";
+  const config = {
+    ...DEFAULT_GLOBAL_CONFIG,
+    version: "9.0.0-alpha.0",
+    active_profile: platform,
+    agent: {
+      platform,
+      model,
+    },
+    profiles: profileIndex(),
+    created: new Date().toISOString(),
+    updated: new Date().toISOString(),
+  };
+  await writeConfig(globalConfigPath(), config);
+  await ensureDefaultProfiles();
+  process.stdout.write(`Created ${globalConfigPath()}\n`);
+}
+
+async function doctor() {
+  process.stdout.write("Hypo-Workflow Doctor\n");
+  process.stdout.write(`Config: ${await exists(globalConfigPath()) ? "ok" : "missing"}\n`);
+  process.stdout.write(`OpenCode: ${binaryState("opencode")}\n`);
+  process.stdout.write(`Codex: ${binaryState("codex")}\n`);
+  process.stdout.write(`Claude Code: ${binaryState("claude")}\n`);
+  process.stdout.write("Pipeline runner: host agent only\n");
+}
+
+async function sync(flags) {
+  const platform = valueAfter(flags, "--platform") || "opencode";
+  const project = resolve(valueAfter(flags, "--project") || ".");
+  if (platform !== "opencode") {
+    process.stdout.write(`No generated artifacts required for ${platform}\n`);
+    return;
+  }
+  await writeOpenCodeArtifacts(project, {
+    profile: valueAfter(flags, "--profile") || "standard",
+  });
+  process.stdout.write(`Synced OpenCode artifacts to ${join(project, ".opencode")}\n`);
+}
+
+async function profile(flags) {
+  const action = flags[0] || "list";
+  if (action === "list") {
+    for (const name of Object.keys(profileIndex())) process.stdout.write(`${name}\n`);
+    return;
+  }
+  if (action === "use") {
+    const name = flags[1];
+    if (!name) throw new Error("profile use requires a profile name");
+    const config = await readOrDefaultConfig();
+    config.active_profile = name;
+    config.updated = new Date().toISOString();
+    await writeConfig(globalConfigPath(), config);
+    process.stdout.write(`Active profile: ${name}\n`);
+    return;
+  }
+  if (action === "edit") {
+    const name = flags[1];
+    if (!name) throw new Error("profile edit requires a profile name");
+    const platform = valueAfter(flags, "--platform") || name;
+    const model = valueAfter(flags, "--model") || "default";
+    const data = {
+      name,
+      agent: {
+        platform,
+        model,
+      },
+      opencode: normalizeProfile(name === "team-strict" ? "strict" : "standard"),
+    };
+    await writeConfig(profilePath(name), data);
+    process.stdout.write(`Updated profile ${name}\n`);
+    return;
+  }
+  throw new Error(`Unknown profile action: ${action}`);
+}
+
+async function install(flags) {
+  const target = flags[0] || "opencode";
+  process.stdout.write(`Install target ${target}: run sync/profile setup for this adapter. No pipeline execution performed.\n`);
+}
+
+async function initProject(flags) {
+  const project = resolve(valueAfter(flags, "--project") || ".");
+  const platform = valueAfter(flags, "--platform") || "opencode";
+  const pipelineDir = join(project, ".pipeline");
+  await mkdir(pipelineDir, { recursive: true });
+  const configFile = join(pipelineDir, "config.yaml");
+  if (!(await exists(configFile))) {
+    await writeFile(
+      configFile,
+      stringifyYaml({
+        pipeline: {
+          name: "Hypo-Workflow Project",
+          source: "local",
+          output: "local",
+          prompts_dir: ".pipeline/prompts",
+          reports_dir: ".pipeline/reports",
+        },
+        execution: {
+          mode: "self",
+          steps: { preset: "tdd" },
+        },
+        evaluation: {
+          auto_continue: false,
+          max_diff_score: 3,
+        },
+      }) + "\n",
+      "utf8",
+    );
+  }
+  if (platform === "opencode") await sync(["--platform", "opencode", "--project", project]);
+  process.stdout.write(`Initialized project adapters in ${project}\n`);
+}
+
+async function readOrDefaultConfig() {
+  if (await exists(globalConfigPath())) return loadConfig(globalConfigPath());
+  return { ...DEFAULT_GLOBAL_CONFIG, profiles: profileIndex() };
+}
+
+async function ensureDefaultProfiles() {
+  await mkdir(dirname(profilePath("default")), { recursive: true });
+  for (const [name, profile] of Object.entries(profileIndex())) {
+    const file = profilePath(name);
+    if (await exists(file)) continue;
+    await writeConfig(file, {
+      name,
+      agent: {
+        platform: profile.platform,
+        model: profile.model,
+      },
+      opencode: normalizeProfile(profile.opencodeProfile),
+    });
+  }
+}
+
+function profileIndex() {
+  return {
+    default: { platform: "codex", model: "default", opencodeProfile: "standard" },
+    codex: { platform: "codex", model: "default", opencodeProfile: "standard" },
+    "claude-code": { platform: "claude-code", model: "default", opencodeProfile: "standard" },
+    opencode: { platform: "opencode", model: "default", opencodeProfile: "standard" },
+    "team-strict": { platform: "opencode", model: "default", opencodeProfile: "strict" },
+  };
+}
+
+function showMenu() {
+  process.stdout.write("Hypo-Workflow setup utility, not a runner\n\n");
+  process.stdout.write("Available actions:\n");
+  process.stdout.write("  setup | doctor | sync | profile list|use|edit | install | init-project\n");
+}
+
+function help() {
+  process.stdout.write(`hypo-workflow — setup utility, not a runner\n\n`);
+  process.stdout.write("Commands:\n");
+  process.stdout.write("  setup [--platform codex|claude-code|opencode] [--model <name>] [--yes]\n");
+  process.stdout.write("  doctor\n");
+  process.stdout.write("  sync --platform opencode --project <dir>\n");
+  process.stdout.write("  profile list|use <name>|edit <name> [--platform <name>] [--model <name>]\n");
+  process.stdout.write("  install opencode|codex|claude\n");
+  process.stdout.write("  init-project --platform opencode --project <dir>\n");
+  process.stdout.write("\nPipeline execution remains inside OpenCode, Codex, or Claude Code agents.\n");
+}
+
+function binaryState(name) {
+  const result = spawnSync("sh", ["-lc", `command -v ${name}`], { encoding: "utf8" });
+  return result.status === 0 ? result.stdout.trim() : "not found";
+}
+
+function valueAfter(values, flag) {
+  const index = values.indexOf(flag);
+  return index >= 0 ? values[index + 1] : undefined;
+}
+
+function globalConfigPath() {
+  return join(homedir(), ".hypo-workflow", "config.yaml");
+}
+
+function profilePath(name) {
+  return join(homedir(), ".hypo-workflow", "profiles", `${name}.yaml`);
+}
+
+async function exists(file) {
+  try {
+    await access(file, constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}

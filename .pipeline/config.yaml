@@ -1,5 +1,5 @@
 pipeline:
-  name: "Hypo-Workflow V2 Notion Adapter"
+  name: "Hypo-Workflow V9 OpenCode Native Adapter"
   source: local
   output: local
   prompts_dir: .pipeline/prompts
@@ -11,7 +11,7 @@ execution:
     preset: tdd
 
 evaluation:
-  auto_continue: false
+  auto_continue: true
   max_diff_score: 3
   checks:
     - tests_pass

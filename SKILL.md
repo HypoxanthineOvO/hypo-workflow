@@ -1,10 +1,10 @@
 ---
 name: hypo-workflow
-version: 8.4.0
+version: 9.0.0
 description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:plan`, `/hw:plan:extend`, `/hw:plan:review`, `/hw:cycle`, `/hw:patch`, `/hw:compact`, `/hw:guide`, `/hw:showcase`, `/hw:rules`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, or `/hw:dashboard`.
 ---
 
-# Hypo-Workflow v8.4.0
+# Hypo-Workflow v9.0.0
 
 > **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 30 个用户指令。
 >
@@ -63,6 +63,15 @@ Compatibility alias: `/hw:review` now prints `⚠️ \`/hw:review\` 已迁移到
 内部日志（log.yaml、state.yaml）始终英文。
 
 Template loading maps `zh-CN` / `zh` to `templates/zh/`, maps `en` / `en-US` to `templates/en/`, and falls back to root `templates/` when the localized template is missing.
+
+## Plan Tool Discipline
+
+The `plan-tool-required` rule applies to complex tasks and planning work:
+
+- OpenCode: use native `todowrite` for visible plan state and `question` / Ask for required user decisions.
+- Codex: use the available plan/update tool when present; otherwise keep an explicit checklist in the conversation.
+- Claude Code: keep an explicit plan/checkpoint list in the conversation or configured planning surface.
+- P1/P2/P3/P4 checkpoints must update the visible plan before moving to the next phase.
 
 # Prompt Pipeline
 

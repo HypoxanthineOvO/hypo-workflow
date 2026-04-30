@@ -1,0 +1,13 @@
+{
+  "name": "@hypo-workflow/core",
+  "version": "9.0.0-alpha.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared deterministic helpers for Hypo-Workflow platform adapters. This package is not a runner.",
+  "bin": {
+    "hw-core": "./bin/hw-core"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}

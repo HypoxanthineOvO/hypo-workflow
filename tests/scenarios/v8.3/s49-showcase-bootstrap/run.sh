@@ -14,6 +14,7 @@ rg -q 'version: 1' .pipeline/showcase/showcase.yaml
 rg -q 'Hypo-Workflow' .pipeline/showcase/PROJECT-INTRO.md
 rg -q '30 个用户指令' .pipeline/showcase/PROJECT-INTRO.md
 rg -q '```mermaid' .pipeline/showcase/slides.md
-rg -q 'poster skipped' .pipeline/PROGRESS.md
+rg -q 'type: poster' .pipeline/showcase/showcase.yaml
+rg -q 'OPENAI_API_KEY missing' .pipeline/showcase/showcase.yaml
 
 echo "s49-showcase-bootstrap: PASS"

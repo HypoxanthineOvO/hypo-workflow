@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/../../../.." && pwd)"
+cd "$ROOT"
+
+tmp_project="$(mktemp -d)"
+node cli/bin/hypo-workflow init-project --platform opencode --project "$tmp_project" >/tmp/hw-s58-init.log
+
+for command in cycle patch patch-fix compact showcase release dashboard audit debug check reset log report status guide rules; do
+  test -f "$tmp_project/.opencode/commands/hw-$command.md" || {
+    echo "missing OpenCode command hw-$command" >&2
+    exit 1
+  }
+done
+
+grep -Fq 'Step 1: Read Patch' "$tmp_project/.opencode/commands/hw-patch-fix.md"
+grep -Fq 'Step 6: Close Patch' "$tmp_project/.opencode/commands/hw-patch-fix.md"
+grep -Fq 'do not run Plan Discover' "$tmp_project/.opencode/commands/hw-patch-fix.md"
+
+grep -Fq 'claude plugin validate .' "$tmp_project/.opencode/commands/hw-release.md"
+grep -Fq 'Ask gate before tag or push' "$tmp_project/.opencode/commands/hw-release.md"
+grep -Fq 'dirty check' "$tmp_project/.opencode/commands/hw-release.md"
+grep -Fq 'git tag' "$tmp_project/.opencode/commands/hw-release.md"
+grep -Fq 'git push' "$tmp_project/.opencode/commands/hw-release.md"
+
+grep -Fq 'session.compacted' "$tmp_project/.opencode/commands/hw-compact.md"
+grep -Fq 'Agent generates showcase artifacts' "$tmp_project/.opencode/commands/hw-showcase.md"
+grep -Fq 'dashboard launcher' "$tmp_project/.opencode/commands/hw-dashboard.md"
+
+test -f references/opencode-parity.md
+grep -Fq '| Cycle |' references/opencode-parity.md
+grep -Fq '| Patch Fix |' references/opencode-parity.md
+grep -Fq '| Release |' references/opencode-parity.md
+grep -Fq 'V8.4 parity' references/opencode-spec.md
+
+echo "s58 passed"

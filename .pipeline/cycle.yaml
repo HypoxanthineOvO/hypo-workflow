@@ -1,0 +1,11 @@
+cycle:
+  number: 1
+  name: "V9 OpenCode Native Adapter"
+  type: feature
+  status: active
+  started: "2026-04-30T14:33:17+08:00"
+  preset: tdd
+  context_sources: []
+  previous_cycle: null
+  summary: "OpenCode native plugin adaptation, platform decoupling, global setup refresh, and full V8.4 parity."
+  lessons: null

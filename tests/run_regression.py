@@ -68,6 +68,15 @@ TARGET_SCENARIOS = {
     "s48-i18n-templates",
     "s49-showcase-bootstrap",
     "s50-rules-system",
+    "s51-opencode-capability-matrix",
+    "s52-core-config-artifacts",
+    "s53-global-cli-tui-setup",
+    "s54-opencode-plugin-scaffold",
+    "s55-opencode-command-map",
+    "s56-agents-ask-todo-plan-discipline",
+    "s57-opencode-events-auto-continue-file-guard",
+    "s58-opencode-full-v84-parity",
+    "s59-v9-regression-bundle",
 }
 
 
@@ -177,7 +186,7 @@ def scenario_specific(scene: Path, result: ScenarioResult) -> None:
         diff = run(f'bash "{ROOT / "scripts" / "diff-stats.sh"}"', cwd=gitrepo)
         add(result, "diff_stats", "changed_files=" in diff.stdout and "added_lines=" in diff.stdout, diff.stdout.strip())
         plugin = run(f'python3 -m json.tool "{PLUGIN_JSON}"')
-        add(result, "plugin_json", plugin.returncode == 0 and '"version": "8.4.0"' in plugin.stdout)
+        add(result, "plugin_json", plugin.returncode == 0 and '"version": "9.0.0"' in plugin.stdout)
     elif name == "s12-hook-stop-check":
         tmp = Path(tempfile.mkdtemp(prefix="hw-s12-"))
         case_a = run(f'bash "{ROOT / "hooks" / "stop-check.sh"}"', cwd=tmp)
@@ -253,6 +262,15 @@ def scenario_specific(scene: Path, result: ScenarioResult) -> None:
         "s48-i18n-templates",
         "s49-showcase-bootstrap",
         "s50-rules-system",
+        "s51-opencode-capability-matrix",
+        "s52-core-config-artifacts",
+        "s53-global-cli-tui-setup",
+        "s54-opencode-plugin-scaffold",
+        "s55-opencode-command-map",
+        "s56-agents-ask-todo-plan-discipline",
+        "s57-opencode-events-auto-continue-file-guard",
+        "s58-opencode-full-v84-parity",
+        "s59-v9-regression-bundle",
     }:
         proc = run(f'bash "{scene / "run.sh"}"', cwd=scene)
         add(result, "run_sh", proc.returncode == 0, (proc.stdout + proc.stderr).strip())

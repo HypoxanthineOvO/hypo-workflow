@@ -10,6 +10,7 @@ rules:
   progress-verbosity: warn
   commit-format: error
   auto-continue-threshold: error
+  plan-tool-required: error
   review-strictness: error
   stop-hook-self-check: error
   session-start-context-load: error

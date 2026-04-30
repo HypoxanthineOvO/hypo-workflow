@@ -6,9 +6,9 @@
 
 Plan -> Execute -> Review -> Report -> Recover -> Showcase
 
-[![Version](https://img.shields.io/badge/version-8.4.0-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-9.0.0-blue)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex-purple)](#平台支持)
+[![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex%20%7C%20OpenCode-purple)](#平台支持)
 
 </div>
 
@@ -38,7 +38,7 @@ Plan -> Prompt -> Step Chain -> Tests -> Review -> Report -> Evaluate -> Next / 
 | Context Compact | 生成 `.compact` 视图，减少 SessionStart 加载上下文 |
 | Showcase | 生成项目介绍文档、技术文档、Markdown slides 和可选海报 |
 | Rules | 统一管理规则严格度、生命周期钩子、自然语言偏好和规则包 |
-| 多平台 | Claude Code 使用 `/hypo-workflow:*`，Codex 使用兼容命令 `/hw:*` |
+| 多平台 | Claude Code 使用 `/hypo-workflow:*`，Codex 使用兼容命令 `/hw:*`，V9 规划 OpenCode 原生 `/hw-*` |
 
 当前版本提供 **30 个用户指令**，另有一个内部 watchdog skill。
 
@@ -444,6 +444,9 @@ Hypo-Workflow/
 ├── plan/PLAN-SKILL.md          # Plan Mode 二级入口
 ├── rules/                      # 内置规则、presets 和自定义规则模板
 ├── references/                 # 详细行为规范
+├── core/                       # V9 规划中的共享配置/产物生成内核
+├── cli/                        # V9 规划中的全局 setup/doctor/sync CLI
+├── plugins/opencode/           # V9 规划中的 OpenCode 原生适配层
 ├── templates/                  # 根 fallback 模板
 ├── templates/en/               # 英文模板
 ├── templates/zh/               # 中文模板
@@ -649,6 +652,30 @@ Token 解析顺序：
 - 可配置 Claude 作为 subagent
 - Hook 行为降级，但文件恢复仍可用
 
+### OpenCode Native Adapter（V9 规划）
+
+V9 的目标是把 Hypo-Workflow 适配到 OpenCode 原生能力，而不是维护一套单独 runner。Agent 仍在 OpenCode 中执行，`hypo-workflow` 全局命令只负责 setup、doctor、sync 和项目初始化。
+
+规划中的映射：
+
+| HW 能力 | OpenCode 原生能力 | V9 处理 |
+|---|---|---|
+| `/hw:*` 指令 | Slash commands | 映射为 `/hw-*` |
+| Plan 交互 | `question` tool / Ask | Plan 阶段优先使用 Ask |
+| 任务计划 | `todowrite` | `/hw-plan*` 强制维护 todo/plan |
+| Subagent | Agents / subagents | 映射 explorer、worker、reviewer 等角色 |
+| 自动继续 | Plugin events | 默认开启 safe auto-continue |
+| 文件门禁 | Permissions + plugin hooks | state/cycle/rules error-gated，普通 `.pipeline` 写入 warn |
+| 规则/说明 | `AGENTS.md` / instructions | 导出 HW always-rules 和平台说明 |
+
+设计基线见 [`references/opencode-spec.md`](references/opencode-spec.md)、[`references/platform-capabilities.md`](references/platform-capabilities.md)、[`references/v9-architecture.md`](references/v9-architecture.md)、[`references/opencode-command-map.md`](references/opencode-command-map.md) 和 [`references/opencode-parity.md`](references/opencode-parity.md)。
+
+V9 的第一批共享 helper 位于 [`core/`](core/)。`core/bin/hw-core` 只负责读取配置、生成 command map、输出 rules summary 和渲染 OpenCode artifacts；它不是 runner，也不会执行 Milestone。
+
+全局 setup 工具位于 [`cli/`](cli/)。`cli/bin/hypo-workflow` 负责 setup、doctor、profile、sync、install 和 init-project；它同样不是 runner，真正执行仍由 OpenCode、Codex 或 Claude Code Agent 完成。
+
+OpenCode scaffold 模板位于 [`plugins/opencode/`](plugins/opencode/)。`hypo-workflow init-project --platform opencode` 会生成项目根 `opencode.json`、`AGENTS.md`，以及 `.opencode/commands/`、`.opencode/agents/`、`.opencode/plugins/hypo-workflow.ts` 和 `.opencode/package.json`。
+
 ### Subagent 示例
 
 ```yaml
@@ -675,11 +702,22 @@ python3 tests/run_regression.py
 git diff --check
 ```
 
-当前预期回归数量为 `50/50`。
+当前预期回归数量为 `59/59`。
 
 ---
 
 ## Changelog
+
+### v9.0.0
+
+- Added the OpenCode Native Adapter baseline with official capability mapping, platform matrix, and architecture docs.
+- Added `core/` shared helpers for config/profile/platform/command/rules and OpenCode artifact generation.
+- Added setup-only `cli/bin/hypo-workflow` for setup, doctor, profile, sync, install, and init-project.
+- Added OpenCode scaffold generation: `opencode.json`, `AGENTS.md`, `.opencode/commands/`, `.opencode/agents/`, `.opencode/plugins/hypo-workflow.ts`, and `.opencode/package.json`.
+- Added full 30-command OpenCode `/hw-*` mapping, OpenCode agents, Ask/question guidance, todowrite plan discipline, and `plan-tool-required`.
+- Added OpenCode event policy scaffold for command context, safe auto-continue, compact context restore, file guard, and permission logging.
+- Added V8.4 parity docs and static smoke coverage for Cycle, Patch, Compact, Showcase, Release, Dashboard, Audit, Debug, Rules, and core lifecycle commands.
+- Regression suite expanded to `59/59`.
 
 ### v8.4.0
 

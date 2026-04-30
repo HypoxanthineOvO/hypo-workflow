@@ -1,0 +1,7 @@
+{
+  "name": "hypo-workflow-opencode-adapter",
+  "version": "__HW_VERSION__",
+  "type": "module",
+  "private": true,
+  "description": "Hypo-Workflow managed OpenCode adapter scaffold"
+}

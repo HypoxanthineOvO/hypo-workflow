@@ -1,5 +1,27 @@
 # Changelog
 
+## v9.0.0 - 2026-04-30
+
+### Features
+
+- Added the OpenCode Native Adapter baseline with capability mapping, platform matrix, command map, parity docs, and architecture references.
+- Added `core/` deterministic helpers for config/profile/platform/commands/rules and OpenCode artifact generation.
+- Added `cli/bin/hypo-workflow` as a setup-only global CLI for setup, doctor, profile, sync, install, and init-project.
+- Added OpenCode project scaffold generation for `opencode.json`, `AGENTS.md`, `.opencode/commands/`, `.opencode/agents/`, `.opencode/plugins/hypo-workflow.ts`, and `.opencode/package.json`.
+- Added OpenCode agents, Ask/question guidance, todowrite plan discipline, and the `plan-tool-required` built-in rule.
+- Added OpenCode plugin event policy scaffold for command context, safe auto-continue, compact context restore, file guard, todo sync, and permission logging.
+
+### Improvements
+
+- Documented full V8.4 parity expectations for OpenCode without making OpenCode runtime a CI dependency.
+- Updated command templates so all 30 user commands are traceable from `/hw:*` to OpenCode `/hw-*`.
+- Preserved Codex and Claude Code behavior while adding OpenCode-specific generated artifacts.
+
+### Tests
+
+- Added V9 scenarios `s51` through `s59`, covering capability matrix, core helpers, CLI setup, plugin scaffold, command map, agents/Ask/todowrite, events/file guard, V8.4 parity, and V9 regression bundle.
+- Regression suite expanded to `59/59`.
+
 ## v8.4.0 - 2026-04-30
 
 ### Features

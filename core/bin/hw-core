@@ -1,0 +1,38 @@
+#!/usr/bin/env node
+import { mkdir } from "node:fs/promises";
+import { resolve } from "node:path";
+import { commandMap, loadRulesSummary, writeOpenCodeArtifacts } from "../src/index.js";
+
+const [, , command, ...args] = process.argv;
+
+try {
+  if (command === "commands") {
+    const platform = valueAfter(args, "--platform") || "opencode";
+    process.stdout.write(`${JSON.stringify(commandMap(platform), null, 2)}\n`);
+  } else if (command === "rules") {
+    const project = resolve(valueAfter(args, "--project") || ".");
+    process.stdout.write(await loadRulesSummary(project, resolve(".")));
+  } else if (command === "artifact") {
+    const target = args[0];
+    if (target !== "opencode") throw new Error(`Unsupported artifact target: ${target}`);
+    const outDir = resolve(valueAfter(args, "--out") || ".opencode");
+    await mkdir(outDir, { recursive: true });
+    await writeOpenCodeArtifacts(outDir, { profile: valueAfter(args, "--profile") || "standard" });
+    process.stdout.write(`Generated OpenCode artifacts in ${outDir}\n`);
+  } else {
+    usage();
+    process.exit(command ? 1 : 0);
+  }
+} catch (error) {
+  process.stderr.write(`${error.message}\n`);
+  process.exit(1);
+}
+
+function valueAfter(args, flag) {
+  const index = args.indexOf(flag);
+  return index >= 0 ? args[index + 1] : undefined;
+}
+
+function usage() {
+  process.stdout.write(`hw-core deterministic helper (not a runner)\n\nCommands:\n  hw-core commands --platform opencode\n  hw-core rules --project <dir>\n  hw-core artifact opencode --out <dir> [--profile standard]\n`);
+}

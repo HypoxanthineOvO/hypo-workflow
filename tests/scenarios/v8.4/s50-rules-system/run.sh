@@ -10,7 +10,7 @@ test -f skills/rules/SKILL.md
 test -f references/rules-spec.md
 test -x scripts/rules-summary.sh
 
-test "$(find rules/builtin -maxdepth 1 -type f -name '*.yaml' | wc -l | tr -d ' ')" = "12"
+test "$(find rules/builtin -maxdepth 1 -type f -name '*.yaml' | wc -l | tr -d ' ')" = "13"
 test "$(find rules/presets -maxdepth 1 -type f -name '*.yaml' | wc -l | tr -d ' ')" = "3"
 test -f rules/template/custom-rule-template.md
 
@@ -20,13 +20,14 @@ rg -q 'rules.extends' references/config-spec.md
 rg -q 'rules:' config.schema.yaml
 rg -q '### `/hw:rules`' README.md
 rg -q '### v8.4.0' README.md
-rg -q '"version": "8.4.0"' .claude-plugin/plugin.json
+rg -q '"version": "9.0.0"' .claude-plugin/plugin.json
 
 summary="$(bash scripts/rules-summary.sh "$repo_root")"
 printf '%s\n' "$summary" | rg -q 'Rules: recommended'
 printf '%s\n' "$summary" | rg -q 'git-clean-check[[:space:]]+guard[[:space:]]+warn[[:space:]]+pre-milestone'
+printf '%s\n' "$summary" | rg -q 'plan-tool-required[[:space:]]+workflow[[:space:]]+warn'
 printf '%s\n' "$summary" | rg -q 'session-start-context-load[[:space:]]+hook[[:space:]]+error[[:space:]]+on-session-start'
-printf '%s\n' "$summary" | rg -q 'Summary: 11/13 enabled'
+printf '%s\n' "$summary" | rg -q 'Summary: 12/14 enabled'
 printf '%s\n' "$summary" | rg -q 'prefer-chinese-output'
 printf '%s\n' "$summary" | rg -q 'report-language'
 
