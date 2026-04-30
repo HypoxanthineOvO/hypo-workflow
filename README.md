@@ -798,8 +798,9 @@ hypo-workflow init-project --platform opencode --project .
 
 | 文件 | 作用 |
 |---|---|
-| `opencode.json` | OpenCode 项目配置、permissions、auto-continue 和 HW metadata |
+| `opencode.json` | OpenCode 官方项目配置：instructions、compaction、permissions |
 | `AGENTS.md` | 项目级 Agent 指令，说明 `.pipeline/` 契约和受保护文件 |
+| `.opencode/hypo-workflow.json` | HW 私有 metadata：profile、auto-continue、file guard、command map |
 | `.opencode/commands/hw-*.md` | 30 个 OpenCode 原生 slash commands |
 | `.opencode/agents/hw-*.md` | `hw-plan`、`hw-build`、`hw-status`、`hw-review`、`hw-explore`、`hw-debug`、`hw-docs` |
 | `.opencode/plugins/hypo-workflow.ts` | command context、file guard、auto-continue、compact restore、permission logging scaffold |
@@ -839,14 +840,14 @@ OpenCode scaffold 默认启用 safe auto-continue：
 
 ```json
 {
-  "hypoWorkflow": {
-    "auto_continue": {
-      "enabled": true,
-      "mode": "safe"
-    }
+  "auto_continue": {
+    "enabled": true,
+    "mode": "safe"
   }
 }
 ```
+
+该配置写在 `.opencode/hypo-workflow.json`，不会写入 `opencode.json`。`opencode.json` 只保留 OpenCode 官方 schema 支持的字段，避免 OpenCode runtime 启动时拒绝配置。
 
 `safe` 模式只在测试/规则/交互门禁都满足时继续。`ask` 模式会倾向询问用户；`aggressive` 仅适合明确自动化场景。
 
@@ -859,9 +860,17 @@ OpenCode scaffold 默认启用 safe auto-continue：
 | `.pipeline/rules.yaml` | error gate |
 | 其他 `.pipeline/*` 写入 | warn |
 
-#### 当前验证范围
+#### Runtime 验证
 
-V9.0.0 的 OpenCode 支持已通过本仓库静态 scaffold 和模板 smoke 测试，但不依赖 CI 中安装真实 OpenCode runtime。换句话说：命令、agent、plugin scaffold、配置和文件契约都已生成并回归验证；实际运行效果由 OpenCode 读取这些项目文件后执行。
+如果本机安装了 OpenCode，项目接入后可以直接检查 schema：
+
+```bash
+cd /path/to/project
+opencode debug config
+opencode
+```
+
+当前回归会在检测到 `opencode` 可用时自动运行 `opencode debug config`，确保 `opencode.json`、`.opencode/agents/*.md`、commands 和 plugin scaffold 能被真实 OpenCode runtime 解析。
 
 设计基线见 [`references/opencode-spec.md`](references/opencode-spec.md)、[`references/platform-capabilities.md`](references/platform-capabilities.md)、[`references/v9-architecture.md`](references/v9-architecture.md)、[`references/opencode-command-map.md`](references/opencode-command-map.md) 和 [`references/opencode-parity.md`](references/opencode-parity.md)。
 
@@ -869,7 +878,7 @@ V9 的第一批共享 helper 位于 [`core/`](core/)。`core/bin/hw-core` 只负
 
 全局 setup 工具位于 [`cli/`](cli/)。`cli/bin/hypo-workflow` 负责 setup、doctor、profile、sync、install 和 init-project；它同样不是 runner，真正执行仍由 OpenCode、Codex 或 Claude Code Agent 完成。
 
-OpenCode scaffold 模板位于 [`plugins/opencode/`](plugins/opencode/)。`hypo-workflow init-project --platform opencode` 会生成项目根 `opencode.json`、`AGENTS.md`，以及 `.opencode/commands/`、`.opencode/agents/`、`.opencode/plugins/hypo-workflow.ts` 和 `.opencode/package.json`。
+OpenCode scaffold 模板位于 [`plugins/opencode/`](plugins/opencode/)。`hypo-workflow init-project --platform opencode` 会生成项目根 `opencode.json`、`AGENTS.md`，以及 `.opencode/commands/`、`.opencode/agents/`、`.opencode/hypo-workflow.json`、`.opencode/plugins/hypo-workflow.ts` 和 `.opencode/package.json`。
 
 ### Subagent 示例
 

@@ -1,7 +1,12 @@
 ---
-name: hw-plan
+description: Plan, discovery, guide, and confirmation work.
 mode: primary
-tools: read, grep, glob, question, todowrite
+permission:
+  read: allow
+  grep: allow
+  glob: allow
+  question: allow
+  todowrite: allow
 ---
 
 # hw-plan

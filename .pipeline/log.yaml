@@ -214,3 +214,11 @@ entries:
     commit: "self"
     summary: "Expanded README with Chinese OpenCode installation, setup, project initialization, command mapping, workflows, platform behavior, and validation scope."
     tests: "python3 tests/run_regression.py (59/59); claude plugin validate .; git diff --check"
+  - id: "P003"
+    type: patch_fix
+    patch: "P003"
+    status: closed
+    timestamp: "2026-04-30T17:04:04+08:00"
+    commit: "self"
+    summary: "Fixed OpenCode runtime schema compatibility by keeping opencode.json on official keys, moving HW metadata to .opencode/hypo-workflow.json, and rendering agents with permission objects instead of tools strings."
+    tests: "opencode debug config; node --test core/test/*.test.js; python3 tests/run_regression.py (60/60); claude plugin validate .; git diff --check"

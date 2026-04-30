@@ -71,6 +71,7 @@ export async function writeOpenCodeArtifacts(outDir, options = {}) {
   }
 
   await writeFile(join(adapterDir, "opencode.json"), `${JSON.stringify(renderOpenCodeConfig(profile), null, 2)}\n`, "utf8");
+  await writeFile(join(adapterDir, "hypo-workflow.json"), `${JSON.stringify(renderHypoWorkflowMetadata(profile), null, 2)}\n`, "utf8");
   await writeFile(join(projectRoot, "opencode.json"), `${JSON.stringify(renderOpenCodeConfig(profile), null, 2)}\n`, "utf8");
   await writeFile(join(projectRoot, "AGENTS.md"), await renderAgentsInstruction(), "utf8");
   await writeFile(join(adapterDir, "package.json"), await renderTemplate("package.json"), "utf8");
@@ -105,29 +106,62 @@ function commandSpecificGuidance(command) {
 }
 
 export function renderAgent(agent) {
-  return `---\nname: ${agent.name}\nmode: ${agent.mode}\ntools: ${agent.tools.join(", ")}\n---\n\n# ${agent.name}\n\n${agent.description}\n\nUse \`question\` / Ask for required user interaction and \`todowrite\` for visible plan discipline when those tools are available. For Plan work, every P1/P2/P3/P4 checkpoint must be represented in the todo state before continuing.\n`;
+  return `---\ndescription: ${agent.description}\nmode: ${agent.mode}\npermission:\n${renderAgentPermissions(agent.tools)}---\n\n# ${agent.name}\n\n${agent.description}\n\nUse \`question\` / Ask for required user interaction and \`todowrite\` for visible plan discipline when those tools are available. For Plan work, every P1/P2/P3/P4 checkpoint must be represented in the todo state before continuing.\n`;
+}
+
+function renderAgentPermissions(tools) {
+  const permissions = new Map();
+  for (const tool of tools) {
+    const key = permissionKeyForTool(tool);
+    if (!key) continue;
+    permissions.set(key, defaultPermissionForKey(key));
+  }
+  return [...permissions.entries()]
+    .map(([key, value]) => `  ${key}: ${value}\n`)
+    .join("");
+}
+
+function permissionKeyForTool(tool) {
+  if (["read", "grep", "glob", "list", "bash", "task", "todowrite", "question"].includes(tool)) {
+    return tool;
+  }
+  if (["write", "edit", "apply_patch"].includes(tool)) {
+    return "edit";
+  }
+  return null;
+}
+
+function defaultPermissionForKey(key) {
+  return key === "bash" || key === "edit" ? "ask" : "allow";
 }
 
 export function renderOpenCodeConfig(profile) {
   return {
+    $schema: "https://opencode.ai/config.json",
     instructions: ["AGENTS.md", ".pipeline/rules.yaml"],
-    "experimental.session.compacting": true,
+    compaction: {
+      auto: true,
+      prune: true,
+    },
     permission: {
       edit: profile.permissions === "allow-safe" ? "allow" : "ask",
       bash: profile.permissions === "allow-safe" ? "ask" : "ask",
       question: "allow",
     },
-    hypoWorkflow: {
-      profile: profile.name,
-      autoContinue: profile.auto_continue,
-      auto_continue: {
-        enabled: profile.auto_continue,
-        mode: profile.auto_continue_mode || "safe",
-      },
-      fileGuard: profile.file_guard,
-      version: HW_VERSION,
-      commandMap: commandMap("opencode"),
+  };
+}
+
+export function renderHypoWorkflowMetadata(profile) {
+  return {
+    profile: profile.name,
+    autoContinue: profile.auto_continue,
+    auto_continue: {
+      enabled: profile.auto_continue,
+      mode: profile.auto_continue_mode || "safe",
     },
+    fileGuard: profile.file_guard,
+    version: HW_VERSION,
+    commandMap: commandMap("opencode"),
   };
 }
 

@@ -32,9 +32,12 @@ node core/bin/hw-core artifact opencode --out /tmp/hw-opencode-artifacts
 test -f /tmp/hw-opencode-artifacts/.opencode/commands/hw-plan.md
 test -f /tmp/hw-opencode-artifacts/.opencode/agents/hw-plan.md
 test -f /tmp/hw-opencode-artifacts/opencode.json
+test -f /tmp/hw-opencode-artifacts/.opencode/hypo-workflow.json
 test -f /tmp/hw-opencode-artifacts/AGENTS.md
 grep -Fq '/hw:plan' /tmp/hw-opencode-artifacts/.opencode/commands/hw-plan.md
 grep -Fq 'todowrite' /tmp/hw-opencode-artifacts/.opencode/agents/hw-plan.md
+grep -Fq '"compaction"' /tmp/hw-opencode-artifacts/opencode.json
+grep -Fq '"auto_continue"' /tmp/hw-opencode-artifacts/.opencode/hypo-workflow.json
 
 grep -Riq 'not a runner' core README.md references/v9-architecture.md
 

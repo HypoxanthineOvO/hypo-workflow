@@ -1,7 +1,10 @@
 ---
-name: hw-explore
+description: Bounded codebase exploration.
 mode: subagent
-tools: read, grep, glob
+permission:
+  read: allow
+  grep: allow
+  glob: allow
 ---
 
 # hw-explore

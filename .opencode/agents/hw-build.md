@@ -1,7 +1,13 @@
 ---
-name: hw-build
+description: Pipeline execution, patch fix, debug, release, and showcase generation.
 mode: primary
-tools: read, grep, glob, edit, bash, todowrite
+permission:
+  read: allow
+  grep: allow
+  glob: allow
+  edit: ask
+  bash: ask
+  todowrite: allow
 ---
 
 # hw-build

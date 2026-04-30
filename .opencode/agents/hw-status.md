@@ -1,7 +1,10 @@
 ---
-name: hw-status
+description: Status, help, log, compact, check, and rules inspection.
 mode: primary
-tools: read, grep, glob
+permission:
+  read: allow
+  grep: allow
+  glob: allow
 ---
 
 # hw-status

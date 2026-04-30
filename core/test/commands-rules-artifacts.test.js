@@ -27,10 +27,17 @@ test("writeOpenCodeArtifacts renders commands, agents, and config", async () => 
   const agent = await readFile(join(dir, ".opencode", "agents", "hw-plan.md"), "utf8");
   const plugin = await readFile(join(dir, ".opencode", "plugins", "hypo-workflow.ts"), "utf8");
   const config = JSON.parse(await readFile(join(dir, "opencode.json"), "utf8"));
+  const metadata = JSON.parse(await readFile(join(dir, ".opencode", "hypo-workflow.json"), "utf8"));
 
   assert.match(command, /\/hw:plan/);
   assert.match(command, /not a separate runner/);
   assert.match(agent, /todowrite/);
+  assert.match(agent, /permission:/);
+  assert.doesNotMatch(agent, /^tools:/m);
   assert.match(plugin, /commandMap/);
-  assert.equal(config.hypoWorkflow.autoContinue, true);
+  assert.equal(config.$schema, "https://opencode.ai/config.json");
+  assert.equal(config.compaction.auto, true);
+  assert.equal(config.compaction.prune, true);
+  assert.equal(metadata.autoContinue, true);
+  assert.equal(metadata.auto_continue.mode, "safe");
 });

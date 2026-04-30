@@ -1,7 +1,11 @@
 ---
-name: hw-review
+description: Audit, review, and architecture drift analysis.
 mode: subagent
-tools: read, grep, glob, todowrite
+permission:
+  read: allow
+  grep: allow
+  glob: allow
+  todowrite: allow
 ---
 
 # hw-review

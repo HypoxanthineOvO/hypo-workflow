@@ -34,7 +34,7 @@ V8.4 parity is tracked in [`opencode-parity.md`](./opencode-parity.md).
 | Command context capture | plugin-assisted | `command.executed`, `tui.command.execute` | Record invoked command, args, and current project state. |
 | Auto continue | plugin-assisted | `tool.execute.after`, `session.idle`, `session.status` | Apply HW evaluation rules and continue only under safe policy. |
 | File guard | plugin-assisted | `tool.execute.before`, permission config | Protect state/cycle/rules as errors; warn on ordinary `.pipeline` writes. |
-| Context compaction | plugin-assisted | `experimental.session.compacting`, `session.compacted` | Inject compact HW state into compaction summaries. |
+| Context compaction | plugin-assisted | `opencode.json.compaction`, `session.compacted`, plugin compaction hooks | Inject compact HW state into compaction summaries. |
 | Context loading | plugin-assisted | session events plus generated instructions | Load current prompt/state/report without flooding context. |
 | Interactive guide | agent-prompt | `/hw-guide` command template + `question` | Keep intent matching in prompt policy. |
 | Plan interview flow | agent-prompt | `/hw-plan*` commands on plan agent | Enforce explicit confirmation and targeted follow-up. |
@@ -101,7 +101,7 @@ Plan commands must bind to `hw-plan` by default. If OpenCode exposes nested plan
 | `tool.execute.before` | Enforce file guard before edits or shell actions. |
 | `tool.execute.after` | Update heartbeat and inspect tests/evaluation signals. |
 | `session.idle` and `session.status` | Trigger safe auto-continue when enabled. |
-| `session.compacted` and `experimental.session.compacting` | Preserve current Cycle, milestone, prompt, and compact files across compaction. |
+| `session.compacted` and compaction hooks | Preserve current Cycle, milestone, prompt, and compact files across compaction. |
 | `permission.asked` and `permission.replied` | Record user approvals when they affect HW state. |
 | `todo.updated` | Mirror OpenCode todos into PROGRESS summaries where useful. |
 

@@ -17,17 +17,28 @@ HOME="$tmp_home" node cli/bin/hypo-workflow init-project --platform opencode --p
 test -f "$tmp_project/opencode.json"
 test -f "$tmp_project/AGENTS.md"
 test -f "$tmp_project/.opencode/package.json"
+test -f "$tmp_project/.opencode/hypo-workflow.json"
 test -f "$tmp_project/.opencode/plugins/hypo-workflow.ts"
 test -f "$tmp_project/.opencode/commands/hw-plan.md"
 test -f "$tmp_project/.opencode/agents/hw-plan.md"
 
 grep -Fq 'Hypo-Workflow managed' "$tmp_project/AGENTS.md"
 grep -Fq 'version' "$tmp_project/.opencode/package.json"
+grep -Fq 'permission:' "$tmp_project/.opencode/agents/hw-plan.md"
+! grep -Fq 'tools: read, grep' "$tmp_project/.opencode/agents/hw-plan.md"
 grep -Fq 'commandMap' "$tmp_project/.opencode/plugins/hypo-workflow.ts"
 grep -Fq '/hw:plan' "$tmp_project/.opencode/plugins/hypo-workflow.ts"
 grep -Fq 'tool.execute.before' "$tmp_project/.opencode/plugins/hypo-workflow.ts"
 grep -Fq 'session.idle' "$tmp_project/.opencode/plugins/hypo-workflow.ts"
 grep -Fq 'does not implement business tasks' "$tmp_project/.opencode/plugins/hypo-workflow.ts"
-grep -Fq '"experimental.session.compacting": true' "$tmp_project/opencode.json"
+grep -Fq '"compaction"' "$tmp_project/opencode.json"
+grep -Fq '"auto_continue"' "$tmp_project/.opencode/hypo-workflow.json"
+
+if command -v opencode >/dev/null 2>&1; then
+  (cd "$tmp_project" && opencode debug config >/tmp/hw-s54-opencode-config.log 2>&1) || {
+    cat /tmp/hw-s54-opencode-config.log >&2
+    exit 1
+  }
+fi
 
 echo "s54 passed"

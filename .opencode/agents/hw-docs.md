@@ -1,7 +1,12 @@
 ---
-name: hw-docs
+description: Documentation, showcase, and release-note assistance.
 mode: subagent
-tools: read, grep, glob, edit, todowrite
+permission:
+  read: allow
+  grep: allow
+  glob: allow
+  edit: ask
+  todowrite: allow
 ---
 
 # hw-docs

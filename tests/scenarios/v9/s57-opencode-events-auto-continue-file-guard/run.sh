@@ -7,11 +7,11 @@ cd "$ROOT"
 tmp_project="$(mktemp -d)"
 node cli/bin/hypo-workflow init-project --platform opencode --project "$tmp_project" >/tmp/hw-s57-init.log
 plugin="$tmp_project/.opencode/plugins/hypo-workflow.ts"
-config="$tmp_project/opencode.json"
+metadata="$tmp_project/.opencode/hypo-workflow.json"
 
-grep -Fq 'auto_continue' "$config"
-grep -Fq '"enabled": true' "$config"
-grep -Fq '"mode": "safe"' "$config"
+grep -Fq 'auto_continue' "$metadata"
+grep -Fq '"enabled": true' "$metadata"
+grep -Fq '"mode": "safe"' "$metadata"
 
 for event in \
   'command.executed' \

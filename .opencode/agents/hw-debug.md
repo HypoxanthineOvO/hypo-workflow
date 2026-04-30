@@ -1,7 +1,13 @@
 ---
-name: hw-debug
+description: Symptom-driven debugging with hypothesis tracking and user Ask gates.
 mode: subagent
-tools: read, grep, glob, bash, todowrite, question
+permission:
+  read: allow
+  grep: allow
+  glob: allow
+  bash: ask
+  todowrite: allow
+  question: allow
 ---
 
 # hw-debug
