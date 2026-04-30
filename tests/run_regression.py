@@ -67,6 +67,7 @@ TARGET_SCENARIOS = {
     "s47-showcase-lifecycle",
     "s48-i18n-templates",
     "s49-showcase-bootstrap",
+    "s50-rules-system",
 }
 
 
@@ -176,7 +177,7 @@ def scenario_specific(scene: Path, result: ScenarioResult) -> None:
         diff = run(f'bash "{ROOT / "scripts" / "diff-stats.sh"}"', cwd=gitrepo)
         add(result, "diff_stats", "changed_files=" in diff.stdout and "added_lines=" in diff.stdout, diff.stdout.strip())
         plugin = run(f'python3 -m json.tool "{PLUGIN_JSON}"')
-        add(result, "plugin_json", plugin.returncode == 0 and '"version": "8.3.0"' in plugin.stdout)
+        add(result, "plugin_json", plugin.returncode == 0 and '"version": "8.4.0"' in plugin.stdout)
     elif name == "s12-hook-stop-check":
         tmp = Path(tempfile.mkdtemp(prefix="hw-s12-"))
         case_a = run(f'bash "{ROOT / "hooks" / "stop-check.sh"}"', cwd=tmp)
@@ -251,6 +252,7 @@ def scenario_specific(scene: Path, result: ScenarioResult) -> None:
         "s47-showcase-lifecycle",
         "s48-i18n-templates",
         "s49-showcase-bootstrap",
+        "s50-rules-system",
     }:
         proc = run(f'bash "{scene / "run.sh"}"', cwd=scene)
         add(result, "run_sh", proc.returncode == 0, (proc.stdout + proc.stderr).strip())

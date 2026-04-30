@@ -1,7 +1,7 @@
 {
   "name": "hypo-workflow",
-  "version": "8.3.0",
-  "description": "Serialized prompt workflow with setup, planning, execution, cycles, patches, compact context, guide, showcase, auditing, debugging, release automation, watchdog, and WebUI support.",
+  "version": "8.4.0",
+  "description": "Serialized prompt workflow with setup, planning, execution, cycles, patches, compact context, guide, showcase, rules, auditing, debugging, release automation, watchdog, and WebUI support.",
   "author": {
     "name": "Hypoxanthine",
     "url": "https://github.com/HypoxanthineOvO"
@@ -23,7 +23,7 @@
   "interface": {
     "displayName": "Hypo-Workflow",
     "shortDescription": "Plan-to-release workflow automation with setup, progress tracking, and dashboard support.",
-    "longDescription": "Hypo-Workflow packages a complete planning and execution workflow with native skills, smart stop hooks, dual plan modes, Cycle archives, persistent Patches, context-injected planning, progress summaries, serial subagent orchestration, plugin setup, Auto Resume watchdog, and a live dashboard for a local .pipeline workspace.",
+    "longDescription": "Hypo-Workflow packages a complete planning and execution workflow with native skills, smart stop hooks, dual plan modes, Cycle archives, persistent Patches, context-injected planning, progress summaries, serial subagent orchestration, configurable Rules, plugin setup, Auto Resume watchdog, and a live dashboard for a local .pipeline workspace.",
     "developerName": "Hypoxanthine",
     "category": "Productivity",
     "websiteURL": "https://github.com/HypoxanthineOvO/Hypo-Workflow"

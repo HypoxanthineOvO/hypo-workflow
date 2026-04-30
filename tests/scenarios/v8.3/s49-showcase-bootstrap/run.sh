@@ -12,7 +12,7 @@ test -f .pipeline/showcase/TECHNICAL-DOC.md
 test -f .pipeline/showcase/slides.md
 rg -q 'version: 1' .pipeline/showcase/showcase.yaml
 rg -q 'Hypo-Workflow' .pipeline/showcase/PROJECT-INTRO.md
-rg -q '29 个用户指令' .pipeline/showcase/PROJECT-INTRO.md
+rg -q '30 个用户指令' .pipeline/showcase/PROJECT-INTRO.md
 rg -q '```mermaid' .pipeline/showcase/slides.md
 rg -q 'poster skipped' .pipeline/PROGRESS.md
 

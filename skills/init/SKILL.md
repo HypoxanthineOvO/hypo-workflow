@@ -41,9 +41,21 @@ Use this skill to bootstrap `.pipeline/` and the architecture baseline. V8.1 als
    - output generation
 4. Generate `.pipeline/config.yaml` with only project-specific values and overrides that differ from global defaults.
 5. Generate architecture in single-file or folder mode based on project size unless forced.
-6. After creating `.pipeline/` directories and before initializing `state.yaml`, branch into History Import if `--import-history` is present.
-7. Use `--rescan` to refresh architecture for an existing pipeline.
-8. Set `current.phase=lifecycle_init` when tracking this command through state.
+6. Initialize rules configuration unless the user explicitly skips it:
+   - show the preset choice in interactive contexts:
+     ```text
+     📏 Rules 配置
+       [1] recommended — 推荐规则集（默认）
+       [2] strict — 严格模式
+       [3] minimal — 最小化
+       [4] 跳过（后续用 /hw:rules 配置）
+     ```
+   - create `.pipeline/rules.yaml` with `extends: recommended` by default
+   - create `.pipeline/rules/custom/` for future custom rules
+   - do not create explicit Cycle metadata during init
+7. After creating `.pipeline/` directories and before initializing `state.yaml`, branch into History Import if `--import-history` is present.
+8. Use `--rescan` to refresh architecture for an existing pipeline.
+9. Set `current.phase=lifecycle_init` when tracking this command through state.
 
 ## History Import
 
@@ -206,5 +218,7 @@ Do not overwrite an existing active Cycle unless the user explicitly asks.
 - `references/init-spec.md` — init behavior and architecture strategy
 - `references/commands-spec.md`
 - `references/config-spec.md`
+- `references/rules-spec.md`
+- `rules/presets/recommended.yaml`
 - `templates/legacy-report.md`
 - `SKILL.md`

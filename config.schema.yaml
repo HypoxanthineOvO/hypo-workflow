@@ -261,6 +261,35 @@ $defs:
             size: "1024x1536"
             quality: high
             style: auto
+      rules:
+        type: object
+        additionalProperties: false
+        properties:
+          extends:
+            oneOf:
+              - type: string
+                minLength: 1
+                default: recommended
+              - type: array
+                minItems: 1
+                items:
+                  type: string
+                  minLength: 1
+            default: recommended
+          rules:
+            type: object
+            default: {}
+            propertyNames:
+              pattern: "^[a-z0-9][a-z0-9-]*$"
+            additionalProperties:
+              type: string
+              enum:
+                - off
+                - warn
+                - error
+        default:
+          extends: recommended
+          rules: {}
       plan:
         type: object
         additionalProperties: false
@@ -296,7 +325,7 @@ $defs:
               require_explicit_confirm: true
       version:
         type: string
-        pattern: "^(7\\.1\\.0|8\\.0\\.0|8\\.1\\.0|8\\.2\\.0|8\\.3\\.0)$"
+        pattern: "^(7\\.1\\.0|8\\.0\\.0|8\\.1\\.0|8\\.2\\.0|8\\.3\\.0|8\\.4\\.0)$"
       created:
         type: string
         minLength: 1
@@ -673,6 +702,35 @@ properties:
         size: "1024x1536"
         quality: high
         style: auto
+  rules:
+    type: object
+    additionalProperties: false
+    properties:
+      extends:
+        oneOf:
+          - type: string
+            minLength: 1
+            default: recommended
+          - type: array
+            minItems: 1
+            items:
+              type: string
+              minLength: 1
+        default: recommended
+      rules:
+        type: object
+        default: {}
+        propertyNames:
+          pattern: "^[a-z0-9][a-z0-9-]*$"
+        additionalProperties:
+          type: string
+          enum:
+            - off
+            - warn
+            - error
+    default:
+      extends: recommended
+      rules: {}
   step_overrides:
     type: object
     default: {}

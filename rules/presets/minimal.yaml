@@ -1,0 +1,15 @@
+name: minimal
+description: Minimal defaults that keep only hook safety gates enabled.
+rules:
+  git-clean-check: off
+  config-valid: off
+  cycle-closed: off
+  conflict-check: off
+  report-language: off
+  progress-timezone: off
+  progress-verbosity: off
+  commit-format: off
+  auto-continue-threshold: off
+  review-strictness: off
+  stop-hook-self-check: error
+  session-start-context-load: error

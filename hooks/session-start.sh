@@ -103,6 +103,17 @@ append_open_patches() {
   fi
 }
 
+append_rules_context() {
+  local helper="$scripts_dir/rules-summary.sh"
+  [[ -x "$helper" ]] || return 0
+  local rules_summary
+  rules_summary="$(bash "$helper" "$cwd" 2>/dev/null || true)"
+  [[ -n "$rules_summary" ]] || return 0
+  additional_context+=$'\n\n'"[Rules Context]"$'\n'
+  additional_context+="$(printf '%s\n' "$rules_summary" | sed -n '1,220p')"
+  context_load_log+=$'\n'"Loaded rules context (always rules included)"
+}
+
 summary="$("$scripts_dir/state-summary.sh" "$pipeline_dir" 2>/dev/null || true)"
 if [[ -z "$summary" || "$summary" == "No active pipeline" ]]; then
   emit_empty
@@ -172,6 +183,7 @@ append_compact_or_full "state" "$pipeline_dir/state.compact.yaml" "$pipeline_dir
 append_compact_or_full "log" "$pipeline_dir/log.compact.yaml" "$pipeline_dir/log.yaml"
 append_context_file "patches compact" "$pipeline_dir/patches.compact.md"
 append_open_patches
+append_rules_context
 
 additional_context+=$'\n\n'"$context_load_log"
 

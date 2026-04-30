@@ -6,7 +6,7 @@ Use this reference whenever a command needs Hypo-Workflow configuration defaults
 
 | Layer | Path | Owner | Purpose |
 |---|---|---|---|
-| Global | `~/.hypo-workflow/config.yaml` | `/hypo-workflow:setup` | Agent platform, default execution mode, subagent backend, dashboard defaults, plan defaults, output defaults, watchdog defaults, history import defaults, compact defaults, showcase defaults |
+| Global | `~/.hypo-workflow/config.yaml` | `/hypo-workflow:setup` | Agent platform, default execution mode, subagent backend, dashboard defaults, plan defaults, output defaults, watchdog defaults, history import defaults, compact defaults, showcase defaults, rules defaults |
 | Project | `.pipeline/config.yaml` | `/hypo-workflow:init` or `/hypo-workflow:plan-generate` | Project name, prompt source/output, reports, preset, evaluation rules, project-specific overrides |
 
 `setup` must never create project config. `init` and `plan-generate` must not overwrite global config.
@@ -51,6 +51,8 @@ Resolve every configurable value in this order:
 | showcase poster size | `showcase.poster.size` | `showcase.poster.size` | `1024x1536` |
 | showcase poster quality | `showcase.poster.quality` | `showcase.poster.quality` | `high` |
 | showcase poster style | `showcase.poster.style` | `showcase.poster.style` | `auto` |
+| rules extends | `rules.extends` or `.pipeline/rules.yaml extends` | `rules.extends` | `recommended` |
+| rules overrides | `rules.rules` or `.pipeline/rules.yaml rules` | `rules.rules` | `{}` |
 
 Normalize global `agent.platform=claude-code` to the runtime platform value `claude` when applying existing project-platform logic.
 
@@ -126,7 +128,10 @@ showcase:
     size: "1024x1536"
     quality: high
     style: auto
-version: "8.3.0"
+rules:
+  extends: recommended
+  rules: {}
+version: "8.4.0"
 created: "2026-04-26T14:00:00+08:00"
 updated: "2026-04-26T14:00:00+08:00"
 ```
@@ -140,3 +145,18 @@ updated: "2026-04-26T14:00:00+08:00"
 - A missing global config is valid; use built-in defaults.
 - A malformed global config should be reported by `/hypo-workflow:check` but should not prevent reading project config.
 - New V8 fields are optional and must not break older project configs.
+
+## Rules Config
+
+Rules may be declared in either `.pipeline/rules.yaml` or the optional `rules:` block of project/global config. `.pipeline/rules.yaml` is the primary project-local rules file and takes precedence for rule behavior.
+
+```yaml
+extends: recommended
+
+rules:
+  git-clean-check: error
+  commit-format: off
+  prefer-chinese-comments: warn
+```
+
+Supported built-in presets are `recommended`, `strict`, and `minimal`. External rule packs use string references such as `github:owner/repo`.

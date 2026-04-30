@@ -71,3 +71,12 @@ entries:
     report: ".claude-plugin/plugin.json"
     trigger: user
     related_milestone: "M6"
+  - id: "REL-840"
+    type: release
+    ref: "v8.4.0"
+    status: completed
+    timestamp: "2026-04-30T14:22:03+08:00"
+    summary: "Released the Rules dimension with built-in presets, custom Markdown rules, SessionStart injection, and 50/50 regression coverage."
+    report: "CHANGELOG.md"
+    trigger: user
+    related_milestone: "V8.4"

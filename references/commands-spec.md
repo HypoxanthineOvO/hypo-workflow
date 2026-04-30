@@ -5,7 +5,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 ## Namespace
 
 - all explicit Hypo-Workflow commands use the `/hw:` prefix
-- V8.3 canonical namespace contains 29 user-facing commands across Setup, Pipeline, Plan, Lifecycle, and Utility groups, plus an internal cron-only watchdog skill
+- V8.4 canonical namespace contains 30 user-facing commands across Setup, Pipeline, Plan, Lifecycle, and Utility groups, plus an internal cron-only watchdog skill
 - slash commands are exact and namespace-scoped
 - slash commands take precedence over fuzzy natural-language matching
 - natural-language commands remain valid for backward compatibility
@@ -28,6 +28,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
    - `/hw:compact`
    - `/hw:guide`
    - `/hw:showcase`
+   - `/hw:rules`
    - `/hw:check`
    - `/hw:init`
    - `/hw:release`
@@ -45,7 +46,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 3. parse remaining tokens as command arguments
 4. flags are order-independent
 5. if a command is unknown, return exactly:
-   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:compact, /hw:guide, /hw:showcase, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
+   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:compact, /hw:guide, /hw:showcase, /hw:rules, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
 6. if a known command receives an unsupported flag, stop and report the unsupported flag explicitly instead of guessing
 7. if a prompt selector is ambiguous, list the candidates and stop
 8. plan and review commands load `plan/PLAN-SKILL.md` before execution
@@ -189,7 +190,7 @@ Supported forms:
 Behavior:
 
 - read `SKILL.md` command tables as the source of truth
-- `/hw:help` lists all 29 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility
+- `/hw:help` lists all 30 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility
 - `/hw:help --quick` returns a compact cheat sheet
 - `/hw:help <cmd>` returns detailed usage, flags, and examples for the requested command
 
@@ -532,6 +533,34 @@ Behavior:
 - with `--new`, archive current artifacts into `history/v{N}/` and increment Showcase version
 - obey `showcase.*`, `output.language`, and `output.timezone`
 - poster API failures must not block docs or slides
+
+### `/hw:rules`
+
+Supported forms:
+
+- `/hw:rules`
+- `/hw:rules list`
+- `/hw:rules list --active`
+- `/hw:rules list --label <guard|style|hook|workflow|custom>`
+- `/hw:rules enable <name>`
+- `/hw:rules disable <name>`
+- `/hw:rules set <name> <off|warn|error>`
+- `/hw:rules create <name>`
+- `/hw:rules edit <name>`
+- `/hw:rules delete <name>`
+- `/hw:rules pack export <name>`
+- `/hw:rules pack import <url>`
+
+Behavior:
+
+- load `skills/rules/SKILL.md`
+- use `rules/builtin/` and `rules/presets/` as distributed defaults
+- use `.pipeline/rules.yaml` for project extends and severity overrides
+- auto-load `.pipeline/rules/custom/*.md` as natural-language custom rules
+- missing `.pipeline/rules.yaml` remains compatible and behaves as `extends: recommended`
+- use `scripts/rules-summary.sh` for deterministic listing when shell access is available
+- `warn` rules warn and continue; `error` rules block execution at the matching lifecycle hook
+- `always` rules are injected into SessionStart context
 
 ### `/hw:review`
 

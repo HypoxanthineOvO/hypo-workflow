@@ -43,6 +43,7 @@ Important mappings:
 - project `output.language` > global `output.language` > `en`
 - project `output.timezone` > global `output.timezone` > `UTC`
 - project `watchdog.enabled` > global `watchdog.enabled` > `false`
+- project rules from `.pipeline/rules.yaml` > project `rules.*` > global `rules.*` > `extends: recommended`
 
 ## Execution Flow
 
@@ -75,8 +76,11 @@ Important mappings:
 9. Ask whether to enable watchdog defaults:
    - default `false`
    - interval and heartbeat timeout default `300`
-10. Write `~/.hypo-workflow/config.yaml`.
-11. Print a concise configuration summary and remind the user that project config can override these values.
+10. Ask for Rules defaults:
+   - preset: `recommended`, `strict`, or `minimal`
+   - default `recommended`
+11. Write `~/.hypo-workflow/config.yaml`.
+12. Print a concise configuration summary and remind the user that project config can override these values.
 
 ## First-Run Questions
 
@@ -95,6 +99,7 @@ Use short, concrete prompts:
 - "Output timezone?"
 - "Enable Auto Resume watchdog by default?"
 - "History import split method?"
+- "Rules preset: `recommended`, `strict`, or `minimal`?"
 
 ## Default Values
 
@@ -131,7 +136,9 @@ Use short, concrete prompts:
 - `showcase.poster.size=1024x1536`
 - `showcase.poster.quality=high`
 - `showcase.poster.style=auto`
-- `version=8.3.0`
+- `rules.extends=recommended`
+- `rules.rules={}`
+- `version=8.4.0`
 
 ## Config Shape
 
@@ -201,7 +208,11 @@ showcase:
     quality: high
     style: auto
 
-version: "8.3.0"
+rules:
+  extends: recommended
+  rules: {}
+
+version: "8.4.0"
 created: "2026-04-26T14:00:00+08:00"
 updated: "2026-04-26T14:00:00+08:00"
 ```

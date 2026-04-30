@@ -1,0 +1,15 @@
+name: strict
+description: Strict defaults for teams that prefer hard gates.
+rules:
+  git-clean-check: error
+  config-valid: error
+  cycle-closed: error
+  conflict-check: error
+  report-language: warn
+  progress-timezone: warn
+  progress-verbosity: warn
+  commit-format: error
+  auto-continue-threshold: error
+  review-strictness: error
+  stop-hook-self-check: error
+  session-start-context-load: error

@@ -5,7 +5,7 @@
 
 ## Checks
 
-- [ ] Version is 8.3.0.
+- [ ] Version is 8.4.0.
 - [ ] Help count is 28.
 - [ ] New commands appear in root and README.
 - [ ] V8.2 changelog exists.

@@ -1,12 +1,12 @@
 ---
 name: hypo-workflow
-version: 8.3.0
-description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:plan`, `/hw:plan:extend`, `/hw:plan:review`, `/hw:cycle`, `/hw:patch`, `/hw:compact`, `/hw:guide`, `/hw:showcase`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, or `/hw:dashboard`.
+version: 8.4.0
+description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:plan`, `/hw:plan:extend`, `/hw:plan:review`, `/hw:cycle`, `/hw:patch`, `/hw:compact`, `/hw:guide`, `/hw:showcase`, `/hw:rules`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, or `/hw:dashboard`.
 ---
 
-# Hypo-Workflow v8.3.0
+# Hypo-Workflow v8.4.0
 
-> **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 29 个用户指令。
+> **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 30 个用户指令。
 >
 > **Codex 用户**：本文件是完整的 Skill 入口，继续使用 `/hw:*` 指令。
 
@@ -33,6 +33,7 @@ description: Run a serialized prompt execution pipeline from a local `.pipeline/
 | `/hw:compact` | Generate `.compact` context views for large runtime files |
 | `/hw:guide` | Start an interactive guide that recommends the next command path |
 | `/hw:showcase` | Generate project intro docs, technical docs, slides, and an optional poster |
+| `/hw:rules` | Manage rule severities, custom natural-language rules, lifecycle hooks, and rule packs |
 | `/hw:init` | Initialize or rescan `.pipeline/` with architecture-aware project discovery |
 | `/hw:check` | Run pipeline health checks for config, state, prompts, Notion, and architecture |
 | `/hw:audit` | Run preventive code audits and emit graded findings with report output |
@@ -131,6 +132,7 @@ load `plan/PLAN-SKILL.md` before executing the command-specific behavior.
    - if both exist, top-level wins
 9. Read `.pipeline/state.yaml` if it exists. If not, initialize from [`assets/state-init.yaml`](./assets/state-init.yaml) and then fill in the prompt-specific fields.
 10. Read `.pipeline/log.yaml` when lifecycle history, milestone status, fixes, audits, release records, or debug context matters.
+11. Read `.pipeline/rules.yaml` and `.pipeline/rules/custom/` when rule severity, lifecycle gates, or always-on behavior constraints matter. Missing rules config is compatible and behaves as `extends: recommended`.
 
 ## Runtime Resources
 
@@ -155,6 +157,7 @@ Use these bundled files when relevant:
 - [`references/release-spec.md`](./references/release-spec.md)
 - [`references/progress-spec.md`](./references/progress-spec.md)
 - [`references/config-spec.md`](./references/config-spec.md)
+- [`references/rules-spec.md`](./references/rules-spec.md)
 - [`references/subagent-spec.md`](./references/subagent-spec.md)
 - [`references/state-contract.md`](./references/state-contract.md)
 - [`references/platform-claude.md`](./references/platform-claude.md)
@@ -166,9 +169,11 @@ Use these bundled files when relevant:
 - [`scripts/log-append.sh`](./scripts/log-append.sh)
 - [`scripts/diff-stats.sh`](./scripts/diff-stats.sh)
 - [`scripts/watchdog.sh`](./scripts/watchdog.sh)
+- [`scripts/rules-summary.sh`](./scripts/rules-summary.sh)
 - [`skills/compact/SKILL.md`](./skills/compact/SKILL.md)
 - [`skills/guide/SKILL.md`](./skills/guide/SKILL.md)
 - [`skills/showcase/SKILL.md`](./skills/showcase/SKILL.md)
+- [`skills/rules/SKILL.md`](./skills/rules/SKILL.md)
 
 ## Supported Commands
 
@@ -220,6 +225,8 @@ Handle these commands directly:
   Load [`skills/guide/SKILL.md`](./skills/guide/SKILL.md). Sense project state, ask what the user wants, recommend a short command flow, and execute the first command only after confirmation.
 - `/hw:showcase`
   Load [`skills/showcase/SKILL.md`](./skills/showcase/SKILL.md). Generate project introduction documents, technical docs, slides, and an optional GPT Image poster under `.pipeline/showcase/`.
+- `/hw:rules`
+  Load [`skills/rules/SKILL.md`](./skills/rules/SKILL.md). Manage rule severities, built-in presets, custom Markdown rules, lifecycle hook binding, and shareable rule packs.
 - `/hw:review`
   Emit the V6 migration warning and redirect the user to `/hw:plan:review`. Keep this alias only for compatibility.
 - `中止`, `abort`
@@ -227,7 +234,7 @@ Handle these commands directly:
 
 If a command starts with `/hw:` and is not listed above, return:
 
-`Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:compact, /hw:guide, /hw:showcase, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
+`Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:compact, /hw:guide, /hw:showcase, /hw:rules, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
 
 Slash commands are exact and take precedence over fuzzy natural-language matching. Detailed parsing and option semantics live in [`references/commands-spec.md`](./references/commands-spec.md).
 
@@ -260,6 +267,7 @@ Key fallbacks:
 - `history_import.split_method` falls back to global `history_import.split_method`, then `auto`
 - `compact.auto` falls back to global `compact.auto`, then `true`
 - `showcase.language` falls back to global `showcase.language`, then `auto`
+- `rules.extends` falls back to `recommended`
 
 Read [`references/config-spec.md`](./references/config-spec.md) when resolving config precedence or field mapping.
 
@@ -274,6 +282,7 @@ Expected top-level config groups:
 - `history_import` optional
 - `compact` optional
 - `showcase` optional
+- `rules` optional
 - `platform` optional
 - `step_overrides` optional
 - `hooks` optional
@@ -311,6 +320,7 @@ Key defaults:
 - `showcase.poster.size=1024x1536`
 - `showcase.poster.quality=high`
 - `showcase.poster.style=auto`
+- `rules.extends=recommended`
 - `dashboard.enabled=false`
 - `dashboard.port=7700`
 - `dashboard.auto_start=false`
@@ -400,6 +410,48 @@ Patch rules:
 - Patch numbering is global, `P001`, `P002`, and so on
 - Patches are never archived with a Cycle
 - `/hw:plan --context patches` can inject open Patches into P1 Discover
+
+## Rules
+
+V8.4 adds Rules as an independent behavior dimension.
+
+Rule sources:
+
+- distributed built-ins: `rules/builtin/*.yaml`
+- distributed presets: `rules/presets/recommended.yaml`, `strict.yaml`, `minimal.yaml`
+- project config: `.pipeline/rules.yaml`
+- project custom rules: `.pipeline/rules/custom/*.md`
+- imported packs: `.pipeline/rules/packs/<pack-name>/`
+
+Severity model:
+
+- `off`: disabled
+- `warn`: emit warning and continue
+- `error`: hard gate; stop execution until fixed, disabled, or downgraded
+
+Lifecycle hook points:
+
+- `on-session-start`
+- `pre-milestone`
+- `post-milestone`
+- `pre-step`
+- `post-step`
+- `pre-commit`
+- `on-fail`
+- `on-evaluate`
+- `always`
+
+Loading priority:
+
+1. built-in default severity
+2. `extends` preset
+3. `.pipeline/rules/custom/`
+4. `.pipeline/rules.yaml rules:` overrides
+5. command-line `--rule name=severity` overrides when supported
+
+Missing `.pipeline/rules.yaml` is compatible with old projects and behaves like `extends: recommended`.
+
+SessionStart loads active `always` rules through `scripts/rules-summary.sh` and injects them into context. Other hook points are enforced by the command-specific Skill behavior and should use `references/rules-spec.md` when exact rule semantics matter.
 
 ### ⚠️ Patch Fix 执行约束
 
