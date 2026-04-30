@@ -703,7 +703,8 @@ Maintain `.pipeline/PROGRESS.md` as the human-readable execution summary.
 
 - update it after every milestone start, step completion, milestone completion, and deferred decision
 - keep it consistent with `state.yaml` and `log.yaml`
-- use it to summarize current status, recent activity, and deferred items for humans
+- use it to summarize current status, milestone table, timeline table, patch table, and deferred items for humans
+- keep it as a board-style summary, not a loose append-only event log
 - write all prose in `output.language`
 - format times in `output.timezone` as same-day `HH:MM` or cross-day `DD日 HH:MM` for `zh-CN`
 

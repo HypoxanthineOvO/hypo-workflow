@@ -906,7 +906,7 @@ python3 tests/run_regression.py
 git diff --check
 ```
 
-当前预期回归数量为 `59/59`。
+当前预期回归数量为 `60/60`。
 
 ---
 

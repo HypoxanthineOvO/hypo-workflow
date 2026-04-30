@@ -13,7 +13,8 @@ for scenario in \
   s56-agents-ask-todo-plan-discipline \
   s57-opencode-events-auto-continue-file-guard \
   s58-opencode-full-v84-parity \
-  s59-v9-regression-bundle
+  s59-v9-regression-bundle \
+  s60-progress-board-format
 do
   test -f "tests/scenarios/v9/$scenario/run.sh" || {
     echo "missing V9 scenario $scenario" >&2
@@ -30,7 +31,9 @@ if grep -R "curl .*opencode\\|OPENAI_API_KEY\\|https://api.openai.com\\|opencode
   exit 1
 fi
 
-grep -Fq '当前预期回归数量为 `59/59`' README.md
+grep -Fq 'opencode debug config' tests/scenarios/v9/s54-opencode-plugin-scaffold/run.sh
+
+grep -Fq '当前预期回归数量为 `60/60`' README.md
 grep -Fq 'OpenCode Native Adapter' README.md
 grep -Fq 'references/opencode-parity.md' README.md
 

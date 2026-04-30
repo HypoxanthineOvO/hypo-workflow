@@ -43,7 +43,7 @@ If there is no active Cycle, stop and tell the user to run `/hw:cycle new "ÂêçÁß
 6. Wait for the user to confirm the split.
 7. Generate new prompt files under `.pipeline/prompts/`.
 8. Append new milestone records to `.pipeline/state.yaml`.
-9. Update `.pipeline/PROGRESS.md` if it exists.
+9. Update `.pipeline/PROGRESS.md` if it exists: refresh the top metadata, milestone table, and timeline table instead of appending a loose one-line event.
 10. Append a lifecycle event to `.pipeline/log.yaml`.
 
 ## Numbering Rules

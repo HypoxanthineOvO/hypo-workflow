@@ -214,6 +214,14 @@ entries:
     commit: "self"
     summary: "Expanded README with Chinese OpenCode installation, setup, project initialization, command mapping, workflows, platform behavior, and validation scope."
     tests: "python3 tests/run_regression.py (59/59); claude plugin validate .; git diff --check"
+  - id: "P002"
+    type: patch_fix
+    patch: "P002"
+    status: closed
+    timestamp: "2026-04-30T16:59:24+08:00"
+    commit: "self"
+    summary: "Restored PROGRESS.md to a board-style summary with milestone, timeline, and patch tables, and added s60 regression coverage for the format contract."
+    tests: "bash tests/scenarios/v9/s60-progress-board-format/run.sh; claude plugin validate .; python3 tests/run_regression.py (60/60); git diff --check"
   - id: "P003"
     type: patch_fix
     patch: "P003"

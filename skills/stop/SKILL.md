@@ -27,7 +27,7 @@ Use this skill to pause the current run while preserving resumable state.
 4. Preserve `current.phase` so a future resume can restore intent cleanly.
 5. Optionally write an intermediate report if the command does not disable report generation.
 6. Append a stop event to `.pipeline/log.yaml`.
-7. Update `.pipeline/PROGRESS.md` to show the paused status.
+7. Update `.pipeline/PROGRESS.md` to show the paused status in the top metadata, current status block, and timeline table.
 8. Update top-level `last_heartbeat`.
 9. Remove `.pipeline/.lock` if it belongs to the current execution.
 10. Unregister the watchdog cron entry because this stop is intentional.

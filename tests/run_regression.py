@@ -77,6 +77,7 @@ TARGET_SCENARIOS = {
     "s57-opencode-events-auto-continue-file-guard",
     "s58-opencode-full-v84-parity",
     "s59-v9-regression-bundle",
+    "s60-progress-board-format",
 }
 
 
@@ -271,6 +272,7 @@ def scenario_specific(scene: Path, result: ScenarioResult) -> None:
         "s57-opencode-events-auto-continue-file-guard",
         "s58-opencode-full-v84-parity",
         "s59-v9-regression-bundle",
+        "s60-progress-board-format",
     }:
         proc = run(f'bash "{scene / "run.sh"}"', cwd=scene)
         add(result, "run_sh", proc.returncode == 0, (proc.stdout + proc.stderr).strip())

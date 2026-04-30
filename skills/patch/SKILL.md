@@ -137,7 +137,7 @@ For each requested Patch, run these six steps strictly in order:
 3. **Fix** — apply the smallest targeted change. If the repair requires touching more than 5 files, stop that Patch and recommend upgrading it to a Milestone or Cycle plan item. Do not perform opportunistic refactors.
 4. **Test** — run the existing project test suite or the narrowest existing regression command that covers the change. Optionally add one targeted regression test when the Patch exposes a repeatable bug. If tests fail, revert only the changes made for that Patch, keep the Patch `open`, and continue to the next requested Patch.
 5. **Commit** — create one independent commit per Patch with `git commit -m "fix(P001): <Patch title>"`. For batch fixes, do not combine Patch commits.
-6. **Close** — update the Patch file, append one `.pipeline/PROGRESS.md` line, and append a lifecycle event to `.pipeline/log.yaml`.
+6. **Close** — update the Patch file, refresh `.pipeline/PROGRESS.md` board tables, and append a lifecycle event to `.pipeline/log.yaml`.
 
 ### Closed Patch Update
 
@@ -155,11 +155,20 @@ Use `output.language` and `output.timezone` for generated prose and time formatt
 
 ### Progress And Log Records
 
-Append one concise line to `.pipeline/PROGRESS.md`:
+Update `.pipeline/PROGRESS.md` as a board-style summary:
+
+- update the top metadata timestamp
+- update or add the Patch row under `Patch 轨道`
+- insert a row at the top of `时间线`
+- keep detailed payloads in `.pipeline/log.yaml`
+
+Example timeline row:
 
 ```markdown
-14:30 P001 closed — 修复了 xxx
+| 14:30 | Patch | P001 closed | 修复登录页 CSS 错位 |
 ```
+
+Do not append standalone one-line progress entries to the bottom of `PROGRESS.md`.
 
 Append a `.pipeline/log.yaml` lifecycle event with:
 

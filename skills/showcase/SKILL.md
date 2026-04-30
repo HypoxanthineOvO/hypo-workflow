@@ -267,13 +267,15 @@ Check:
 - consistency: artifacts do not contradict each other
 - language: artifacts follow `output.language` / `showcase.language`
 
-Append a concise 2-3 line review summary to `.pipeline/PROGRESS.md`.
+Refresh `.pipeline/PROGRESS.md` with a concise Showcase result.
 
-Progress one-line format:
+Progress table format:
 
-```text
-19:00 /hw:showcase --all — v3: 4 artifacts generated, review ✅
+```markdown
+| 19:00 | Showcase | /hw:showcase --all | v3: 4 artifacts generated, review ✅ |
 ```
+
+Update the top metadata timestamp and keep `PROGRESS.md` as a board-style summary instead of appending loose one-line events.
 
 Use the compact time format required by `output.timezone`.
 
