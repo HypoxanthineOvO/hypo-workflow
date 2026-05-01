@@ -644,7 +644,7 @@ entries:
     patch: "P004"
     status: closed
     timestamp: "2026-05-02T00:47:05+08:00"
-    commit: "8efa19e"
+    commit: "e3d791c"
     summary: "Refactored the C2 technical report slides into a 51-page command-oriented deck, fixed cover/section/diagram display issues, and added Harness model-intelligence future work to both slides and report."
     tests: "make slides pass (51 pages); make report pass (30 pages); git diff --check pass"
     trigger: user

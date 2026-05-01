@@ -8,7 +8,7 @@
 - 测试: ✅ `make slides`、`make report`、`git diff --check` 通过；Slides 51 页，Report 30 页
 - 关联: docs/showcase/c2-report/slides.tex, docs/showcase/c2-report/report.tex
 - resolved_by: P004
-- commit: `8efa19e`
+- commit: `e3d791c`
 - related: []
 - supersedes: []
 
