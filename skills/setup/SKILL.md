@@ -40,8 +40,8 @@ Important mappings:
 - project `plan.interaction_depth` > global `plan.interaction_depth` > `medium`
 - project `dashboard.enabled` > global `dashboard.enabled` > `false`
 - project `dashboard.port` > global `dashboard.port` > `7700`
-- project `output.language` > global `output.language` > `en`
-- project `output.timezone` > global `output.timezone` > `UTC`
+- project `output.language` > global `output.language` > `zh-CN`
+- project `output.timezone` > global `output.timezone` > `Asia/Shanghai`
 - project `watchdog.enabled` > global `watchdog.enabled` > `false`
 - project rules from `.pipeline/rules.yaml` > project `rules.*` > global `rules.*` > `extends: recommended`
 
@@ -71,8 +71,8 @@ Important mappings:
    - `interactive` pauses for confirmation during planning
    - `auto` runs planning phases without routine pauses
 8. Ask for output defaults:
-   - language, default `en`
-   - timezone, default `UTC`
+   - language, default `zh-CN`
+   - timezone, default `Asia/Shanghai`
 9. Ask whether to enable watchdog defaults:
    - default `false`
    - interval and heartbeat timeout default `300`
@@ -115,8 +115,8 @@ Use short, concrete prompts:
 - `plan.interaction_depth=medium`
 - `plan.interactive.min_rounds=3`
 - `plan.interactive.require_explicit_confirm=true`
-- `output.language=en`
-- `output.timezone=UTC`
+- `output.language=zh-CN`
+- `output.timezone=Asia/Shanghai`
 - `watchdog.enabled=false`
 - `watchdog.interval=300`
 - `watchdog.heartbeat_timeout=300`
@@ -173,8 +173,8 @@ plan:
     require_explicit_confirm: true
 
 output:
-  language: en
-  timezone: UTC
+  language: zh-CN
+  timezone: Asia/Shanghai
 
 watchdog:
   enabled: false

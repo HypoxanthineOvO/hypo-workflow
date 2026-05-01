@@ -96,8 +96,8 @@ Default behavior:
 
 ## Compatibility Alias
 
-- `/hw:review` should print `⚠️ \`/hw:review\` 已迁移到 \`/hw:plan:review\`。请使用新命令。此兼容提示将在 V7 中移除。`
-- keep `/hw:review --full` mentioned in docs as a migration aid only
+- `/hw:review` should print `⚠️ \`/hw:review\` 已迁移到 \`/hw:plan:review\`。请使用新命令。`
+- keep `/hw:review --full` mentioned as a legacy compatibility reminder only
 
 ## Safety Rules
 

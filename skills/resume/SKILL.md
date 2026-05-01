@@ -36,9 +36,14 @@ Use this skill to continue from `.pipeline/state.yaml` without restarting comple
    - Claude validates, scores, and updates artifacts
 10. Update `.pipeline/PROGRESS.md`, `.pipeline/log.yaml`, `.pipeline/state.yaml`, and `last_heartbeat` after each meaningful transition.
 11. After a Milestone report is generated and the Milestone reaches a final state, run `/hw:compact` automatically when `compact.auto=true`; skip it when `compact.auto=false`.
-12. Apply the same `retry` / `deferred` / `stop` decision model on failures.
-13. Remove `.pipeline/.lock` when the resume turn completes, stops, blocks, aborts, or finishes.
-14. If the pipeline completes or stops intentionally, unregister the watchdog cron entry.
+12. If `.pipeline/feature-queue.yaml` exists, resume batch auto-chain from the saved state:
+   - honor `gate: confirm` by pausing before the next Feature
+   - when a queued Feature uses `just_in_time`, decompose it only after it becomes current
+   - sync queue duration, token/cost, and metric summaries from `.pipeline/metrics.yaml`, preserving `n/a` for unavailable telemetry
+13. When Test Profiles are active, do not treat missing profile evidence as a soft warning; block until the required evidence contract is satisfied or an explicit blocker is recorded.
+14. Apply the same `retry` / `deferred` / `stop` decision model on failures.
+15. Remove `.pipeline/.lock` when the resume turn completes, stops, blocks, aborts, or finishes.
+16. If the pipeline completes or stops intentionally, unregister the watchdog cron entry.
 
 ## Safety Rules
 

@@ -3,5 +3,9 @@
   "version": "__HW_VERSION__",
   "type": "module",
   "private": true,
-  "description": "Hypo-Workflow managed OpenCode adapter scaffold"
+  "description": "Hypo-Workflow managed OpenCode adapter scaffold",
+  "dependencies": {
+    "@opencode-ai/plugin": "^1.14.30",
+    "solid-js": "^1.9.7"
+  }
 }

@@ -53,6 +53,8 @@ Supported semantic labels:
 - `style`: output and language preferences
 - `hook`: hook behavior wrapped as rules
 - `workflow`: process preferences such as commit and review policy
+- `quality`: repository asset quality checks such as `skill-quality`
+- `release`: publication gates such as `readme-freshness`
 
 Custom rules may use these labels or a concise project-specific label.
 
@@ -131,7 +133,7 @@ rules:
 For `/hw:rules` or `/hw:rules list`:
 
 1. Load the effective rule table.
-2. Group by label in this order: guard, style, hook, workflow, custom.
+2. Group by label in this order: guard, style, hook, workflow, quality, release, custom.
 3. Show name, severity, hooks, and whether the rule is enabled.
 4. Apply filters:
    - `--active`: exclude `off`
@@ -274,6 +276,8 @@ The distributed built-ins are:
 | `commit-format` | workflow | off | pre-commit |
 | `auto-continue-threshold` | workflow | warn | on-evaluate |
 | `review-strictness` | workflow | warn | on-evaluate |
+| `readme-freshness` | release | warn | pre-commit, pre-release |
+| `skill-quality` | quality | warn | pre-milestone, pre-release |
 | `stop-hook-self-check` | hook | error | post-step |
 | `session-start-context-load` | hook | error | on-session-start |
 

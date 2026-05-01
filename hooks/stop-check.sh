@@ -4,6 +4,10 @@
 # 触发时机：Claude Code 的 Stop 事件（Agent 每次尝试停止前）
 #
 # 输入：stdin 接收 Claude Code 传入的 JSON（包含 session_id, cwd 等）
+# Chat summary fallback contract:
+# - when chat mode is active, Stop Hook may request auto summary persistence
+# - fallback can emit chat_entry only when full chat summary is unnecessary
+# - large lightweight follow-up repairs may recommend Patch escalation
 
 set -euo pipefail
 
@@ -58,6 +62,19 @@ extract_state_current() {
   local key="$2"
   awk -v key="$key" '
     /^current:/ { in_section=1; next }
+    in_section && /^[^[:space:]]/ { in_section=0 }
+    in_section && match($0, "^[[:space:]]*" key ":[[:space:]]*(.*)$", m) {
+      print m[1]
+      exit
+    }
+  ' "$file" | trim
+}
+
+extract_state_chat() {
+  local file="$1"
+  local key="$2"
+  awk -v key="$key" '
+    /^chat:/ { in_section=1; next }
     in_section && /^[^[:space:]]/ { in_section=0 }
     in_section && match($0, "^[[:space:]]*" key ":[[:space:]]*(.*)$", m) {
       print m[1]
@@ -148,6 +165,12 @@ if [[ -z "$summary" || "$summary" == "No active pipeline" ]]; then
 fi
 
 pipeline_status="$(printf '%s\n' "$summary" | sed -n 's/^Status: //p' | head -n1)"
+chat_active="$(extract_state_chat "$state_file" active)"
+if [[ "$chat_active" == "true" ]]; then
+  emit_block "chat.active == true：请写入 chat summary 或 chat_entry；若范围过大，请提示 Patch escalation，然后再结束。"
+  exit 0
+fi
+
 if [[ "$pipeline_status" != "running" ]]; then
   emit_empty
   exit 0

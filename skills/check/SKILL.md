@@ -13,7 +13,7 @@ description: Run a health check over config, state, prompts, and architecture wh
 - auto：跟随用户对话语言
 内部日志（log.yaml、state.yaml）始终英文。
 
-Use this skill for the six-surface health check.
+Use this skill for the seven-surface health check.
 
 ## Preconditions
 
@@ -23,13 +23,14 @@ Use this skill for the six-surface health check.
 
 1. Read `~/.hypo-workflow/config.yaml` if present and warn if it is malformed.
 2. Resolve `output.language` and `output.timezone`.
-3. Run the six checks from `references/check-spec.md`:
+3. Run the checks from `references/check-spec.md` plus built-in quality helpers:
    - Config
    - Pipeline
    - State
    - Prompts
    - Notion
    - Architecture
+   - Skill quality via `checkSkillQuality`
 4. Print `✅`, `⚠️`, or `❌` for each surface.
 5. Summarize overall health, effective config source, and recommended next action in `output.language`.
 6. Set `current.phase=lifecycle_check` when tracking this command through state.
@@ -39,4 +40,5 @@ Use this skill for the six-surface health check.
 - `references/check-spec.md`
 - `references/commands-spec.md`
 - `references/config-spec.md`
+- `core/src/skills/index.js`
 - `SKILL.md`

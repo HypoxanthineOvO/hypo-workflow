@@ -12,5 +12,9 @@
     "edit": "ask",
     "bash": "ask",
     "question": "allow"
-  }
+  },
+  "plugin": [
+    ".opencode/plugins/hypo-workflow.ts",
+    ".opencode/plugins/hypo-workflow-tui.tsx"
+  ]
 }

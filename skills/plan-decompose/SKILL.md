@@ -15,6 +15,8 @@ description: Split discovered work into milestones when the user wants Hypo-Work
 
 Use this skill for P2 Decompose only.
 
+For `/hw:plan --batch`, this phase decomposes Feature Queue entries according to `batch.decompose_mode`.
+
 ## Preconditions
 
 - P1 Discover has already clarified the project enough to define milestones
@@ -52,6 +54,20 @@ Use this skill for P2 Decompose only.
 ## P2 Checkpoint Gate
 
 Interactive P2 completion is not permission to write files. The only valid next step is to display the proposed decomposition and ask the user to confirm it. P3 may start only after the user explicitly approves the milestone split.
+
+## Batch Decompose
+
+When `--batch` is present:
+
+1. Read `.plan-state/batch-discover.yaml` or the current Feature candidate table.
+2. Resolve `batch.decompose_mode` as project config > global config > default `upfront`.
+3. If mode is `upfront`, decompose every Feature into initial Milestones before P3.
+4. If mode is `just_in_time`, create Feature-level queue entries and leave Milestone arrays empty with `JIT decomposition pending`.
+5. For upfront mode, produce:
+   - a Feature Queue Markdown table
+   - a Mermaid dependency graph
+   - a Feature-level architecture impact section
+6. Preserve single-feature `/hw:plan` behavior when `--batch` is absent.
 
 ## Reference Files
 

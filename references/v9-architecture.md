@@ -69,6 +69,12 @@ The first implementation lives in `cli/bin/hypo-workflow` with non-interactive f
 | Instruction exporter | `AGENTS.md` or config instructions | Export stable HW guidance and active always-rules. |
 | Permission profile | `opencode.json` snippets | Set standard, strict, and automation profiles. |
 
+Root vs adapter config:
+
+- project root `opencode.json` is the executable OpenCode config and owns plugin registration
+- `.opencode/opencode.json` is adapter-local metadata for mirrored settings and must not redeclare plugin paths, or OpenCode may resolve duplicate nested plugin entries
+- non-plugin runtime helpers such as status loaders belong under `.opencode/runtime/`, not `.opencode/plugins/`, because OpenCode auto-discovers local plugin files from the plugins directory
+
 The V9 scaffold templates live under `plugins/opencode/templates/` and are rendered by `core/src/artifacts/opencode.js`.
 
 ## Codex and Claude Code Path

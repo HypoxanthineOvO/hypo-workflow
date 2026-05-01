@@ -31,7 +31,16 @@ Use this reference for `/hw:release`, the automated publishing workflow for Hypo
 - update version mentions in `README.md`
 - update the version note in `SKILL.md` or `PLAN-SKILL.md` when present
 
-### Step 5: Changelog
+### Step 5: README Update
+
+- run `update_readme` after versioned files are updated and before the release commit
+- read `templates/readme-spec.md` as the README structure and data-source contract
+- replace managed marker blocks by default
+- obey `release.readme.mode` and `release.readme.full_regen` before full README regeneration
+- run `readme-freshness` after the update and before changelog/commit operations
+- stop in strict mode when version, command count, platform matrix, feature summary, or release summary is stale
+
+### Step 6: Changelog
 
 - diff from the last git tag to `HEAD`
 - group commits by conventional type
@@ -54,7 +63,7 @@ Preferred shape:
 - docs: ...
 ```
 
-### Step 6: Git Operations
+### Step 7: Git Operations
 
 - `git add -A`
 - `git commit -m "release: vX.Y.Z"`
@@ -62,7 +71,7 @@ Preferred shape:
 - `git push`
 - `git push --tags`
 
-### Step 7: GitHub Release
+### Step 8: GitHub Release
 
 - if `gh` is available, create `gh release create vX.Y.Z --title "vX.Y.Z" --notes "<changelog>"`
 - otherwise stop after printing the generated changelog text for manual release entry
@@ -80,4 +89,5 @@ Preferred shape:
 
 - `--dry-run` prints every planned step, file mutation, version bump, and tag without changing files or git state
 - `--skip-tests` is dangerous and requires explicit second confirmation before continuing
+- `readme-freshness` must pass before commit/tag/push unless the user explicitly chooses a documented loose-mode repair path
 - always write a lifecycle entry to `.pipeline/log.yaml` with `type: release`

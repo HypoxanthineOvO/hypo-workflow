@@ -8,8 +8,8 @@ tmp_project="$(mktemp -d)"
 node cli/bin/hypo-workflow init-project --platform opencode --project "$tmp_project" >/tmp/hw-s55-init.log
 
 count="$(find "$tmp_project/.opencode/commands" -maxdepth 1 -type f -name 'hw-*.md' | wc -l | tr -d ' ')"
-test "$count" = "30" || {
-  echo "expected 30 command files, found $count" >&2
+test "$count" = "31" || {
+  echo "expected 31 command files, found $count" >&2
   exit 1
 }
 
@@ -20,6 +20,7 @@ grep -Fq 'agent: hw-build' "$tmp_project/.opencode/commands/hw-start.md"
 grep -Fq 'agent: hw-build' "$tmp_project/.opencode/commands/hw-resume.md"
 grep -Fq 'agent: hw-build' "$tmp_project/.opencode/commands/hw-patch-fix.md"
 grep -Fq 'agent: hw-build' "$tmp_project/.opencode/commands/hw-release.md"
+grep -Fq 'agent: hw-build' "$tmp_project/.opencode/commands/hw-chat.md"
 grep -Fq 'agent: hw-review' "$tmp_project/.opencode/commands/hw-audit.md"
 grep -Fq 'agent: hw-status' "$tmp_project/.opencode/commands/hw-status.md"
 
@@ -27,6 +28,7 @@ for pair in \
   "hw-plan.md:/hw:plan" \
   "hw-plan-discover.md:/hw:plan:discover" \
   "hw-patch-fix.md:/hw:patch fix" \
+  "hw-chat.md:/hw:chat" \
   "hw-dashboard.md:/hw:dashboard"
 do
   file="${pair%%:*}"

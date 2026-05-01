@@ -30,12 +30,13 @@ V8.4 parity is tracked in [`opencode-parity.md`](./opencode-parity.md).
 | Rules and instructions | native | `AGENTS.md`, `opencode.json.instructions` | Export HW rules into native instruction sources. |
 | Model selection | native | provider/model/variant config | Prefer OpenCode config; HW only supplies profile defaults. |
 | MCP servers | native | `mcp` config | Optional setup integration, not required for command parity. |
-| Plugin lifecycle | plugin-assisted | `.opencode/plugins/hypo-workflow.ts` | Listen to events and coordinate HW artifacts. |
+| Plugin lifecycle | plugin-assisted | `.opencode/plugins/hypo-workflow.ts`, `.opencode/runtime/hypo-workflow-status.js`, `.opencode/plugins/hypo-workflow-tui.tsx` | Keep event/file-guard logic, read-only status loading, and TUI rendering loosely coupled. |
 | Command context capture | plugin-assisted | `command.executed`, `tui.command.execute` | Record invoked command, args, and current project state. |
 | Auto continue | plugin-assisted | `tool.execute.after`, `session.idle`, `session.status` | Apply HW evaluation rules and continue only under safe policy. |
 | File guard | plugin-assisted | `tool.execute.before`, permission config | Protect state/cycle/rules as errors; warn on ordinary `.pipeline` writes. |
 | Context compaction | plugin-assisted | `opencode.json.compaction`, `session.compacted`, plugin compaction hooks | Inject compact HW state into compaction summaries. |
 | Context loading | plugin-assisted | session events plus generated instructions | Load current prompt/state/report without flooding context. |
+| TUI status model | TUI Slot API | `sidebar_content`, `sidebar_footer`, `home_footer` | Build a read-only status model from `.pipeline/` before rendering UI slots. |
 | Interactive guide | agent-prompt | `/hw-guide` command template + `question` | Keep intent matching in prompt policy. |
 | Plan interview flow | agent-prompt | `/hw-plan*` commands on plan agent | Enforce explicit confirmation and targeted follow-up. |
 | Report prose | agent-prompt | generated command prompt and templates | Preserve HW report structure and language policy. |
@@ -55,6 +56,7 @@ V8.4 parity is tracked in [`opencode-parity.md`](./opencode-parity.md).
 | `/hw:skip` | `/hw-skip` | `hw-build` | Native slash command, HW-specific state mutation. |
 | `/hw:stop` | `/hw-stop` | `hw-status` | Native slash command, HW-specific state mutation. |
 | `/hw:report` | `/hw-report` | `hw-status` | Native slash command, HW-specific report contract. |
+| `/hw:chat` | `/hw-chat` | `hw-build` | Native slash command, lightweight append conversation lane. |
 | `/hw:plan` | `/hw-plan` | `hw-plan` | Native slash command, OpenCode question/todowrite required. |
 | `/hw:plan:discover` | `/hw-plan-discover` | `hw-plan` | Native slash command, Ask-gated discovery. |
 | `/hw:plan:decompose` | `/hw-plan-decompose` | `hw-plan` | Native slash command, todowrite mirrors milestone draft. |
@@ -106,6 +108,65 @@ Plan commands must bind to `hw-plan` by default. If OpenCode exposes nested plan
 | `todo.updated` | Mirror OpenCode todos into PROGRESS summaries where useful. |
 
 Default auto-continue is on for OpenCode with `safe` policy: continue after green tests, explicit low-risk report/evaluation, no open error-severity rules, no dirty protected HW files, and no pending Ask/question gate.
+
+## TUI Status Model
+
+OpenCode exposes a TUI Slot API through `@opencode-ai/plugin` TUI plugins. The relevant host slots for Hypo-Workflow status are:
+
+- `sidebar_content`
+- `sidebar_footer`
+- `home_footer`
+- `home_bottom`
+- `session_prompt_right`
+
+M08 implements the read-only status model first. M09 may render that model into sidebar and footer slots, but the model itself must stay platform-neutral and must not mutate `.pipeline/`.
+
+Recommended M09 layout:
+
+- server plugin: `.opencode/plugins/hypo-workflow.ts`
+- shared status module: `.opencode/runtime/hypo-workflow-status.js`
+- TUI plugin: `.opencode/plugins/hypo-workflow-tui.tsx`
+- project-root `opencode.json.plugin` should load the server and TUI plugins, while `.opencode/opencode.json` must not redeclare those plugin paths
+- the TUI plugin imports the colocated status module instead of referencing Hypo-Workflow source paths outside the generated adapter
+- do not place helper modules under `.opencode/plugins/` unless they export a real plugin entry, because OpenCode auto-discovers local plugin files from that directory
+
+Status model sources:
+
+- `.pipeline/state.yaml`
+- `.pipeline/cycle.yaml`
+- `.pipeline/feature-queue.yaml`
+- `.pipeline/metrics.yaml`
+- `.pipeline/log.yaml`
+- `.pipeline/reports.compact.md`
+- `.pipeline/patches/` and `.pipeline/patches.compact.md` when present
+
+Required output fields:
+
+- Cycle id/name/status
+- pipeline status and heartbeat
+- current Feature, Milestone, step, and Feature Queue pointer
+- progress completed/total/percent
+- `gate: confirm` and failure-policy state
+- latest evaluation score
+- recent 10 events
+- duration, token/cost summary
+- sidebar summary sections
+- footer one-line text
+- source read status and warnings
+
+Resilience rules:
+
+- the adapter is read-only
+- missing optional files produce `missing_optional` source entries, not crashes
+- malformed optional files produce warnings and degraded `n/a` fields
+- missing token/cost telemetry must stay `n/a`; do not infer cost from model names or public price tables
+- if `.pipeline/state.yaml` is missing, return a `missing_pipeline` model suitable for a footer warning
+
+Official baseline:
+
+- `@opencode-ai/plugin/dist/tui.d.ts` defines `TuiHostSlotMap` with `sidebar_content`, `sidebar_footer`, `home_footer`, and related slots.
+- The SDK exposes TUI commands/events such as append prompt, execute command, show toast, and publish.
+- Current implementation should not assume a separate status-bar API beyond the TUI Slot API.
 
 ## Non-Goals for M0
 

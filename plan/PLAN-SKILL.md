@@ -20,6 +20,8 @@ Use this sub-skill when the user wants to design or revise a pipeline before imp
 | `/hw:plan:extend` | Append milestones to the active Cycle without closing it |
 | `/hw:plan:review` | Review architecture and downstream prompt impact for the current milestone or all milestones with `--full` |
 
+`/hw:plan --batch` is a mode flag on `/hw:plan`, not a separate command. It plans multiple Features into `.pipeline/feature-queue.yaml`.
+
 If the user invokes `/hw:plan:xxx` and `xxx` is not recognized, return:
 
 `Unknown command: /hw:plan:xxx. Available: /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review`
@@ -61,6 +63,27 @@ Read `plan.mode` from `.pipeline/config.yaml` when present. If it is missing, fa
   - Claude completes P1-P4 without pausing unless blocked by missing critical information
   - Confirm is a summary checkpoint, not a hard gate
 
+## Batch Plan Mode
+
+Use Batch Plan Mode when the user wants to plan several Features in one interaction.
+
+Behavior:
+
+- run one Discover interview for all Feature candidates
+- produce a prioritized Feature Queue
+- support `gate: confirm` per Feature
+- resolve `batch.decompose_mode`:
+  - `upfront`: decompose every Feature into Milestones before execution
+  - `just_in_time`: defer Milestone decomposition until the Feature becomes current
+- generate Markdown and Mermaid artifacts:
+  - Feature Queue table
+  - Feature dependency graph
+  - Feature-level architecture impact map
+- write planning state to `.plan-state/batch-discover.yaml` and `.plan-state/batch-decompose.yaml`
+- write queue output to `.pipeline/feature-queue.yaml` only after confirmation
+
+Mermaid output should use `graph TD` and include every Feature ID. Upfront mode should attach planned Milestones under each Feature node.
+
 ## Phase Skeleton
 
 ### Discover
@@ -73,11 +96,17 @@ Read `plan.mode` from `.pipeline/config.yaml` when present. If it is missing, fa
 Discover should use a two-pass discussion shape:
 
 1. global framing
-   - project type
+   - task category
+   - desired effect
+   - verification method
    - target users
    - delivery artifact
    - constraints
 2. focused drilling
+   - assumption statement
+   - ambiguity resolution
+   - tradeoff review
+   - validation criteria
    - architecture expectations
    - testing expectations
    - integration boundaries
@@ -87,6 +116,7 @@ Interactive questioning rules:
 
 - ask 2-3 targeted questions per round
 - move from broad framing to detailed drilling
+- start with task category, desired effect, and verification method before implementation detail
 - summarize what was learned after each round
 - do not leave Discover until the configured minimum question rounds are complete and the user signals that the requirement interview is sufficient
 - never treat "确认一下" or a plain answer as permission to enter Decompose
@@ -115,6 +145,12 @@ Required Discover outputs:
 - `.plan-state/discover.yaml`
 - a concise list of unresolved questions, if any
 
+Batch Discover adds:
+
+- `.plan-state/batch-discover.yaml`
+- Feature candidate table with category, desired effect, verification method, priority, gate, dependency, and decompose mode
+- unresolved cross-Feature questions
+
 ### Decompose
 
 - split work into milestones
@@ -133,6 +169,13 @@ Decompose output rules:
 - prefer narrower milestones when architecture review is likely to change downstream prompts
 
 Persist milestone planning state in `.plan-state/decompose.yaml` when possible.
+
+Batch Decompose:
+
+- upfront mode decomposes all Features immediately
+- just_in_time mode writes Feature scaffolds only
+- both modes generate a Markdown queue table and Mermaid graph
+- single-feature `/hw:plan` behavior is unchanged when `--batch` is absent
 
 Interactive P2 checkpoint:
 

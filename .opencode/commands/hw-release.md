@@ -13,6 +13,9 @@ Load the corresponding Hypo-Workflow skill instructions from `skills/release/SKI
 Release lane:
 - run `claude plugin validate .`
 - run the regression suite
+- update versioned files
+- run `update_readme` after version updates and before the release commit
+- run `readme-freshness` before commit/tag/push gates
 - perform a dirty check before release mutations
 - require an Ask gate before tag or push
 - use `git tag` and `git push` only after confirmation

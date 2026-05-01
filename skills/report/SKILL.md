@@ -43,8 +43,8 @@ Use this skill to summarize the latest generated report file.
 
 ## Output Rules
 
-- report summaries must use `output.language`; default is `en`
-- timestamps must be converted to `output.timezone`; default is `UTC`
+- report summaries must use `output.language`; default is `zh-CN`
+- timestamps must be converted to `output.timezone`; default is `Asia/Shanghai`
 - for Chinese output, use compact progress times: same day `HH:MM`, cross-day `DD日 HH:MM`
 - template loading maps `zh-CN` / `zh` to `templates/zh/report.md`, maps `en` / `en-US` to `templates/en/report.md`, and falls back to `templates/report.md` when localized templates are missing
 

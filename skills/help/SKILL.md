@@ -13,14 +13,14 @@ description: Show the full Hypo-Workflow command map when the user needs a quick
 - auto：跟随用户对话语言
 内部日志（log.yaml、state.yaml）始终英文。
 
-Use this skill to explain the 30 user-facing Hypo-Workflow commands and the internal watchdog skill.
+Use this skill to explain the 31 user-facing Hypo-Workflow commands and the internal watchdog skill.
 
 ## Command Groups
 
 - Setup:
   - `setup`
 - Pipeline:
-  - `start`, `resume`, `status`, `skip`, `stop`, `report`
+  - `start`, `resume`, `status`, `skip`, `stop`, `report`, `chat`
 - Plan:
   - `plan`, `plan-discover`, `plan-decompose`, `plan-generate`, `plan-confirm`, `plan-extend`, `plan-review`
 - Lifecycle:
@@ -32,7 +32,7 @@ Use this skill to explain the 30 user-facing Hypo-Workflow commands and the inte
 
 ## Execution Flow
 
-1. By default, list all 30 user-facing commands grouped by category.
+1. By default, list all 31 user-facing commands grouped by category.
 2. For a specific command, explain:
    - when to use it
    - required inputs or flags

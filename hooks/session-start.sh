@@ -2,6 +2,10 @@
 # Pipeline SessionStart Hook — additionalContext 注入
 #
 # 触发时机：Claude Code 的 SessionStart 事件（startup / resume / clear / compact）
+# Chat Recovery contract:
+# - if chat.active == true, SessionStart should recover chat context
+# - when no active Milestone is running, SessionStart may hint that /hw:chat is available
+# - recovery should prioritize state.yaml + cycle.yaml + PROGRESS.md + recent report
 
 set -euo pipefail
 
@@ -114,6 +118,20 @@ append_rules_context() {
   context_load_log+=$'\n'"Loaded rules context (always rules included)"
 }
 
+extract_state_chat_active() {
+  local file="$1"
+  awk '
+    /^chat:/ { in_section=1; next }
+    in_section && /^[^[:space:]]/ { in_section=0 }
+    in_section && match($0, /^[[:space:]]*active:[[:space:]]*(.*)$/, m) {
+      value=m[1]
+      gsub(/^[[:space:]"]+|[[:space:]"]+$/, "", value)
+      print value
+      exit
+    }
+  ' "$file"
+}
+
 summary="$("$scripts_dir/state-summary.sh" "$pipeline_dir" 2>/dev/null || true)"
 if [[ -z "$summary" || "$summary" == "No active pipeline" ]]; then
   emit_empty
@@ -129,6 +147,7 @@ current_prompt="$(printf '%s\n' "$current_line" | sed -n 's#^\(.*\) / .* (step_i
 current_step="$(printf '%s\n' "$current_line" | sed -n 's#^.* / \(.*\) (step_index: .*#\1#p' | head -n1)"
 current_step_index="$(printf '%s\n' "$current_line" | sed -n 's#^.*(step_index: \(.*\))#\1#p' | head -n1)"
 context_load_log="[Context Load Log]"
+chat_active="$(extract_state_chat_active "$state_file")"
 
 case "$matcher" in
   startup|clear)
@@ -184,6 +203,12 @@ append_compact_or_full "log" "$pipeline_dir/log.compact.yaml" "$pipeline_dir/log
 append_context_file "patches compact" "$pipeline_dir/patches.compact.md"
 append_open_patches
 append_rules_context
+
+if [[ "$chat_active" == "true" ]]; then
+  additional_context+=$'\n\n'"[Chat Recovery]"$'\n'
+  additional_context+="chat.active == true; resume /hw:chat using state.yaml + cycle.yaml + PROGRESS.md + recent report. Keep append-mode notes in chat_entry/chat_session, not Milestone report."
+  context_load_log+=$'\n'"Loaded chat recovery context"
+fi
 
 additional_context+=$'\n\n'"$context_load_log"
 

@@ -1,5 +1,27 @@
 # Changelog
 
+## v9.1.0 - 2026-05-01
+
+### Features
+
+- 新增 README 自动维护与 release freshness 检查，将动态文档更新纳入发布门禁。
+- 新增 Skill 质量规范、结构检查和 `skill-quality` 规则，覆盖 Codex、Claude Code 与 OpenCode 的技能面一致性。
+- 新增 Feature Queue、Batch Plan、queue insert、auto-chain、JIT decomposition 和 metrics fallback。
+- 新增 `/hw:chat` 轻量会话轨道、恢复上下文、日志记录和 Patch 升级提示。
+- 新增 Progressive Discover、可选 Karpathy rule pack，以及 webapp、agent-service、research 三类 Test Profile。
+- 新增 OpenCode 只读状态模型、sidebar/footer TUI plugin 和独立 runtime helper。
+
+### Improvements
+
+- OpenCode 命令映射扩展到 31 个用户命令，并补齐 `/hw-chat` adapter。
+- 更新 release 规范，加入 README Update 和 readme-freshness 发布步骤。
+- 更新规则、进度、配置、日志、评估和命令规范以匹配 C2 的非 Report 能力。
+
+### Tests
+
+- Node core suite: 73/73 passing.
+- Scenario regression: 60/60 passing.
+
 ## v9.0.0 - 2026-04-30
 
 ### Features

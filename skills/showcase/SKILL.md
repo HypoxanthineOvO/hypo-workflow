@@ -9,7 +9,7 @@ Use this skill when the user invokes `/hw:showcase` or `/hypo-workflow:showcase`
 
 Showcase is a non-development preset that proves Hypo-Workflow can run structured AI work beyond code implementation. It generates project introduction material under `.pipeline/showcase/` and keeps the normal Pipeline state machine untouched.
 
-## Output Language
+## Output Language Rules
 
 📌 输出语言规则：
 读取 config.yaml → output.language

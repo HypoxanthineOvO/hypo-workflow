@@ -15,6 +15,24 @@ description: Run the discovery phase of Hypo-Workflow planning when the user nee
 
 Use this skill for P1 Discover only.
 
+For `/hw:plan --batch`, this phase becomes Batch Discover. Batch Discover covers multiple Feature candidates in one interview, but it keeps the same interactive hard gates as ordinary Discover.
+
+## Big Questions First
+
+Before diving into details, start with three broad questions:
+
+1. task category
+2. desired effect
+3. verification method
+
+Only after these are clear should the Agent go deeper into assumptions, ambiguities, tradeoffs, and validation criteria.
+
+Category-specific follow-up:
+
+- `webapp`: ask for E2E path, browser interaction, and visual evidence
+- `agent-service`: ask for CLI shape, shared core, and CLI scenario
+- `research`: ask for baseline, expected direction, validation script, and environment constraints
+
 ## Preconditions
 
 - planning mode is active or about to start
@@ -68,13 +86,14 @@ If `plan.interactive.min_rounds` is set, use it as an additional floor after res
 
 1. Ask only 2-3 targeted questions per round.
 2. Start broad, then drill into detail.
-3. Summarize what has been learned after each round.
-4. Count completed question rounds explicitly in the working notes.
-5. Do not enter P2 until both conditions are true:
+3. Start with task category, desired effect, and verification method before implementation-specific detail.
+4. Summarize what has been learned after each round.
+5. Count completed question rounds explicitly in the working notes.
+6. Do not enter P2 until both conditions are true:
    - the configured minimum round count has been met
    - the user explicitly says「够了」「开始吧」「可以了」or an equivalent end signal
-6. If user input is vague, ask follow-up questions instead of silently filling gaps.
-7. If the user says "确认一下" or merely answers the previous questions, summarize and continue asking.
+7. If user input is vague, ask follow-up questions instead of silently filling gaps.
+8. If the user says "确认一下" or merely answers the previous questions, summarize and continue asking.
 
 ## Context Injection
 
@@ -96,6 +115,32 @@ Context injection behavior:
 Example opening:
 
 > 基于审计报告 + 3 个 open patch，我看到这些问题：…… 你想全部处理还是只修 Critical？还有其他想加的吗？
+
+## Batch Discover
+
+When `--batch` is present:
+
+1. Collect multiple Feature candidates before moving to Decompose.
+2. For each Feature, capture:
+   - title
+   - task category
+   - desired effect
+   - verification method
+   - user-visible goal
+   - priority
+   - dependencies
+   - likely gate: `auto` or `confirm`
+   - preferred `decompose_mode`: `upfront` or `just_in_time`
+   - acceptance boundary
+3. Ask unified follow-up questions so the user does not repeat one full planning loop per Feature.
+4. Present a Feature Queue preview table before P2.
+5. Do not generate `.pipeline/feature-queue.yaml` until queue confirmation.
+
+Required Batch Discover output:
+
+- `.plan-state/batch-discover.yaml`
+- a Markdown Feature candidate table
+- unresolved cross-Feature dependency questions
 
 ## Reference Files
 

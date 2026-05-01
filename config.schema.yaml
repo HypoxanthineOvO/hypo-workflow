@@ -45,6 +45,36 @@ $defs:
               - self
               - subagent
             default: self
+          test_profiles:
+            type: object
+            additionalProperties: false
+            properties:
+              enabled:
+                type: boolean
+                default: true
+              selection:
+                type: string
+                enum:
+                  - auto
+                  - manual
+                default: auto
+              compose:
+                type: boolean
+                default: true
+              profiles:
+                type: array
+                default: []
+                items:
+                  type: string
+                  enum:
+                    - webapp
+                    - agent-service
+                    - research
+            default:
+              enabled: true
+              selection: auto
+              compose: true
+              profiles: []
       subagent:
         type: object
         additionalProperties: false
@@ -102,10 +132,69 @@ $defs:
           timezone:
             type: string
             minLength: 1
-            default: UTC
+            default: Asia/Shanghai
         default:
-          language: en
-          timezone: UTC
+          language: zh-CN
+          timezone: Asia/Shanghai
+      release:
+        type: object
+        additionalProperties: false
+        properties:
+          readme:
+            type: object
+            additionalProperties: false
+            properties:
+              mode:
+                type: string
+                enum:
+                  - loose
+                  - strict
+                default: loose
+              full_regen:
+                type: string
+                enum:
+                  - auto
+                  - ask
+                  - deny
+                default: auto
+            default:
+              mode: loose
+              full_regen: auto
+        default:
+          readme:
+            mode: loose
+            full_regen: auto
+      batch:
+        type: object
+        additionalProperties: false
+        properties:
+          decompose_mode:
+            type: string
+            enum:
+              - upfront
+              - just_in_time
+            default: upfront
+          failure_policy:
+            type: string
+            enum:
+              - stop
+              - skip_defer
+              - retry
+            default: skip_defer
+          auto_chain:
+            type: boolean
+            default: true
+          default_gate:
+            type: string
+            enum:
+              - auto
+              - confirm
+            default: auto
+        default:
+          decompose_mode: upfront
+          failure_policy: skip_defer
+          auto_chain: true
+          default_gate: auto
       watchdog:
         type: object
         additionalProperties: false
@@ -323,6 +412,26 @@ $defs:
             default:
               min_rounds: 3
               require_explicit_confirm: true
+          discover:
+            type: object
+            additionalProperties: false
+            properties:
+              progressive:
+                type: boolean
+                default: true
+              big_questions_first:
+                type: boolean
+                default: true
+              plan_extend_mode:
+                type: string
+                enum:
+                  - lightweight
+                  - full
+                default: lightweight
+            default:
+              progressive: true
+              big_questions_first: true
+              plan_extend_mode: lightweight
       version:
         type: string
         pattern: "^(7\\.1\\.0|8\\.0\\.0|8\\.1\\.0|8\\.2\\.0|8\\.3\\.0|8\\.4\\.0)$"
@@ -379,12 +488,36 @@ properties:
         default:
           min_rounds: 3
           require_explicit_confirm: true
+      discover:
+        type: object
+        additionalProperties: false
+        properties:
+          progressive:
+            type: boolean
+            default: true
+          big_questions_first:
+            type: boolean
+            default: true
+          plan_extend_mode:
+            type: string
+            enum:
+              - lightweight
+              - full
+            default: lightweight
+        default:
+          progressive: true
+          big_questions_first: true
+          plan_extend_mode: lightweight
     default:
       mode: interactive
       interaction_depth: medium
       interactive:
         min_rounds: 3
         require_explicit_confirm: true
+      discover:
+        progressive: true
+        big_questions_first: true
+        plan_extend_mode: lightweight
   dashboard:
     type: object
     additionalProperties: false
@@ -486,6 +619,36 @@ properties:
               minLength: 1
         default:
           preset: tdd
+      test_profiles:
+        type: object
+        additionalProperties: false
+        properties:
+          enabled:
+            type: boolean
+            default: true
+          selection:
+            type: string
+            enum:
+              - auto
+              - manual
+            default: auto
+          compose:
+            type: boolean
+            default: true
+          profiles:
+            type: array
+            default: []
+            items:
+              type: string
+              enum:
+                - webapp
+                - agent-service
+                - research
+        default:
+          enabled: true
+          selection: auto
+          compose: true
+          profiles: []
       step_overrides:
         type: object
         default: {}
@@ -542,11 +705,70 @@ properties:
       timezone:
         type: string
         minLength: 1
-        default: UTC
+        default: Asia/Shanghai
         description: IANA timezone used for PROGRESS and report timestamps.
     default:
-      language: en
-      timezone: UTC
+      language: zh-CN
+      timezone: Asia/Shanghai
+  release:
+    type: object
+    additionalProperties: false
+    properties:
+      readme:
+        type: object
+        additionalProperties: false
+        properties:
+          mode:
+            type: string
+            enum:
+              - loose
+              - strict
+            default: loose
+          full_regen:
+            type: string
+            enum:
+              - auto
+              - ask
+              - deny
+            default: auto
+        default:
+          mode: loose
+          full_regen: auto
+    default:
+      readme:
+        mode: loose
+        full_regen: auto
+  batch:
+    type: object
+    additionalProperties: false
+    properties:
+      decompose_mode:
+        type: string
+        enum:
+          - upfront
+          - just_in_time
+        default: upfront
+      failure_policy:
+        type: string
+        enum:
+          - stop
+          - skip_defer
+          - retry
+        default: skip_defer
+      auto_chain:
+        type: boolean
+        default: true
+      default_gate:
+        type: string
+        enum:
+          - auto
+          - confirm
+        default: auto
+    default:
+      decompose_mode: upfront
+      failure_policy: skip_defer
+      auto_chain: true
+      default_gate: auto
   watchdog:
     type: object
     additionalProperties: false

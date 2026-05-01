@@ -4,7 +4,7 @@
 
 export const metadata = {
   name: "hypo-workflow",
-  version: "9.0.0-alpha.0",
+  version: "9.1.0-alpha.0",
   commandMap: [
   {
     "canonical": "/hw:start",
@@ -47,6 +47,13 @@ export const metadata = {
     "agent": "hw-status",
     "route": "read",
     "skill": "skills/report/SKILL.md"
+  },
+  {
+    "canonical": "/hw:chat",
+    "opencode": "/hw-chat",
+    "agent": "hw-build",
+    "route": "lifecycle",
+    "skill": "skills/chat/SKILL.md"
   },
   {
     "canonical": "/hw:plan",

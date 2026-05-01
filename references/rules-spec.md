@@ -23,6 +23,7 @@ Rules do not replace `config.yaml`. Config keeps structured project settings; ru
 | Project config | `.pipeline/rules.yaml` | Extends and severity overrides |
 | Project custom | `.pipeline/rules/custom/*.md` | Natural-language custom rules |
 | Project packs | `.pipeline/rules/packs/*` | Imported or exported shareable packs |
+| Built-in packs | `rules/packs/*` | Optional distributed rule packs such as `@karpathy/guidelines` |
 
 ## Severity
 
@@ -54,9 +55,10 @@ Effective rule state is resolved in this order:
 
 1. `rules/builtin/*.yaml` metadata and default severity.
 2. Preset severity from `rules/presets/<extends>.yaml`.
-3. Project custom rule files in `.pipeline/rules/custom/`.
-4. `.pipeline/rules.yaml rules:` overrides.
-5. Command-line `--rule name=severity` overrides when supported.
+3. Built-in or imported pack defaults from `rules/packs/*` and `.pipeline/rules/packs/*`.
+4. Project custom rule files in `.pipeline/rules/custom/`.
+5. `.pipeline/rules.yaml rules:` overrides.
+6. Command-line `--rule name=severity` overrides when supported.
 
 Missing `.pipeline/rules.yaml` is equivalent to:
 
@@ -73,6 +75,23 @@ rules: {}
 | `strict` | Team or release mode. Guard and workflow rules become hard gates. |
 | `minimal` | Compatibility mode. Only hook rules stay active as errors. |
 
+## Optional Packs
+
+Optional packs are not enabled by default. Add them through `extends`:
+
+```yaml
+extends:
+  - recommended
+  - @karpathy/guidelines
+```
+
+`@karpathy/guidelines` provides:
+
+- `karpathy-think-before-coding`
+- `karpathy-simplicity-first`
+- `karpathy-surgical-changes`
+- `karpathy-goal-driven-execution`
+
 ## Built-In Rules
 
 | Rule | Label | Default | Hooks |
@@ -87,6 +106,8 @@ rules: {}
 | `commit-format` | workflow | off | pre-commit |
 | `auto-continue-threshold` | workflow | warn | on-evaluate |
 | `review-strictness` | workflow | warn | on-evaluate |
+| `readme-freshness` | release | warn | pre-commit, pre-release |
+| `skill-quality` | quality | warn | pre-milestone, pre-release |
 | `stop-hook-self-check` | hook | error | post-step |
 | `session-start-context-load` | hook | error | on-session-start |
 

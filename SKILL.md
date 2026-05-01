@@ -1,12 +1,12 @@
 ---
 name: hypo-workflow
-version: 9.0.0
-description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:plan`, `/hw:plan:extend`, `/hw:plan:review`, `/hw:cycle`, `/hw:patch`, `/hw:compact`, `/hw:guide`, `/hw:showcase`, `/hw:rules`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, or `/hw:dashboard`.
+version: 9.1.0
+description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:chat`, `/hw:plan`, `/hw:plan:extend`, `/hw:plan:review`, `/hw:cycle`, `/hw:patch`, `/hw:compact`, `/hw:guide`, `/hw:showcase`, `/hw:rules`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, or `/hw:dashboard`.
 ---
 
-# Hypo-Workflow v9.0.0
+# Hypo-Workflow v9.1.0
 
-> **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 30 个用户指令。
+> **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 31 个用户指令。
 >
 > **Codex 用户**：本文件是完整的 Skill 入口，继续使用 `/hw:*` 指令。
 
@@ -20,6 +20,7 @@ description: Run a serialized prompt execution pipeline from a local `.pipeline/
 | `/hw:skip` | Skip the current prompt and advance |
 | `/hw:stop` | Gracefully stop and save state |
 | `/hw:report` | Show compact report summaries, latest scores, or `--view <M>` full report |
+| `/hw:chat` | Enter lightweight append conversation mode |
 | `/hw:plan` | Enter Plan Mode through `plan/PLAN-SKILL.md` |
 | `/hw:plan:discover` | Run the Discover phase of Plan Mode |
 | `/hw:plan:decompose` | Run the Decompose phase of Plan Mode |
@@ -51,7 +52,7 @@ When the user types any `/hw:*` command, execute the corresponding action.
 Unrecognized `/hw:*` commands should be reported as unknown.
 Load [`references/commands-spec.md`](./references/commands-spec.md) when you need parsing rules, parameter semantics, or state-mutation details for slash commands.
 
-Compatibility alias: `/hw:review` now prints `⚠️ \`/hw:review\` 已迁移到 \`/hw:plan:review\`。请使用新命令。此兼容提示将在 V7 中移除。`
+Compatibility alias: `/hw:review` now prints `⚠️ \`/hw:review\` 已迁移到 \`/hw:plan:review\`。请使用新命令。`
 
 ## Output Language Rules
 
@@ -202,6 +203,8 @@ Handle these commands directly:
   Gracefully stop without aborting the pipeline. Persist state, optionally write an intermediate report, and set `pipeline.status=stopped`. With `--no-report`, skip the intermediate report.
 - `/hw:report`
   Load compact report summaries when available. With `--view <M>`, load the specified Milestone report in full. Otherwise summarize the latest scores, warnings, and decision.
+- `/hw:chat`
+  Load [`skills/chat/SKILL.md`](./skills/chat/SKILL.md). Enter lightweight append conversation mode, reload `state.yaml + cycle.yaml + PROGRESS.md + recent report`, and write chat entries instead of Milestone reports.
 - `/hw:help`
   Show grouped command help. Use `--quick` for a compact cheat sheet or `/hw:help <cmd>` for detailed usage, arguments, and examples sourced from this file.
 - `/hw:reset`
@@ -237,13 +240,13 @@ Handle these commands directly:
 - `/hw:rules`
   Load [`skills/rules/SKILL.md`](./skills/rules/SKILL.md). Manage rule severities, built-in presets, custom Markdown rules, lifecycle hook binding, and shareable rule packs.
 - `/hw:review`
-  Emit the V6 migration warning and redirect the user to `/hw:plan:review`. Keep this alias only for compatibility.
+  Emit the legacy migration warning and redirect the user to `/hw:plan:review`. Keep this alias only for compatibility.
 - `中止`, `abort`
   Mark the current prompt and pipeline as aborted, persist state, append a prompt-level log event, and stop.
 
 If a command starts with `/hw:` and is not listed above, return:
 
-`Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:compact, /hw:guide, /hw:showcase, /hw:rules, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
+`Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:chat, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:compact, /hw:guide, /hw:showcase, /hw:rules, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
 
 Slash commands are exact and take precedence over fuzzy natural-language matching. Detailed parsing and option semantics live in [`references/commands-spec.md`](./references/commands-spec.md).
 

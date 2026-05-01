@@ -5,7 +5,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 ## Namespace
 
 - all explicit Hypo-Workflow commands use the `/hw:` prefix
-- V8.4 canonical namespace contains 30 user-facing commands across Setup, Pipeline, Plan, Lifecycle, and Utility groups, plus an internal cron-only watchdog skill
+- V9.1 canonical namespace contains 31 user-facing commands across Setup, Pipeline, Plan, Lifecycle, and Utility groups, plus an internal cron-only watchdog skill
 - slash commands are exact and namespace-scoped
 - slash commands take precedence over fuzzy natural-language matching
 - natural-language commands remain valid for backward compatibility
@@ -27,14 +27,15 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
    - `/hw:dashboard`
    - `/hw:compact`
    - `/hw:guide`
-   - `/hw:showcase`
-   - `/hw:rules`
-   - `/hw:check`
-   - `/hw:init`
-   - `/hw:release`
-   - `/hw:audit`
-   - `/hw:debug`
-   - `/hw:plan`
+- `/hw:showcase`
+- `/hw:rules`
+- `/hw:check`
+- `/hw:init`
+- `/hw:release`
+- `/hw:audit`
+- `/hw:debug`
+- `/hw:chat`
+- `/hw:plan`
    - `/hw:plan:discover`
    - `/hw:plan:decompose`
    - `/hw:plan:generate`
@@ -190,7 +191,7 @@ Supported forms:
 Behavior:
 
 - read `SKILL.md` command tables as the source of truth
-- `/hw:help` lists all 30 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility
+- `/hw:help` lists all 31 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility
 - `/hw:help --quick` returns a compact cheat sheet
 - `/hw:help <cmd>` returns detailed usage, flags, and examples for the requested command
 
@@ -305,6 +306,8 @@ Supported flags:
 Behavior:
 
 - follow the seven-step release flow in `references/release-spec.md`
+- run `update_readme` after versioned files are updated and before commit/tag/push gates
+- run `readme-freshness` before release commit creation
 - require explicit second confirmation for `--skip-tests`
 - append a `type: release` entry to `.pipeline/log.yaml`
 
@@ -338,11 +341,31 @@ Behavior:
 - distinguish symptom-driven debugging from preventive audit scanning
 - write the detailed report to `.pipeline/debug/` and append a debug log entry
 
+### `/hw:chat`
+
+Supported forms:
+
+- `/hw:chat`
+- `/hw:chat end`
+
+Behavior:
+
+- load `references/chat-spec.md`
+- `/hw:chat` reloads Workflow context from `state.yaml + cycle.yaml + PROGRESS.md + recent report`
+- enter append conversation mode without opening a new Milestone
+- keep discussion and small modifications in chat log rather than Milestone report
+- `/hw:chat end` explicitly closes chat mode and writes a chat summary when required
+- if the session stays lightweight, keep at least chat entries plus modification traces
+- when scale grows beyond lightweight follow-up work, recommend upgrade to Patch instead of silently converting
+
 ### `/hw:plan`
 
 Supported flags:
 
 - none
+- `--batch`
+- `--insert <natural language>`
+- `--context audit,patches,deferred,debug`
 
 Behavior:
 
@@ -350,6 +373,17 @@ Behavior:
 - enter Plan Mode using the Discover-first flow
 - honor `--template <name>` as an initial template hint when present
 - honor `--context` as comma-separated P1 context sources
+- single-feature /hw:plan behavior is unchanged when `--batch` is absent
+- with `--batch`, Discover covers multiple Features in one interview and generates a Feature Queue after confirmation
+- Progressive Discover starts by asking task category, desired effect, and verification method before deeper implementation detail
+- map task category to Test Profile expectations when applicable; webapp, agent-service, and research each require different validation evidence
+- with `--insert <natural language>`, interpret the natural-language request as a structured queue operation, summarize the queue diff, and wait for explicit confirmation before writing `.pipeline/feature-queue.yaml`
+- supported insert operations include append, insert before/after, reprioritize, pause with `gate: confirm`, move queued Features, and update queued Feature title/summary/decompose mode
+- `--insert` must not reorder active, done, blocked, or deferred Features unless the user explicitly requests repair surgery
+- with `--batch`, resolve `batch.decompose_mode`:
+  - `upfront`: decompose all Features before execution
+  - `just_in_time`: defer Milestone decomposition until each Feature becomes current
+- with `--batch`, generate Feature Queue Markdown tables and Mermaid graphs for dependencies and architecture impact
 - when `--context` is omitted, use active `cycle.context_sources` when present
 - honor `plan.mode=auto|interactive` from project config, falling back to global `plan.default_mode` when available
 - default to `/hw:plan:discover` when no explicit sub-phase is given
@@ -366,9 +400,12 @@ Behavior:
 - load `plan/PLAN-SKILL.md`
 - inspect the current repository when applicable
 - gather goals, constraints, and stack assumptions
+- ask task category, desired effect, and verification method before narrower follow-up questions
+- if the category is `research`, ask baseline, expected direction, and validation script before leaving Discover
 - write or update `.pipeline/design-spec.md`
 - persist intermediate planning state in `.plan-state/` when available
 - in interactive mode, ask targeted follow-up questions in rounds
+- use assumption statement, ambiguity resolution, tradeoff review, and validation criteria as the default Progressive Discover structure
 - in interactive mode, enforce minimum rounds from `plan.interaction_depth`: low=2, medium=3, high=5
 - in interactive mode, do not enter P2 until the user explicitly says「够了」「开始吧」「可以了」or equivalent
 - if context is injected, present it before the first question round but do not skip Discover
@@ -430,6 +467,7 @@ Behavior:
 - require `.pipeline/state.yaml`
 - show the current Cycle milestone list
 - ask at least one targeted interactive question round
+- use lightweight Progressive Discover first: category, desired effect, verification method
 - propose appended milestones and wait for explicit confirmation
 - generate new prompt files under `.pipeline/prompts/`
 - append milestone records to `.pipeline/state.yaml`
@@ -556,6 +594,7 @@ Behavior:
 - load `skills/rules/SKILL.md`
 - use `rules/builtin/` and `rules/presets/` as distributed defaults
 - use `.pipeline/rules.yaml` for project extends and severity overrides
+- allow optional packs such as `@karpathy/guidelines`; keep them disabled unless explicitly extended
 - auto-load `.pipeline/rules/custom/*.md` as natural-language custom rules
 - missing `.pipeline/rules.yaml` remains compatible and behaves as `extends: recommended`
 - use `scripts/rules-summary.sh` for deterministic listing when shell access is available
@@ -571,7 +610,7 @@ Supported flags:
 Behavior:
 
 - do not run Plan Review directly
-- print `⚠️ \`/hw:review\` 已迁移到 \`/hw:plan:review\`。请使用新命令。此兼容提示将在 V7 中移除。`
+- print `⚠️ \`/hw:review\` 已迁移到 \`/hw:plan:review\`。请使用新命令。`
 - keep `--full` only as part of the compatibility message
 
 ## Compatibility Notes
@@ -582,9 +621,10 @@ Behavior:
 - `跳过当前步骤` remains a step-level skip and is not the same as `/hw:skip`
 - `中止`, `abort` remain hard-abort operations and are not the same as `/hw:stop`
 - `/hw:plan` enters planning mode and is not the same as `/hw:start`
+- `/hw:chat` is lightweight append conversation and is not the same as `/hw:patch`
 - `/hw:plan:extend` appends to an active Cycle and is not the same as opening a new Cycle
 - `/hw:plan:review` is a planning review surface and not the same as `review_code`
 - `/hw:cycle` manages Cycle metadata and archives, not normal milestone execution
 - `/hw:patch` manages persistent side-track issues, not prompt patch queues under `.plan-state/`
-- `/hw:review --full` remains a compatibility reminder during V6 only
+- `/hw:review --full` remains a legacy compatibility reminder only
 - slash commands are entry shortcuts only; they do not change TDD, evaluation, or delegation semantics

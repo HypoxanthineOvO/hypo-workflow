@@ -1,14 +1,27 @@
 pipeline:
-  name: "Hypo-Workflow V9 OpenCode Native Adapter"
+  name: "Hypo-Workflow C2 Maintainability, Observability, Batch Plan, and Showcase"
   source: local
   output: local
   prompts_dir: .pipeline/prompts
   reports_dir: .pipeline/reports
 
+plan:
+  mode: interactive
+  interaction_depth: high
+  interactive:
+    min_rounds: 5
+    require_explicit_confirm: true
+
 execution:
   mode: self
   steps:
     preset: tdd
+
+batch:
+  decompose_mode: upfront
+  failure_policy: skip_defer
+  auto_chain: true
+  default_gate: auto
 
 evaluation:
   auto_continue: true
@@ -18,3 +31,7 @@ evaluation:
     - no_regressions
     - matches_plan
     - code_quality
+
+output:
+  language: zh-CN
+  timezone: Asia/Shanghai

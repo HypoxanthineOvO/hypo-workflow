@@ -5,6 +5,7 @@ export const CANONICAL_COMMANDS = Object.freeze([
   { canonical: "/hw:skip", opencode: "/hw-skip", agent: "hw-build", route: "pipeline", skill: "skills/skip/SKILL.md" },
   { canonical: "/hw:stop", opencode: "/hw-stop", agent: "hw-status", route: "pipeline", skill: "skills/stop/SKILL.md" },
   { canonical: "/hw:report", opencode: "/hw-report", agent: "hw-status", route: "read", skill: "skills/report/SKILL.md" },
+  { canonical: "/hw:chat", opencode: "/hw-chat", agent: "hw-build", route: "lifecycle", skill: "skills/chat/SKILL.md" },
   { canonical: "/hw:plan", opencode: "/hw-plan", agent: "hw-plan", route: "plan", skill: "skills/plan/SKILL.md" },
   { canonical: "/hw:plan:discover", opencode: "/hw-plan-discover", agent: "hw-plan", route: "plan", skill: "skills/plan-discover/SKILL.md" },
   { canonical: "/hw:plan:decompose", opencode: "/hw-plan-decompose", agent: "hw-plan", route: "plan", skill: "skills/plan-decompose/SKILL.md" },

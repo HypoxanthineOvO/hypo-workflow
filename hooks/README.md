@@ -11,6 +11,16 @@ Hooks 为 Hypo-Workflow Pipeline 提供被动安全网。
 | InstructionsLoaded 监听 | ✅ 可选 | ❌ 不支持 |
 | 完成通知 | ✅ Notification | ✅ notify |
 
+## Chat Recovery
+
+M13 起，Hook 规范额外支持 `/hw:chat` 的追加对话语义：
+
+- SessionStart 可在无 active Milestone 时提示用户可以进入 `/hw:chat`
+- SessionStart 可在 `chat.active == true` 时恢复 chat context
+- 恢复时优先注入 `state.yaml + cycle.yaml + PROGRESS.md + recent report`
+- Stop Hook 可根据会话规模决定写 `chat summary`，或只保留 `chat_entry` 与修改痕迹
+- 当 chat 修改不再轻量时，Hook / runtime 可提示升级为 Patch escalation
+
 ## 安装
 
 ### 方式 1：Plugin 安装（推荐，Claude Code）

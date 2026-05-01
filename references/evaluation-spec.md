@@ -37,6 +37,28 @@ Apply only the checks listed in `evaluation.checks`.
 - `code_quality`
   `code_quality >= 3`.
 
+## Test Profile Evidence
+
+When `execution.test_profiles` is enabled or a Feature declares a matching profile, required evidence becomes category-specific:
+
+- `webapp`
+  - require E2E execution
+  - require browser interaction evidence
+  - require screenshot or equivalent visual proof
+  - block if the only evidence is unit tests
+- `agent-service`
+  - require CLI planning evidence
+  - require shared core interface evidence
+  - require real CLI scenario execution
+- `research`
+  - require named baseline metric
+  - require expected direction
+  - require explicit validation script
+  - require before / after / delta evidence from actual script execution
+  - block if acceptance is based on diff alone
+
+Missing required Test Profile evidence counts as missing required evidence and should produce `STOP`.
+
 ## Score Formula
 
 The pipeline keeps the V1 scoring model:
@@ -67,7 +89,7 @@ Interpretation:
 
 Every completed prompt writes one report based on `assets/report-template.md`.
 
-Reports must use `output.language` for prose and `output.timezone` for timestamps. Defaults are `en` and `UTC` when no output config is set.
+Reports must use `output.language` for prose and `output.timezone` for timestamps. Defaults are `zh-CN` and `Asia/Shanghai` when no output config is set.
 
 Minimum report content:
 

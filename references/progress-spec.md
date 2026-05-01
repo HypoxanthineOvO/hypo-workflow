@@ -53,6 +53,14 @@ Use a board-style summary. Do not let `PROGRESS.md` degrade into a loose append-
 - M1/step3: 跳过了 SQLite WAL 模式测试 — 原因：测试环境不支持
 ```
 
+Chat sessions should appear in `时间线` as compact board rows rather than as a new freeform appendix.
+
+Example:
+
+```markdown
+| 16:40 | Chat | 💬 Chat session recovered | 继续上次 `/hw:chat`，恢复 recent report 与修改上下文 |
+```
+
 ## Update Timing
 
 Update `PROGRESS.md`:
@@ -71,6 +79,7 @@ Update `PROGRESS.md`:
 - current milestone and step
 - milestone table
 - timeline table with compact timestamps
+- board-style chat session rows when chat mode is used
 - patch table when patches exist
 - deferred section when applicable
 
@@ -83,14 +92,22 @@ When recording a new event:
 3. Insert a compact row at the top of `时间线`.
 4. Keep older timeline rows brief; detailed event payloads belong in `.pipeline/log.yaml`.
 
+For chat mode:
+
+- use `Chat` as the timeline type
+- use `Chat 前缀` for the event family and `💬 Chat` for the visible event text
+- prefix the event text with `💬 Chat`
+- summarize append conversation, recent report recovery, or chat summary persistence in one row
+- do not create a separate append-only chat transcript section inside `PROGRESS.md`
+
 Do not append standalone one-line entries such as `14:30 P001 closed — ...` to the bottom of the file. Convert them into timeline/table rows instead.
 
 ## Output Language And Timezone
 
 Resolve output settings as project `.pipeline/config.yaml` > global `~/.hypo-workflow/config.yaml` > built-in defaults:
 
-- `output.language`: default `en`
-- `output.timezone`: default `UTC`
+- `output.language`: default `zh-CN`
+- `output.timezone`: default `Asia/Shanghai`
 
 All `PROGRESS.md` prose, status labels, and recent-activity text should use `output.language`. All timestamps should be converted to `output.timezone`.
 

@@ -61,6 +61,7 @@ If there is no active Cycle, stop and tell the user to run `/hw:cycle new "ÂêçÁß
 `/hw:plan:extend` uses a lighter version of the M0 interactive gate because the Cycle already exists:
 
 - ask at least 1 round of targeted questions
+- use lightweight Progressive Discover: ask task category, desired effect, and verification method first
 - do not infer missing scope details silently
 - summarize what will be appended
 - require explicit confirmation before writing files

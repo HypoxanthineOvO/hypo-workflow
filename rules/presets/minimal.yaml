@@ -12,5 +12,7 @@ rules:
   auto-continue-threshold: off
   plan-tool-required: off
   review-strictness: off
+  readme-freshness: off
+  skill-quality: off
   stop-hook-self-check: error
   session-start-context-load: error

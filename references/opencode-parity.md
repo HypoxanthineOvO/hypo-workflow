@@ -17,8 +17,9 @@ V9 OpenCode support targets V8.4 user-facing parity through native slash command
 | Reset | `/hw-reset` | `hw-status` | Guarded reset through canonical reset skill. |
 | Log | `/hw-log` | `hw-status` | Lifecycle log view through canonical log skill. |
 | Report | `/hw-report` | `hw-status` | Report summaries and full report view. |
+| Chat | `/hw-chat` | `hw-build` | Lightweight append conversation mode without opening a new Milestone. |
 | Status | `/hw-status` | `hw-status` | Current runtime state summary. |
 | Guide | `/hw-guide` | `hw-plan` | Interactive project-aware guide using Ask/question. |
 | Rules | `/hw-rules` | `hw-status` | Rules listing, severity, custom rules, and packs. |
 
-All 30 commands remain traceable in `references/opencode-command-map.md`.
+All 31 commands remain traceable in `references/opencode-command-map.md`.

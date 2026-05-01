@@ -31,6 +31,7 @@ prompt_state:
   steps: []
 history:
   completed_prompts: []
+chat: {}
 ```
 
 ## Milestone Record Fields
@@ -91,6 +92,8 @@ Read `state.yaml` at these moments:
 - `/hw:report`
 - `skip step`
 - `abort`
+- `/hw:chat`
+- `/hw:chat end`
 
 ## Field Dependencies
 
@@ -108,6 +111,33 @@ Read `state.yaml` at these moments:
 - `prompt_state.result=stopped` means the current prompt was paused mid-flight and should resume from `current.step`.
 - prompt-level `result=skipped` should not increment `pipeline.prompts_completed`.
 - `history.completed_prompts` is a legacy field name and may contain non-pass entries such as `blocked`, `aborted`, or `skipped`.
+- optional `chat.*` state must never replace Cycle / Milestone / Patch state; it only annotates an append conversation lane.
+
+## Chat State
+
+`chat:` is optional and is used for lightweight append conversation state.
+
+Suggested fields:
+
+```yaml
+chat:
+  active: false
+  session_id: null
+  started_at: null
+  last_activity_at: null
+  summary_policy: minimal | full | auto
+  related_cycle: C2
+  related_milestone: null
+  recent_files: []
+```
+
+Notes:
+
+- `chat.active` indicates whether append conversation mode is live or should be recovered.
+- `summary_policy` distinguishes full chat summary from minimal log-only persistence.
+- `related_cycle` and `related_milestone` are references, not ownership transfer.
+- `recent_files` is a lightweight recovery aid for context restoration.
+- chat mode does not replace Cycle / Milestone / Patch semantics.
 
 ## Version History
 
@@ -163,6 +193,14 @@ Added:
 - optional `last_heartbeat` for Auto Resume watchdog detection
 - Cycle and Patch lifecycle phases
 - Cycle-local milestone numbering semantics through `.pipeline/cycle.yaml`
+
+### V9.1
+
+Added:
+
+- optional `chat:` append conversation state
+- chat recovery hints for SessionStart / Stop Hook integration
+- explicit note that chat mode does not replace Cycle / Milestone / Patch
 
 ## V4 新增字段
 

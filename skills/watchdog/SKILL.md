@@ -45,7 +45,7 @@ All Pipeline execution skills must update `.pipeline/state.yaml` after every mea
 last_heartbeat: "2026-04-28T12:00:00+08:00"
 ```
 
-Write an ISO-8601 timestamp with timezone. Use `output.timezone`; default to `UTC`.
+Write an ISO-8601 timestamp with timezone. Use `output.timezone`; default to `Asia/Shanghai`.
 
 Update `last_heartbeat` when:
 

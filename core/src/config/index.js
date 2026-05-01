@@ -2,13 +2,19 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 
 export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
-  version: "9.0.0-alpha.0",
+  version: "9.1.0-alpha.0",
   agent: {
     platform: "codex",
     model: "default",
   },
   execution: {
     default_mode: "self",
+    test_profiles: {
+      enabled: true,
+      selection: "auto",
+      compose: true,
+      profiles: [],
+    },
   },
   subagent: {
     provider: "codex",
@@ -17,13 +23,38 @@ export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
     enabled: true,
     port: 7700,
   },
+  plan: {
+    default_mode: "interactive",
+    interaction_depth: "medium",
+    interactive: {
+      min_rounds: 3,
+      require_explicit_confirm: true,
+    },
+    discover: {
+      progressive: true,
+      big_questions_first: true,
+      plan_extend_mode: "lightweight",
+    },
+  },
   output: {
-    language: "en",
-    timezone: "UTC",
+    language: "zh-CN",
+    timezone: "Asia/Shanghai",
   },
   opencode: {
     auto_continue: true,
     profile: "standard",
+  },
+  release: {
+    readme: {
+      mode: "loose",
+      full_regen: "auto",
+    },
+  },
+  batch: {
+    decompose_mode: "upfront",
+    failure_policy: "skip_defer",
+    auto_chain: true,
+    default_gate: "auto",
   },
 });
 

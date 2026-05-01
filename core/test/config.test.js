@@ -36,5 +36,7 @@ test("loadConfig merges defaults and writeConfig persists yaml", async () => {
   assert.equal(loaded.agent.platform, "opencode");
   assert.equal(loaded.execution.default_mode, "self");
   assert.equal(loaded.output.timezone, "Asia/Shanghai");
+  assert.equal(loaded.release.readme.mode, "loose");
+  assert.equal(loaded.release.readme.full_regen, "auto");
   assert.match(raw, /platform: opencode/);
 });

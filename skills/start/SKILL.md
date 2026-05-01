@@ -51,14 +51,25 @@ Use this skill to start execution from a local `.pipeline/` workspace. This is t
    - `.pipeline/PROGRESS.md`
    - top-level `last_heartbeat`
 11. After a Milestone report is generated and the Milestone reaches a final state, resolve `compact.auto` from project > global > defaults. If `compact.auto=true`, run the `/hw:compact` generation rules before advancing to the next Milestone.
-12. On failure, Claude must choose one of:
+12. If `.pipeline/feature-queue.yaml` exists, apply batch auto-chain after a Feature's final Milestone passes:
+   - mark the completed Feature `done`
+   - advance to the next queued Feature when `auto_chain=true`
+   - pause before the next Feature when it has `gate: confirm`
+   - when the next Feature uses `just_in_time`, decompose its Milestones before starting execution
+   - sync queue metric summaries from `.pipeline/metrics.yaml`, using `n/a` when token/cost telemetry is unavailable
+13. When `execution.test_profiles` or Feature-level Test Profiles are active, require the matching profile evidence before declaring GREEN:
+   - `webapp`: E2E + browser interaction + visual evidence
+   - `agent-service`: CLI plan + shared core + real CLI run
+   - `research`: baseline + script execution + before/after/delta
+14. On failure, Claude must choose one of:
    - `retry`: revise instructions and rerun the failed step
    - `deferred`: mark the milestone deferred if downstream work can continue safely
    - `stop`: stop and surface the blocking reason to the user
-13. Keep moving automatically between milestones while unfinished work remains.
-14. Remove `.pipeline/.lock` when the execution turn completes, stops, blocks, aborts, or finishes.
-15. If the pipeline completes or stops intentionally, unregister the watchdog cron entry.
-16. Only allow the turn to end naturally when all milestones are complete or Claude has explicitly chosen the `stop` outcome.
+15. If a Feature fails and the resolved `failure_policy=skip_defer`, mark the Feature `deferred`, preserve its report and metrics, then auto-chain to the next queued Feature unless blocked by `gate: confirm`.
+16. Keep moving automatically between milestones while unfinished work remains.
+17. Remove `.pipeline/.lock` when the execution turn completes, stops, blocks, aborts, or finishes.
+18. If the pipeline completes or stops intentionally, unregister the watchdog cron entry.
+19. Only allow the turn to end naturally when all milestones are complete or Claude has explicitly chosen the `stop` outcome.
 
 ## Watchdog Integration
 

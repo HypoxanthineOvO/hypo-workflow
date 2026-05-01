@@ -54,7 +54,7 @@ cycle:
   lessons: null
 ```
 
-Use an ISO-8601 timestamp with timezone. Resolve timezone from `output.timezone`; default to `UTC`.
+Use an ISO-8601 timestamp with timezone. Resolve timezone from `output.timezone`; default to `Asia/Shanghai`.
 
 ## Type And Preset Mapping
 

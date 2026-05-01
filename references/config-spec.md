@@ -32,8 +32,8 @@ Resolve every configurable value in this order:
 | plan explicit confirm | `plan.interactive.require_explicit_confirm` | `plan.interactive.require_explicit_confirm` | `true` |
 | dashboard enabled | `dashboard.enabled` | `dashboard.enabled` | `false` |
 | dashboard port | `dashboard.port` | `dashboard.port` | `7700` |
-| output language | `output.language` | `output.language` | `en` |
-| output timezone | `output.timezone` | `output.timezone` | `UTC` |
+| output language | `output.language` | `output.language` | `zh-CN` |
+| output timezone | `output.timezone` | `output.timezone` | `Asia/Shanghai` |
 | watchdog enabled | `watchdog.enabled` | `watchdog.enabled` | `false` |
 | watchdog interval | `watchdog.interval` | `watchdog.interval` | `300` |
 | watchdog heartbeat timeout | `watchdog.heartbeat_timeout` | `watchdog.heartbeat_timeout` | `300` |
@@ -51,6 +51,16 @@ Resolve every configurable value in this order:
 | showcase poster size | `showcase.poster.size` | `showcase.poster.size` | `1024x1536` |
 | showcase poster quality | `showcase.poster.quality` | `showcase.poster.quality` | `high` |
 | showcase poster style | `showcase.poster.style` | `showcase.poster.style` | `auto` |
+| release README mode | `release.readme.mode` | `release.readme.mode` | `loose` |
+| release README full regeneration | `release.readme.full_regen` | `release.readme.full_regen` | `auto` |
+| batch decompose mode | `batch.decompose_mode` | `batch.decompose_mode` | `upfront` |
+| batch failure policy | `batch.failure_policy` | `batch.failure_policy` | `skip_defer` |
+| batch auto-chain | `batch.auto_chain` | `batch.auto_chain` | `true` |
+| batch default gate | `batch.default_gate` | `batch.default_gate` | `auto` |
+| test profile enabled | `execution.test_profiles.enabled` | `execution.test_profiles.enabled` | `true` |
+| test profile selection mode | `execution.test_profiles.selection` | `execution.test_profiles.selection` | `auto` |
+| test profile compose | `execution.test_profiles.compose` | `execution.test_profiles.compose` | `true` |
+| test profile defaults | `execution.test_profiles.profiles` | `execution.test_profiles.profiles` | `[]` |
 | rules extends | `rules.extends` or `.pipeline/rules.yaml extends` | `rules.extends` | `recommended` |
 | rules overrides | `rules.rules` or `.pipeline/rules.yaml rules` | `rules.rules` | `{}` |
 
@@ -81,6 +91,11 @@ agent:
   model: claude-sonnet-4-20250514
 execution:
   default_mode: self
+  test_profiles:
+    enabled: true
+    selection: auto
+    compose: true
+    profiles: []
 subagent:
   provider: codex
   codex:
@@ -98,8 +113,8 @@ plan:
     min_rounds: 3
     require_explicit_confirm: true
 output:
-  language: en
-  timezone: UTC
+  language: zh-CN
+  timezone: Asia/Shanghai
 watchdog:
   enabled: false
   interval: 300
@@ -128,6 +143,15 @@ showcase:
     size: "1024x1536"
     quality: high
     style: auto
+release:
+  readme:
+    mode: loose
+    full_regen: auto
+batch:
+  decompose_mode: upfront
+  failure_policy: skip_defer
+  auto_chain: true
+  default_gate: auto
 rules:
   extends: recommended
   rules: {}
@@ -160,3 +184,5 @@ rules:
 ```
 
 Supported built-in presets are `recommended`, `strict`, and `minimal`. External rule packs use string references such as `github:owner/repo`.
+
+Test Profiles live under `execution.test_profiles` so they stay close to `execution.steps.preset`. Preset controls step order; Test Profile controls validation policy.
