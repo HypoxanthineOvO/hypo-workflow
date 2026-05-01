@@ -6,7 +6,7 @@
 
 Plan -> Execute -> Review -> Report -> Recover -> Showcase
 
-[![Version](https://img.shields.io/badge/version-9.1.1-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-9.1.2-blue)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex%20%7C%20OpenCode-purple)](#平台支持)
 
@@ -966,6 +966,13 @@ git diff --check
 ---
 
 ## Changelog
+
+### v9.1.2
+
+- Added README coverage for Feature Queue long-range planning and recorded the next-cycle OpenCode multi-agent model matrix candidate.
+- Reworked the C2 technical report Slides into a 51-page command-oriented deck with seven lived-experience path pages, section highlights, command enumeration, and Demo Route.
+- Fixed the Slides cover, Execution Loop, OpenCode Adapter diagram, and removed the draft visual/evidence page and V9 timeline page.
+- Added future work in both the report and Slides on whether Harness can reduce the need for model-engineering intelligence.
 
 ### v9.1.1
 

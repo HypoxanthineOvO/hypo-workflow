@@ -1,5 +1,27 @@
 # Changelog
 
+## v9.1.2 - 2026-05-02
+
+### Documentation
+
+- Added README coverage for Feature Queue long-range planning, including `--batch`, `--insert`, gates, auto-chain, failure policy, metrics, and lifecycle usage.
+- Recorded the next-cycle OpenCode multi-agent model matrix candidate as the first draft task for the next Cycle.
+- Reworked the C2 technical report Slides into a 51-page command-oriented deck with seven lived-experience path pages, section highlights, command enumeration, and Demo Route.
+- Added future work in both the report and Slides on whether Harness can reduce the need for model-engineering intelligence.
+
+### Fixes
+
+- Fixed the Slides cover layout so the title metadata is no longer clipped.
+- Removed the draft visual/evidence page and replaced the V9 timeline page with a clearer Codex-to-OpenCode motivation section.
+- Enlarged and rerouted the Execution Loop diagram and simplified the OpenCode Adapter figure to avoid overlap.
+- Restored the Slides GPT Image 2 / Image Gen visual-system evidence marker required by the showcase refresh contract.
+
+### Tests
+
+- Scenario regression: 60/60 passing.
+- Showcase refresh target: 3/3 passing.
+- PDF builds: `make report` and `make slides` passing.
+
 ## v9.1.1 - 2026-05-01
 
 ### Documentation

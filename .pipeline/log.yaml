@@ -648,3 +648,11 @@ entries:
     summary: "Refactored the C2 technical report slides into a 51-page command-oriented deck, fixed cover/section/diagram display issues, and added Harness model-intelligence future work to both slides and report."
     tests: "make slides pass (51 pages); make report pass (30 pages); git diff --check pass"
     trigger: user
+  - id: "RELEASE-V9.1.2"
+    type: release
+    ref: "v9.1.2"
+    status: done
+    timestamp: "2026-05-02T00:56:29+08:00"
+    summary: "Released V9.1 patch updates: Feature Queue README documentation, next-cycle OpenCode model-matrix draft, and the optimized 51-page C2 technical report Slides/report future-work refresh."
+    report: "CHANGELOG.md"
+    trigger: user
