@@ -14,7 +14,7 @@ managed by Hypo-Workflow. The preferred structure is:
 2. Overview and capability summary.
 3. Quick start by platform.
 4. Command reference.
-5. Common workflows.
+5. Common workflows, including Feature Queue / Batch Plan for long-range multi-feature planning.
 6. Architecture and internal details.
 7. Configuration.
 8. Platform support matrix.
@@ -80,6 +80,7 @@ be preserved unless a future spec revision explicitly marks them deprecated.
 | OpenCode command aliases, agents, and Skill paths | `references/opencode-command-map.md` | `core/src/commands/index.js` |
 | Platform capability matrix | `references/platform-capabilities.md` | `core/src/platform/index.js` |
 | Release flow and safety gates | `references/release-spec.md` | `skills/release/SKILL.md` |
+| Feature Queue and Batch Plan behavior | `references/feature-queue-spec.md` | `skills/plan/SKILL.md`, `skills/start/SKILL.md` |
 | Skill inventory and internal watchdog exception | `skills/` | `core/src/commands/index.js` |
 | README narrative and manually maintained prose | `README.md` | Maintainer review |
 

@@ -630,3 +630,12 @@ entries:
     summary: "Released the Report/Slides packaging layer: canonical docs/showcase/c2-report sources, GPT Image assets, Hypoxanthine-LaTeX submodule, and build verification."
     report: "docs/showcase/c2-report/README.md"
     trigger: user
+  - id: "CHAT-20260502-OPENCODE-MODEL-MATRIX"
+    type: chat_entry
+    ref: "C3/F001-candidate"
+    status: proposed
+    timestamp: "2026-05-02T00:29:20+08:00"
+    summary: "Recorded the next Cycle first-task candidate: make OpenCode multi-agent model routing first-class, including GPT-5.5 planning, Flash compaction, separate test/code/debug/report subagents, and an effective 900K context compaction target."
+    report: ".pipeline/next-cycle-draft.yaml"
+    trigger: user
+    related_milestone: null
