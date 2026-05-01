@@ -1,19 +1,20 @@
 \begin{tikzpicture}[
-  node distance=10mm and 8mm,
-  box/.style={draw=HWGray, rounded corners=2mm, fill=HWBlue!8, minimum width=19mm, minimum height=8mm, align=center, font=\small},
-  arrow/.style={-Latex, thick, draw=HWGray}
+  node distance=11mm and 13mm,
+  box/.style={draw=HWGray, rounded corners=2mm, fill=HWBlue!8, minimum width=25mm, minimum height=10mm, align=center, font=\normalsize\bfseries},
+  note/.style={font=\small, text=HWGray},
+  arrow/.style={-Latex, very thick, draw=HWGray}
 ]
 \node[box] (plan) {Plan};
 \node[box, right=of plan] (execute) {Execute};
 \node[box, right=of execute] (review) {Review};
 \node[box, right=of review] (report) {Report};
-\node[box, right=of report] (evaluate) {Evaluate};
-\node[box, below=12mm of review, fill=HWGold!18] (recover) {Recover / Retry};
+\node[box, below=12mm of report, fill=HWBlue!12] (evaluate) {Evaluate};
+\node[box, below=12mm of execute, fill=HWGold!18] (recover) {Recover\\Retry};
 \draw[arrow] (plan) -- (execute);
 \draw[arrow] (execute) -- (review);
 \draw[arrow] (review) -- (report);
 \draw[arrow] (report) -- (evaluate);
-\draw[arrow] (evaluate.south) |- node[pos=0.25, right, font=\scriptsize]{need fix} (recover.east);
-\draw[arrow] (recover.west) -| (execute.south);
-\draw[arrow] (evaluate.north) to[out=80, in=100, looseness=1.3] node[above, font=\scriptsize]{pass / continue} (plan.north);
+\draw[arrow] (evaluate.west) -- node[above, note]{need fix} (recover.east);
+\draw[arrow] (recover.north) -- (execute.south);
+\draw[arrow] (evaluate.south) |- ++(0,-0.9) -| node[pos=0.28, below, note]{pass / continue} (plan.south);
 \end{tikzpicture}

@@ -59,17 +59,18 @@
 \setbeamertemplate{title page}{
   \begin{tikzpicture}[remember picture,overlay]
     \node[anchor=center,inner sep=0pt] at (current page.center)
-      {\includegraphics[width=\paperwidth,height=\paperheight]{assets/gpt-image/cover-harness-engineering.png}};
-    \fill[white,opacity=0.83] (current page.north west) rectangle ([xshift=0.54\paperwidth]current page.south west);
+      {\includegraphics[width=\paperwidth,height=\paperheight]{assets/opencode-observability.png}};
+    \fill[white,opacity=0.90] (current page.north west) rectangle ([xshift=0.62\paperwidth]current page.south west);
     \fill[WorkflowBlue!78] ([xshift=0.055\paperwidth,yshift=-0.16\paperheight]current page.north west) rectangle ++(0.008\paperwidth,-0.30\paperheight);
   \end{tikzpicture}
-  \vspace*{1.2cm}
+  \vspace*{1.0cm}
   \hspace*{1.0cm}
-  \begin{minipage}{0.40\paperwidth}
-    {\fontsize{28}{32}\selectfont\bfseries\color{WorkflowText}\inserttitle\par}
-    \vspace{0.6cm}
-    {\large\color{WorkflowMuted}\insertsubtitle\par}
-    \vspace{1.2cm}
+  \begin{minipage}{0.50\paperwidth}
+    \raggedright
+    {\fontsize{27}{31}\selectfont\bfseries\color{WorkflowText}\inserttitle\par}
+    \vspace{0.5cm}
+    {\normalsize\color{WorkflowMuted}\insertsubtitle\par}
+    \vspace{1.0cm}
     {\normalsize\color{WorkflowText}\textbf{\insertauthor}\par}
     \vspace{0.2cm}
     {\small\color{WorkflowMuted}\insertinstitute\par}

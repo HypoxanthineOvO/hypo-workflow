@@ -1,6 +1,6 @@
 # Hypo-Workflow C2 Maintainability, Observability, Batch Plan, and Showcase — 开发进度
 
-> 最后更新：23:09 | 状态：完成 | 进度：20/20 Milestone
+> 最后更新：00:47 | 状态：完成 | 进度：20/20 Milestone
 
 ## 当前状态
 
@@ -35,6 +35,7 @@
 
 | 时间 | 类型 | 事件 | 结果 |
 |---|---|---|---|
+| 00:47 | Patch | P004 closed | 优化 C2 技术报告 Slides 结构和显示问题；Slides 重构为 51 页，Report 未来工作同步补充 |
 | 23:09 | Cycle | C2 completed after M20 recovery | M20 重新验证通过：目标测试 3/3、core 73/73、`git diff --check`、`make report`、`make slides` 全部通过 |
 | 23:08 | Step | M20 run_tests_green | `docs/showcase/c2-report/build/report.pdf` 30 页；`docs/showcase/c2-report/build/slides.pdf` 37 页；三张 Image Gen 资产已引用 |
 | 23:04 | Step | M20 implement | 完成主源迁移、报告叙事/技术扩写、Slides 结构与图像刷新、submodule/ignore/README/Makefile 整理 |
@@ -141,6 +142,7 @@
 
 | Patch | 状态 | 时间 | 摘要 |
 |---|---|---|---|
+| P004 | ✅ closed | 05-02 00:47 | 优化 C2 技术报告 Slides 结构和显示问题 |
 | P001 | ✅ closed | 04-30 16:28 | README OpenCode 文档扩展 |
 | P002 | ✅ closed | 04-30 16:59 | 恢复 PROGRESS board 格式 |
 | P003 | ✅ closed | 04-30 17:04 | 修复 OpenCode config schema 兼容 |
