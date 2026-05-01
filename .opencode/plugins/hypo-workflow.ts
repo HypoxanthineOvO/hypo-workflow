@@ -4,7 +4,7 @@
 
 export const metadata = {
   name: "hypo-workflow",
-  version: "9.1.0-alpha.0",
+  version: "9.1.1-alpha.0",
   commandMap: [
   {
     "canonical": "/hw:start",

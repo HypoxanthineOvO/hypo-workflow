@@ -1,0 +1,81 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{hypo-slide-theme-workflow}[2026/05/01 Hypo Workflow Slide Theme]
+
+\RequirePackage{tikz}
+\usetikzlibrary{calc}
+
+\definecolor{WorkflowBg}{HTML}{F4F5F7}
+\definecolor{WorkflowSurface}{HTML}{FFFFFF}
+\definecolor{WorkflowText}{HTML}{2F3640}
+\definecolor{WorkflowMuted}{HTML}{6B7280}
+\definecolor{WorkflowBorder}{HTML}{D6DEE8}
+\definecolor{WorkflowBlue}{HTML}{7FAEDB}
+\definecolor{WorkflowBlueDark}{HTML}{4E7FAE}
+\definecolor{WorkflowGold}{HTML}{E8D89D}
+\definecolor{WorkflowDarkPanel}{HTML}{1F2937}
+\colorlet{HWGray}{WorkflowMuted}
+\colorlet{HWBlue}{WorkflowBlue}
+\colorlet{HWGold}{WorkflowGold}
+
+\setbeamercolor{background canvas}{bg=WorkflowBg}
+\setbeamercolor{normal text}{fg=WorkflowText,bg=WorkflowBg}
+\setbeamercolor{structure}{fg=WorkflowBlueDark}
+\setbeamercolor{title}{fg=WorkflowText}
+\setbeamercolor{subtitle}{fg=WorkflowMuted}
+\setbeamercolor{frametitle}{fg=WorkflowText,bg=WorkflowBg}
+\setbeamercolor{block title}{fg=WorkflowText,bg=WorkflowBlue!16}
+\setbeamercolor{block body}{fg=WorkflowText,bg=white}
+\setbeamercolor{alerted text}{fg=WorkflowBlueDark}
+\setbeamercolor{palette primary}{fg=WorkflowText,bg=white}
+\setbeamercolor{palette secondary}{fg=WorkflowMuted,bg=white}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{headline}{}
+
+\setbeamertemplate{frametitle}{
+  \vspace*{0.2cm}
+  \begin{beamercolorbox}[wd=\paperwidth,ht=3.3ex,dp=1.2ex,leftskip=1.0em,rightskip=1.0em]{frametitle}
+    \usebeamerfont{frametitle}\bfseries\insertframetitle
+    \par\vspace{0.1cm}
+    {\color{WorkflowBlue}\rule{\dimexpr\paperwidth-2em\relax}{0.6pt}}
+  \end{beamercolorbox}
+}
+
+\setbeamertemplate{footline}{
+  \leavevmode
+  \hbox{
+    \begin{beamercolorbox}[wd=0.62\paperwidth,ht=3.2ex,dp=1.1ex,leftskip=1em]{palette primary}
+      \scriptsize\textbf{\insertshorttitle}\hspace{1em}{\color{WorkflowMuted}\insertsectionhead}
+    \end{beamercolorbox}
+    \begin{beamercolorbox}[wd=0.24\paperwidth,ht=3.2ex,dp=1.1ex,center]{palette secondary}
+      \scriptsize\insertshortauthor
+    \end{beamercolorbox}
+    \begin{beamercolorbox}[wd=0.14\paperwidth,ht=3.2ex,dp=1.1ex,rightskip=1em,right]{palette secondary}
+      \scriptsize\insertframenumber/\inserttotalframenumber
+    \end{beamercolorbox}
+  }
+}
+
+\setbeamertemplate{title page}{
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=center,inner sep=0pt] at (current page.center)
+      {\includegraphics[width=\paperwidth,height=\paperheight]{assets/gpt-image/cover-harness-engineering.png}};
+    \fill[white,opacity=0.83] (current page.north west) rectangle ([xshift=0.54\paperwidth]current page.south west);
+    \fill[WorkflowBlue!78] ([xshift=0.055\paperwidth,yshift=-0.16\paperheight]current page.north west) rectangle ++(0.008\paperwidth,-0.30\paperheight);
+  \end{tikzpicture}
+  \vspace*{1.2cm}
+  \hspace*{1.0cm}
+  \begin{minipage}{0.40\paperwidth}
+    {\fontsize{28}{32}\selectfont\bfseries\color{WorkflowText}\inserttitle\par}
+    \vspace{0.6cm}
+    {\large\color{WorkflowMuted}\insertsubtitle\par}
+    \vspace{1.2cm}
+    {\normalsize\color{WorkflowText}\textbf{\insertauthor}\par}
+    \vspace{0.2cm}
+    {\small\color{WorkflowMuted}\insertinstitute\par}
+    \vspace{0.2cm}
+    {\small\color{WorkflowMuted}\insertdate\par}
+  \end{minipage}
+}
+
+\endinput

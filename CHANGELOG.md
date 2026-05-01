@@ -1,5 +1,18 @@
 # Changelog
 
+## v9.1.1 - 2026-05-01
+
+### Documentation
+
+- Added the canonical `docs/showcase/c2-report/` source package for the expanded technical book report and Beamer slides.
+- Added GPT Image generated visual assets for the cover, tool-evolution narrative, and file-first architecture.
+- Added the `vendor/Hypoxanthine-LaTeX` submodule and LaTeX build packaging for report/slides compilation.
+
+### Tests
+
+- Added report refresh coverage for canonical source placement, submodule metadata, narrative anchors, and GPT Image 2 slide evidence.
+- Verified report and slides PDF builds from the new source directory.
+
 ## v9.1.0 - 2026-05-01
 
 ### Features

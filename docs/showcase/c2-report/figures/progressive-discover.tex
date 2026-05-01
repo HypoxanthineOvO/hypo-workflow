@@ -1,0 +1,20 @@
+\begin{tikzpicture}[
+  stage/.style={draw=HWGray, rounded corners=2mm, fill=HWBlue!8, minimum width=30mm, minimum height=8mm, align=center, font=\small},
+  arrow/.style={-Latex, thick, draw=HWGray}
+]
+\node[stage] (q1) at (0,2.1) {Task category};
+\node[stage] (q2) at (3.8,2.1) {Desired effect};
+\node[stage] (q3) at (7.6,2.1) {Verification method};
+\node[stage] (s1) at (0,0) {Assumption\\statement};
+\node[stage] (s2) at (3.8,0) {Ambiguity\\resolution};
+\node[stage] (s3) at (7.6,0) {Tradeoff\\review};
+\node[stage, fill=HWGold!18] (s4) at (11.4,0) {Validation\\criteria};
+\draw[arrow] (q1) -- (q2);
+\draw[arrow] (q2) -- (q3);
+\draw[arrow] (q1.south) -- (s1.north);
+\draw[arrow] (q2.south) -- (s2.north);
+\draw[arrow] (q3.south) -- (s3.north);
+\draw[arrow] (s1) -- (s2);
+\draw[arrow] (s2) -- (s3);
+\draw[arrow] (s3) -- (s4);
+\end{tikzpicture}

@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 
 export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
-  version: "9.1.0-alpha.0",
+  version: "9.1.1-alpha.0",
   agent: {
     platform: "codex",
     model: "default",

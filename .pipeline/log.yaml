@@ -622,3 +622,11 @@ entries:
     summary: "Released C2 non-Report features: README automation, Skill governance, Batch Plan, Chat Mode, Progressive Discover, Test Profiles, and OpenCode status panels."
     report: "CHANGELOG.md"
     trigger: user
+  - id: "RELEASE-V9.1.1"
+    type: release
+    ref: "v9.1.1"
+    status: done
+    timestamp: "2026-05-02T00:05:00+08:00"
+    summary: "Released the Report/Slides packaging layer: canonical docs/showcase/c2-report sources, GPT Image assets, Hypoxanthine-LaTeX submodule, and build verification."
+    report: "docs/showcase/c2-report/README.md"
+    trigger: user

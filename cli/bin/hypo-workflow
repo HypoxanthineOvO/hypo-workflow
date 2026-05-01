@@ -51,7 +51,7 @@ async function setup(flags) {
   const model = valueAfter(flags, "--model") || "default";
   const config = {
     ...DEFAULT_GLOBAL_CONFIG,
-    version: "9.1.0-alpha.0",
+    version: "9.1.1-alpha.0",
     active_profile: platform,
     agent: {
       platform,

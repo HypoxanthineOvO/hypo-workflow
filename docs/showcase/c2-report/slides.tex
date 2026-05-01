@@ -1,0 +1,474 @@
+\documentclass[theme=workflow,aspectratio=169,fontset=tech]{Hypo-Slide}
+
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{multicol}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{adjustbox}
+\usetikzlibrary{arrows.meta,positioning,fit,matrix,trees,calc}
+\pgfplotsset{compat=1.18}
+\graphicspath{{assets/}{figures/}{vendor/Hypoxanthine-LaTeX/assets/}}
+
+\HypoSlideSetup{
+  title={Hypo-Workflow},
+  subtitle={从 AI Coding 使用经验到 Harness Engineering 工作流},
+  author={Hypo-Workflow Project Draft},
+  institute={Technical Report / Lab Presentation},
+  date={2026-05-01},
+  cover={assets/gpt-image/cover-harness-engineering.png}
+}
+
+\newcommand{\WorkflowSectionFrame}[3]{
+  \begin{frame}[plain]
+    \begin{tikzpicture}[remember picture,overlay]
+      \node[anchor=center,inner sep=0pt] at (current page.center)
+        {\includegraphics[width=\paperwidth,height=\paperheight]{#3}};
+      \fill[white,opacity=0.85] (current page.north west) rectangle ([xshift=0.50\paperwidth]current page.south west);
+      \fill[WorkflowBlue!80] ([xshift=0.055\paperwidth,yshift=-0.18\paperheight]current page.north west) rectangle ++(0.008\paperwidth,-0.28\paperheight);
+    \end{tikzpicture}
+    \vspace*{1.3cm}
+    \hspace*{0.95cm}
+    \begin{minipage}{0.38\paperwidth}
+      {\Large\bfseries\color{WorkflowBlue}#1\par}
+      \vspace{0.55cm}
+      {\fontsize{21}{25}\selectfont\bfseries\color{WorkflowText}#2\par}
+    \end{minipage}
+  \end{frame}
+}
+
+\newcommand{\WorkflowFigureFrame}[3]{
+  \begin{frame}{#1}
+    \centering
+    \adjustbox{max width=0.94\linewidth,max totalheight=0.54\textheight,center}{\input{#2}}
+    \vspace{0.4cm}
+    
+    {\small\color{WorkflowMuted}#3}
+  \end{frame}
+}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}{视觉与证据系统}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.48\textwidth}
+    \begin{block}{GPT Image 2 / Image Gen}
+      封面、分节页、背景图、工具演化图和架构润色图都预留 GPT Image 2 生成路径；严格字段关系仍保留 TikZ / Graphviz 技术图。
+    \end{block}
+    \column{0.48\textwidth}
+    \begin{block}{真实工程证据}
+      真实代码、真实 YAML、真实命令、真实 repo 树、真实 \texttt{.pipeline} 状态和 report 记录共同支撑论证。
+    \end{block}
+  \end{columns}
+  \vspace{0.35cm}
+  \begin{alertblock}{演讲主线}
+    问题 $\rightarrow$ 经历 $\rightarrow$ 机制 $\rightarrow$ 系统 $\rightarrow$ 证据 $\rightarrow$ 结论。
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{报告结构}
+  \tableofcontents
+\end{frame}
+
+\section{动机与问题}
+\WorkflowSectionFrame{Part I}{为什么需要一个新的工程层}{assets/gpt-image/tool-evolution-diary.png}
+
+\begin{frame}{个人 AI 工具迁移路径}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.58\textwidth}
+    \begin{block}{使用路径}
+      \begin{enumerate}
+        \item Web GPT / Gemini / Cherry Studio + DeepSeek
+        \item GitHub Copilot
+        \item AntiGravity
+        \item Claude Code
+        \item Skills / Superpowers
+        \item Notion AI Opus + Codex
+        \item Hypo-Workflow
+      \end{enumerate}
+    \end{block}
+    \column{0.38\textwidth}
+    \begin{alertblock}{关键观察}
+      每一次工具跃迁都在修补上一个阶段暴露的结构性问题，而不是单纯追求“更会写代码”。
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{真实经历不是背景，而是需求来源}
+  \small
+  \begin{tabularx}{\textwidth}{p{0.18\linewidth}p{0.24\linewidth}X}
+    \toprule
+    项目 & 工具组合 & 暴露的问题 \\
+    \midrule
+    Hypo-LaTeX & Copilot + 手工 prompt & 写 CHANGELOG、Git 规范、release notes 都要反复喂 Prompt；Copilot 连续被封 3 个账号后，单一工具入口不再可信。 \\
+    Bill & Claude & 前期搭建快，后期 UI 显示问题反复修、越改越乱，缺少文档和视觉验收证据。 \\
+    Agent & Claude + Superpowers & Superpowers 作为早期 Harness 前期很有效，但持续修 Bug 时缺少全局观，局部修改持续引入新问题。 \\
+    Research / Info & Notion AI + Codex & 规划、文档、执行分裂，作者变成 Prompt 搬运工。 \\
+    \bottomrule
+  \end{tabularx}
+\end{frame}
+
+\begin{frame}{我真正踩到的坑}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.32\textwidth}
+    \begin{block}{网页模型阶段}
+      \begin{itemize}
+        \item 不能读完整 repo
+        \item 只能靠人描述代码
+        \item 重复 prompt 成本极高
+      \end{itemize}
+    \end{block}
+    \column{0.32\textwidth}
+    \begin{block}{Copilot / AntiGravity}
+      \begin{itemize}
+        \item Copilot 补全强但规划弱
+        \item AntiGravity 自动化感强但不可控
+        \item 验证闭环都不够硬
+      \end{itemize}
+    \end{block}
+    \column{0.32\textwidth}
+    \begin{block}{Claude Code 之后}
+      \begin{itemize}
+        \item 单次对话能力很强
+        \item 但行为约束仍要重复粘贴
+        \item 长期历史仍会逐渐丢失
+      \end{itemize}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{为什么“多写一点 Prompt”仍然不够}
+  \begin{block}{核心判断}
+    Prompt 可以补救一次，但不能稳定替代状态系统、计划系统和验证系统。
+  \end{block}
+  \begin{itemize}
+    \item 上下文窗口天然是局部的
+    \item 规则越依赖人工复述，越容易丢
+    \item 模型会在错误前提上持续自我强化
+    \item 中断之后很难恢复到同一工程状态
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{AI-assisted coding 的六个核心约束}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.48\textwidth}
+    \begin{block}{Context / Prompt}
+      \begin{itemize}
+        \item context management
+        \item repeated prompt feeding
+        \item self-deception risk
+      \end{itemize}
+    \end{block}
+    \column{0.48\textwidth}
+    \begin{block}{Process / Recovery}
+      \begin{itemize}
+        \item style persistence
+        \item iteration drift
+        \item interruption / recovery
+      \end{itemize}
+    \end{block}
+  \end{columns}
+  \vspace{0.3cm}
+  \begin{alertblock}{结论}
+    主问题不是“能不能生成代码”，而是“能不能持续维持工程约束”。
+  \end{alertblock}
+\end{frame}
+
+\section{Harness Engineering}
+\begin{frame}{Harness Engineering}
+  \begin{definition}{定义}{def:harness}
+    Harness Engineering 是围绕 AI Agent 构建外部工程约束层：把 context、plans、state、rules、evaluation、recovery 与 collaboration protocol 固化到文件和工具里。
+  \end{definition}
+  \vspace{0.2cm}
+  \begin{itemize}
+    \item execution loop
+    \item layering
+    \item behavior solidification
+    \item automatic maintenance
+  \end{itemize}
+\end{frame}
+
+\WorkflowFigureFrame{Execution Loop}{figures/execution-loop.tex}{从 Plan 到 Report，再到 Evaluate 与 Recover，形成可重复执行的闭环}
+
+\section{架构与协议}
+\WorkflowSectionFrame{Part II}{File-First Protocol 与分层架构}{assets/gpt-image/file-first-architecture.png}
+
+\begin{frame}{为什么坚持 File-First}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.48\textwidth}
+    \begin{block}{聊天窗口的问题}
+      \begin{itemize}
+        \item 状态会漂移
+        \item 历史难以索引
+        \item 中断后恢复成本高
+      \end{itemize}
+    \end{block}
+    \column{0.48\textwidth}
+    \begin{block}{文件协议的收益}
+      \begin{itemize}
+        \item 人与 Agent 共用同一事实源
+        \item 平台 adapter 可以只做投影
+        \item 规划、执行、归档都可审计
+      \end{itemize}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\WorkflowFigureFrame{\texttt{.pipeline/} File Protocol}{figures/pipeline-protocol.tex}{状态、队列、日志、指标、报告都进入统一目录协议}
+
+\begin{frame}{File-First Architecture：生成图润色版}
+  \centering
+  \includegraphics[width=0.88\linewidth,height=0.68\textheight,keepaspectratio]{assets/gpt-image/file-first-architecture.png}
+  \vspace{0.25cm}
+
+  {\small\color{WorkflowMuted}GPT Image 2 / Image Gen 负责视觉包装；严格字段关系继续由 TikZ 图和真实 YAML 作证。}
+\end{frame}
+
+\WorkflowFigureFrame{Project / Cycle / Feature / Milestone / Patch}{figures/hierarchy.tex}{Cycle 提供交付边界，Feature 提供调度层，Milestone 提供执行粒度，Patch 处理旁路修复}
+
+\begin{frame}{失败恢复不是补充功能，而是主路径的一部分}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.48\textwidth}
+    \begin{block}{显式控制}
+      \begin{itemize}
+        \item \texttt{gate: confirm}
+        \item skip / defer
+        \item Patch 旁路
+      \end{itemize}
+    \end{block}
+    \column{0.48\textwidth}
+    \begin{block}{会话恢复}
+      \begin{itemize}
+        \item Stop / Resume
+        \item Chat Mode
+        \item heartbeat + history
+      \end{itemize}
+    \end{block}
+  \end{columns}
+  \vspace{0.2cm}
+  \begin{important}{工程含义}{imp:recovery}
+    一个长期工作流如果只定义“成功时怎么走”，在真实使用中几乎必然失败。
+  \end{important}
+\end{frame}
+
+\section{V9 Case Study}
+\WorkflowSectionFrame{Part III}{V9 OpenCode Native Adapter}{assets/opencode-observability.png}
+
+\begin{frame}{为什么 V9 是好的 Case Study}
+  \begin{itemize}
+    \item 有完整归档：C1 summary + archived state
+    \item 有明确 10 个 Milestone
+    \item 覆盖 command map、agent roles、plugin、runtime、docs、release
+    \item 不是概念讨论，而是自举开发的真实工程交付
+  \end{itemize}
+\end{frame}
+
+\WorkflowFigureFrame{OpenCode Adapter 结构}{figures/opencode-adapter.tex}{统一 workflow contract，通过 adapter 映射到 OpenCode 原生命令、事件和状态展示}
+
+\begin{frame}{V9 Milestone Timeline}
+  \centering
+  \includegraphics[width=0.95\linewidth]{figures/v9-timeline.pdf}
+\end{frame}
+
+\begin{frame}{V9 的几个关键工程判断}
+  \begin{enumerate}
+    \item \texttt{core/} 只做 deterministic generation，不做 runner
+    \item command mapping 必须是可测试 contract
+    \item plugin 与 runtime helper 必须分离
+    \item regression suite 是交付证据的一部分
+  \end{enumerate}
+  \vspace{0.3cm}
+  \begin{alertblock}{结果}
+    V9 证明了外部工程轨道可以跨平台迁移，而不需要重造一套执行器。
+  \end{alertblock}
+\end{frame}
+
+\section{C2 New Design}
+\WorkflowSectionFrame{Part IV}{C2：从可运行到可维护、可观测、可展示}{assets/cover-hero.png}
+
+\begin{frame}{C2 Feature Delivery Map}
+  \small
+  \begin{tabularx}{\textwidth}{p{0.08\linewidth}p{0.24\linewidth}X}
+    \toprule
+    ID & Feature & 交付重点 \\
+    \midrule
+    F001 & README automation & readme-spec、update\_readme、readme-freshness \\
+    F002 & Skill governance & skill-spec、skill-quality、平台映射可追溯 \\
+    F003 & OpenCode panels & status adapter、sidebar、footer、recent events \\
+    F004 & Batch planning & Feature Queue、auto-chain、\texttt{--insert}、upfront/JIT \\
+    F005 & Showcase delivery & technical report、Beamer slides、demo script \\
+    F006 & Chat mode & \texttt{/hw:chat}、chat state、chat\_entry、Hook 恢复 \\
+    F007 & Progressive Discover & big-question-first、阶段式澄清、可选规则包 \\
+    F008 & Test Profiles & webapp / agent-service / research evidence contracts \\
+    \bottomrule
+  \end{tabularx}
+\end{frame}
+
+\begin{frame}{README 自动更新 + Skill 质量治理}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.48\textwidth}
+    \begin{block}{README}
+      \begin{itemize}
+        \item \texttt{templates/readme-spec.md}
+        \item managed dynamic blocks
+        \item \texttt{update\_readme}
+        \item \texttt{readme-freshness}
+      \end{itemize}
+    \end{block}
+    \column{0.48\textwidth}
+    \begin{block}{Skills}
+      \begin{itemize}
+        \item \texttt{references/skill-spec.md}
+        \item SKILL 结构和命名规范
+        \item \texttt{skill-quality} rule
+        \item Codex / Claude Code / OpenCode 映射
+      \end{itemize}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{OpenCode 状态面板：为什么是只读投影}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.56\textwidth}
+    \includegraphics[width=\linewidth]{assets/opencode-observability.png}
+    \column{0.40\textwidth}
+    \begin{block}{Sidebar}
+      Cycle、Feature Queue、当前 Milestone、最近事件
+    \end{block}
+    \begin{block}{Footer}
+      当前 step、进度、score、heartbeat、duration / token / cost
+    \end{block}
+    \begin{alertblock}{判断}
+      状态面板不应该成为第二套状态系统，它只应投影 \texttt{.pipeline/}。
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Batch Planning：加一个中层调度器}
+  \begin{itemize}
+    \item \texttt{/hw:plan --batch}：一次 Discover 覆盖多个 Feature
+    \item upfront / just-in-time decomposition
+    \item \texttt{/hw:plan --insert}：自然语言 queue edit
+    \item auto-chain + \texttt{gate: confirm}
+    \item Feature Queue 与 metrics 分离
+  \end{itemize}
+  \vspace{0.35cm}
+  \begin{block}{核心价值}
+    把“每个功能重新走一遍完整计划流程”压缩成“先统一 Discover，再按顺序推进执行”。
+  \end{block}
+\end{frame}
+
+\begin{frame}{Chat Mode：把轻量追加讨论纳入正式轨道}
+  \begin{itemize}
+    \item \texttt{/hw:chat} 重载 workflow context
+    \item \texttt{chat:} state + \texttt{chat\_entry} log
+    \item SessionStart / Stop Hook 负责恢复与 summary fallback
+    \item 规模超限时提示升级到 Patch
+  \end{itemize}
+  \vspace{0.35cm}
+  \begin{alertblock}{边界感}
+    Chat Mode 不是“再开一个随便聊的窗口”，而是主线外的轻量、可恢复、可落盘会话轨道。
+  \end{alertblock}
+\end{frame}
+
+\WorkflowFigureFrame{Progressive Discover}{figures/progressive-discover.tex}{先问任务类别、目标效果和验证方式，再进入假设、歧义、权衡和验收标准}
+
+\begin{frame}{Test Profiles：验收方式必须在 Plan 阶段说清楚}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.56\textwidth}
+    \resizebox{\linewidth}{!}{\input{figures/test-profile-matrix.tex}}
+    \column{0.40\textwidth}
+    \begin{block}{webapp}
+      必须有 E2E / 浏览器操作证据
+    \end{block}
+    \begin{block}{agent-service}
+      必须设计 CLI，并跑真实 CLI 场景
+    \end{block}
+    \begin{block}{research}
+      必须定义 baseline、script、delta
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\section{Demo / Evaluation / Discussion}
+\WorkflowSectionFrame{Part V}{演示路径、验证闭环与讨论}{assets/tool-evolution.png}
+
+\begin{frame}{建议 Demo Route}
+  \begin{enumerate}
+    \item \texttt{/hw:plan} 或 \texttt{/hw:plan --batch}
+    \item Progressive Discover 先问 category / effect / verification
+    \item Feature Queue 与 Test Profiles
+    \item \texttt{/hw:chat} 与 OpenCode status panels
+    \item \texttt{/hw:release} 更新 README + gate
+    \item 以 tests、reports、PDF 产物收尾
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{C2 验证证据}
+  \small
+  \begin{tabularx}{\textwidth}{p{0.2\linewidth}p{0.38\linewidth}X}
+    \toprule
+    能力 & 自动化验证 & 结果 \\
+    \midrule
+    README automation & \texttt{readme-update.test.js} + \texttt{checkReadmeFreshness()} & pass \\
+    Skill governance & \texttt{skill-quality.test.js} + \texttt{checkSkillQuality()} & 0 issues / 31 skills \\
+    OpenCode panels & \texttt{opencode-status.test.js} + \texttt{opencode-panels.test.js} & pass \\
+    Batch Planning & \texttt{batch-plan.test.js} + \texttt{feature-queue-ops.test.js} & pass \\
+    Chat / Discover / Profiles & 对应核心测试集 & pass \\
+    Final regression & \texttt{node --test core/test/*.test.js} & 70/70 \\
+    \bottomrule
+  \end{tabularx}
+\end{frame}
+
+\begin{frame}{和其他工具的关系}
+  \small
+  \begin{tabularx}{\textwidth}{lXXXX}
+    \toprule
+    Tool & Repo visibility & Planning & Recoverability & Validation \\
+    \midrule
+    Web GPT / Gemini & 弱 & 弱 & 弱 & 弱 \\
+    Copilot & 中 & 弱 & 弱 & 弱 \\
+    AntiGravity & 中 & 中下 & 弱 & 弱 \\
+    Claude Code & 强 & 中上 & 中 & 中 \\
+    Notion AI Opus + Codex & 强 & 强 & 中上 & 中上 \\
+    Hypo-Workflow & 强 & 强 & 强 & 强 \\
+    \bottomrule
+  \end{tabularx}
+  \vspace{0.3cm}
+  \begin{alertblock}{技术性评价}
+    我想解决的不是“哪个模型更聪明”，而是“哪个系统能稳定承载长期工程约束”。
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{局限性}
+  \begin{itemize}
+    \item 仍依赖宿主 Agent 的基础能力
+    \item token / cost 观测仍是 best-effort
+    \item OpenCode 状态面板以观测为主，不直接调度
+    \item Test Profile runtime 在本仓库主要体现为 evidence contract
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{未来工作}
+  \begin{itemize}
+    \item pure analysis assistant mode
+    \item workflow generalization beyond code writing
+    \item richer observability and metrics
+    \item stronger cross-platform adapters and shared standards
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{结论}
+  \begin{block}{结论}
+    对复杂 AI Coding，真正决定质量上限的通常不是单次模型回答，而是外部工程约束系统是否完备。
+  \end{block}
+  \vspace{0.6cm}
+  \centering
+  {\Large\bfseries\color{WorkflowBlue}Hypo-Workflow 的工作，是把这些约束从聊天窗口搬进工程系统。}
+\end{frame}
+
+\end{document}

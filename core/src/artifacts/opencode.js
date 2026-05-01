@@ -3,7 +3,7 @@ import { dirname, join, resolve } from "node:path";
 import { commandMap } from "../commands/index.js";
 import { normalizeProfile } from "../profile/index.js";
 
-const HW_VERSION = "9.1.0-alpha.0";
+const HW_VERSION = "9.1.1-alpha.0";
 
 export const OPENCODE_AGENTS = Object.freeze([
   {

@@ -1,0 +1,18 @@
+\begin{tikzpicture}[
+  box/.style={draw=HWGray, rounded corners=2mm, minimum width=28mm, minimum height=8mm, align=center, font=\small},
+  arrow/.style={-Latex, thick, draw=HWGray}
+]
+\node[box, fill=HWBlue!10] (user) at (0,1.6) {OpenCode\\slash command};
+\node[box, fill=HWBlue!10] (cmd) at (3.8,1.6) {\texttt{.opencode/commands}\\command mapping};
+\node[box, fill=HWBlue!10] (agent) at (7.6,1.6) {\texttt{.opencode/agents}\\role binding};
+\node[box, fill=HWGold!18] (plugin) at (3.8,-0.2) {\texttt{plugins/hypo-workflow.ts}\\events / file guard / context};
+\node[box, fill=white] (runtime) at (7.6,-0.2) {\texttt{runtime/hypo-workflow-status.js}\\read-only status model};
+\node[box, fill=white] (pipeline) at (11.6,0.7) {\texttt{.pipeline/}\\source of truth};
+
+\draw[arrow] (user) -- (cmd);
+\draw[arrow] (cmd) -- (agent);
+\draw[arrow] (cmd) -- (plugin);
+\draw[arrow] (plugin) -- (runtime);
+\draw[arrow] (runtime) -- (pipeline);
+\draw[arrow] (agent) -- (pipeline);
+\end{tikzpicture}

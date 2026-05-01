@@ -6,7 +6,7 @@
 
 Plan -> Execute -> Review -> Report -> Recover -> Showcase
 
-[![Version](https://img.shields.io/badge/version-9.1.0-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-9.1.1-blue)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex%20%7C%20OpenCode-purple)](#平台支持)
 
@@ -913,6 +913,13 @@ git diff --check
 ---
 
 ## Changelog
+
+### v9.1.1
+
+- Added the canonical `docs/showcase/c2-report/` source package for the expanded technical book report and Beamer slides.
+- Added GPT Image generated visual assets for cover, narrative, and architecture imagery.
+- Added `vendor/Hypoxanthine-LaTeX` as a submodule-backed LaTeX dependency.
+- Added report refresh tests covering source placement, submodule metadata, narrative anchors, and slide evidence.
 
 ### v9.1.0
 

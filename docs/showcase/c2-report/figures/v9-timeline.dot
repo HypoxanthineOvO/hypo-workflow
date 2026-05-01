@@ -1,0 +1,16 @@
+digraph V9Timeline {
+  graph [rankdir=LR, bgcolor="transparent", nodesep=0.35, ranksep=0.6];
+  node [shape=box, style="rounded,filled", color="#4b5563", fillcolor="#dbeafe", fontname="Noto Sans CJK SC", fontsize=10];
+  edge [color="#4b5563", penwidth=1.4];
+  M0 [label="M0\nCapability matrix"];
+  M1 [label="M1\nCore helpers"];
+  M2 [label="M2\nGlobal CLI"];
+  M3 [label="M3\nPlugin scaffold"];
+  M4 [label="M4\n31 commands"];
+  M5 [label="M5\nAgent roles"];
+  M6 [label="M6\nHooks / auto-continue"];
+  M7 [label="M7\nV8.4 parity"];
+  M8 [label="M8\n59/59 regression"];
+  M9 [label="M9\nDocs / release"];
+  M0 -> M1 -> M2 -> M3 -> M4 -> M5 -> M6 -> M7 -> M8 -> M9;
+}
