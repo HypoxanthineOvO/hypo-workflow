@@ -1,0 +1,159 @@
+version: 1
+cycle_id: C4
+current_feature: F001
+defaults:
+  decompose_mode: upfront
+  failure_policy: skip_defer
+  auto_chain: true
+  default_gate: auto
+features:
+  -
+    id: F001
+    title: "Knowledge Ledger and OpenCode Hooks"
+    priority: 10
+    status: active
+    gate: auto
+    decompose_mode: upfront
+    source: batch-discover
+    summary: "Cross-session project memory plus usable OpenCode auto-continue, permission, file-guard, and stop-equivalent hooks."
+    category: agent-service
+    workflow_kind: build
+    desired_effect: "Every completed milestone or patch can leave compact reusable knowledge, and OpenCode workflow control becomes reliable enough for C4 execution."
+    verification: "Core fixture tests, hook tests, OpenCode artifact tests, and actual OpenCode smoke."
+    test_profiles:
+      - agent-service
+    milestones:
+      -
+        id: M01
+        status: done
+        title: "Knowledge Ledger contract"
+        prompt_file: 00-knowledge-ledger-contract.md
+      -
+        id: M02
+        status: planned
+        title: "Knowledge helpers and compact index"
+        prompt_file: 01-knowledge-helpers-compact-index.md
+      -
+        id: M03
+        status: planned
+        title: "Knowledge hook integration"
+        prompt_file: 02-knowledge-hook-integration.md
+      -
+        id: M04
+        status: planned
+        title: "OpenCode workflow-control hooks"
+        prompt_file: 03-opencode-workflow-control-hooks.md
+      -
+        id: M05
+        status: planned
+        title: "F001 integration gate"
+        prompt_file: 04-knowledge-opencode-integration-gate.md
+    metric_summary:
+      duration_ms: n/a
+      token_count: n/a
+      cost: n/a
+  -
+    id: F002
+    title: "Global TUI"
+    priority: 20
+    status: queued
+    gate: confirm
+    decompose_mode: upfront
+    source: batch-discover
+    summary: "Ink-based global management TUI for model pool, global defaults, project registry, and sync actions."
+    category: agent-service
+    workflow_kind: build
+    desired_effect: "Users can run hypoworkflow or hw and manage global Hypo-Workflow state from a real terminal UI."
+    verification: "Config roundtrip tests, TUI smoke tests, CLI tests, and OpenCode artifact sync tests."
+    test_profiles:
+      - agent-service
+    milestones:
+      -
+        id: M06
+        status: planned
+        title: "Global config and registry model"
+        prompt_file: 05-global-config-registry-model.md
+      -
+        id: M07
+        status: planned
+        title: "Ink TUI foundation"
+        prompt_file: 06-ink-tui-foundation.md
+      -
+        id: M08
+        status: planned
+        title: "Model pool and project actions"
+        prompt_file: 07-model-pool-project-actions.md
+    metric_summary:
+      duration_ms: n/a
+      token_count: n/a
+      cost: n/a
+  -
+    id: F003
+    title: "Acceptance Loop"
+    priority: 30
+    status: queued
+    gate: auto
+    decompose_mode: upfront
+    source: batch-discover
+    summary: "Manual accept and reject loop for Cycle and Patch lifecycles with structured feedback and PROGRESS/status visibility."
+    category: agent-service
+    workflow_kind: build
+    desired_effect: "Completed work waits for user acceptance when configured, and rejection feedback reliably drives the next repair loop."
+    verification: "Lifecycle fixtures, status tests, PROGRESS format tests, patch iteration tests, and timeout policy tests."
+    test_profiles:
+      - agent-service
+    milestones:
+      -
+        id: M09
+        status: planned
+        title: "Cycle acceptance"
+        prompt_file: 08-cycle-acceptance.md
+      -
+        id: M10
+        status: planned
+        title: "Patch acceptance"
+        prompt_file: 09-patch-acceptance.md
+      -
+        id: M11
+        status: planned
+        title: "Acceptance policy and status"
+        prompt_file: 10-acceptance-policy-status.md
+    metric_summary:
+      duration_ms: n/a
+      token_count: n/a
+      cost: n/a
+  -
+    id: F004
+    title: "Explore Mode and Sync"
+    priority: 40
+    status: queued
+    gate: auto
+    decompose_mode: upfront
+    source: batch-discover
+    summary: "Isolated exploration sessions using global worktrees plus explicit lightweight, standard, and deep sync."
+    category: agent-service
+    workflow_kind: build
+    desired_effect: "Exploration can happen without dirtying the main worktree, and sync refreshes project and knowledge state predictably."
+    verification: "Git worktree fixtures, permission policy tests, explore lifecycle tests, sync tests, and OpenCode smoke."
+    test_profiles:
+      - agent-service
+    milestones:
+      -
+        id: M12
+        status: planned
+        title: "Explore contract and worktree"
+        prompt_file: 11-explore-contract-worktree.md
+      -
+        id: M13
+        status: planned
+        title: "Explore lifecycle and upgrade"
+        prompt_file: 12-explore-lifecycle-upgrade.md
+      -
+        id: M14
+        status: planned
+        title: "Sync standardization"
+        prompt_file: 13-hw-sync-standardization.md
+    metric_summary:
+      duration_ms: n/a
+      token_count: n/a
+      cost: n/a

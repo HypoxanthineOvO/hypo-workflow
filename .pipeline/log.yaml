@@ -1,4 +1,79 @@
 entries:
+  - id: "M01-COMPLETE-C4"
+    type: milestone_complete
+    ref: "C4/M01"
+    status: completed
+    timestamp: "2026-05-02T19:41:26+08:00"
+    summary: "Completed Knowledge Ledger contract with helper functions, docs, Skill, command mapping, OpenCode artifacts, and regression updates."
+    report: ".pipeline/reports/00-knowledge-ledger-contract.report.md"
+    tests: "node --test core/test/knowledge-ledger.test.js; node --test core/test/*.test.js; bash scripts/validate-config.sh .pipeline/config.yaml; node JSON parse .opencode/hypo-workflow.json; git diff --check; python3 tests/run_regression.py; claude plugin validate .; node core/bin/hw-core commands"
+    trigger: auto
+    related_milestone: "M01"
+  - id: "M01-REVIEW-CODE-C4"
+    type: step
+    ref: "C4/M01/review_code"
+    status: completed
+    timestamp: "2026-05-02T19:41:26+08:00"
+    summary: "Reviewed M01 scope: contract and deterministic helpers are complete; hook capture remains deferred to later milestones."
+    report: ".pipeline/reports/00-knowledge-ledger-contract.report.md"
+    trigger: auto
+    related_milestone: "M01"
+  - id: "M01-GREEN-C4"
+    type: step
+    ref: "C4/M01/run_tests_green"
+    status: completed
+    timestamp: "2026-05-02T19:41:14+08:00"
+    summary: "Green validation passed for Knowledge Ledger contract and related command/spec surfaces."
+    report: "core/test/knowledge-ledger.test.js"
+    tests: "node --test core/test/knowledge-ledger.test.js; node --test core/test/*.test.js; bash scripts/validate-config.sh .pipeline/config.yaml; git diff --check; python3 tests/run_regression.py"
+    trigger: auto
+    related_milestone: "M01"
+  - id: "M01-IMPLEMENT-C4"
+    type: step
+    ref: "C4/M01/implement"
+    status: completed
+    timestamp: "2026-05-02T19:41:14+08:00"
+    summary: "Implemented Knowledge Ledger contract helpers, docs, Skill, command map, OpenCode guidance, README updates, and regression fixture sync."
+    report: "references/knowledge-spec.md"
+    trigger: auto
+    related_milestone: "M01"
+  - id: "M01-RED-C4"
+    type: step
+    ref: "C4/M01/run_tests_red"
+    status: completed
+    timestamp: "2026-05-02T19:15:54+08:00"
+    summary: "Red run failed as expected because Knowledge Ledger helpers and artifacts are not implemented."
+    report: "node --test core/test/knowledge-ledger.test.js"
+    tests: "failed as expected: missing buildKnowledgeLoadPlan export"
+    trigger: auto
+    related_milestone: "M01"
+  - id: "M01-REVIEW-TESTS-C4"
+    type: step
+    ref: "C4/M01/review_tests"
+    status: completed
+    timestamp: "2026-05-02T19:15:24+08:00"
+    summary: "Reviewed Knowledge Ledger contract tests and accepted their M01 scope."
+    report: "core/test/knowledge-ledger.test.js"
+    trigger: auto
+    related_milestone: "M01"
+  - id: "M01-WRITE-TESTS-C4"
+    type: step
+    ref: "C4/M01/write_tests"
+    status: completed
+    timestamp: "2026-05-02T19:14:38+08:00"
+    summary: "Added Knowledge Ledger contract tests and a valid milestone record fixture."
+    report: "core/test/knowledge-ledger.test.js"
+    trigger: auto
+    related_milestone: "M01"
+  - id: "M01-START-C4"
+    type: milestone_start
+    ref: "C4/M01"
+    status: active
+    timestamp: "2026-05-02T19:09:18+08:00"
+    summary: "Started C4 M01 Knowledge Ledger contract in write_tests."
+    report: ".pipeline/prompts/00-knowledge-ledger-contract.md"
+    trigger: user
+    related_milestone: "M01"
   - id: "REL-1002"
     type: release
     ref: "v10.0.2"

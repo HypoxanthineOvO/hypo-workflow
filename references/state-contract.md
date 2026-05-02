@@ -151,6 +151,7 @@ Read `state.yaml` at these moments:
 - `history.completed_prompts` is a legacy field name and may contain non-pass entries such as `blocked`, `aborted`, or `skipped`.
 - optional `chat.*` state must never replace Cycle / Milestone / Patch state; it only annotates an append conversation lane.
 - optional `prompt_state.analysis_summary` must stay compact and must never replace the analysis ledger.
+- Knowledge Ledger records must stay outside `state.yaml`; if a future status, resume, or SessionStart surface needs recovery context, store only compact/index pointers such as `.pipeline/knowledge/knowledge.compact.md` and `.pipeline/knowledge/index/*.yaml`.
 
 ## Chat State
 

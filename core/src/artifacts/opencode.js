@@ -158,6 +158,9 @@ function commandSpecificGuidance(command) {
   if (command.canonical === "/hw:compact") {
     return "\nCompact lane: generate compact context files and coordinate with OpenCode `session.compacted` context restore.\n";
   }
+  if (command.canonical === "/hw:knowledge") {
+    return "\nKnowledge lane: inspect `.pipeline/knowledge/` records, indexes, compact summaries, and secret references. Load compact and index context by default; only open raw records when the user requests `view` or a narrow `search` result.\n";
+  }
   if (command.canonical === "/hw:chat") {
     return "\nChat lane:\n- reload `state.yaml + cycle.yaml + PROGRESS.md + recent report`\n- write chat entries instead of Milestone reports\n- keep small edits lightweight\n- suggest `/hw:patch` when scope grows beyond append conversation\n";
   }

@@ -1,0 +1,11 @@
+cycle:
+  number: 4
+  name: "Knowledge Ledger, Global TUI, Acceptance Loop, Explore Mode"
+  type: feature
+  status: active
+  started: "2026-05-02T18:24:36+08:00"
+  preset: tdd
+  context_sources: []
+  previous_cycle: 3
+  summary: null
+  lessons: null

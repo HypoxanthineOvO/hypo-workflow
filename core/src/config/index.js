@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { DEFAULT_ANALYSIS_INTERACTION } from "../analysis/index.js";
+import { DEFAULT_KNOWLEDGE_CONFIG } from "../knowledge/index.js";
 
 export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
   version: "10.0.1",
@@ -84,6 +85,7 @@ export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
     auto_chain: true,
     default_gate: "auto",
   },
+  knowledge: DEFAULT_KNOWLEDGE_CONFIG,
 });
 
 export async function loadConfig(file, defaults = DEFAULT_GLOBAL_CONFIG) {

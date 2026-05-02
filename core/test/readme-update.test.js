@@ -20,7 +20,7 @@ test("defaultReadmeConfig exposes loose marker-safe defaults", () => {
 
 test("renderReadmeBlock derives command and platform content from assets", async () => {
   const commandCount = renderReadmeBlock("command-count");
-  assert.match(commandCount, /31 个用户指令/);
+  assert.match(commandCount, /32 个用户指令/);
   assert.match(commandCount, /1 个内部 watchdog/);
 
   const commandReference = renderReadmeBlock("command-reference");
@@ -120,6 +120,6 @@ test("updateReadme replaces requested managed blocks and reports a summary", asy
   assert.deepEqual(summary.changedBlocks, ["command-count"]);
   assert.equal(summary.fullRegenerated, false);
   assert.match(updated, /manual intro/);
-  assert.match(updated, /31 个用户指令/);
+  assert.match(updated, /32 个用户指令/);
   assert.match(updated, /manual outro/);
 });

@@ -1,12 +1,12 @@
 ---
 name: hypo-workflow
 version: 10.0.2
-description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:chat`, `/hw:plan`, `/hw:plan:extend`, `/hw:plan:review`, `/hw:cycle`, `/hw:patch`, `/hw:compact`, `/hw:guide`, `/hw:showcase`, `/hw:rules`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, or `/hw:dashboard`.
+description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:chat`, `/hw:plan`, `/hw:plan:extend`, `/hw:plan:review`, `/hw:cycle`, `/hw:patch`, `/hw:compact`, `/hw:knowledge`, `/hw:guide`, `/hw:showcase`, `/hw:rules`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, or `/hw:dashboard`.
 ---
 
 # Hypo-Workflow v10.0.2
 
-> **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 31 个用户指令。
+> **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 32 个用户指令。
 >
 > **Codex 用户**：本文件是完整的 Skill 入口，继续使用 `/hw:*` 指令。
 
@@ -32,6 +32,7 @@ description: Run a serialized prompt execution pipeline from a local `.pipeline/
 | `/hw:patch` | Create, list, close, and `fix` persistent lightweight Patches |
 | `/hw:patch fix` | Execute the lightweight six-step Patch repair lane |
 | `/hw:compact` | Generate `.compact` context views for large runtime files |
+| `/hw:knowledge` | Inspect Knowledge Ledger records, indexes, compact summaries, and secret references |
 | `/hw:guide` | Start an interactive guide that recommends the next command path |
 | `/hw:showcase` | Generate project intro docs, technical docs, slides, and an optional poster |
 | `/hw:rules` | Manage rule severities, custom natural-language rules, lifecycle hooks, and rule packs |
@@ -181,6 +182,7 @@ Use these bundled files when relevant:
 - [`scripts/watchdog.sh`](./scripts/watchdog.sh)
 - [`scripts/rules-summary.sh`](./scripts/rules-summary.sh)
 - [`skills/compact/SKILL.md`](./skills/compact/SKILL.md)
+- [`skills/knowledge/SKILL.md`](./skills/knowledge/SKILL.md)
 - [`skills/guide/SKILL.md`](./skills/guide/SKILL.md)
 - [`skills/showcase/SKILL.md`](./skills/showcase/SKILL.md)
 - [`skills/rules/SKILL.md`](./skills/rules/SKILL.md)
@@ -233,6 +235,8 @@ Handle these commands directly:
   Load [`skills/patch/SKILL.md`](./skills/patch/SKILL.md). Manage persistent lightweight patches under `.pipeline/patches/`. Support `/hw:patch fix P001 [P...]` for the lightweight six-step fix lane.
 - `/hw:compact`
   Load [`skills/compact/SKILL.md`](./skills/compact/SKILL.md). Generate `.compact` context views for PROGRESS, state, log, reports, and closed patches without mutating source files.
+- `/hw:knowledge`
+  Load [`skills/knowledge/SKILL.md`](./skills/knowledge/SKILL.md). Inspect `.pipeline/knowledge/` records, generated category indexes, compact summaries, and redacted secret references. Default to compact and index context; load raw records only for `view` or narrow `search`.
 - `/hw:guide`
   Load [`skills/guide/SKILL.md`](./skills/guide/SKILL.md). Sense project state, ask what the user wants, recommend a short command flow, and execute the first command only after confirmation.
 - `/hw:showcase`
@@ -246,7 +250,7 @@ Handle these commands directly:
 
 If a command starts with `/hw:` and is not listed above, return:
 
-`Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:chat, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:compact, /hw:guide, /hw:showcase, /hw:rules, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
+`Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:chat, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:compact, /hw:knowledge, /hw:guide, /hw:showcase, /hw:rules, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
 
 Slash commands are exact and take precedence over fuzzy natural-language matching. Detailed parsing and option semantics live in [`references/commands-spec.md`](./references/commands-spec.md).
 
@@ -293,6 +297,7 @@ Expected top-level config groups:
 - `watchdog` optional
 - `history_import` optional
 - `compact` optional
+- `knowledge` optional
 - `showcase` optional
 - `rules` optional
 - `platform` optional
@@ -327,6 +332,11 @@ Key defaults:
 - `compact.state_history_full=1`
 - `compact.log_recent=20`
 - `compact.reports_summary_lines=3`
+- `knowledge.enabled=true`
+- `knowledge.loading.session_start=true`
+- `knowledge.loading.compact=true`
+- `knowledge.loading.records=false`
+- `knowledge.redaction.secret_keys=['api_key','token','secret','password','authorization','access_token','refresh_token','client_secret']`
 - `showcase.language=auto`
 - `showcase.poster.api_key_env=OPENAI_API_KEY`
 - `showcase.poster.size=1024x1536`

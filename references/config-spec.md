@@ -46,6 +46,13 @@ Resolve every configurable value in this order:
 | compact full state history | `compact.state_history_full` | `compact.state_history_full` | `1` |
 | compact recent log events | `compact.log_recent` | `compact.log_recent` | `20` |
 | compact report summary lines | `compact.reports_summary_lines` | `compact.reports_summary_lines` | `3` |
+| knowledge enabled | `knowledge.enabled` | `knowledge.enabled` | `true` |
+| knowledge SessionStart loading | `knowledge.loading.session_start` | `knowledge.loading.session_start` | `true` |
+| knowledge compact loading | `knowledge.loading.compact` | `knowledge.loading.compact` | `true` |
+| knowledge index loading | `knowledge.loading.indexes` | `knowledge.loading.indexes` | `dependencies`, `references`, `pitfalls`, `decisions`, `config-notes`, `secret-refs` |
+| knowledge raw record loading | `knowledge.loading.records` | `knowledge.loading.records` | `false` |
+| knowledge redaction keys | `knowledge.redaction.secret_keys` | `knowledge.redaction.secret_keys` | `api_key`, `token`, `secret`, `password`, `authorization`, `access_token`, `refresh_token`, `client_secret` |
+| knowledge invalid record strictness | `knowledge.strictness.invalid_record` | `knowledge.strictness.invalid_record` | `warn` |
 | showcase language | `showcase.language` | `showcase.language` | `auto` |
 | showcase poster API key env | `showcase.poster.api_key_env` | `showcase.poster.api_key_env` | `OPENAI_API_KEY` |
 | showcase poster size | `showcase.poster.size` | `showcase.poster.size` | `1024x1536` |
@@ -169,6 +176,40 @@ compact:
   state_history_full: 1
   log_recent: 20
   reports_summary_lines: 3
+knowledge:
+  enabled: true
+  root: .pipeline/knowledge
+  loading:
+    session_start: true
+    compact: true
+    indexes:
+      - dependencies
+      - references
+      - pitfalls
+      - decisions
+      - config-notes
+      - secret-refs
+    records: false
+  compaction:
+    auto: true
+    max_records_per_category: 50
+    compact_file: .pipeline/knowledge/knowledge.compact.md
+  redaction:
+    enabled: true
+    replacement: "[REDACTED]"
+    secret_keys:
+      - api_key
+      - token
+      - secret
+      - password
+      - authorization
+      - access_token
+      - refresh_token
+      - client_secret
+  strictness:
+    invalid_record: warn
+    missing_index: warn
+    secret_leak: error
 showcase:
   language: auto
   poster:

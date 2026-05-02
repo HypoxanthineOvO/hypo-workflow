@@ -5,7 +5,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 ## Namespace
 
 - all explicit Hypo-Workflow commands use the `/hw:` prefix
-- V9.1 canonical namespace contains 31 user-facing commands across Setup, Pipeline, Plan, Lifecycle, and Utility groups, plus an internal cron-only watchdog skill
+- V10.1 canonical namespace contains 32 user-facing commands across Setup, Pipeline, Plan, Lifecycle, and Utility groups, plus an internal cron-only watchdog skill
 - slash commands are exact and namespace-scoped
 - slash commands take precedence over fuzzy natural-language matching
 - natural-language commands remain valid for backward compatibility
@@ -25,6 +25,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
    - `/hw:log`
    - `/hw:setup`
    - `/hw:dashboard`
+   - `/hw:knowledge`
    - `/hw:compact`
    - `/hw:guide`
 - `/hw:showcase`
@@ -47,7 +48,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 3. parse remaining tokens as command arguments
 4. flags are order-independent
 5. if a command is unknown, return exactly:
-   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:compact, /hw:guide, /hw:showcase, /hw:rules, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
+   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:compact, /hw:knowledge, /hw:guide, /hw:showcase, /hw:rules, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
 6. if a known command receives an unsupported flag, stop and report the unsupported flag explicitly instead of guessing
 7. if a prompt selector is ambiguous, list the candidates and stop
 8. plan and review commands load `plan/PLAN-SKILL.md` before execution
@@ -191,7 +192,7 @@ Supported forms:
 Behavior:
 
 - read `SKILL.md` command tables as the source of truth
-- `/hw:help` lists all 31 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility
+- `/hw:help` lists all 32 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility
 - `/hw:help --quick` returns a compact cheat sheet
 - `/hw:help <cmd>` returns detailed usage, flags, and examples for the requested command
 
@@ -536,6 +537,26 @@ Behavior:
 - generate `.pipeline/PROGRESS.compact.md`, `.pipeline/state.compact.yaml`, `.pipeline/log.compact.yaml`, `.pipeline/reports.compact.md`, and `.pipeline/patches.compact.md` when source files exist
 - never mutate source files while compacting
 - obey `compact.*`, `output.language`, and `output.timezone`
+
+### `/hw:knowledge`
+
+Supported forms:
+
+- `/hw:knowledge list`
+- `/hw:knowledge view <id>`
+- `/hw:knowledge compact`
+- `/hw:knowledge index`
+- `/hw:knowledge search [--category <name>] [--tag <tag>] [--source <source>] [text]`
+
+Behavior:
+
+- load `skills/knowledge/SKILL.md`
+- read `references/knowledge-spec.md`
+- inspect `.pipeline/knowledge/knowledge.compact.md` and `.pipeline/knowledge/index/*.yaml` by default
+- only load `.pipeline/knowledge/records/*.yaml` for `view` or narrow `search` results
+- redact `api_key`, `token`, `secret`, `password`, `authorization`, `access_token`, `refresh_token`, `client_secret`, and similar fields before display
+- never write raw secret values into `.pipeline/`
+- keep `.pipeline/state.yaml` compact and do not store full knowledge records there
 
 ### `/hw:guide`
 

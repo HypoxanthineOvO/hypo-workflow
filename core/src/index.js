@@ -13,3 +13,4 @@ export * from "./opencode-status/index.js";
 export * from "./chat/index.js";
 export * from "./presets/index.js";
 export * from "./analysis/index.js";
+export * from "./knowledge/index.js";

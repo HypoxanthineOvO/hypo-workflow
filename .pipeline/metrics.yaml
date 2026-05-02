@@ -1,0 +1,38 @@
+cycle_id: C4
+cycles:
+  -
+    id: C4
+    title: "Knowledge Ledger, Global TUI, Acceptance Loop, and Explore Mode"
+    duration_ms: n/a
+    token_count: n/a
+    cost: n/a
+features:
+  -
+    id: F001
+    duration_ms: n/a
+    token_count: n/a
+    cost: n/a
+  -
+    id: F002
+    duration_ms: n/a
+    token_count: n/a
+    cost: n/a
+  -
+    id: F003
+    duration_ms: n/a
+    token_count: n/a
+    cost: n/a
+  -
+    id: F004
+    duration_ms: n/a
+    token_count: n/a
+    cost: n/a
+milestones:
+  -
+    id: M01
+    feature_id: F001
+    duration_ms: n/a
+    token_count: n/a
+    cost: n/a
+    status: done
+    completed_at: "2026-05-02T19:41:26+08:00"

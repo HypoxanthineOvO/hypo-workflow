@@ -1,16 +1,16 @@
 pipeline:
-  name: "Hypo-Workflow C3 OpenCode Multi-Agent Matrix and V10 Analysis Preset"
+  name: "Hypo-Workflow C4 Knowledge Ledger, Global TUI, Acceptance Loop, and Explore Mode"
   source: local
   output: local
   prompts_dir: .pipeline/prompts
   reports_dir: .pipeline/reports
 
 plan:
-  mode: auto
+  mode: interactive
   interaction_depth: high
   interactive:
     min_rounds: 5
-    require_explicit_confirm: false
+    require_explicit_confirm: true
 
 execution:
   mode: self

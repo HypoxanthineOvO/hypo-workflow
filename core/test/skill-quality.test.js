@@ -44,9 +44,9 @@ test("checkSkillQuality accepts current repository skills and watchdog exception
 
   assert.equal(result.ok, true);
   assert.equal(result.issues.length, 0);
-  assert.equal(result.stats.localSkills, 31);
-  assert.equal(result.stats.userFacingCommands, 31);
-  assert.equal(result.stats.userFacingSkillPaths, 30);
+  assert.equal(result.stats.localSkills, 32);
+  assert.equal(result.stats.userFacingCommands, 32);
+  assert.equal(result.stats.userFacingSkillPaths, 31);
   assert.equal(result.stats.internalSkills, 1);
   assert.ok(result.internalSkills.includes("skills/watchdog/SKILL.md"));
 

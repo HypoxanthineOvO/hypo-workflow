@@ -22,6 +22,7 @@ OpenCode uses dash-style native slash commands. Each command remains traceable t
 | `/hw:patch` | `/hw-patch` | `hw-build` | `skills/patch/SKILL.md` |
 | `/hw:patch fix` | `/hw-patch-fix` | `hw-build` | `skills/patch/SKILL.md` |
 | `/hw:compact` | `/hw-compact` | `hw-compact` | `skills/compact/SKILL.md` |
+| `/hw:knowledge` | `/hw-knowledge` | `hw-compact` | `skills/knowledge/SKILL.md` |
 | `/hw:guide` | `/hw-guide` | `hw-plan` | `skills/guide/SKILL.md` |
 | `/hw:showcase` | `/hw-showcase` | `hw-build` | `skills/showcase/SKILL.md` |
 | `/hw:rules` | `/hw-rules` | `hw-status` | `skills/rules/SKILL.md` |

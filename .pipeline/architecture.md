@@ -1,183 +1,139 @@
-# Architecture Baseline — C3 OpenCode Multi-Agent Matrix and V10 Analysis Preset
+# Architecture Baseline - C4 Knowledge Ledger, Global TUI, Acceptance Loop, and Explore Mode
 
 ## Current Baseline
 
-- Active Cycle: C3, completed and awaiting archive.
-- Previous Cycle C1 delivered V9 OpenCode Native Adapter and is archived.
-- Previous Cycle C2 delivered maintainability, observability, Batch Plan, Chat Mode, Progressive Discover, Test Profiles, OpenCode status panels, and showcase/report assets.
-- `.pipeline/` remains the source of truth for Cycle, state, rules, progress, logs, patches, prompts, reports, queue, and metrics.
-- Protected files remain `.pipeline/state.yaml`, `.pipeline/cycle.yaml`, and `.pipeline/rules.yaml`.
-- Compact files are intentionally not regenerated in this C3 plan generation pass.
-- Cross-cycle external source discovery is indexed in `references/external-docs-index.md`.
+- Active Cycle: C4.
+- Previous Cycle C3 delivered OpenCode multi-agent model matrix and V10 Analysis Preset.
+- `.pipeline/` remains the project source of truth for Cycle, state, rules, progress, logs, patches, prompts, reports, queues, metrics, knowledge, explorations, and archives.
+- `hypo-workflow` remains a setup/sync/global-management CLI, not a pipeline runner.
+- Agent execution remains inside Codex, Claude Code, or OpenCode.
+- OpenCode adapter artifacts are generated from `core/src/artifacts/opencode.js` and templates under `plugins/opencode/templates/`.
 
-## C3 Architecture Direction
+## C4 Architecture Direction
 
-C3 delivered two major directions:
+C4 adds four large capabilities:
 
-1. OpenCode Multi-Agent Model Matrix.
-2. V10 Analysis Preset.
+1. Knowledge Ledger for cross-session project memory.
+2. Global management TUI built with Ink.
+3. Manual acceptance and rejection loops for Cycle and Patch lifecycles.
+4. Explore Mode with isolated global git worktrees and standardized sync.
 
-The first extends the OpenCode adapter and sync artifact layer. The second extends Hypo-Workflow from a build-focused engine into a general workflow engine that can run investigations and produce traceable conclusions.
+The features are planned as a Batch Feature Queue. `F001` must finish first and pause before `F002`, because Knowledge Ledger and OpenCode workflow-control hooks become the foundation for the remaining C4 work.
 
-## Plan Review 2026-05-02
+## Cross-Cutting Constraints
 
-This review reconciles the generated C3 baseline with the implemented C3 artifacts and the current official OpenCode documentation surface.
+- Do not turn Hypo-Workflow into a runner.
+- Keep deterministic logic in `core/`; keep judgment and execution in the host Agent.
+- Keep large evidence and knowledge outside `state.yaml`.
+- Treat `.pipeline/state.yaml`, `.pipeline/cycle.yaml`, and `.pipeline/rules.yaml` as protected workflow state.
+- Published defaults should be conservative: OpenCode auto-continue defaults to `safe`.
+- Local automation profile may use `aggressive`; strict/team profile should use `ask`.
+- Secret values must not be committed. Real API keys belong in `~/.hypo-workflow/secrets.yaml`; project knowledge records may reference env var names and redacted usage only.
+- OpenCode Explore worktrees may be allowed under `~/.hypo-workflow/worktrees/**`; this allowance must not extend to `~/.hypo-workflow/secrets.yaml` or global config files.
 
-| Field | Review |
-|---|---|
-| ADDED | C3 now has implemented model matrix defaults/schema/rendering, OpenCode role agents, provider-qualified model IDs, TUI model visibility, analysis preset runtime helpers, analysis ledger/report templates, preset-aware evaluation, and scenario coverage. |
-| CHANGED | The baseline moved from planned C3 architecture to completed C3 architecture. OpenCode integration is no longer only V9 parity plus planned model routing; it is a synced matrix surface backed by generated agents and sidecar metadata. |
-| REASON | C3 M01-M12 and P005 changed project reality after the original architecture baseline was written. Models also need a durable official-doc lookup path for OpenCode APIs, config, agent behavior, MCP docs access, and server/SDK surfaces. |
-| IMPACT | Future planning, archive summaries, and OpenCode adapter changes should read this file plus `references/external-docs-index.md` and `references/opencode-spec.md` before changing generated artifacts, agent model routing, TUI status, or documentation lookup behavior. |
+## F001 Knowledge Ledger And OpenCode Hooks
 
-Downstream prompt review: C3 has no remaining active downstream prompts. No `.plan-state/prompt-patch-queue.yaml` edits are required for stale prompt assumptions; the next mutation should be `/hw:cycle close`.
+Knowledge storage uses three layers:
 
-## Core Layering
+- raw session records under `.pipeline/knowledge/records/`
+- generated category indexes under `.pipeline/knowledge/index/`
+- compact context under `.pipeline/knowledge/knowledge.compact.md`
 
-- Cycle: delivery container.
-- Feature Queue: multi-feature scheduling layer.
-- Milestone: executable unit.
-- Preset: step sequence.
-- Test Profile: validation policy composed with a preset.
-- Interaction Mode: controls human/agent collaboration and permission behavior.
-- Evidence Ledger: analysis-specific structured evidence chain.
+Knowledge categories:
 
-`analysis` must not be implemented as a Test Profile. It is a preset with different execution semantics and report requirements.
+- dependencies: library name, version, reason, official docs, adoption context
+- references: official docs and API references consulted
+- pitfalls: issue, symptoms, root cause, fix, prevention
+- decisions: lightweight ADRs and architecture choices
+- config notes: external service setup, env var names, smoke requirements
+- secret refs: redacted references to secrets stored outside the repo
 
-## OpenCode Model Matrix
+SessionStart must load compact knowledge and index only. Full records are opened on demand.
 
-OpenCode model routing is now a first-class config/sync surface:
+OpenCode workflow-control hooks must move beyond scaffold:
 
-- planning agent can use a frontier model;
-- compaction can use a cheaper Flash-class model;
-- TDD work can route testing, code worker A/B, debug/review, and report writing to distinct OpenCode agents;
-- agent-level compaction settings should render deterministically into OpenCode artifacts;
-- generated artifacts must stay OpenCode-native and schema-compatible.
+- export pure policy functions for file guard, permission decisions, auto-continue, stop-equivalent checks, and event serialization
+- handle `file`, `path`, and `filePath` style tool args
+- record permission events when they affect HW state
+- use fixture tests plus actual OpenCode smoke
 
-Hypo-Workflow remains a setup/sync layer. It should not call models directly as a runner.
+## F002 Global TUI
 
-Official OpenCode docs currently anchor this surface:
+The global TUI is a true terminal UI built with Ink in the existing Node CLI stack.
 
-- `https://opencode.ai/docs/config/` for merged config precedence, project `opencode.json`, `.opencode/` directories, and `https://opencode.ai/config.json`.
-- `https://opencode.ai/docs/agents/` for primary agents, subagents, agent frontmatter options, model overrides, mode, and permissions.
-- `https://opencode.ai/docs/models/` for provider/model IDs, variants, and model option inheritance.
-- `https://opencode.ai/docs/cli/` for `opencode models --refresh`, `opencode run`, `opencode serve`, and `--model provider/model` usage.
-- `https://opencode.ai/docs/server/` and `https://opencode.ai/docs/sdk/` for programmatic HTTP/OpenAPI/SDK integration.
-- `https://opencode.ai/docs/mcp-servers/` for optional docs lookup through MCP, including Context7.
+It manages:
 
-## Analysis Preset
+- model pool roles: Plan, Implement, Review, Evaluate, Chat
+- fallback chains for model roles
+- mapping to OpenCode agent matrix
+- global defaults under `~/.hypo-workflow/config.yaml`
+- project registry under `~/.hypo-workflow/projects.yaml`
+- project add, scan, sync, and status overview
 
-The V10 Analysis Preset step chain is:
+Migration is lazy. Missing fields fall back at runtime. The first write through TUI creates a backup before saving.
 
-```text
-define_question -> gather_context -> hypothesize -> experiment -> interpret -> conclude
-```
+## F003 Acceptance Loop
 
-Primary use cases:
+Cycle acceptance:
 
-- root-cause/debug analysis;
-- metric/research analysis;
-- repo/system analysis.
+- all milestones complete -> `cycle.status=pending_acceptance`
+- `state.yaml` may mirror runtime status for status/TUI, but `cycle.yaml` is authoritative
+- `/hw:accept` archives and closes normally
+- `/hw:reject` records structured feedback and reopens work
 
-The first release should prioritize root-cause investigation while keeping the ledger/report structure broad enough for the other two.
+Patch acceptance:
 
-## Interaction Model
+- patch fix may enter pending acceptance instead of direct close in manual mode
+- `/hw:patch accept P001` closes
+- `/hw:patch reject P001 "feedback"` reopens and increments iteration
+- repeated rejection recommends escalation to Cycle
 
-Public mode names:
+Reject feedback is always stored structurally with problem, reproduction steps, expected behavior, actual behavior, context, and iteration.
 
-- `manual`
-- `hybrid`
-- `auto`
+`PROGRESS.md`, status, log, and OpenCode TUI must display acceptance state clearly.
 
-Initial behavior:
+## F004 Explore Mode And Sync
 
-- `manual`: collect context, propose, and report; do not modify code.
-- `hybrid`: propose code changes and wait for approval before modifying code.
-- `auto`: may modify code and validate in the same analysis Milestone.
+Explore Mode:
 
-Boundary defaults:
+- metadata under `.pipeline/explorations/E001-slug/`
+- code worktree under `~/.hypo-workflow/worktrees/<project-id>/E001-slug/`
+- branch name `explore/E001-slug`
+- dirty main worktree requires a user decision
+- ending an exploration keeps the branch/worktree unless deletion is explicitly confirmed
 
-- installing system-level dependencies: ask;
-- restarting services: confirm;
-- network/proxy/remote resources: owner `auto` may allow, published `hybrid` should ask/confirm;
-- destructive or external side-effect actions: require confirmation.
+Explore outcomes:
 
-## State And Ledger
+- archive only
+- upgrade to Build Cycle through `/hw:plan --context explore:E001`
+- upgrade to Analysis for deeper validation
 
-Keep `.pipeline/state.yaml` as the linear execution pointer. Do not model hypothesis backtracking as step rollback.
+Sync:
 
-Analysis state should only add a lightweight summary such as:
+- `/hw:sync --light`: registry, compact hints, knowledge index, external-change prompt
+- `/hw:sync`: light + adapter sync + config/schema checks
+- `/hw:sync --deep`: standard + architecture/dependency scan
+- SessionStart runs light detection only and avoids heavy mutations.
 
-```yaml
-analysis:
-  question_id: Q1
-  analysis_kind: root_cause
-  interaction_mode: auto
-  active_hypothesis_id: H2
-  active_experiment_id: E3
-  outcome: null
-```
+## Validation Strategy
 
-Full evidence belongs in per-Milestone ledgers:
+Required C4 validation:
 
-```text
-.pipeline/analysis/<milestone-id>-analysis-ledger.yaml
-```
+- `node --test core/test/*.test.js`
+- `python tests/run_regression.py`
+- hook script tests
+- CLI and TUI smoke tests
+- OpenCode artifact sync tests
+- actual OpenCode smoke for command mapping, agent matrix, permissions, file guard, auto-continue, stop-equivalent behavior, and TUI status
+- manual smoke records must be captured in Knowledge Ledger
 
-The ledger must include question, environment snapshot, hypotheses, experiments, observations, metrics, interpretation, conclusion, confidence, next actions, code change refs, threats to validity, and ruled-out alternatives.
+## Milestone Strategy
 
-## Outcomes
+C4 uses 14 milestones:
 
-Hypothesis statuses:
+- M01-M05: Knowledge Ledger and OpenCode workflow-control hooks
+- M06-M08: Global config, project registry, and Ink TUI
+- M09-M11: Acceptance lifecycle
+- M12-M14: Explore Mode and sync
 
-- `pending`
-- `confirmed`
-- `disproved`
-- `partial`
-
-Milestone outcomes:
-
-- `confirmed`
-- `partial`
-- `disproved`
-- `inconclusive`
-- `blocked`
-
-A disproved hypothesis is normal progress, not a failed Milestone. A disproved Milestone means the main suspected direction was ruled out and no replacement conclusion was confirmed in that Milestone.
-
-## Reports And Evaluation
-
-Build reports continue to use build-centric evaluation. Analysis reports must be preset-aware and focus on traceability:
-
-- question addressed;
-- evidence completeness;
-- conclusion traceability;
-- experiment execution;
-- change validation when code changed;
-- follow-up recording.
-
-Analysis reports should be usable as input to a later Build Cycle.
-
-## Completed Milestones
-
-| Milestone | Feature | Prompt |
-|---|---|---|
-| M01 | F001 Model Matrix | `00-opencode-model-matrix-contract-schema.md` |
-| M02 | F001 Model Matrix | `01-opencode-artifact-rendering-sync.md` |
-| M03 | F001 Model Matrix | `02-opencode-model-matrix-validation-docs.md` |
-| M04 | F002 Analysis Core | `03-analysis-preset-workflow-taxonomy.md` |
-| M05 | F002 Analysis Core | `04-analysis-interaction-boundaries.md` |
-| M06 | F003 Analysis Runtime | `05-analysis-state-ledger-format.md` |
-| M07 | F003 Analysis Runtime | `06-analysis-experiment-execution-contract.md` |
-| M08 | F003 Analysis Runtime | `07-analysis-outcome-handoff.md` |
-| M09 | F004 Analysis Templates | `08-analysis-report-evidence-templates.md` |
-| M10 | F004 Analysis Templates | `09-preset-aware-evaluation.md` |
-| M11 | F005 Integration | `10-analysis-planning-generate-integration.md` |
-| M12 | F005 Integration | `11-queue-auto-continue-docs-regression.md` |
-
-## Review Expectations
-
-- Keep implementation steps narrow enough that each Milestone can add tests before code.
-- Run targeted tests plus `node --test core/test/*.test.js` after implementation milestones.
-- Run scenario regression where a Milestone changes plan, config, OpenCode artifact generation, or runtime state semantics.
-- Ensure no C3 Feature is generated with `gate: confirm`.
+Expected preset: `tdd`.
