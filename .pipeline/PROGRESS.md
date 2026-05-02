@@ -1,17 +1,17 @@
 # Hypo-Workflow C4 Knowledge Ledger, Global TUI, Acceptance Loop, and Explore Mode — 开发进度
 
-> 最后更新：19:41 | 状态：已暂停 | 进度：1/14 Milestone
+> 最后更新：20:41 | 状态：执行中 | 进度：2/14 Milestone
 
 ## 当前状态
-⏸️ **M01: Knowledge Ledger contract** — 已完成；下一步从 M02 `write_tests` 继续。
+🔄 **M03: Knowledge hook integration** — `review_tests` 进行中。
 
 ## Milestone 进度
 
 | # | Feature | Milestone | 状态 | 摘要 |
 |---|---|---|---|---|
 | M01 | F001 | Knowledge Ledger contract | ✅ 完成 | Knowledge Ledger 合同、helper、默认配置、Skill、命令映射和回归场景已通过验证 |
-| M02 | F001 | Knowledge helpers and compact index | ⏳ 待执行 | — |
-| M03 | F001 | Knowledge hook integration | ⏳ 待执行 | — |
+| M02 | F001 | Knowledge helpers and compact index | ✅ 完成 | Knowledge helper API、record append、index rebuild、compact render 已通过验证 |
+| M03 | F001 | Knowledge hook integration | 🔄 执行中 | 正在补充 hook integration 测试 |
 | M04 | F001 | OpenCode workflow-control hooks | ⏳ 待执行 | — |
 | M05 | F001 | F001 integration gate | ⏳ 待执行 | — |
 | M06 | F002 | Global config and registry model | ⏳ 待执行 | — |
@@ -28,6 +28,16 @@
 
 | 时间 | 类型 | 事件 | 结果 |
 |---|---|---|---|
+| 20:41 | Step | M03 write_tests | 已新增 SessionStart、Stop Hook strict gate、archive/compact/rules 文档测试 |
+| 20:40 | Patch | P006 closed | V4 报告和 Slides 全面重写，11章/45页+29页，编译通过 |
+| 20:35 | Milestone | M03 started | auto-continue 进入 Knowledge hook integration，当前步骤 `write_tests` |
+| 20:35 | Milestone | M02 completed | 报告已生成，helper/index/compact 交付完成 |
+| 20:32 | Step | M02 run_tests_green | 定向 8/8、核心 113/113、回归 62/62、配置/plugin/diff 校验通过 |
+| 20:29 | Step | M02 implement | 已实现 normalization、append、index rebuild、compact render 和 helper API 文档 |
+| 20:23 | Step | M02 run_tests_red | 红灯符合预期：M02 helper exports 尚未实现 |
+| 20:20 | Step | M02 review_tests | 测试合同审查通过，准备红灯验证 |
+| 20:16 | Step | M02 write_tests | 已新增 normalization、append、index、compact、state boundary 测试 |
+| 20:12 | Milestone | M02 started | 进入 Knowledge helpers and compact index，当前步骤 `write_tests` |
 | 19:41 | Milestone | M01 completed | 报告已生成，pipeline 暂停在 M02 前，可用 `/hw:resume` 继续 |
 | 19:41 | Step | M01 review_code | 范围审查通过：合同层完成，hook 行为留给后续 Milestone |
 | 19:41 | Step | M01 run_tests_green | 定向测试、核心测试 110/110、配置校验、diff check、回归 62/62 通过 |
@@ -47,6 +57,7 @@
 | P003 | closed | — | OpenCode config schema 修复 |
 | P004 | closed | — | C2 报告与 slides 优化 |
 | P005 | closed | 15:51 | OpenCode model status display |
+| P006 | closed | 20:40 | V4 报告和 Slides 全面重写（11章/45页+29页） |
 
 ## Deferred 项
 - 暂无。
