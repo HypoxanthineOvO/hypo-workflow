@@ -1,4 +1,32 @@
 entries:
+  - id: "REL-1002"
+    type: release
+    ref: "v10.0.2"
+    status: completed
+    timestamp: "2026-05-02T17:40:43+08:00"
+    summary: "Prepared v10.0.2 with C2 rename, C3 archive, external docs index, and archived-artifact regression updates."
+    report: "CHANGELOG.md"
+    tests: "claude plugin validate .; bash scripts/validate-config.sh .pipeline/config.yaml; node --test core/test/*.test.js; python3 tests/run_regression.py; git diff --check"
+    trigger: user
+    related_milestone: "C3"
+  - id: "C3-ARCHIVE"
+    type: cycle_archive
+    ref: "C3"
+    status: completed
+    timestamp: "2026-05-02T16:46:03+08:00"
+    summary: "Archived C3 OpenCode Multi-Agent Matrix and V10 Analysis Preset runtime artifacts after cycle close."
+    report: ".pipeline/archives/C3-opencode-multi-agent-matrix-and-v10-analysis-preset/summary.md"
+    trigger: user
+    related_milestone: null
+  - id: "PLAN-REVIEW-C3-ARCH-DOCS"
+    type: plan_review
+    ref: "C3"
+    status: completed
+    timestamp: "2026-05-02T16:46:03+08:00"
+    summary: "Refreshed C3 architecture baseline and external docs index with official OpenCode Config, Agents, Models, CLI, Server, SDK, MCP, and Context7 lookup surfaces."
+    report: ".pipeline/architecture.md"
+    trigger: user
+    related_milestone: "C3"
   - id: "REL-1001"
     type: release
     ref: "v10.0.1"

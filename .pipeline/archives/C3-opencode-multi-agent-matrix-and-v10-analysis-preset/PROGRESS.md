@@ -1,6 +1,6 @@
 # Hypo-Workflow C3 OpenCode Multi-Agent Matrix and V10 Analysis Preset — 开发进度
 
-> 最后更新：16:02 | 状态：已完成 | 进度：12/12 Milestone
+> 最后更新：16:46 | 状态：已完成 | 进度：12/12 Milestone
 
 ## 当前状态
 
@@ -27,6 +27,7 @@
 
 | 时间 | 类型 | 事件 | 结果 |
 |---|---|---|---|
+| 16:46 | Plan Review | C3 architecture/docs index refreshed | 更新 `.pipeline/architecture.md`、`references/external-docs-index.md`、`references/opencode-spec.md`，纳入 OpenCode 官方 Config/Agents/Models/CLI/Server/SDK/MCP/Context7 查询入口 |
 | 16:02 | Release | v10.0.1 local release | OpenCode provider-qualified model IDs、TUI 模型显示、s57 HOME 隔离；core 105/105、scenario 62/62 通过 |
 | 15:51 | Patch | P005 closed | OpenCode 界面显示当前模型和 Subagent 子模型 |
 | 14:42 | Release | v10.0.0 local release | 修复旧 C2 fixture 测试后，core 103/103、scenario 62/62、diff check 通过；准备本地分发 |

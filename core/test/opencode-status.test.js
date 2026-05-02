@@ -283,7 +283,7 @@ function cycleYaml() {
   return `
 cycle:
   number: 2
-  name: New Cycle
+  name: Maintainability, Observability, and Showcase Expansion
   status: active
 `;
 }

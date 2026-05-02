@@ -138,7 +138,10 @@ test("batch plan keeps analysis fields and C3 queue policy has no confirm gates"
   assert.equal(artifacts.queue.features[0].analysis_kind, "metric");
   assert.match(artifacts.markdown, /Analysis Kind/);
 
-  const queueText = await readFile(".pipeline/feature-queue.yaml", "utf8");
+  const queueText = await readFile(
+    ".pipeline/archives/C3-opencode-multi-agent-matrix-and-v10-analysis-preset/feature-queue.yaml",
+    "utf8",
+  );
   const queue = parseYaml(queueText);
   assert.equal(queue.defaults.default_gate, "auto");
   assert.equal(queue.defaults.auto_chain, true);

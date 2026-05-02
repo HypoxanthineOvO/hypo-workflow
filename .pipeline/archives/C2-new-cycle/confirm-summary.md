@@ -3,7 +3,7 @@
 ## Project
 
 - Name: Hypo-Workflow C2 Maintainability, Observability, Batch Plan, and Showcase
-- Cycle: C2 — New Cycle
+- Cycle: C2 — Maintainability, Observability, and Showcase Expansion
 - Preset: tdd
 - Milestones: 12
 - Mode: interactive planning completed through P2; P3 artifacts generated after user confirmation.

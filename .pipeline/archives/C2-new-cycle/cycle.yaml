@@ -1,6 +1,6 @@
 cycle:
   number: 2
-  name: "New Cycle"
+  name: "Maintainability, Observability, and Showcase Expansion"
   type: feature
   status: completed
   started: "2026-04-30T16:17:46+00:00"

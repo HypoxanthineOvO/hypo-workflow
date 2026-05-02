@@ -1,5 +1,25 @@
 # Changelog
 
+## v10.0.2 - 2026-05-02
+
+### Documentation
+
+- Renamed C2 to `Maintainability, Observability, and Showcase Expansion` across archived Cycle metadata, confirm summary, project summary, and status fixtures.
+- Added `references/external-docs-index.md` as the official documentation lookup index for OpenCode Config, Agents, Models, CLI, Server, SDK, MCP, and Context7.
+- Updated the C3 architecture baseline with a completed Plan Review and archived C3 runtime context.
+
+### Lifecycle
+
+- Archived C3 runtime artifacts into `.pipeline/archives/C3-opencode-multi-agent-matrix-and-v10-analysis-preset/`.
+- Updated project summary and lifecycle log to reflect three completed archived Cycles and no active Cycle.
+
+### Tests
+
+- Updated C3 queue, metrics, progress, and design validation to read archived artifacts after Cycle close.
+- Core Node suite: 105/105 passing.
+- Scenario regression: 62/62 passing.
+- Claude plugin validation and config validation passing.
+
 ## v10.0.1 - 2026-05-02
 
 ### Fixes

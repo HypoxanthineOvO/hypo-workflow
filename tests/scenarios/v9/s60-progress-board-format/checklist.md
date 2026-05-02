@@ -4,4 +4,4 @@ Validate that `PROGRESS.md` keeps the human-readable board layout instead of dri
 
 - `references/progress-spec.md` requires board-style summary.
 - Patch Fix instructions update the Patch table and timeline instead of appending one-line entries.
-- Current `.pipeline/PROGRESS.md` contains top metadata, Milestone table, timeline table, Patch table, and Deferred section.
+- Archived C3 `PROGRESS.md` contains top metadata, Milestone table, timeline table, Patch table, and Deferred section.

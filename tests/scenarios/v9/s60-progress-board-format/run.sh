@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../../../.." && pwd)"
 cd "$ROOT"
 
-progress=".pipeline/PROGRESS.md"
+progress=".pipeline/archives/C3-opencode-multi-agent-matrix-and-v10-analysis-preset/PROGRESS.md"
 spec="references/progress-spec.md"
 patch_skill="skills/patch/SKILL.md"
 

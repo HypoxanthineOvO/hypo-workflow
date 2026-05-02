@@ -10,6 +10,8 @@ test -f templates/analysis/report.md
 test -f templates/analysis/ledger.yaml
 test -f references/analysis-ledger-spec.md
 
-! rg -n "gate: confirm" .pipeline/feature-queue.yaml >/dev/null
-rg -n "default_gate: auto" .pipeline/feature-queue.yaml >/dev/null
-rg -n "auto_chain: true" .pipeline/feature-queue.yaml >/dev/null
+queue=".pipeline/archives/C3-opencode-multi-agent-matrix-and-v10-analysis-preset/feature-queue.yaml"
+
+! rg -n "gate: confirm" "$queue" >/dev/null
+rg -n "default_gate: auto" "$queue" >/dev/null
+rg -n "auto_chain: true" "$queue" >/dev/null

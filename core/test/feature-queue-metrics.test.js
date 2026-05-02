@@ -76,8 +76,9 @@ test("metrics spec documents duration token cost fallback", async () => {
 });
 
 test("feature queue and metrics fixtures are present", async () => {
-  const queue = await readFile(".pipeline/feature-queue.yaml", "utf8");
-  const metrics = await readFile(".pipeline/metrics.yaml", "utf8");
+  const archive = ".pipeline/archives/C3-opencode-multi-agent-matrix-and-v10-analysis-preset";
+  const queue = await readFile(`${archive}/feature-queue.yaml`, "utf8");
+  const metrics = await readFile(`${archive}/metrics.yaml`, "utf8");
   const parsedQueue = parseYaml(queue);
 
   assert.match(queue, /decompose_mode: upfront/);

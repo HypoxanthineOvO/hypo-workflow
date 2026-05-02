@@ -15,6 +15,6 @@ rg -q '### Confirm' plan/PLAN-SKILL.md
 rg -q 'append mode' plan/PLAN-SKILL.md
 rg -q 'Append conflict rules' plan/PLAN-SKILL.md
 rg -q '\.plan-state/' .gitignore
-test -f .pipeline/design-spec.md
+test -f .pipeline/archives/C3-opencode-multi-agent-matrix-and-v10-analysis-preset/design-spec.md
 
 echo "s17-plan-review: PASS"

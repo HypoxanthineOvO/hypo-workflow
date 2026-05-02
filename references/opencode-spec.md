@@ -8,14 +8,20 @@ V8.4 parity is tracked in [`opencode-parity.md`](./opencode-parity.md).
 
 | Area | Official docs | V9 interpretation |
 |---|---|---|
+| Config and schema | https://opencode.ai/docs/config/ and https://opencode.ai/config.json | Root `opencode.json` must stay OpenCode-schema-compatible; HW-private matrix, guard, and auto-continue metadata belongs in `.opencode/hypo-workflow.json`. |
 | Plugins and events | https://opencode.ai/docs/plugins/ | Native extension point for file guards, event listeners, context injection, auto-continue, and custom tools. |
+| TUI plugins | https://opencode.ai/docs/tui/ | Native TUI extension surface for sidebar/footer/home/session prompt status panels. |
 | Slash commands | https://opencode.ai/docs/commands/ | Native command surface for `/hw-*` files. |
 | Agents and subagents | https://opencode.ai/docs/agents/ | Native primary agents and subagents replace HW-owned delegation prompts on OpenCode. |
 | Tools | https://opencode.ai/docs/tools/ | Native `question` and `todowrite` tools are required for Plan and execution discipline. |
 | Permissions | https://opencode.ai/docs/permissions | Native allow/ask/deny permission model backs file guard and setup defaults. |
 | Rules/instructions | https://opencode.ai/docs/rules | Native `AGENTS.md` and instruction loading carry persistent agent guidance. |
-| MCP | https://opencode.ai/docs/mcp-servers/ | Optional external-tool channel, not required for V9 parity. |
-| Models | https://opencode.ai/docs/models/ | Native model/provider/variant config is used before HW implements any router. |
+| MCP | https://opencode.ai/docs/mcp-servers/ | Optional external-tool channel, not required for parity; Context7 can be used for docs lookup when enabled. |
+| Models | https://opencode.ai/docs/models/ | Native provider-qualified model IDs, variants, and model option config are used before HW implements any router. |
+| CLI | https://opencode.ai/docs/cli/ | `opencode models --refresh`, `opencode run`, and `opencode serve` are the source for smoke-test and setup guidance. |
+| Server and SDK | https://opencode.ai/docs/server/ and https://opencode.ai/docs/sdk/ | Programmatic integration should prefer the OpenAPI/SDK surface instead of scraping TUI state. |
+
+See also [`external-docs-index.md`](./external-docs-index.md) for the cross-platform official docs lookup map.
 
 ## Capability Classification
 

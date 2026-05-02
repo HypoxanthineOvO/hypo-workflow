@@ -6,7 +6,7 @@
 
 Plan -> Execute -> Review -> Report -> Recover -> Showcase
 
-[![Version](https://img.shields.io/badge/version-10.0.1-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-10.0.2-blue)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex%20%7C%20OpenCode-purple)](#平台支持)
 
@@ -987,7 +987,7 @@ opencode
 
 当前回归会在检测到 `opencode` 可用时自动运行 `opencode debug config`，确保 `opencode.json`、`.opencode/agents/*.md`、commands 和 plugin scaffold 能被真实 OpenCode runtime 解析。
 
-设计基线见 [`references/opencode-spec.md`](references/opencode-spec.md)、[`references/platform-capabilities.md`](references/platform-capabilities.md)、[`references/v9-architecture.md`](references/v9-architecture.md)、[`references/opencode-command-map.md`](references/opencode-command-map.md) 和 [`references/opencode-parity.md`](references/opencode-parity.md)。
+设计基线见 [`references/opencode-spec.md`](references/opencode-spec.md)、[`references/external-docs-index.md`](references/external-docs-index.md)、[`references/platform-capabilities.md`](references/platform-capabilities.md)、[`references/v9-architecture.md`](references/v9-architecture.md)、[`references/opencode-command-map.md`](references/opencode-command-map.md) 和 [`references/opencode-parity.md`](references/opencode-parity.md)。
 
 V9 的第一批共享 helper 位于 [`core/`](core/)。`core/bin/hw-core` 只负责读取配置、生成 command map、输出 rules summary 和渲染 OpenCode artifacts；它不是 runner，也不会执行 Milestone。
 
@@ -1026,6 +1026,12 @@ git diff --check
 ---
 
 ## Changelog
+
+### v10.0.2
+
+- Renamed C2 to `Maintainability, Observability, and Showcase Expansion` across archived Cycle metadata and project summary indexes.
+- Archived C3 runtime artifacts after Plan Review and added an external official-docs index for OpenCode Config, Agents, Models, CLI, Server, SDK, MCP, and Context7.
+- Updated regression fixtures and scenarios to read C3 queue, metrics, progress, and design artifacts from the archive after Cycle close.
 
 ### v10.0.1
 
