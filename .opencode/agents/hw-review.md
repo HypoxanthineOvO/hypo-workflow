@@ -1,6 +1,7 @@
 ---
 description: Audit, review, and architecture drift analysis.
 mode: subagent
+model: openai/gpt-5.5
 permission:
   read: allow
   grep: allow

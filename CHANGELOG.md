@@ -1,5 +1,19 @@
 # Changelog
 
+## v10.0.1 - 2026-05-02
+
+### Fixes
+
+- Fixed OpenCode agent frontmatter to render known model IDs in `provider/model` form, including MiMo and DeepSeek custom providers.
+- Added OpenCode TUI status visibility for the current agent/model, latest active subagent/model, and configured subagent model matrix.
+- Isolated the OpenCode events/file-guard regression scenario from local global profile settings.
+
+### Tests
+
+- Core Node suite: 105/105 passing.
+- Scenario regression: 62/62 passing.
+- OpenCode sync and `hw-build` smoke tests passing against `/home/heyx/Hypo-Agent`.
+
 ## v10.0.0 - 2026-05-02
 
 ### Features

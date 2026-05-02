@@ -1,13 +1,13 @@
 ---
 description: Pipeline execution, patch fix, debug, release, and showcase generation.
 mode: primary
-model: gpt-5.4
+model: mimo/mimo-v2.5-pro
 permission:
   read: allow
   grep: allow
   glob: allow
-  edit: ask
-  bash: ask
+  edit: allow
+  bash: allow
   todowrite: allow
 ---
 

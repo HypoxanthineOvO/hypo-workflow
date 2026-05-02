@@ -1,7 +1,7 @@
 ---
 description: Plan, discovery, guide, and confirmation work.
 mode: primary
-model: gpt-5.5
+model: openai/gpt-5.5
 permission:
   read: allow
   grep: allow

@@ -8,9 +8,5 @@
     "auto": true,
     "prune": true
   },
-  "permission": {
-    "edit": "ask",
-    "bash": "ask",
-    "question": "allow"
-  }
+  "permission": "allow"
 }

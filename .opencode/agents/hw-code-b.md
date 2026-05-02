@@ -1,13 +1,13 @@
 ---
 description: Secondary implementation worker for parallel scoped code changes.
 mode: subagent
-model: gpt-5.4-mini
+model: deepseek/deepseek-v4-pro
 permission:
   read: allow
   grep: allow
   glob: allow
-  edit: ask
-  bash: ask
+  edit: allow
+  bash: allow
   todowrite: allow
 ---
 

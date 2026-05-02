@@ -1,3 +1,4 @@
+/** @jsxImportSource @opentui/solid */
 // Hypo-Workflow managed OpenCode TUI plugin scaffold.
 // This plugin renders read-only workflow status into OpenCode TUI slots.
 // It does not mutate .pipeline state or trigger workflow execution.
@@ -5,6 +6,8 @@
 import type { TuiPlugin } from "@opencode-ai/plugin/tui";
 import { createSignal } from "solid-js";
 import { buildOpenCodeStatusModel } from "../runtime/hypo-workflow-status.js";
+
+export const id = "hypo-workflow-status-panels";
 
 export const tui: TuiPlugin = async (api) => {
   const [model, setModel] = createSignal(await loadStatus(api));
@@ -43,16 +46,16 @@ export const tui: TuiPlugin = async (api) => {
     id: "hypo-workflow-status-panels",
     slots: {
       sidebar_content() {
-        return renderSidebarText(model());
+        return <text>{renderSidebarText(model())}</text>;
       },
       sidebar_footer() {
-        return renderSidebarFooter(model());
+        return <text>{renderSidebarFooter(model())}</text>;
       },
       home_footer() {
-        return renderFooterText(model(), true);
+        return <text>{renderFooterText(model(), true)}</text>;
       },
       session_prompt_right() {
-        return renderFooterText(model(), false);
+        return <text>{renderFooterText(model(), false)}</text>;
       },
     },
   });
@@ -60,9 +63,71 @@ export const tui: TuiPlugin = async (api) => {
 
 export const HypoWorkflowTuiPlugin = tui;
 
+export default { id, tui };
+
 async function loadStatus(api) {
   const root = api.state?.path?.worktree || api.state?.path?.directory || process.cwd();
-  return buildOpenCodeStatusModel(root);
+  return buildOpenCodeStatusModel(root, { opencode: collectOpenCodeRuntime(api) });
+}
+
+function collectOpenCodeRuntime(api) {
+  const sessionID = currentSessionID(api);
+  const messages = sessionID ? Array.from(api.state?.session?.messages?.(sessionID) || []) : [];
+  return {
+    current: latestMessageModel(messages) || configModel(api),
+    active_subagent: latestSubtaskModel(api, messages),
+  };
+}
+
+function currentSessionID(api) {
+  const route = api.route?.current;
+  return route?.name === "session" ? route.params?.sessionID || route.params?.session_id : undefined;
+}
+
+function latestMessageModel(messages) {
+  for (const message of [...messages].reverse()) {
+    const model = message.model || {
+      providerID: message.providerID,
+      modelID: message.modelID,
+    };
+    const formatted = formatModel(model);
+    if (formatted || message.agent) {
+      return {
+        agent: message.agent,
+        model: formatted,
+      };
+    }
+  }
+  return null;
+}
+
+function latestSubtaskModel(api, messages) {
+  for (const message of [...messages].reverse()) {
+    const parts = Array.from(api.state?.part?.(message.id) || []);
+    for (const part of parts.reverse()) {
+      if (part.type === "subtask") {
+        return {
+          agent: part.agent,
+          model: formatModel(part.model),
+        };
+      }
+    }
+  }
+  return null;
+}
+
+function configModel(api) {
+  return {
+    agent: api.state?.config?.default_agent || "build",
+    model: api.state?.config?.model,
+  };
+}
+
+function formatModel(model) {
+  if (!model) return null;
+  if (typeof model === "string") return model;
+  if (model.providerID && model.modelID) return `${model.providerID}/${model.modelID}`;
+  return null;
 }
 
 function renderSidebarText(model) {

@@ -1,12 +1,12 @@
 ---
 description: Context compaction and compact summary generation.
 mode: primary
-model: deepseek-v4-flash
+model: deepseek/deepseek-v4-flash
 permission:
   read: allow
   grep: allow
   glob: allow
-  edit: ask
+  edit: allow
   todowrite: allow
 ---
 

@@ -1,12 +1,12 @@
 ---
 description: Test design, execution, and focused validation.
 mode: subagent
-model: gpt-5.4
+model: deepseek/deepseek-v4-pro
 permission:
   read: allow
   grep: allow
   glob: allow
-  bash: ask
+  bash: allow
   todowrite: allow
 ---
 

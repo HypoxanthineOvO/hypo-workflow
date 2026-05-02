@@ -147,7 +147,7 @@ export async function checkReadmeFreshness(readmeFile = "README.md", options = {
 }
 
 function renderBadges(context) {
-  const version = context.version || "10.0.0";
+  const version = context.version || "10.0.1";
   return [
     `[![Version](https://img.shields.io/badge/version-${version}-blue)](.claude-plugin/plugin.json)`,
     "[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)",
@@ -196,7 +196,7 @@ function renderReleaseSummary() {
 }
 
 function renderVersionHistory(context) {
-  const version = context.version || "10.0.0";
+  const version = context.version || "10.0.1";
   return `Current release: v${version}. See CHANGELOG and README changelog section for recent milestone history.`;
 }
 

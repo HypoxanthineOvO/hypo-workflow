@@ -1,12 +1,12 @@
 ---
 description: Symptom-driven debugging with hypothesis tracking and user Ask gates.
 mode: subagent
-model: gpt-5.4
+model: openai/gpt-5.5
 permission:
   read: allow
   grep: allow
   glob: allow
-  bash: ask
+  bash: allow
   todowrite: allow
   question: allow
 ---

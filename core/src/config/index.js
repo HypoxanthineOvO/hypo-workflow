@@ -3,7 +3,7 @@ import { dirname } from "node:path";
 import { DEFAULT_ANALYSIS_INTERACTION } from "../analysis/index.js";
 
 export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
-  version: "10.0.0",
+  version: "10.0.1",
   agent: {
     platform: "codex",
     model: "default",

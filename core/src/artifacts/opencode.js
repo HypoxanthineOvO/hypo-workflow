@@ -6,7 +6,7 @@ import { commandMap } from "../commands/index.js";
 import { DEFAULT_GLOBAL_CONFIG, mergeConfig } from "../config/index.js";
 import { normalizeProfile, selectProfile } from "../profile/index.js";
 
-const HW_VERSION = "10.0.0";
+const HW_VERSION = "10.0.1";
 const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(MODULE_DIR, "..", "..", "..");
 

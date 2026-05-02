@@ -1,4 +1,14 @@
 entries:
+  - id: "REL-1001"
+    type: release
+    ref: "v10.0.1"
+    status: completed
+    timestamp: "2026-05-02T16:02:00+08:00"
+    summary: "Prepared local v10.0.1 release with OpenCode provider-qualified model IDs, TUI model visibility, and deterministic s57 regression isolation."
+    report: "CHANGELOG.md"
+    tests: "claude plugin validate .; node --test core/test/*.test.js; python3 tests/run_regression.py; readme-freshness; git diff --check"
+    trigger: user
+    related_milestone: "P005"
   - id: "P005-FIX"
     type: patch_fix
     patch: P005

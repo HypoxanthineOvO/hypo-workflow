@@ -1,7 +1,7 @@
 ---
 description: Report synthesis, evidence summaries, and final delivery notes.
 mode: primary
-model: gpt-5.4-mini
+model: deepseek/deepseek-v4-flash
 permission:
   read: allow
   grep: allow

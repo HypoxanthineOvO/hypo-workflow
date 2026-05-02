@@ -6,7 +6,7 @@
 
 Plan -> Execute -> Review -> Report -> Recover -> Showcase
 
-[![Version](https://img.shields.io/badge/version-10.0.0-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-10.0.1-blue)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex%20%7C%20OpenCode-purple)](#平台支持)
 
@@ -1026,6 +1026,12 @@ git diff --check
 ---
 
 ## Changelog
+
+### v10.0.1
+
+- Fixed OpenCode agent frontmatter so known models render as provider-qualified IDs such as `mimo/mimo-v2.5-pro`.
+- Added OpenCode TUI model visibility for the current agent/model, latest active subagent/model, and configured subagent model matrix.
+- Isolated the OpenCode event/file-guard scenario from machine-level global profile settings.
 
 ### v10.0.0
 

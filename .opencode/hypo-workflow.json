@@ -1,9 +1,9 @@
 {
-  "profile": "standard",
+  "profile": "automation",
   "autoContinue": true,
   "auto_continue": {
     "enabled": true,
-    "mode": "safe"
+    "mode": "aggressive"
   },
   "compaction": {
     "effective_context_target": 900000
@@ -16,19 +16,19 @@
       "model": "deepseek-v4-flash"
     },
     "test": {
-      "model": "gpt-5.4"
+      "model": "deepseek-v4-pro"
     },
     "code-a": {
-      "model": "gpt-5.4"
+      "model": "mimo-v2.5-pro"
     },
     "code-b": {
-      "model": "gpt-5.4-mini"
+      "model": "deepseek-v4-pro"
     },
     "debug": {
-      "model": "gpt-5.4"
+      "model": "gpt-5.5"
     },
     "report": {
-      "model": "gpt-5.4-mini"
+      "model": "deepseek-v4-flash"
     }
   },
   "analysis": {
@@ -57,7 +57,7 @@
     }
   },
   "fileGuard": "standard",
-  "version": "10.0.0",
+  "version": "10.0.1",
   "commandMap": [
     {
       "canonical": "/hw:start",
