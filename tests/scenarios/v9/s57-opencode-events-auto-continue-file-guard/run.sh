@@ -4,8 +4,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../../../.." && pwd)"
 cd "$ROOT"
 
+tmp_home="$(mktemp -d)"
 tmp_project="$(mktemp -d)"
-node cli/bin/hypo-workflow init-project --platform opencode --project "$tmp_project" >/tmp/hw-s57-init.log
+HOME="$tmp_home" node cli/bin/hypo-workflow setup --platform opencode --yes >/tmp/hw-s57-setup.log
+HOME="$tmp_home" node cli/bin/hypo-workflow init-project --platform opencode --project "$tmp_project" >/tmp/hw-s57-init.log
 plugin="$tmp_project/.opencode/plugins/hypo-workflow.ts"
 metadata="$tmp_project/.opencode/hypo-workflow.json"
 

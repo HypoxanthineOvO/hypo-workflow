@@ -67,8 +67,11 @@ NODE
 
 legacy="$(mktemp -d)"
 node cli/bin/hypo-workflow sync --platform opencode --project "$legacy" >/dev/null
-grep -Fq "model: gpt-5.5" "$legacy/.opencode/agents/hw-plan.md"
-grep -Fq "model: gpt-5.4-mini" "$legacy/.opencode/agents/hw-code-b.md"
+grep -Fq "model: openai/gpt-5.5" "$legacy/.opencode/agents/hw-plan.md"
+grep -Fq "model: mimo/mimo-v2.5-pro" "$legacy/.opencode/agents/hw-build.md"
+grep -Fq "model: deepseek/deepseek-v4-pro" "$legacy/.opencode/agents/hw-test.md"
+grep -Fq "model: deepseek/deepseek-v4-pro" "$legacy/.opencode/agents/hw-code-b.md"
+grep -Fq "model: deepseek/deepseek-v4-flash" "$legacy/.opencode/agents/hw-report.md"
 
 node - "$legacy" <<'NODE'
 const fs = require("fs");
@@ -79,6 +82,9 @@ if (metadata.compaction.effective_context_target !== 900000) {
 }
 if (metadata.agents.compact.model !== "deepseek-v4-flash") {
   throw new Error("default compact model missing");
+}
+if (metadata.providers !== undefined) {
+  throw new Error("default sync should not render project providers");
 }
 NODE
 

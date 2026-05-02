@@ -5,6 +5,8 @@
   "private": true,
   "description": "Hypo-Workflow managed OpenCode adapter scaffold",
   "dependencies": {
+    "@opentui/core": "^0.1.105",
+    "@opentui/solid": "^0.1.105",
     "@opencode-ai/plugin": "^1.14.30",
     "solid-js": "^1.9.7"
   }

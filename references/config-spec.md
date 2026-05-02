@@ -67,14 +67,15 @@ Resolve every configurable value in this order:
 | analysis destructive/external boundary | `execution.analysis.boundaries.destructive_or_external_side_effects` | `execution.analysis.boundaries.destructive_or_external_side_effects` | `ask` |
 | OpenCode auto-continue | `opencode.auto_continue` | `opencode.auto_continue` | `true` |
 | OpenCode profile | `opencode.profile` | `opencode.profile` | `standard` |
+| OpenCode providers | `opencode.providers` | `opencode.providers` | placeholders for GPT 5.5, Opus 4.6, MiMo V2.5 Pro/Flash, DeepSeek V4 Pro/Flash |
 | OpenCode compaction target | `opencode.compaction.effective_context_target` | `opencode.compaction.effective_context_target` | `900000` |
 | OpenCode plan model | `opencode.agents.plan.model` | `opencode.agents.plan.model` | `gpt-5.5` |
 | OpenCode compact model | `opencode.agents.compact.model` | `opencode.agents.compact.model` | `deepseek-v4-flash` |
-| OpenCode test model | `opencode.agents.test.model` | `opencode.agents.test.model` | `gpt-5.4` |
-| OpenCode code-a model | `opencode.agents.code-a.model` | `opencode.agents.code-a.model` | `gpt-5.4` |
-| OpenCode code-b model | `opencode.agents.code-b.model` | `opencode.agents.code-b.model` | `gpt-5.4-mini` |
-| OpenCode debug model | `opencode.agents.debug.model` | `opencode.agents.debug.model` | `gpt-5.4` |
-| OpenCode report model | `opencode.agents.report.model` | `opencode.agents.report.model` | `gpt-5.4-mini` |
+| OpenCode test model | `opencode.agents.test.model` | `opencode.agents.test.model` | `deepseek-v4-pro` |
+| OpenCode code-a model | `opencode.agents.code-a.model` | `opencode.agents.code-a.model` | `mimo-v2.5-pro` |
+| OpenCode code-b model | `opencode.agents.code-b.model` | `opencode.agents.code-b.model` | `deepseek-v4-pro` |
+| OpenCode debug model | `opencode.agents.debug.model` | `opencode.agents.debug.model` | `gpt-5.5` |
+| OpenCode report model | `opencode.agents.report.model` | `opencode.agents.report.model` | `deepseek-v4-flash` |
 | test profile enabled | `execution.test_profiles.enabled` | `execution.test_profiles.enabled` | `true` |
 | test profile selection mode | `execution.test_profiles.selection` | `execution.test_profiles.selection` | `auto` |
 | test profile compose | `execution.test_profiles.compose` | `execution.test_profiles.compose` | `true` |
@@ -187,6 +188,27 @@ batch:
 opencode:
   auto_continue: true
   profile: standard
+  providers:
+    openai:
+      models:
+        gpt-5.5:
+          name: GPT 5.5
+    anthropic:
+      models:
+        claude-opus-4.6:
+          name: Claude Opus 4.6
+    mimo:
+      models:
+        mimo-v2.5-pro:
+          name: MiMo V2.5 Pro
+        mimo-v2.5-flash:
+          name: MiMo V2.5 Flash
+    deepseek:
+      models:
+        deepseek-v4-pro:
+          name: DeepSeek V4 Pro
+        deepseek-v4-flash:
+          name: DeepSeek V4 Flash
   compaction:
     effective_context_target: 900000
   agents:
@@ -195,15 +217,15 @@ opencode:
     compact:
       model: deepseek-v4-flash
     test:
-      model: gpt-5.4
+      model: deepseek-v4-pro
     code-a:
-      model: gpt-5.4
+      model: mimo-v2.5-pro
     code-b:
-      model: gpt-5.4-mini
+      model: deepseek-v4-pro
     debug:
-      model: gpt-5.4
+      model: gpt-5.5
     report:
-      model: gpt-5.4-mini
+      model: deepseek-v4-flash
 rules:
   extends: recommended
   rules: {}

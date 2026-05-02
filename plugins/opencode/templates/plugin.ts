@@ -2,7 +2,7 @@
 // This plugin bridges native OpenCode events to Hypo-Workflow file contracts.
 // It does not implement business tasks, write product code, fix bugs, or generate reports by itself.
 
-export const metadata = {
+const metadata = {
   name: "hypo-workflow",
   version: "__HW_VERSION__",
   commandMap: __COMMAND_MAP_JSON__,
@@ -30,7 +30,7 @@ const autoContinue = {
   mode: "safe",
 };
 
-export const server = async ({ client }) => {
+const server = async ({ client }) => {
   const log = createLogger(client);
   return {
     event: async ({ event }) => {
@@ -65,7 +65,9 @@ export const server = async ({ client }) => {
   };
 };
 
-export async function activate({ app, client }) {
+export default server;
+
+async function activate({ app, client }) {
   const log = createLogger(client);
 
   app.on("command.executed", async (event) => {

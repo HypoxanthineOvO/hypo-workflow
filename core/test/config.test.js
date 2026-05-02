@@ -52,10 +52,11 @@ test("default config exposes OpenCode model matrix defaults", () => {
   assert.equal(DEFAULT_GLOBAL_CONFIG.opencode.compaction.effective_context_target, 900000);
   assert.equal(DEFAULT_GLOBAL_CONFIG.opencode.agents.plan.model, "gpt-5.5");
   assert.equal(DEFAULT_GLOBAL_CONFIG.opencode.agents.compact.model, "deepseek-v4-flash");
-  assert.equal(DEFAULT_GLOBAL_CONFIG.opencode.agents.test.model, "gpt-5.4");
-  assert.equal(DEFAULT_GLOBAL_CONFIG.opencode.agents["code-a"].model, "gpt-5.4");
-  assert.equal(DEFAULT_GLOBAL_CONFIG.opencode.agents["code-b"].model, "gpt-5.4-mini");
-  assert.equal(DEFAULT_GLOBAL_CONFIG.opencode.agents.report.model, "gpt-5.4-mini");
+  assert.equal(DEFAULT_GLOBAL_CONFIG.opencode.agents.test.model, "deepseek-v4-pro");
+  assert.equal(DEFAULT_GLOBAL_CONFIG.opencode.agents["code-a"].model, "mimo-v2.5-pro");
+  assert.equal(DEFAULT_GLOBAL_CONFIG.opencode.agents["code-b"].model, "deepseek-v4-pro");
+  assert.equal(DEFAULT_GLOBAL_CONFIG.opencode.agents.debug.model, "gpt-5.5");
+  assert.equal(DEFAULT_GLOBAL_CONFIG.opencode.agents.report.model, "deepseek-v4-flash");
 });
 
 test("loadConfig accepts project overrides for OpenCode model matrix", async () => {
@@ -79,5 +80,5 @@ test("loadConfig accepts project overrides for OpenCode model matrix", async () 
   assert.equal(loaded.opencode.agents.plan.model, "custom-plan");
   assert.equal(loaded.opencode.agents.compact.model, "custom-flash");
   assert.equal(loaded.opencode.agents.test.model, "custom-test");
-  assert.equal(loaded.opencode.agents["code-a"].model, "gpt-5.4");
+  assert.equal(loaded.opencode.agents["code-a"].model, "mimo-v2.5-pro");
 });

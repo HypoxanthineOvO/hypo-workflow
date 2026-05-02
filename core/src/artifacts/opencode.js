@@ -68,6 +68,7 @@ export const OPENCODE_AGENTS = Object.freeze([
   },
   {
     name: "hw-review",
+    modelRole: "debug",
     mode: "subagent",
     tools: ["read", "grep", "glob", "todowrite"],
     description: "Audit, review, and architecture drift analysis.",
@@ -98,12 +99,15 @@ export async function writeOpenCodeArtifacts(outDir, options = {}) {
   const adapterDir = outDir.endsWith(".opencode") ? outDir : join(outDir, ".opencode");
   const projectRoot = dirname(adapterDir);
   const rootConfig = renderOpenCodeConfig(profile, { includePlugins: true });
+  const tuiConfig = renderOpenCodeTuiConfig();
   const adapterConfig = renderOpenCodeConfig(profile, { includePlugins: false });
   await mkdir(join(adapterDir, "commands"), { recursive: true });
   await mkdir(join(adapterDir, "agents"), { recursive: true });
   await mkdir(join(adapterDir, "plugins"), { recursive: true });
   await mkdir(join(adapterDir, "runtime"), { recursive: true });
+  await mkdir(join(adapterDir, "tui"), { recursive: true });
   await rm(join(adapterDir, "plugins", "hypo-workflow-status.js"), { force: true });
+  await rm(join(adapterDir, "plugins", "hypo-workflow-tui.tsx"), { force: true });
 
   for (const command of commandMap("opencode")) {
     await writeFile(
@@ -114,12 +118,13 @@ export async function writeOpenCodeArtifacts(outDir, options = {}) {
   }
 
   for (const agent of renderableOpenCodeAgents(profile)) {
-    await writeFile(join(adapterDir, "agents", `${agent.name}.md`), renderAgent(agent), "utf8");
+    await writeFile(join(adapterDir, "agents", `${agent.name}.md`), renderAgent(agent, profile), "utf8");
   }
 
   await writeFile(join(adapterDir, "opencode.json"), `${JSON.stringify(adapterConfig, null, 2)}\n`, "utf8");
   await writeFile(join(adapterDir, "hypo-workflow.json"), `${JSON.stringify(renderHypoWorkflowMetadata(profile), null, 2)}\n`, "utf8");
   await writeFile(join(projectRoot, "opencode.json"), `${JSON.stringify(rootConfig, null, 2)}\n`, "utf8");
+  await writeFile(join(projectRoot, "tui.json"), `${JSON.stringify(tuiConfig, null, 2)}\n`, "utf8");
   await writeFile(join(projectRoot, "AGENTS.md"), await renderAgentsInstruction(), "utf8");
   await writeFile(join(adapterDir, "package.json"), await renderTemplate("package.json"), "utf8");
   await writeFile(join(adapterDir, "plugins", "hypo-workflow.ts"), await renderPluginTemplate(), "utf8");
@@ -129,7 +134,7 @@ export async function writeOpenCodeArtifacts(outDir, options = {}) {
     "utf8",
   );
   await writeFile(
-    join(adapterDir, "plugins", "hypo-workflow-tui.tsx"),
+    join(adapterDir, "tui", "hypo-workflow-tui.tsx"),
     await renderOpenCodeStatusTuiPlugin(),
     "utf8",
   );
@@ -165,17 +170,36 @@ function commandSpecificGuidance(command) {
   return "";
 }
 
-export function renderAgent(agent) {
-  const model = agent.model ? `model: ${agent.model}\n` : "";
-  return `---\ndescription: ${agent.description}\nmode: ${agent.mode}\n${model}permission:\n${renderAgentPermissions(agent.tools)}---\n\n# ${agent.name}\n\n${agent.description}\n\nAnalysis boundary: read \`.opencode/hypo-workflow.json.analysis\` before executing an \`analysis\` preset. Manual mode denies code changes, hybrid mode confirms before code changes, and auto mode may change code within the configured boundaries. Always honor restart, system dependency, network, destructive, and external side-effect boundaries.\n\nUse \`question\` / Ask for required user interaction and \`todowrite\` for visible plan discipline when those tools are available. For Plan work, every P1/P2/P3/P4 checkpoint must be represented in the todo state before continuing.\n`;
+export function renderAgent(agent, profile = {}) {
+  const model = agent.model ? `model: ${renderOpenCodeModelId(agent.model, profile)}\n` : "";
+  return `---\ndescription: ${agent.description}\nmode: ${agent.mode}\n${model}permission:\n${renderAgentPermissions(agent.tools, profile)}---\n\n# ${agent.name}\n\n${agent.description}\n\nAnalysis boundary: read \`.opencode/hypo-workflow.json.analysis\` before executing an \`analysis\` preset. Manual mode denies code changes, hybrid mode confirms before code changes, and auto mode may change code within the configured boundaries. Always honor restart, system dependency, network, destructive, and external side-effect boundaries.\n\nUse \`question\` / Ask for required user interaction and \`todowrite\` for visible plan discipline when those tools are available. For Plan work, every P1/P2/P3/P4 checkpoint must be represented in the todo state before continuing.\n`;
 }
 
-function renderAgentPermissions(tools) {
+export function renderOpenCodeModelId(model, profile = {}) {
+  if (!model || model.includes("/")) return model;
+  const provider = providerForModel(model, profile);
+  return provider ? `${provider}/${model}` : model;
+}
+
+function providerForModel(model, profile = {}) {
+  for (const [providerId, provider] of Object.entries(profile.providers || {})) {
+    if (provider?.models && Object.prototype.hasOwnProperty.call(provider.models, model)) {
+      return providerId;
+    }
+  }
+  if (model.startsWith("gpt-")) return "openai";
+  if (model.startsWith("claude-")) return "anthropic";
+  if (model.startsWith("mimo-")) return "mimo";
+  if (model.startsWith("deepseek-")) return "deepseek";
+  return undefined;
+}
+
+function renderAgentPermissions(tools, profile = {}) {
   const permissions = new Map();
   for (const tool of tools) {
     const key = permissionKeyForTool(tool);
     if (!key) continue;
-    permissions.set(key, defaultPermissionForKey(key));
+    permissions.set(key, defaultPermissionForKey(key, profile));
   }
   return [...permissions.entries()]
     .map(([key, value]) => `  ${key}: ${value}\n`)
@@ -192,7 +216,8 @@ function permissionKeyForTool(tool) {
   return null;
 }
 
-function defaultPermissionForKey(key) {
+function defaultPermissionForKey(key, profile = {}) {
+  if (profile.permissions === "allow-safe") return "allow";
   return key === "bash" || key === "edit" ? "ask" : "allow";
 }
 
@@ -204,19 +229,32 @@ export function renderOpenCodeConfig(profile, options = {}) {
       auto: true,
       prune: true,
     },
-    permission: {
-      edit: profile.permissions === "allow-safe" ? "allow" : "ask",
-      bash: profile.permissions === "allow-safe" ? "ask" : "ask",
-      question: "allow",
-    },
+    permission: profile.permissions === "allow-safe"
+      ? "allow"
+      : {
+          edit: "ask",
+          bash: "ask",
+          question: "allow",
+        },
   };
   if (options.includePlugins !== false) {
     config.plugin = [
       ".opencode/plugins/hypo-workflow.ts",
-      ".opencode/plugins/hypo-workflow-tui.tsx",
     ];
   }
+  if (profile.providers && Object.keys(profile.providers).length) {
+    config.provider = profile.providers;
+  }
   return config;
+}
+
+export function renderOpenCodeTuiConfig() {
+  return {
+    $schema: "https://opencode.ai/tui.json",
+    plugin: [
+      ".opencode/tui/hypo-workflow-tui.tsx",
+    ],
+  };
 }
 
 export function renderHypoWorkflowMetadata(profile) {
@@ -229,6 +267,7 @@ export function renderHypoWorkflowMetadata(profile) {
       mode: normalized.auto_continue_mode || "safe",
     },
     compaction: normalized.compaction,
+    providers: normalized.providers,
     agents: normalized.agents,
     analysis: normalizeAnalysisInteraction(normalized.analysis || {}),
     fileGuard: normalized.file_guard,
@@ -259,6 +298,7 @@ function withOpenCodeRenderingDefaults(profile) {
   return {
     ...profile,
     compaction: mergeConfig(DEFAULT_GLOBAL_CONFIG.opencode.compaction, profile.compaction || {}),
+    providers: profile.providers,
     agents: mergeConfig(DEFAULT_GLOBAL_CONFIG.opencode.agents, profile.agents || {}),
   };
 }

@@ -56,19 +56,19 @@ export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
         model: "deepseek-v4-flash",
       },
       test: {
-        model: "gpt-5.4",
+        model: "deepseek-v4-pro",
       },
       "code-a": {
-        model: "gpt-5.4",
+        model: "mimo-v2.5-pro",
       },
       "code-b": {
-        model: "gpt-5.4-mini",
+        model: "deepseek-v4-pro",
       },
       debug: {
-        model: "gpt-5.4",
+        model: "gpt-5.5",
       },
       report: {
-        model: "gpt-5.4-mini",
+        model: "deepseek-v4-flash",
       },
     },
   },

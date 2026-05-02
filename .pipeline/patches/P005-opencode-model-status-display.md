@@ -8,7 +8,7 @@
 - 测试: ✅ `node --test core/test/*.test.js`、OpenCode sync smoke、`opencode run --agent hw-build` 通过
 - 关联: core/test/opencode-status.test.js, core/test/opencode-panels.test.js, references/opencode-spec.md
 - resolved_by: P005
-- commit: `0fc5ac4`
+- commit: `4cf9681`
 - related: []
 - supersedes: []
 

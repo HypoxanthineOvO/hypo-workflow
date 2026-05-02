@@ -47,5 +47,6 @@ export function selectProfile(config = {}) {
     auto_continue: opencode.auto_continue ?? profile.auto_continue,
     compaction: opencode.compaction || profile.compaction,
     agents: opencode.agents || profile.agents,
+    providers: opencode.providers || profile.providers,
   };
 }

@@ -12,6 +12,36 @@ $defs:
       model:
         type: string
         minLength: 1
+  opencode_provider_model:
+    type: object
+    additionalProperties: true
+    properties:
+      name:
+        type: string
+        minLength: 1
+      limit:
+        type: object
+        additionalProperties: true
+      modalities:
+        type: object
+        additionalProperties: true
+  opencode_provider:
+    type: object
+    additionalProperties: true
+    properties:
+      npm:
+        type: string
+        minLength: 1
+      name:
+        type: string
+        minLength: 1
+      options:
+        type: object
+        additionalProperties: true
+      models:
+        type: object
+        additionalProperties:
+          $ref: "#/$defs/opencode_provider_model"
   analysis_boundary_value:
     type: string
     enum:
@@ -242,6 +272,10 @@ $defs:
             type: string
             minLength: 1
             default: standard
+          providers:
+            type: object
+            additionalProperties:
+              $ref: "#/$defs/opencode_provider"
           compaction:
             type: object
             additionalProperties: false
@@ -276,15 +310,15 @@ $defs:
               compact:
                 model: deepseek-v4-flash
               test:
-                model: gpt-5.4
+                model: deepseek-v4-pro
               code-a:
-                model: gpt-5.4
+                model: mimo-v2.5-pro
               code-b:
-                model: gpt-5.4-mini
+                model: deepseek-v4-pro
               debug:
-                model: gpt-5.4
+                model: gpt-5.5
               report:
-                model: gpt-5.4-mini
+                model: deepseek-v4-flash
         default:
           auto_continue: true
           profile: standard
@@ -296,15 +330,15 @@ $defs:
             compact:
               model: deepseek-v4-flash
             test:
-              model: gpt-5.4
+              model: deepseek-v4-pro
             code-a:
-              model: gpt-5.4
+              model: mimo-v2.5-pro
             code-b:
-              model: gpt-5.4-mini
+              model: deepseek-v4-pro
             debug:
-              model: gpt-5.4
+              model: gpt-5.5
             report:
-              model: gpt-5.4-mini
+              model: deepseek-v4-flash
       release:
         type: object
         additionalProperties: false
@@ -1298,6 +1332,10 @@ properties:
         type: string
         minLength: 1
         default: standard
+      providers:
+        type: object
+        additionalProperties:
+          $ref: "#/$defs/opencode_provider"
       compaction:
         type: object
         additionalProperties: false
@@ -1332,15 +1370,15 @@ properties:
           compact:
             model: deepseek-v4-flash
           test:
-            model: gpt-5.4
+            model: deepseek-v4-pro
           code-a:
-            model: gpt-5.4
+            model: mimo-v2.5-pro
           code-b:
-            model: gpt-5.4-mini
+            model: deepseek-v4-pro
           debug:
-            model: gpt-5.4
+            model: gpt-5.5
           report:
-            model: gpt-5.4-mini
+            model: deepseek-v4-flash
   notion:
     type: object
     additionalProperties: false
