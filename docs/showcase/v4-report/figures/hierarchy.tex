@@ -1,0 +1,17 @@
+\begin{tikzpicture}[
+  level 1/.style={sibling distance=40mm},
+  level 2/.style={sibling distance=25mm},
+  level 3/.style={sibling distance=18mm},
+  every node/.style={draw=HWGray, rounded corners=1.5mm, fill=HWBlue!8, font=\small, align=center, minimum height=7mm},
+  edge from parent/.style={draw=HWGray, -Latex}
+]
+\node {Project}
+  child { node {Cycle}
+    child { node {Feature} 
+      child { node {Milestone} 
+        child { node {Step} }
+      }
+    }
+    child { node[fill=HWGold!18] {Patch\\(side track)} }
+  };
+\end{tikzpicture}

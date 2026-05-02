@@ -1,0 +1,23 @@
+\begin{tikzpicture}[
+  file/.style={draw=HWGray, rounded corners=1.5mm, fill=white, minimum width=31mm, minimum height=8mm, align=left, font=\small},
+  group/.style={draw=HWGray, rounded corners=2mm, dashed, inner sep=4mm},
+  arrow/.style={-Latex, thick, draw=HWGray}
+]
+\node[file] (config) at (0,2.2) {\texttt{config.yaml}\\planning / execution policy};
+\node[file] (state) at (0,0.8) {\texttt{state.yaml}\\active prompt \& step};
+\node[file] (cycle) at (0,-0.6) {\texttt{cycle.yaml}\\delivery boundary};
+\node[file] (queue) at (0,-2.0) {\texttt{feature-queue.yaml}\\batch schedule};
+\node[file] (metrics) at (5.5,2.2) {\texttt{metrics.yaml}\\duration / tokens / cost};
+\node[file] (log) at (5.5,0.8) {\texttt{log.yaml}\\lifecycle events};
+\node[file] (progress) at (5.5,-0.6) {\texttt{PROGRESS.md}\\human-readable board};
+\node[file] (reports) at (5.5,-2.0) {\texttt{reports/*.md}\\milestone evidence};
+
+\node[group, fit=(config)(state)(cycle)(queue)(metrics)(log)(progress)(reports), label=above:{\small \texttt{.pipeline/} file protocol}] {};
+
+\draw[arrow] (config.east) -- (metrics.west);
+\draw[arrow] (state.east) -- (log.west);
+\draw[arrow] (cycle.east) -- (progress.west);
+\draw[arrow] (queue.east) -- (reports.west);
+\draw[arrow] (state) -- (progress);
+\draw[arrow] (queue) -- (metrics);
+\end{tikzpicture}
