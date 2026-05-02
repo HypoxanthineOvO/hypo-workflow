@@ -1,0 +1,19 @@
+\begin{tikzpicture}[
+  box/.style={draw=HWGray, rounded corners=2mm, minimum width=31mm, minimum height=9mm, text width=30mm, align=center, font=\small},
+  wide/.style={box, minimum width=39mm, text width=37mm},
+  arrow/.style={-Latex, thick, draw=HWGray}
+]
+\node[wide, fill=HWBlue!10] (user) at (0,2.4) {OpenCode\\slash command};
+\node[wide, fill=HWBlue!10] (cmd) at (-2.4,0.8) {\texttt{.opencode/commands}\\command mapping};
+\node[wide, fill=HWBlue!10] (agent) at (2.4,0.8) {\texttt{.opencode/agents}\\role binding};
+\node[wide, fill=HWGold!18] (plugin) at (-2.7,-0.9) {plugin hooks\\events / guards / context};
+\node[wide, fill=white] (runtime) at (2.7,-0.9) {status runtime\\read-only model};
+\node[wide, fill=white] (pipeline) at (0,-2.6) {\texttt{.pipeline/}\\source of truth};
+
+\draw[arrow] (user) -- (cmd);
+\draw[arrow] (user) -- (agent);
+\draw[arrow] (cmd) -- (plugin);
+\draw[arrow] (plugin) -- (runtime);
+\draw[arrow] (runtime) -- (pipeline);
+\draw[arrow] (agent) -- (pipeline);
+\end{tikzpicture}

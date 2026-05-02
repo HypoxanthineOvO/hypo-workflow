@@ -1,0 +1,15 @@
+\begin{tikzpicture}
+\matrix[
+  matrix of nodes,
+  nodes={draw=HWGray, minimum width=24mm, minimum height=7mm, align=center, font=\scriptsize, text width=23mm},
+  row 1/.style={nodes={fill=HWBlue!16, font=\bfseries\scriptsize}},
+  column 1/.style={nodes={fill=HWBlue!8, font=\bfseries\scriptsize}},
+  row sep=-\pgflinewidth,
+  column sep=-\pgflinewidth
+] {
+  Profile & Discover focus & Required evidence & Forbidden shortcut \\
+  webapp & browser path / visual effect & E2E + browser interaction + screenshot & unit test only \\
+  agent-service & CLI shape / shared core & CLI plan + shared core + real CLI run & split core logic \\
+  research & baseline / direction / script & before + after + delta + script execution & diff-only acceptance \\
+};
+\end{tikzpicture}

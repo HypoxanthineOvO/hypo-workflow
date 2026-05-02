@@ -1,0 +1,20 @@
+\begin{tikzpicture}[
+  node distance=11mm and 13mm,
+  box/.style={draw=HWGray, rounded corners=2mm, fill=HWBlue!8, minimum width=25mm, minimum height=10mm, align=center, font=\normalsize\bfseries},
+  note/.style={font=\small, text=HWGray},
+  arrow/.style={-Latex, very thick, draw=HWGray}
+]
+\node[box] (plan) {Plan};
+\node[box, right=of plan] (execute) {Execute};
+\node[box, right=of execute] (review) {Review};
+\node[box, right=of review] (report) {Report};
+\node[box, below=12mm of report, fill=HWBlue!12] (evaluate) {Evaluate};
+\node[box, below=12mm of execute, fill=HWGold!18] (recover) {Recover\\Retry};
+\draw[arrow] (plan) -- (execute);
+\draw[arrow] (execute) -- (review);
+\draw[arrow] (review) -- (report);
+\draw[arrow] (report) -- (evaluate);
+\draw[arrow] (evaluate.west) -- node[above, note]{need fix} (recover.east);
+\draw[arrow] (recover.north) -- (execute.south);
+\draw[arrow] (evaluate.south) |- ++(0,-0.9) -| node[pos=0.28, below, note]{pass / continue} (plan.south);
+\end{tikzpicture}

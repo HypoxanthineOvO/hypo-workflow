@@ -1,0 +1,475 @@
+\documentclass[theme=workflow,aspectratio=169,fontset=tech]{Hypo-Slide}
+
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{multicol}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{adjustbox}
+\usetikzlibrary{arrows.meta,positioning,fit,matrix,trees,calc}
+\pgfplotsset{compat=1.18}
+\graphicspath{{assets/}{figures/}{vendor/Hypoxanthine-LaTeX/assets/}}
+
+\HypoSlideSetup{
+  title={Hypo-Workflow V4},
+  subtitle={从 V4.5 到 C4 的指令演进与 Harness Engineering 实践},
+  author={Hypo-Workflow Project Draft},
+  institute={Technical Report / Lab Presentation},
+  date={2026-05-02},
+  cover={assets/opencode-observability.png}
+}
+\author[Project Draft]{Hypo-Workflow Project Draft}
+
+\newcommand{\WorkflowSectionFrame}[3]{
+  \begin{frame}[plain]
+    \begin{tikzpicture}[remember picture,overlay]
+      \node[anchor=center,inner sep=0pt] at (current page.center)
+        {\includegraphics[width=\paperwidth,height=\paperheight]{#3}};
+      \fill[white,opacity=0.90] (current page.north west) rectangle ([xshift=0.76\paperwidth]current page.south west);
+      \fill[WorkflowBlue!80] ([xshift=0.055\paperwidth,yshift=-0.18\paperheight]current page.north west) rectangle ++(0.008\paperwidth,-0.28\paperheight);
+    \end{tikzpicture}
+    \vspace*{1.5cm}
+    \hspace*{0.8cm}
+    \begin{minipage}{0.64\paperwidth}
+      {\Large\bfseries\color{WorkflowBlue}#1\par}
+      \vspace{0.6cm}
+      {\fontsize{22}{28}\selectfont\bfseries\color{WorkflowText}#2\par}
+    \end{minipage}
+  \end{frame}
+}
+
+\newcommand{\CommandSlide}[4]{
+  \begin{frame}{#1: \texttt{#2}}
+    \begin{block}{出生 (V#3)}
+      #4
+    \end{block}
+  \end{frame}
+}
+
+\AtBeginSection[]{
+  \begin{frame}{报告结构}
+    \small
+    \tableofcontents[currentsection,hideothersubsections]
+  \end{frame}
+}
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+\begin{frame}{报告结构}
+  \small
+  \tableofcontents
+\end{frame}
+
+%% ============================================================
+%% Part I — 动机与问题
+%% ============================================================
+
+\section{动机与问题}
+\WorkflowSectionFrame{Part I}{从七段使用路径到 Harness Engineering}{assets/opencode-observability.png}
+
+\begin{frame}{七段使用路径}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.50\textwidth}
+    \begin{block}{工具迁移链}
+      \begin{enumerate}
+        \item 网页 GPT / Cherry Studio —— 能问、能写，但不能稳定持有项目约束
+        \item GitHub Copilot —— 局部补全很强，规划能力和项目级记忆不足
+        \item AntiGravity —— 自动化感强但缺少可验证约束
+        \item Claude Code —— 真正的拐点，但行为无法固化
+        \item Skills / Superpowers —— 先计划后做，单次优秀长期偏航
+        \item Notion AI + Codex —— 规划空间与执行空间分离，但人当胶水
+      \end{enumerate}
+    \end{block}
+    \column{0.44\textwidth}
+    \begin{alertblock}{核心教训}
+      规划、状态、检索和执行必须通过协议连接，而不是靠人反复搬运 Prompt。
+    \end{alertblock}
+    \begin{block}{最终形态}
+      Hypo-Workflow —— 文件优先协议 + 可恢复状态 + 审计证据
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{AI Coding 的六个核心约束}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.48\textwidth}
+    \begin{enumerate}
+      \item \textbf{上下文窗口有限} —— 只能稳定看见局部
+      \item \textbf{重复喂 Prompt 成本累加} —— 人当外部内存
+      \item \textbf{模型会自证正确} —— 错误越走越深
+    \end{enumerate}
+    \column{0.48\textwidth}
+    \begin{enumerate}\setcounter{enumi}{3}
+      \item \textbf{风格行为难以固化} —— 每次对话重新对齐
+      \item \textbf{多轮迭代后偏航} —— 设计意图蒸发
+      \item \textbf{中断频繁} —— 不知道做到哪、下一步怎么走
+    \end{enumerate}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Harness Engineering：四个核心原则}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.48\textwidth}
+    \begin{block}{1. 执行闭环}
+      Plan → Execute → Review → Report → Evaluate → Recover
+    \end{block}
+    \vspace{0.3cm}
+    \begin{block}{2. 分层建模}
+      Project / Cycle / Feature / Milestone / Step / Patch
+    \end{block}
+    \column{0.48\textwidth}
+    \begin{block}{3. 行为固化}
+      Skills、rules、hooks、templates、adapters
+    \end{block}
+    \vspace{0.3cm}
+    \begin{block}{4. 自动维护}
+      README / PROGRESS / reports / queue / release checks
+    \end{block}
+  \end{columns}
+  \vspace{0.3cm}
+  \begin{block}{关键判断}
+    Hypo-Workflow \textbf{不是 Runner} —— 真正执行代码生成的是宿主 Agent (Codex / Claude / OpenCode)。
+    Workflow 提供的是约束协议和状态系统，而不是替代 Agent 本身。
+  \end{block}
+\end{frame}
+
+\begin{frame}{文件优先协议：\texttt{.pipeline/} 是事实来源}
+  \centering
+  \begin{tikzpicture}[node distance=0.8cm, auto]
+    \node[draw, rectangle, rounded corners, fill=WorkflowBlue!10, text width=3cm, align=center] (state) {\texttt{state.yaml}\\\small 当前进度};
+    \node[draw, rectangle, rounded corners, fill=WorkflowBlue!10, text width=3cm, align=center, right=of state] (cycle) {\texttt{cycle.yaml}\\\small Cycle 边界};
+    \node[draw, rectangle, rounded corners, fill=WorkflowBlue!10, text width=3cm, align=center, below=of state] (queue) {\texttt{feature-queue.yaml}\\\small Feature 调度};
+    \node[draw, rectangle, rounded corners, fill=WorkflowBlue!10, text width=3cm, align=center, below=of cycle] (progress) {\texttt{PROGRESS.md}\\\small 人类可读进度};
+    \node[draw, rectangle, rounded corners, fill=WorkflowBlue!10, text width=3cm, align=center, right=of progress, xshift=0.3cm] (reports) {\texttt{reports/*.md}\\\small Milestone 报告};
+    \node[draw, rectangle, rounded corners, fill=WorkflowGold!20, text width=3cm, align=center, below=of reports] (knowledge) {\texttt{knowledge/}\\\small Knowledge Ledger (C4)};
+  \end{tikzpicture}
+\end{frame}
+
+%% ============================================================
+%% Part II — 指令按版本演进
+%% ============================================================
+
+\section{指令演进：V4.5–V6}
+\WorkflowSectionFrame{Part II-1}{V4.5–V6：基础工作流的建立}{assets/opencode-observability.png}
+
+\begin{frame}{V4.5：Pipeline 基础命令}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.48\textwidth}
+    \begin{block}{\texttt{/hw:start} — 启动 Pipeline}
+      从当前状态开始执行。读取 \texttt{state.yaml}，推进到下一个待执行 Milestone。
+    \end{block}
+    \vspace{0.2cm}
+    \begin{block}{\texttt{/hw:resume} — 恢复中断}
+      专门处理"之前已在执行、但被中断"的场景。不覆盖已完成工作。
+    \end{block}
+    \vspace{0.2cm}
+    \begin{block}{\texttt{/hw:status} — 查看进度}
+      只读命令，不修改状态。汇总 Cycle、Milestone、Step、Patches。
+    \end{block}
+    \column{0.48\textwidth}
+    \begin{block}{为什么要这些命令？}
+      \begin{itemize}
+        \item 长流程执行总会中断 —— 用户切走、模型出错、上下文爆满
+        \item 如果每次中断都要从头来，系统不可用
+        \item 需要"现在在做什么"的即时回答
+      \end{itemize}
+    \end{block}
+    \begin{alertblock}{V4.5 同时出厂}
+      \texttt{/hw:stop}, \texttt{/hw:skip}, \texttt{/hw:report}, \texttt{/hw:config}
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{V5：四阶段规划系统}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.52\textwidth}
+    \begin{block}{\texttt{/hw:plan} — P1-P4 规划流程}
+      \begin{enumerate}
+        \item \textbf{Discover (P1)}：需求澄清、约束收集
+        \item \textbf{Decompose (P2)}：拆分为可审查的 Milestone
+        \item \textbf{Generate (P3)}：生成 prompt + 架构基线
+        \item \textbf{Confirm (P4)}：用户最终确认
+      \end{enumerate}
+      强制最少提问轮数，渐进式需求挖掘。
+    \end{block}
+    \column{0.44\textwidth}
+    \begin{block}{为什么需要 Plan？}
+      V4.5 解决了"能跑"，但用户常常还没想清楚就触发了 start。
+      规划不是一次性活动，需要多次交互、逐步明确。
+    \end{block}
+    \vspace{0.3cm}
+    \begin{block}{\texttt{/hw:review}}
+      确认规划与现有架构没有冲突 —— 架构追踪。
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{V6：工程化入口}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.32\textwidth}
+    \begin{block}{\texttt{/hw:init}}
+      项目初始化。生成 \texttt{.pipeline/} 骨架和所有必要文件。
+    \end{block}
+    \column{0.32\textwidth}
+    \begin{block}{\texttt{/hw:audit}}
+      预防性审计。六维度扫描（安全/错误/架构/性能/测试/质量）。
+    \end{block}
+    \column{0.32\textwidth}
+    \begin{block}{\texttt{/hw:release}}
+      回���+版本+changelog+tag。发布全流程自动化。
+    \end{block}
+  \end{columns}
+  \vspace{0.3cm}
+  \begin{alertblock}{V6 同时出厂}
+    \texttt{/hw:check}, \texttt{/hw:debug}, \texttt{/hw:help}, \texttt{/hw:reset} —— 让 V6 成为工程化入口的关键版本。
+  \end{alertblock}
+\end{frame}
+
+%% ============================================================
+\section{指令演进：V7–C1}
+\WorkflowSectionFrame{Part II-2}{V7–C1：工程质量与 OpenCode 适配}{assets/opencode-observability.png}
+
+\begin{frame}{V7–V8：交互增强与修复旁路}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.48\textwidth}
+    \begin{block}{\texttt{/hw:dashboard} (V7)}
+      WebUI 实时面板。Pipeline 状态、Cycle 进度、Patch 列表、日志和报告，一个页面呈现。
+    \end{block}
+    \vspace{0.2cm}
+    \begin{block}{\texttt{/hw:patch} (V8)}
+      \textbf{最深刻的教训。}轻量修复旁路，不强制走 TDD。独立状态（open → closed），不阻塞主 Milestone。
+    \end{block}
+    \column{0.48\textwidth}
+    \begin{block}{\texttt{/hw:compact} (V8.2)}
+      大型运行时文件的紧凑视图。解决上下文窗口膨胀问题。
+    \end{block}
+    \vspace{0.2cm}
+    \begin{block}{\texttt{/hw:showcase} (V8.3)}
+      项目物料一键生成 —— 技术报告、Slides、README。
+    \end{block}
+    \vspace{0.2cm}
+    \begin{block}{\texttt{/hw:guide} (V8.2) + \texttt{/hw:rules} (V8.4)}
+      交互式引导 + 规则管理。
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{C1：从 Codex 到 OpenCode}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.52\textwidth}
+    \begin{block}{为什么迁移？}
+      OpenCode 提供了 Codex 没有的能力：
+      \begin{itemize}
+        \item 原生 slash command —— 30 条命令直接映射
+        \item Agent 系统 —— 与 Step 委派天然对应
+        \item Event policy / file guard —— 精细行为控制
+        \item TUI 扩展 —— 终端内状态展示
+      \end{itemize}
+    \end{block}
+    \column{0.44\textwidth}
+    \begin{block}{核心架构原则}
+      \begin{enumerate}
+        \item 一套 contract，多平台 adapter
+        \item OpenCode 原生能力优先
+        \item \texttt{core/} 只承载 deterministic helper
+        \item 实际推理和执行仍由宿主 Agent 完成
+      \end{enumerate}
+    \end{block}
+    \begin{block}{工程交付}
+      C1 共 10 个 Milestone：adapter + CLI + 30 条 command mapping + plugin scaffold + TUI + docs + release。
+    \end{block}
+  \end{columns}
+\end{frame}
+
+%% ============================================================
+\section{指令演进：C2–C4}
+\WorkflowSectionFrame{Part II-3}{C2–C4：复杂工程需求驱动}{assets/opencode-observability.png}
+
+\begin{frame}{C2：批量规划与工程自动化}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.52\textwidth}
+    \begin{block}{\texttt{/hw:plan --batch}}
+      Feature Queue —— 一次规划多个 Feature。
+      \begin{itemize}
+        \item 统一 Discover 访谈
+        \item 生成 Feature Queue + Mermaid 依赖图
+        \item auto\_chain 自动推进
+        \item 支持 upfront / just\_in\_time 分解
+      \end{itemize}
+    \end{block}
+    \column{0.44\textwidth}
+    \begin{block}{同期创新}
+      \begin{itemize}
+        \item \textbf{Progressive Discover}：大问题 → 小细节逐步深化
+        \item \textbf{Test Profiles}：按工作类别定义验收标准
+        \item \textbf{Skill 体系}：质量治理与格式规范化
+        \item \textbf{README 自动更新}：入口文档不再慢半拍
+      \end{itemize}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{C3：多 Agent 协作与分析预设}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.48\textwidth}
+    \begin{block}{\texttt{/hw:chat} (C3 需求页)}
+      轻量追加对话模式。不创建新 Milestone，不走 TDD。
+      适合：补充讨论、小追问、确认细节。
+    \end{block}
+    \vspace{0.2cm}
+    \begin{block}{Agent 矩阵}
+      7 个专用 subagent：
+      \texttt{hw-code-a}, \texttt{hw-code-b}, \texttt{hw-explore}, \texttt{hw-review}, \texttt{hw-test}, \texttt{hw-docs}, \texttt{hw-debug}
+    \end{block}
+    \column{0.48\textwidth}
+    \begin{block}{Analysis Preset}
+      为审计/调试/根因分析定义标准化 workflow：
+      \begin{enumerate}
+        \item define\_question
+        \item gather\_context
+        \item hypothesize
+        \item experiment
+        \item interpret
+        \item conclude
+      \end{enumerate}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{C4：验收、探索与知识管理}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.32\textwidth}
+    \begin{block}{\texttt{/hw:accept} / \texttt{/hw:reject}}
+      C4b 验收闭环。Cycle/Patch 验收通过或打回。
+    \end{block}
+    \vspace{0.2cm}
+    \begin{block}{\texttt{/hw:explore}}
+      C4c 探索模式。受控新项目探索，产出结构化报告。
+    \end{block}
+    \column{0.32\textwidth}
+    \begin{block}{\texttt{/hw:knowledge}}
+      C4d Knowledge Ledger 用户接口。项目知识持久化检索。
+    \end{block}
+    \vspace{0.2cm}
+    \begin{block}{\texttt{/hw:sync}}
+      C4d 显式状态同步。多入口一致性。
+    \end{block}
+    \column{0.32\textwidth}
+    \begin{alertblock}{C4 全局创新}
+      \begin{itemize}
+        \item Knowledge Ledger —— 项目知识持久化
+        \item Global TUI —— Ink 独立界面
+        \item Acceptance Loop —— 正式验收
+        \item Explore Mode —— 探索工作流
+      \end{itemize}
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+%% ============================================================
+%% Part III — 讨论与展望
+%% ============================================================
+
+\section{讨论与展望}
+\WorkflowSectionFrame{Part III}{讨论、局限性与未来工作}{assets/opencode-observability.png}
+
+\begin{frame}{与其他工具的关系}
+  \centering
+  \begin{tabularx}{0.92\textwidth}{lcccc}
+    \toprule
+    系统 & 规划 & 状态 & 修复 & 核心思路 \\
+    \midrule
+    Cline & 中 & 中 & 无 & 对话式 + Task \\
+    Aider & 弱 & 弱 & 无 & Chat + Map \\
+    SWE-bench & 中 & 弱 & 无 & 评测基准 \\
+    Continue.dev & 弱 & 中 & 无 & IDE 插件 \\
+    \textbf{Hypo-WF} & \textbf{强} & \textbf{强} & \textbf{Patch/Chat} & \textbf{Harness Eng.} \\
+    \bottomrule
+  \end{tabularx}
+  \vspace{0.3cm}
+  \begin{block}{差异化}
+    不是在单点上超越，而是通过\textbf{文件优先协议}把规划、状态、修复、评估、恢复、文档维护组合成闭环。
+  \end{block}
+\end{frame}
+
+\begin{frame}{局限性与未来工作}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.48\textwidth}
+    \begin{block}{当前局限}
+      \begin{enumerate}
+        \item 学习成本 —— P1-P4 和 TDD 对新手偏重
+        \item 平台耦合 —— 主要适配 OpenCode
+        \item 上下文占用 —— 大项目仍不够
+        \item 无分布式协作 —— 单 Agent 限制
+      \end{enumerate}
+    \end{block}
+    \column{0.48\textwidth}
+    \begin{block}{未来方向}
+      \begin{enumerate}
+        \item 多模型 Harness 对比 —— 验证约束层能否降低对智力的依赖
+        \item 跨平台 adapter 矩阵
+        \item Knowledge Ledger 跨项目迁移
+        \item 验收自动化
+        \item 自主探索 → 自动 Plan
+      \end{enumerate}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{核心结论}
+  \begin{block}{三个核心判断}
+    \begin{enumerate}
+      \item \textbf{复杂 AI Coding 的主问题}：不是单次生成质量，而是长期状态管理、约束固化、验证闭环和中断恢复。
+      \item \textbf{Harness Engineering}：围绕模型构建外部约束层，让 AI 始终运行在可审计、可恢复、可迭代的工程轨道上。
+      \item \textbf{演进规律}：AI Coding 工具的进化不是"更聪明的模型替代更老的模型"，而是"更完整的约束层替代更薄弱的约束层"。
+    \end{enumerate}
+  \end{block}
+  \vspace{0.3cm}
+  \begin{alertblock}{从 V4.5 到 C4}
+    32 条命令、4 个完整 Cycle、500+ 跟踪文件 —— Hypo-Workflow 已经从单一 prompt 工具成长为包含命令面、状态协议、平台适配、规则系统和知识管理的完整工程体。
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{命令全景：V4.5 → C4d}
+  \centering
+  \small
+  \begin{tabularx}{0.92\textwidth}{lcl}
+    \toprule
+    \textbf{版本} & \textbf{命令} & \textbf{解决的问题} \\
+    \midrule
+    V4.5 & start, resume, status, stop, skip, report, config & Pipeline 能跑、能恢复、能看 \\
+    V5   & plan, review & 需要规划、需要架构追踪 \\
+    V6   & init, audit, release, check, debug, help, reset & 需要初始化、审计、发布 \\
+    V7   & dashboard, setup & 交互增强、新手友好 \\
+    V8   & patch, compact, guide, showcase, rules & 修复旁路、上下文、引导 \\
+    C1   & 全量 OpenCode 适配 & 平台迁移、slash command 映射 \\
+    C2   & plan --batch & Feature Queue 批量管理 \\
+    C3   & chat & 轻量讨论归档 \\
+    C4b  & accept, reject & 验收闭环 \\
+    C4c  & explore & 探索模式 \\
+    C4d  & knowledge, sync & 知识检索、状态同步 \\
+    \bottomrule
+  \end{tabularx}
+\end{frame}
+
+\begin{frame}[plain]
+  \centering
+  \vspace{2cm}
+  {\Huge\bfseries\color{WorkflowBlue}谢谢}
+  \vspace{1cm}
+
+  {\large Hypo-Workflow V4\\[0.3cm]
+  Report \& Slides —— 2026-05-02\\[0.5cm]
+  \texttt{github.com/LoongWynn/Hypo-Workflow}}
+
+  \vspace{1cm}
+  {\small\color{WorkflowMuted}Harness Engineering for AI-Assisted Development}
+\end{frame}
+
+\end{document}
