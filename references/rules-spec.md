@@ -108,6 +108,7 @@ extends:
 | `review-strictness` | workflow | warn | on-evaluate |
 | `readme-freshness` | release | warn | pre-commit, pre-release |
 | `skill-quality` | quality | warn | pre-milestone, pre-release |
+| `knowledge-ledger-self-check` | hook | warn | post-step, post-milestone |
 | `stop-hook-self-check` | hook | error | post-step |
 | `session-start-context-load` | hook | error | on-session-start |
 

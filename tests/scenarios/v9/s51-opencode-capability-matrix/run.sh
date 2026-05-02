@@ -45,8 +45,8 @@ mapping_count="$(
   ' references/opencode-spec.md
 )"
 
-test "$mapping_count" = "32" || {
-  echo "expected 32 OpenCode command mappings, found $mapping_count" >&2
+test "$mapping_count" = "35" || {
+  echo "expected 35 OpenCode command mappings, found $mapping_count" >&2
   exit 1
 }
 
@@ -54,6 +54,7 @@ for cmd in \
   "/hw:start" "/hw:resume" "/hw:status" "/hw:skip" "/hw:stop" "/hw:report" "/hw:chat" \
   "/hw:plan" "/hw:plan:discover" "/hw:plan:decompose" "/hw:plan:generate" \
   "/hw:plan:confirm" "/hw:plan:extend" "/hw:plan:review" "/hw:cycle" \
+  "/hw:accept" "/hw:reject" \
   "/hw:patch" "/hw:patch fix" "/hw:compact" "/hw:knowledge" "/hw:guide" "/hw:showcase" \
   "/hw:rules" "/hw:init" "/hw:check" "/hw:audit" "/hw:release" "/hw:debug" \
   "/hw:help" "/hw:reset" "/hw:log" "/hw:setup" "/hw:dashboard"

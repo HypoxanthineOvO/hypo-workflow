@@ -1,5 +1,27 @@
 # Changelog
 
+## v10.1.0 - 2026-05-03
+
+### Features
+
+- Completed C4 Knowledge Ledger, Global TUI, Acceptance Loop, Explore Mode, and `/hw:sync` standardization across 14 milestones.
+- Added Knowledge Ledger records, indexes, compact context, SessionStart loading, Stop Hook self-check, and OpenCode workflow-control hooks.
+- Added global config/model pool/project registry actions, Ink TUI snapshot, selected project sync, and CLI package metadata.
+- Added Cycle and Patch acceptance loops with structured rejection feedback, timeout policy/status display, and accept/reject command surfaces.
+- Added Explore Mode contract, isolated global worktrees, dirty-worktree gates, lifecycle status/end/archive, and plan/analysis upgrade contexts.
+- Added `/hw:sync` light/standard/deep modes, shared CLI sync logic, SessionStart light external-change detection, TUI sync action, and OpenCode `/hw-sync` artifact.
+
+### Documentation
+
+- Updated README, command map, Skill inventory, OpenCode parity/spec references, CLI docs, and regression scenarios for 36 user-facing commands.
+- Closed and archived C4 under `.pipeline/archives/C4-knowledge-ledger-global-tui-acceptance-loop-explore-mode/`.
+
+### Tests
+
+- Core Node suite: 156/156 passing.
+- Scenario regression: 62/62 passing.
+- Config validation, OpenCode/root/TUI JSON parse, and `git diff --check` passing.
+
 ## v10.0.2 - 2026-05-02
 
 ### Documentation

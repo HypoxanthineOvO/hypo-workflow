@@ -1,9 +1,9 @@
 {
-  "profile": "automation",
+  "profile": "standard",
   "autoContinue": true,
   "auto_continue": {
     "enabled": true,
-    "mode": "aggressive"
+    "mode": "safe"
   },
   "compaction": {
     "effective_context_target": 900000
@@ -29,6 +29,41 @@
     },
     "report": {
       "model": "deepseek-v4-flash"
+    }
+  },
+  "model_pool": {
+    "roles": {
+      "plan": {
+        "primary": "gpt-5.5",
+        "fallback": [
+          "deepseek-v4-pro"
+        ]
+      },
+      "implement": {
+        "primary": "mimo-v2.5-pro",
+        "fallback": [
+          "deepseek-v4-pro",
+          "mimo-v2.5-pro"
+        ]
+      },
+      "review": {
+        "primary": "gpt-5.5",
+        "fallback": [
+          "deepseek-v4-pro"
+        ]
+      },
+      "evaluate": {
+        "primary": "deepseek-v4-flash",
+        "fallback": [
+          "deepseek-v4-pro"
+        ]
+      },
+      "chat": {
+        "primary": "deepseek-v4-pro",
+        "fallback": [
+          "gpt-5.5"
+        ]
+      }
     }
   },
   "analysis": {
@@ -57,7 +92,7 @@
     }
   },
   "fileGuard": "standard",
-  "version": "10.0.1",
+  "version": "10.1.0",
   "commandMap": [
     {
       "canonical": "/hw:start",
@@ -163,6 +198,34 @@
       "agent": "hw-status",
       "route": "lifecycle",
       "skill": "skills/cycle/SKILL.md"
+    },
+    {
+      "canonical": "/hw:accept",
+      "opencode": "/hw-accept",
+      "agent": "hw-build",
+      "route": "lifecycle",
+      "skill": "skills/accept/SKILL.md"
+    },
+    {
+      "canonical": "/hw:reject",
+      "opencode": "/hw-reject",
+      "agent": "hw-build",
+      "route": "lifecycle",
+      "skill": "skills/reject/SKILL.md"
+    },
+    {
+      "canonical": "/hw:explore",
+      "opencode": "/hw-explore",
+      "agent": "hw-explore",
+      "route": "explore",
+      "skill": "skills/explore/SKILL.md"
+    },
+    {
+      "canonical": "/hw:sync",
+      "opencode": "/hw-sync",
+      "agent": "hw-build",
+      "route": "tool",
+      "skill": "skills/sync/SKILL.md"
     },
     {
       "canonical": "/hw:patch",

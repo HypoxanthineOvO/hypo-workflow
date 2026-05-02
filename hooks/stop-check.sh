@@ -70,6 +70,36 @@ extract_state_current() {
   ' "$file" | trim
 }
 
+extract_rule_severity() {
+  local file="$1"
+  local rule="$2"
+  [[ -f "$file" ]] || return 0
+  awk -v rule="$rule" '
+    /^rules:/ { in_rules=1; next }
+    in_rules && /^[^[:space:]]/ { in_rules=0 }
+    in_rules && match($0, "^[[:space:]]*" rule ":[[:space:]]*(.*)$", m) {
+      value=m[1]
+      gsub(/^[[:space:]"]+|[[:space:]"]+$/, "", value)
+      print value
+      exit
+    }
+  ' "$file"
+}
+
+extract_extends_preset() {
+  local file="$1"
+  [[ -f "$file" ]] || return 0
+  awk '
+    /^extends:[[:space:]]*(.*)$/ {
+      value=$0
+      sub(/^extends:[[:space:]]*/, "", value)
+      gsub(/^[[:space:]"]+|[[:space:]"]+$/, "", value)
+      print value
+      exit
+    }
+  ' "$file"
+}
+
 extract_state_chat() {
   local file="$1"
   local key="$2"
@@ -95,6 +125,62 @@ count_unfinished_milestones() {
     }
     END { print count + 0 }
   ' "$file"
+}
+
+extract_current_milestone_id() {
+  local file="$1"
+  local prompt="$2"
+  awk -v prompt="$prompt" '
+    /^milestones:/ { in_ms=1; next }
+    in_ms && /^[^[:space:]]/ { in_ms=0 }
+    in_ms && match($0, /^[[:space:]]*-[[:space:]]*id:[[:space:]]*(.*)$/, m) {
+      id=m[1]
+      gsub(/^[[:space:]"]+|[[:space:]"]+$/, "", id)
+      next
+    }
+    in_ms && match($0, /^[[:space:]]*prompt_file:[[:space:]]*(.*)$/, m) {
+      prompt_file=m[1]
+      gsub(/^[[:space:]"]+|[[:space:]"]+$/, "", prompt_file)
+      if (prompt_file == prompt || prompt_file == ".pipeline/prompts/" prompt) {
+        print id
+        exit
+      }
+    }
+  ' "$file"
+}
+
+knowledge_record_exists() {
+  local cycle_ref="$1"
+  local milestone_ref="$2"
+  local records_dir="$pipeline_dir/knowledge/records"
+  [[ -d "$records_dir" ]] || return 1
+  local record
+  for record in "$records_dir"/*.yaml; do
+    [[ -f "$record" ]] || continue
+    if grep -Eq "cycle:[[:space:]\"']*${cycle_ref}[\"']?[[:space:]]*$" "$record" \
+      && grep -Eq "milestone:[[:space:]\"']*${milestone_ref}[\"']?[[:space:]]*$" "$record"; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+knowledge_self_check_severity() {
+  local rules_file="$pipeline_dir/rules.yaml"
+  local severity
+  severity="$(extract_rule_severity "$rules_file" knowledge-ledger-self-check)"
+  if [[ -n "$severity" ]]; then
+    printf '%s' "$severity"
+    return 0
+  fi
+
+  local preset
+  preset="$(extract_extends_preset "$rules_file")"
+  if [[ "$preset" == "strict" ]]; then
+    printf 'error'
+  else
+    printf 'warn'
+  fi
 }
 
 file_mtime() {
@@ -276,6 +362,27 @@ report_base="${current_prompt_file%.md}.report.md"
 if [[ "$current_step_index" -ge "$last_step_index" && -n "$current_prompt_file" && ! -f "$reports_dir/$report_base" ]]; then
   emit_block "请生成当前 Prompt 的执行报告后再停止。"
   exit 0
+fi
+
+knowledge_severity="$(knowledge_self_check_severity)"
+if [[ "$knowledge_severity" == "error" && "$current_step_index" -ge "$last_step_index" ]]; then
+  cycle_number=""
+  if [[ -f "$pipeline_dir/cycle.yaml" ]]; then
+    cycle_number="$(extract_section "$pipeline_dir/cycle.yaml" cycle number)"
+  fi
+  if [[ -n "$cycle_number" ]]; then
+    cycle_ref="C${cycle_number#C}"
+  else
+    cycle_ref="C?"
+  fi
+  current_milestone_id="$(extract_current_milestone_id "$state_file" "$current_prompt_file")"
+  if [[ -z "$current_milestone_id" ]]; then
+    current_milestone_id="M?"
+  fi
+  if ! knowledge_record_exists "$cycle_ref" "$current_milestone_id"; then
+    emit_block "Knowledge Ledger self-check: ${cycle_ref}/${current_milestone_id} 可能改变了可复用项目知识。请写入 .pipeline/knowledge/records/ 记录并重建 index/compact，或将 knowledge-ledger-self-check 降级为 warn 后再停止。"
+    exit 0
+  fi
 fi
 
 emit_empty

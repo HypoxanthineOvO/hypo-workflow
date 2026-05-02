@@ -33,6 +33,8 @@ Supported forms:
 - `/hw:patch list [--open] [--severity critical|normal|minor]`
 - `/hw:patch close P{NNN}`
 - `/hw:patch fix P{NNN} [P{NNN} ...]`
+- `/hw:patch accept P{NNN}`
+- `/hw:patch reject P{NNN} "feedback"`
 
 ## Patch File Format
 
@@ -196,6 +198,54 @@ For `/hw:patch fix P001 P003`:
 - `resolved_by`: Cycle and milestone or Patch that resolved it
 - `related`: related Patch IDs
 - `supersedes`: older Patch IDs replaced by this Patch
+- `iteration`: current repair attempt number
+- `acceptance_requested_at`: when manual Patch acceptance was requested
+- `accepted_at`: when the Patch was accepted and closed
+- `rejection_refs`: structured feedback files under `.pipeline/patches/feedback/`
+
+## Patch Acceptance
+
+Patch acceptance is Patch-track state only. It must never write `.pipeline/state.yaml`.
+
+Patch metadata may use these statuses:
+
+- `open`
+- `pending_acceptance`
+- `closed`
+- `rejected`
+
+When manual acceptance mode is active, Patch fix Step 6 ends by setting:
+
+```markdown
+- status: pending_acceptance
+- iteration: 1
+- acceptance_requested_at: 2026-05-03T01:20:00+08:00
+```
+
+`/hw:patch accept P001`:
+
+1. Find `.pipeline/patches/P001-*.md`.
+2. Require `status: pending_acceptance`.
+3. Set `status: closed`.
+4. Set `accepted_at`.
+5. Append `patch_accept` to `.pipeline/log.yaml`.
+6. Update `.pipeline/PROGRESS.md`.
+
+`/hw:patch reject P001 "feedback"`:
+
+1. Find `.pipeline/patches/P001-*.md`.
+2. Require `status: pending_acceptance`.
+3. Write structured feedback to `.pipeline/patches/feedback/P001-rejection-<timestamp>.yaml`.
+4. Set `status: open`.
+5. Increment `iteration`.
+6. Append the feedback path to `rejection_refs`.
+7. Append `patch_reject` to `.pipeline/log.yaml`.
+8. Update `.pipeline/PROGRESS.md`.
+9. When repeated rejection reaches `acceptance.reject_escalation_threshold` or higher, recommend escalation to a Cycle.
+
+The feedback file must include `problem`, `reproduce_steps`, `expected`, `actual`, `context`, `iteration`, and `created_at`. A compatibility `feedback` field may be present for older readers.
+
+The next `/hw:patch fix P001` must read `rejection_refs` and inject the structured rejection context before editing.
 
 ## Relationship To Cycles
 

@@ -7,4 +7,5 @@ hooks:
 check: |
   On session start, resume, clear, or compact, load the pipeline summary and priority context files.
   Prefer compact context views when available and fall back to full files.
+  Load Knowledge Ledger knowledge compact and category indexes, but never raw records by default.
   Inject active always rules into the session context.

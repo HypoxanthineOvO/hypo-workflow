@@ -3,10 +3,10 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { normalizeAnalysisInteraction } from "../analysis/index.js";
 import { commandMap } from "../commands/index.js";
-import { DEFAULT_GLOBAL_CONFIG, mergeConfig } from "../config/index.js";
+import { DEFAULT_GLOBAL_CONFIG, buildModelPoolOpenCodeAgents, mergeConfig } from "../config/index.js";
 import { normalizeProfile, selectProfile } from "../profile/index.js";
 
-const HW_VERSION = "10.0.1";
+const HW_VERSION = "10.1.0";
 const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(MODULE_DIR, "..", "..", "..");
 
@@ -134,6 +134,11 @@ export async function writeOpenCodeArtifacts(outDir, options = {}) {
     "utf8",
   );
   await writeFile(
+    join(adapterDir, "runtime", "hypo-workflow-hooks.js"),
+    await renderOpenCodeHookPolicyModule(),
+    "utf8",
+  );
+  await writeFile(
     join(adapterDir, "tui", "hypo-workflow-tui.tsx"),
     await renderOpenCodeStatusTuiPlugin(),
     "utf8",
@@ -145,7 +150,10 @@ export function renderCommand(command) {
     ? "\nPlan discipline: use `question` / Ask for every hard interactive gate unless automation is explicitly configured, and keep `todowrite` synchronized for P1/P2/P3/P4 checkpoint state. Progressive Discover starts with task category, desired effect, and verification method, then moves through assumptions, ambiguities, tradeoffs, and validation criteria as needed. For `/hw:plan --batch`, collect multiple Features in one Discover pass, then generate Feature Queue tables and Mermaid diagrams according to `batch.decompose_mode`. For `/hw:plan --insert`, convert the natural-language request into a structured queue operation, summarize the queue diff, and wait for explicit confirmation before writing `.pipeline/feature-queue.yaml`.\n"
     : "";
   const routeGuidance = commandSpecificGuidance(command);
-  return `---\nagent: ${command.agent}\ndescription: Hypo-Workflow mapping for ${command.canonical}\n---\n\n# ${command.opencode}\n\nCanonical command: \`${command.canonical}\`\nRoute: \`${command.route}\`\nSkill: \`${command.skill}\`\n\nLoad the corresponding Hypo-Workflow skill instructions from \`${command.skill}\`, then execute the canonical command semantics with any user-provided arguments.${planGuidance}${routeGuidance}\nBefore acting, inspect the relevant context when present:\n\n- \`.pipeline/config.yaml\`\n- \`.pipeline/cycle.yaml\`\n- \`.pipeline/state.yaml\`\n- \`.pipeline/rules.yaml\`\n- current prompt/report files for pipeline commands\n- open patches for Patch commands\n\nKeep this command as an OpenCode-native slash mapping, not a separate runner. The OpenCode Agent performs the work and Hypo-Workflow files remain the source of truth.\n`;
+  const knowledgeContext = command.canonical === "/hw:knowledge"
+    ? "- `.pipeline/knowledge/knowledge.compact.md`\n- `.pipeline/knowledge/index/*.yaml`\n"
+    : "";
+  return `---\nagent: ${command.agent}\ndescription: Hypo-Workflow mapping for ${command.canonical}\n---\n\n# ${command.opencode}\n\nCanonical command: \`${command.canonical}\`\nRoute: \`${command.route}\`\nSkill: \`${command.skill}\`\n\nLoad the corresponding Hypo-Workflow skill instructions from \`${command.skill}\`, then execute the canonical command semantics with any user-provided arguments.${planGuidance}${routeGuidance}\nBefore acting, inspect the relevant context when present:\n\n- \`.pipeline/config.yaml\`\n- \`.pipeline/cycle.yaml\`\n- \`.pipeline/state.yaml\`\n- \`.pipeline/rules.yaml\`\n${knowledgeContext}- current prompt/report files for pipeline commands\n- open patches for Patch commands\n\nKeep this command as an OpenCode-native slash mapping, not a separate runner. The OpenCode Agent performs the work and Hypo-Workflow files remain the source of truth.\n`;
 }
 
 function commandSpecificGuidance(command) {
@@ -166,6 +174,9 @@ function commandSpecificGuidance(command) {
   }
   if (command.canonical === "/hw:showcase") {
     return "\nShowcase lane: Agent generates showcase artifacts; the plugin only provides context and file guard support.\n";
+  }
+  if (command.canonical === "/hw:sync") {
+    return "\nSync lane: support `--light`, standard, and `--deep`; never execute pipeline milestones. SessionStart may only perform light external-change detection and prompt before heavier sync.\n";
   }
   if (command.canonical === "/hw:dashboard") {
     return "\nDashboard lane: dashboard launcher for the existing Hypo-Workflow WebUI; do not reimplement the dashboard in the plugin.\n";
@@ -272,6 +283,7 @@ export function renderHypoWorkflowMetadata(profile) {
     compaction: normalized.compaction,
     providers: normalized.providers,
     agents: normalized.agents,
+    model_pool: normalized.model_pool,
     analysis: normalizeAnalysisInteraction(normalized.analysis || {}),
     fileGuard: normalized.file_guard,
     version: HW_VERSION,
@@ -289,8 +301,11 @@ function normalizeArtifactProfile(options = {}) {
           ? { opencode: options.profile }
           : {},
     );
+    const selected = selectProfile(config);
     return withOpenCodeRenderingDefaults({
-      ...selectProfile(config),
+      ...selected,
+      agents: buildModelPoolOpenCodeAgents(config),
+      model_pool: config.model_pool,
       analysis: normalizeAnalysisInteraction(config),
     });
   }
@@ -328,6 +343,10 @@ export async function renderOpenCodeStatusTuiPlugin() {
 
 export async function renderOpenCodeStatusModule() {
   return readFile(resolve(REPO_ROOT, "core", "src", "opencode-status", "index.js"), "utf8");
+}
+
+export async function renderOpenCodeHookPolicyModule() {
+  return readFile(resolve(REPO_ROOT, "core", "src", "opencode-hooks", "index.js"), "utf8");
 }
 
 async function renderTemplate(name) {

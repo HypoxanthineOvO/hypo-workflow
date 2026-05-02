@@ -98,6 +98,20 @@ SessionStart loads the compact summary and category indexes only:
 
 Raw `.pipeline/knowledge/records/*.yaml` files are loaded only for explicit `/hw:knowledge view` or narrow search results.
 
+## Helper API
+
+The deterministic helper API lives in `core/src/knowledge/index.js` and is exported from `core/src/index.js`.
+
+Core helpers support:
+
+- `normalizeKnowledgeRecord` for stable IDs, normalized source refs, canonical category order, normalized tags, and recursive redaction
+- `appendKnowledgeRecord` for writing validated records under `.pipeline/knowledge/records/`
+- `rebuildKnowledgeIndexes` for regenerating all six category indexes
+- `renderKnowledgeCompact` for writing `.pipeline/knowledge/knowledge.compact.md`
+- `rebuildKnowledgeLedger` for index plus compact regeneration
+
+These helpers are reusable by CLI commands, hooks, `/hw:knowledge`, and OpenCode plugin code. They must stay deterministic and dependency-light.
+
 ## Cycle Archive Summary
 
 When a Cycle is archived, copy the compact knowledge summary or write a short archive summary next to the Cycle archive. Do not duplicate all raw records into the archive unless the archive command explicitly owns that operation.
@@ -112,4 +126,4 @@ When a Cycle is archived, copy the compact knowledge summary or write a short ar
 - `index`: regenerate or inspect category indexes
 - `search`: filter by category, tag, source, or text
 
-M01 defines this contract only. Hook capture, full index generation, and OpenCode SessionStart integration are implemented in later milestones.
+M01 defines this contract. M02 implements deterministic helper APIs and index/compact generation. Hook capture and OpenCode SessionStart integration are implemented in later milestones.

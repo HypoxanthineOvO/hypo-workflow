@@ -1,6 +1,6 @@
 version: 1
 cycle_id: C4
-current_feature: F001
+current_feature: null
 defaults:
   decompose_mode: upfront
   failure_policy: skip_defer
@@ -11,7 +11,7 @@ features:
     id: F001
     title: "Knowledge Ledger and OpenCode Hooks"
     priority: 10
-    status: active
+    status: done
     gate: auto
     decompose_mode: upfront
     source: batch-discover
@@ -56,8 +56,8 @@ features:
     id: F002
     title: "Global TUI"
     priority: 20
-    status: queued
-    gate: confirm
+    status: done
+    gate: auto
     decompose_mode: upfront
     source: batch-discover
     summary: "Ink-based global management TUI for model pool, global defaults, project registry, and sync actions."
@@ -91,7 +91,7 @@ features:
     id: F003
     title: "Acceptance Loop"
     priority: 30
-    status: queued
+    status: done
     gate: auto
     decompose_mode: upfront
     source: batch-discover
@@ -126,7 +126,7 @@ features:
     id: F004
     title: "Explore Mode and Sync"
     priority: 40
-    status: queued
+    status: done
     gate: auto
     decompose_mode: upfront
     source: batch-discover
@@ -140,17 +140,17 @@ features:
     milestones:
       -
         id: M12
-        status: planned
+        status: done
         title: "Explore contract and worktree"
         prompt_file: 11-explore-contract-worktree.md
       -
         id: M13
-        status: planned
+        status: done
         title: "Explore lifecycle and upgrade"
         prompt_file: 12-explore-lifecycle-upgrade.md
       -
         id: M14
-        status: planned
+        status: done
         title: "Sync standardization"
         prompt_file: 13-hw-sync-standardization.md
     metric_summary:

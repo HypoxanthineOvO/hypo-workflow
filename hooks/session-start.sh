@@ -118,6 +118,44 @@ append_rules_context() {
   context_load_log+=$'\n'"Loaded rules context (always rules included)"
 }
 
+append_knowledge_context() {
+  local knowledge_dir="$pipeline_dir/knowledge"
+  [[ -d "$knowledge_dir" ]] || return 0
+
+  append_context_file "Knowledge compact" "$knowledge_dir/knowledge.compact.md"
+
+  local category
+  for category in dependencies references pitfalls decisions config-notes secret-refs; do
+    append_context_file "Knowledge index ${category}" "$knowledge_dir/index/${category}.yaml"
+  done
+
+  if [[ -f "$knowledge_dir/knowledge.compact.md" || -d "$knowledge_dir/index" ]]; then
+    context_load_log+=$'\n'"Loaded knowledge compact and category indexes only"
+  fi
+}
+
+append_sync_light_check() {
+  local messages=()
+  if git -C "$cwd" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    local status
+    status="$(git -C "$cwd" status --short 2>/dev/null || true)"
+    if [[ -n "$status" ]]; then
+      messages+=("git_dirty")
+    fi
+  fi
+  if [[ ! -f "$cwd/.opencode/hypo-workflow.json" ]]; then
+    messages+=("adapter_missing")
+  elif [[ -f "$pipeline_dir/config.yaml" && "$pipeline_dir/config.yaml" -nt "$cwd/.opencode/hypo-workflow.json" ]]; then
+    messages+=("adapter_stale")
+  fi
+  if [[ ${#messages[@]} -eq 0 ]]; then
+    return 0
+  fi
+  additional_context+=$'\n\n'"[Sync Light Check]"$'\n'
+  additional_context+="External changes detected: ${messages[*]}. Review changes or run /hw:sync --light before heavier sync."
+  context_load_log+=$'\n'"Ran SessionStart light sync detection (no writes)"
+}
+
 extract_state_chat_active() {
   local file="$1"
   awk '
@@ -201,8 +239,10 @@ append_compact_or_full "PROGRESS" "$pipeline_dir/PROGRESS.compact.md" "$pipeline
 append_compact_or_full "state" "$pipeline_dir/state.compact.yaml" "$pipeline_dir/state.yaml"
 append_compact_or_full "log" "$pipeline_dir/log.compact.yaml" "$pipeline_dir/log.yaml"
 append_context_file "patches compact" "$pipeline_dir/patches.compact.md"
+append_knowledge_context
 append_open_patches
 append_rules_context
+append_sync_light_check
 
 if [[ "$chat_active" == "true" ]]; then
   additional_context+=$'\n\n'"[Chat Recovery]"$'\n'

@@ -8,7 +8,11 @@
     "auto": true,
     "prune": true
   },
-  "permission": "allow",
+  "permission": {
+    "edit": "ask",
+    "bash": "ask",
+    "question": "allow"
+  },
   "plugin": [
     ".opencode/plugins/hypo-workflow.ts"
   ]

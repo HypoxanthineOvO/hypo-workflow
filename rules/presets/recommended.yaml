@@ -11,6 +11,7 @@ rules:
   commit-format: off
   auto-continue-threshold: warn
   plan-tool-required: warn
+  knowledge-ledger-self-check: warn
   review-strictness: warn
   readme-freshness: warn
   skill-quality: warn

@@ -26,6 +26,15 @@ Resolve every configurable value in this order:
 | agent platform | `platform` | `agent.platform` | `auto` |
 | execution mode | `execution.mode` | `execution.default_mode` | `self` |
 | subagent provider | `execution.subagent_tool` | `subagent.provider` | `auto` |
+| model pool plan role | `model_pool.roles.plan` | `model_pool.roles.plan` | `primary=gpt-5.5`, fallback `deepseek-v4-pro` |
+| model pool implement role | `model_pool.roles.implement` | `model_pool.roles.implement` | `primary=mimo-v2.5-pro`, fallback `deepseek-v4-pro`, `mimo-v2.5-pro` |
+| model pool review role | `model_pool.roles.review` | `model_pool.roles.review` | `primary=gpt-5.5`, fallback `deepseek-v4-pro` |
+| model pool evaluate role | `model_pool.roles.evaluate` | `model_pool.roles.evaluate` | `primary=deepseek-v4-flash`, fallback `deepseek-v4-pro` |
+| model pool chat role | `model_pool.roles.chat` | `model_pool.roles.chat` | `primary=deepseek-v4-pro`, fallback `gpt-5.5` |
+| acceptance mode | `acceptance.mode` | `acceptance.mode` | `auto` |
+| acceptance user confirm | `acceptance.require_user_confirm` | `acceptance.require_user_confirm` | `false` |
+| acceptance timeout hours | `acceptance.timeout_hours` | `acceptance.timeout_hours` | `72` |
+| rejection escalation threshold | `acceptance.reject_escalation_threshold` | `acceptance.reject_escalation_threshold` | `3` |
 | plan mode | `plan.mode` | `plan.default_mode` | `interactive` |
 | plan interaction depth | `plan.interaction_depth` | `plan.interaction_depth` | `medium` |
 | plan interactive min rounds | `plan.interactive.min_rounds` | `plan.interactive.min_rounds` | `3` |
@@ -36,6 +45,15 @@ Resolve every configurable value in this order:
 | output timezone | `output.timezone` | `output.timezone` | `Asia/Shanghai` |
 | watchdog enabled | `watchdog.enabled` | `watchdog.enabled` | `false` |
 | watchdog interval | `watchdog.interval` | `watchdog.interval` | `300` |
+
+Acceptance modes are:
+
+- `auto`: keep unattended flow; acceptance is automatically satisfied at the end of the relevant workflow.
+- `manual`: stop at `pending_acceptance` until `/hw:accept` or `/hw:reject`.
+- `timeout`: expose a deterministic status decision after `acceptance.timeout_hours`; no background runner mutates state.
+- `confirm`: legacy compatibility alias for manual user confirmation.
+
+`acceptance.reject_escalation_threshold` controls when repeated Patch rejections should recommend escalation to a Cycle.
 | watchdog heartbeat timeout | `watchdog.heartbeat_timeout` | `watchdog.heartbeat_timeout` | `300` |
 | history import split method | `history_import.split_method` | `history_import.split_method` | `auto` |
 | history import time gap | `history_import.time_gap_threshold` | `history_import.time_gap_threshold` | `24h` |
@@ -53,6 +71,10 @@ Resolve every configurable value in this order:
 | knowledge raw record loading | `knowledge.loading.records` | `knowledge.loading.records` | `false` |
 | knowledge redaction keys | `knowledge.redaction.secret_keys` | `knowledge.redaction.secret_keys` | `api_key`, `token`, `secret`, `password`, `authorization`, `access_token`, `refresh_token`, `client_secret` |
 | knowledge invalid record strictness | `knowledge.strictness.invalid_record` | `knowledge.strictness.invalid_record` | `warn` |
+| sync project registry | `sync.project_registry` | `sync.project_registry` | `~/.hypo-workflow/projects.yaml` |
+| sync register projects | `sync.register_projects` | `sync.register_projects` | `true` |
+| sync OpenCode profile | `sync.platforms.opencode.profile` | `sync.platforms.opencode.profile` | `standard` |
+| sync OpenCode auto-continue mode | `sync.platforms.opencode.auto_continue_mode` | `sync.platforms.opencode.auto_continue_mode` | `safe` |
 | showcase language | `showcase.language` | `showcase.language` | `auto` |
 | showcase poster API key env | `showcase.poster.api_key_env` | `showcase.poster.api_key_env` | `OPENAI_API_KEY` |
 | showcase poster size | `showcase.poster.size` | `showcase.poster.size` | `1024x1536` |
@@ -91,6 +113,37 @@ Resolve every configurable value in this order:
 | rules overrides | `rules.rules` or `.pipeline/rules.yaml rules` | `rules.rules` | `{}` |
 
 Normalize global `agent.platform=claude-code` to the runtime platform value `claude` when applying existing project-platform logic.
+
+## Model Pool And OpenCode Matrix
+
+`model_pool.roles` is the global role-first model contract. OpenCode agent files are derived from it unless `opencode.agents.<role>.model` explicitly overrides a generated role:
+
+| Model pool role | OpenCode agent slots |
+|---|---|
+| `plan` | `hw-plan` |
+| `implement` | `hw-build`, `hw-code-a`, `hw-code-b` |
+| `review` | `hw-review`, `hw-debug` |
+| `evaluate` | `hw-test`, `hw-report`, `hw-compact` |
+| `chat` | reserved for Chat Mode defaults |
+
+The helper must keep OpenCode private model matrix data in `.opencode/hypo-workflow.json`, not root `opencode.json`.
+
+## Lazy Global Migration
+
+Existing `~/.hypo-workflow/config.yaml` files are read without mutation. Migration helpers may produce the merged v10 shape in memory, but only an explicit save path may rewrite the file.
+
+On save:
+
+1. create `config.yaml.bak.<timestamp>`
+2. preserve existing `profiles`
+3. migrate old `opencode.agents` defaults into `model_pool.roles`
+4. write the current schema version
+
+## Project Registry
+
+`~/.hypo-workflow/projects.yaml` stores setup-time project summaries for the global TUI and project switcher. `init-project` registers projects automatically when `sync.register_projects=true`.
+
+Registry entries include stable project ID, display name, absolute path, platform, profile, current Cycle, pipeline status, open patch count, acceptance mode/state, and `updated_at`.
 
 For step-specific delegation, resolve in this order:
 
@@ -143,6 +196,29 @@ subagent:
     base_url: https://api.vsplab.cn
   claude:
     model: claude-sonnet-4-20250514
+model_pool:
+  roles:
+    plan:
+      primary: gpt-5.5
+      fallback: [deepseek-v4-pro]
+    implement:
+      primary: mimo-v2.5-pro
+      fallback: [deepseek-v4-pro, mimo-v2.5-pro]
+    review:
+      primary: gpt-5.5
+      fallback: [deepseek-v4-pro]
+    evaluate:
+      primary: deepseek-v4-flash
+      fallback: [deepseek-v4-pro]
+    chat:
+      primary: deepseek-v4-pro
+      fallback: [gpt-5.5]
+acceptance:
+  mode: auto
+  require_user_confirm: false
+  default_state: pending
+  timeout_hours: 72
+  reject_escalation_threshold: 3
 dashboard:
   enabled: true
   port: 7700
@@ -210,6 +286,14 @@ knowledge:
     invalid_record: warn
     missing_index: warn
     secret_leak: error
+sync:
+  project_registry: ~/.hypo-workflow/projects.yaml
+  register_projects: true
+  platforms:
+    opencode:
+      profile: standard
+      auto_continue: true
+      auto_continue_mode: safe
 showcase:
   language: auto
   poster:

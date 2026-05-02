@@ -53,7 +53,7 @@ test("writeOpenCodeArtifacts emits separate server and TUI plugin files", async 
   const rootConfig = JSON.parse(await readFile(join(dir, "opencode.json"), "utf8"));
   const tuiConfig = JSON.parse(await readFile(join(dir, "tui.json"), "utf8"));
 
-  assert.match(serverPlugin, /fileGuard/);
+  assert.match(serverPlugin, /evaluateOpenCodeFileGuard/);
   assert.match(serverPlugin, /commandMap/);
   assert.match(serverPlugin, /const server/);
   assert.match(serverPlugin, /export default server/);

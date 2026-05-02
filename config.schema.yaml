@@ -42,6 +42,102 @@ $defs:
         type: object
         additionalProperties:
           $ref: "#/$defs/opencode_provider_model"
+  model_pool_role:
+    type: object
+    additionalProperties: false
+    required:
+      - primary
+    properties:
+      primary:
+        type: string
+        minLength: 1
+      fallback:
+        type: array
+        default: []
+        items:
+          type: string
+          minLength: 1
+  model_pool_config:
+    type: object
+    additionalProperties: false
+    properties:
+      roles:
+        type: object
+        additionalProperties: false
+        properties:
+          plan:
+            $ref: "#/$defs/model_pool_role"
+          implement:
+            $ref: "#/$defs/model_pool_role"
+          review:
+            $ref: "#/$defs/model_pool_role"
+          evaluate:
+            $ref: "#/$defs/model_pool_role"
+          chat:
+            $ref: "#/$defs/model_pool_role"
+  acceptance_config:
+    type: object
+    additionalProperties: false
+    properties:
+      mode:
+        type: string
+        enum:
+          - auto
+          - confirm
+          - manual
+          - timeout
+        default: auto
+      require_user_confirm:
+        type: boolean
+        default: false
+      default_state:
+        type: string
+        enum:
+          - pending
+          - accepted
+          - rejected
+        default: pending
+      timeout_hours:
+        type: number
+        exclusiveMinimum: 0
+        default: 72
+      reject_escalation_threshold:
+        type: integer
+        minimum: 1
+        default: 3
+  sync_config:
+    type: object
+    additionalProperties: false
+    properties:
+      project_registry:
+        type: string
+        minLength: 1
+        default: ~/.hypo-workflow/projects.yaml
+      register_projects:
+        type: boolean
+        default: true
+      platforms:
+        type: object
+        additionalProperties: false
+        properties:
+          opencode:
+            type: object
+            additionalProperties: false
+            properties:
+              profile:
+                type: string
+                minLength: 1
+                default: standard
+              auto_continue:
+                type: boolean
+                default: true
+              auto_continue_mode:
+                type: string
+                enum:
+                  - ask
+                  - safe
+                  - aggressive
+                default: safe
   analysis_boundary_value:
     type: string
     enum:
@@ -408,6 +504,10 @@ $defs:
                 type: string
                 minLength: 1
                 default: claude-sonnet-4-20250514
+      model_pool:
+        $ref: "#/$defs/model_pool_config"
+      acceptance:
+        $ref: "#/$defs/acceptance_config"
       dashboard:
         type: object
         additionalProperties: false
@@ -679,6 +779,8 @@ $defs:
           reports_summary_lines: 3
       knowledge:
         $ref: "#/$defs/knowledge_config"
+      sync:
+        $ref: "#/$defs/sync_config"
       showcase:
         type: object
         additionalProperties: false
@@ -816,7 +918,7 @@ $defs:
               plan_extend_mode: lightweight
       version:
         type: string
-        pattern: "^(7\\.1\\.0|8\\.0\\.0|8\\.1\\.0|8\\.2\\.0|8\\.3\\.0|8\\.4\\.0)$"
+        pattern: "^(7\\.1\\.0|8\\.0\\.0|8\\.1\\.0|8\\.2\\.0|8\\.3\\.0|8\\.4\\.0|10\\.0\\.1|10\\.0\\.2)$"
       created:
         type: string
         minLength: 1
@@ -1123,6 +1225,10 @@ properties:
     default:
       language: zh-CN
       timezone: Asia/Shanghai
+  model_pool:
+    $ref: "#/$defs/model_pool_config"
+  acceptance:
+    $ref: "#/$defs/acceptance_config"
   release:
     type: object
     additionalProperties: false
@@ -1286,6 +1392,8 @@ properties:
       reports_summary_lines: 3
   knowledge:
     $ref: "#/$defs/knowledge_config"
+  sync:
+    $ref: "#/$defs/sync_config"
   showcase:
     type: object
     additionalProperties: false

@@ -1,0 +1,30 @@
+schema_version: 1
+category: config-notes
+entries:
+  -
+    record_id: C4-M05-f001-knowledge-and-opencode-integration-gate-18c2eaab
+    type: milestone
+    source: C4/M05
+    created_at: "2026-05-02T21:52:30+08:00"
+    summary: F001 Knowledge and OpenCode integration gate
+    tags:
+      - f001
+      - knowledge
+      - opencode
+      - gate
+    refs:
+      files:
+        - core/src/knowledge/index.js
+        - core/src/opencode-hooks/index.js
+        - hooks/session-start.sh
+        - hooks/stop-check.sh
+        - .opencode/runtime/hypo-workflow-hooks.js
+    items:
+      -
+        key: knowledge.loading.records
+        value: false
+        reason: SessionStart loads compact and indexes only; raw records stay on-demand
+      -
+        key: opencode.auto_continue.mode
+        value: safe
+        reason: F001 gate requires visible conservative auto-continue policy before F002

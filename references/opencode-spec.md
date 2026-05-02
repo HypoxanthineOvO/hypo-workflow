@@ -71,6 +71,9 @@ See also [`external-docs-index.md`](./external-docs-index.md) for the cross-plat
 | `/hw:plan:extend` | `/hw-plan-extend` | `hw-plan` | Native slash command, active Cycle extension. |
 | `/hw:plan:review` | `/hw-plan-review` | `hw-review` | Native slash command, architecture drift review. |
 | `/hw:cycle` | `/hw-cycle` | `hw-status` | Native slash command group; subcommands remain prompt arguments. |
+| `/hw:accept` | `/hw-accept` | `hw-build` | Native slash command, Cycle acceptance gate. |
+| `/hw:reject` | `/hw-reject` | `hw-build` | Native slash command, Cycle rejection feedback. |
+| `/hw:explore` | `/hw-explore` | `hw-explore` | Native slash command, isolated global worktree exploration. |
 | `/hw:patch` | `/hw-patch` | `hw-build` | Native slash command group; file lifecycle stays HW-specific. |
 | `/hw:patch fix` | `/hw-patch-fix` | `hw-build` | Native slash command, six-step patch repair lane. |
 | `/hw:compact` | `/hw-compact` | `hw-compact` | Native slash command, compact generator. |
@@ -178,6 +181,32 @@ This is still used as a setup/sync surface and not as a model-calling runner. Ac
 | `session.idle` and `session.status` | Trigger safe auto-continue when enabled. |
 | `session.compacted` and compaction hooks | Preserve current Cycle, milestone, prompt, and compact files across compaction. |
 | `permission.asked` and `permission.replied` | Record user approvals when they affect HW state. |
+
+## Workflow-Control Policy Runtime
+
+M04 moves OpenCode workflow-control decisions into generated runtime helpers:
+
+- source helper: `core/src/opencode-hooks/index.js`
+- generated helper: `.opencode/runtime/hypo-workflow-hooks.js`
+- plugin import: `.opencode/plugins/hypo-workflow.ts`
+
+The policy helpers cover:
+
+- `evaluateOpenCodeFileGuard`
+- `decideOpenCodePermission`
+- `shouldOpenCodeAutoContinue`
+- `isOpenCodeStopEquivalent`
+- `serializeOpenCodePermissionEvent`
+
+Path policy:
+
+- `.pipeline/state.yaml`, `.pipeline/cycle.yaml`, and `.pipeline/rules.yaml` deny unless an explicit workflow mutation is active
+- `.pipeline/knowledge/**` is allowed through controlled Knowledge Ledger helpers
+- `~/.hypo-workflow/worktrees/**` is allowed for Explore worktrees
+- `~/.hypo-workflow/secrets.yaml` is denied and permission events redact secret-like fields
+- ordinary `.pipeline/**` writes warn or ask, depending on hook surface
+
+OpenCode cannot be described as exact Claude Stop Hook parity. Stop-equivalent behavior is modeled as idle/status policy plus warnings and permission decisions.
 | `todo.updated` | Mirror OpenCode todos into PROGRESS summaries where useful. |
 
 Default auto-continue is on for OpenCode with `safe` policy: continue after green tests, explicit low-risk report/evaluation, no open error-severity rules, no dirty protected HW files, and no pending Ask/question gate.

@@ -5,7 +5,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 ## Namespace
 
 - all explicit Hypo-Workflow commands use the `/hw:` prefix
-- V10.1 canonical namespace contains 32 user-facing commands across Setup, Pipeline, Plan, Lifecycle, and Utility groups, plus an internal cron-only watchdog skill
+- V10.1 canonical namespace contains 36 user-facing commands across Setup, Pipeline, Plan, Lifecycle, and Utility groups, plus an internal cron-only watchdog skill
 - slash commands are exact and namespace-scoped
 - slash commands take precedence over fuzzy natural-language matching
 - natural-language commands remain valid for backward compatibility
@@ -44,11 +44,15 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
    - `/hw:plan:extend`
    - `/hw:plan:review`
    - `/hw:cycle`
+   - `/hw:accept`
+   - `/hw:reject`
+   - `/hw:explore`
+   - `/hw:sync`
    - `/hw:patch`
 3. parse remaining tokens as command arguments
 4. flags are order-independent
 5. if a command is unknown, return exactly:
-   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:compact, /hw:knowledge, /hw:guide, /hw:showcase, /hw:rules, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
+   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:accept, /hw:reject, /hw:explore, /hw:sync, /hw:patch, /hw:compact, /hw:knowledge, /hw:guide, /hw:showcase, /hw:rules, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
 6. if a known command receives an unsupported flag, stop and report the unsupported flag explicitly instead of guessing
 7. if a prompt selector is ambiguous, list the candidates and stop
 8. plan and review commands load `plan/PLAN-SKILL.md` before execution
@@ -192,7 +196,7 @@ Supported forms:
 Behavior:
 
 - read `SKILL.md` command tables as the source of truth
-- `/hw:help` lists all 32 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility
+- `/hw:help` lists all 36 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility
 - `/hw:help --quick` returns a compact cheat sheet
 - `/hw:help <cmd>` returns detailed usage, flags, and examples for the requested command
 
@@ -248,7 +252,7 @@ Behavior:
 Supported flags:
 
 - none
-- `--context audit,patches,deferred,debug`
+- `--context audit,patches,deferred,debug,explore:E001`
 
 Behavior:
 
@@ -373,7 +377,7 @@ Behavior:
 - load `plan/PLAN-SKILL.md`
 - enter Plan Mode using the Discover-first flow
 - honor `--template <name>` as an initial template hint when present
-- honor `--context` as comma-separated P1 context sources
+- honor `--context` as comma-separated P1 context sources, including `explore:E001` refs created by `/hw:explore upgrade plan E001`
 - single-feature /hw:plan behavior is unchanged when `--batch` is absent
 - with `--batch`, Discover covers multiple Features in one interview and generates a Feature Queue after confirmation
 - Progressive Discover starts by asking task category, desired effect, and verification method before deeper implementation detail
@@ -506,6 +510,23 @@ Behavior:
 - do not let `/hw:init` create `cycle.yaml`
 - archive active Cycle artifacts on `close` or before a new Cycle starts
 - leave old projects without `cycle.yaml` compatible as implicit `C1`
+
+### `/hw:sync`
+
+Supported flags:
+
+- `--light`
+- `--deep`
+- `--platform opencode`
+- `--project <dir>`
+
+Behavior:
+
+- default standard mode runs light sync, OpenCode adapter sync, config loading check, and compact refresh
+- `--light` refreshes registry status, refreshes Knowledge Ledger compact/index when source records changed, detects external changes, and reports without adapter writes
+- `--deep` runs standard sync plus dependency scan and architecture rescan hints
+- never execute pipeline milestones
+- SessionStart may only perform light external-change detection and prompt before heavier sync
 
 ### `/hw:patch`
 

@@ -12,9 +12,12 @@ count="$(awk '
   in_table && /^When the user types/ {print c; exit}
 ' SKILL.md)"
 
-test "$count" = "32"
-rg -q '32 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility' references/commands-spec.md
+test "$count" = "36"
+rg -q '36 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility' references/commands-spec.md
 rg -q '\| `/hw:cycle` \|' SKILL.md
+rg -q '\| `/hw:accept` \|' SKILL.md
+rg -q '\| `/hw:reject` \|' SKILL.md
+rg -q '\| `/hw:sync` \|' SKILL.md
 rg -q '\| `/hw:patch` \|' SKILL.md
 rg -q '\| `/hw:compact` \|' SKILL.md
 rg -q '\| `/hw:knowledge` \|' SKILL.md

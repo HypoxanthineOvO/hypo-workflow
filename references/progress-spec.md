@@ -92,6 +92,15 @@ When recording a new event:
 3. Insert a compact row at the top of `时间线`.
 4. Keep older timeline rows brief; detailed event payloads belong in `.pipeline/log.yaml`.
 
+Cycle acceptance rows use compact lifecycle status labels:
+
+- `pending_acceptance`: completed work is waiting for `/hw:accept` or `/hw:reject`.
+- `accepted`: the user accepted the Cycle.
+- `rejected`: feedback was captured and the Cycle reopened.
+- `timeout accepted`: status/check logic treated pending acceptance as accepted after `acceptance.timeout_hours`.
+
+Rejected feedback should be summarized in the row and stored in `.pipeline/acceptance/`; do not paste full feedback into `PROGRESS.md`.
+
 For chat mode:
 
 - use `Chat` as the timeline type

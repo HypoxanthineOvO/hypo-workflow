@@ -6,9 +6,9 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { commandByCanonical, commandMap, loadRulesSummary, writeOpenCodeArtifacts } from "../src/index.js";
 
-test("commandMap contains 32 OpenCode mappings", () => {
+test("commandMap contains 36 OpenCode mappings", () => {
   const commands = commandMap("opencode");
-  assert.equal(commands.length, 32);
+  assert.equal(commands.length, 36);
   assert.equal(commandByCanonical("/hw:plan").opencode, "/hw-plan");
   assert.equal(commandByCanonical("/hw:report").agent, "hw-report");
   assert.equal(commandByCanonical("/hw:compact").agent, "hw-compact");
@@ -16,6 +16,10 @@ test("commandMap contains 32 OpenCode mappings", () => {
   assert.equal(commandByCanonical("/hw:dashboard").agent, "hw-status");
   assert.equal(commandByCanonical("/hw:chat").opencode, "/hw-chat");
   assert.equal(commandByCanonical("/hw:knowledge").opencode, "/hw-knowledge");
+  assert.equal(commandByCanonical("/hw:accept").opencode, "/hw-accept");
+  assert.equal(commandByCanonical("/hw:reject").opencode, "/hw-reject");
+  assert.equal(commandByCanonical("/hw:explore").opencode, "/hw-explore");
+  assert.equal(commandByCanonical("/hw:sync").opencode, "/hw-sync");
 });
 
 test("loadRulesSummary reads builtin rules", async () => {

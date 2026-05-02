@@ -1,12 +1,12 @@
 ---
 name: hypo-workflow
-version: 10.0.2
-description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:chat`, `/hw:plan`, `/hw:plan:extend`, `/hw:plan:review`, `/hw:cycle`, `/hw:patch`, `/hw:compact`, `/hw:knowledge`, `/hw:guide`, `/hw:showcase`, `/hw:rules`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, or `/hw:dashboard`.
+version: 10.1.0
+description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:chat`, `/hw:plan`, `/hw:plan:extend`, `/hw:plan:review`, `/hw:cycle`, `/hw:accept`, `/hw:reject`, `/hw:explore`, `/hw:sync`, `/hw:patch`, `/hw:compact`, `/hw:knowledge`, `/hw:guide`, `/hw:showcase`, `/hw:rules`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, or `/hw:dashboard`.
 ---
 
-# Hypo-Workflow v10.0.2
+# Hypo-Workflow v10.1.0
 
-> **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 32 个用户指令。
+> **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 36 个用户指令。
 >
 > **Codex 用户**：本文件是完整的 Skill 入口，继续使用 `/hw:*` 指令。
 
@@ -29,6 +29,10 @@ description: Run a serialized prompt execution pipeline from a local `.pipeline/
 | `/hw:plan:extend` | Append milestones to an active Cycle |
 | `/hw:plan:review` | Run Plan Review for the current or all milestones |
 | `/hw:cycle` | Create, list, view, close, and archive delivery Cycles |
+| `/hw:accept` | Accept pending Cycle work and complete the manual acceptance gate |
+| `/hw:reject` | Reject pending Cycle work with structured feedback and reopen the Cycle |
+| `/hw:explore` | Start an isolated exploration worktree and record exploration metadata |
+| `/hw:sync` | Synchronize project adapters and lightweight derived context without executing pipeline milestones |
 | `/hw:patch` | Create, list, close, and `fix` persistent lightweight Patches |
 | `/hw:patch fix` | Execute the lightweight six-step Patch repair lane |
 | `/hw:compact` | Generate `.compact` context views for large runtime files |
@@ -231,6 +235,8 @@ Handle these commands directly:
   Load [`plan/PLAN-SKILL.md`](./plan/PLAN-SKILL.md) and route execution to the corresponding Plan Mode phase.
 - `/hw:cycle`
   Load [`skills/cycle/SKILL.md`](./skills/cycle/SKILL.md). Manage explicit Cycles, archives, deferred items, and project summaries. Old projects without `.pipeline/cycle.yaml` remain compatible as implicit `C1`.
+- `/hw:sync`
+  Load [`skills/sync/SKILL.md`](./skills/sync/SKILL.md). Run light, standard, or deep project sync without executing pipeline milestones. SessionStart may only run light external-change detection.
 - `/hw:patch`
   Load [`skills/patch/SKILL.md`](./skills/patch/SKILL.md). Manage persistent lightweight patches under `.pipeline/patches/`. Support `/hw:patch fix P001 [P...]` for the lightweight six-step fix lane.
 - `/hw:compact`
@@ -250,7 +256,7 @@ Handle these commands directly:
 
 If a command starts with `/hw:` and is not listed above, return:
 
-`Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:chat, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:patch, /hw:compact, /hw:knowledge, /hw:guide, /hw:showcase, /hw:rules, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
+`Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:chat, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:accept, /hw:reject, /hw:explore, /hw:sync, /hw:patch, /hw:compact, /hw:knowledge, /hw:guide, /hw:showcase, /hw:rules, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
 
 Slash commands are exact and take precedence over fuzzy natural-language matching. Detailed parsing and option semantics live in [`references/commands-spec.md`](./references/commands-spec.md).
 

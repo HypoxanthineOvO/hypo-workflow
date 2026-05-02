@@ -5,7 +5,8 @@ ROOT="$(cd "$(dirname "$0")/../../../.." && pwd)"
 cd "$ROOT"
 
 tmp_project="$(mktemp -d)"
-node cli/bin/hypo-workflow init-project --platform opencode --project "$tmp_project" >/tmp/hw-s56-init.log
+tmp_home="$(mktemp -d)"
+HOME="$tmp_home" node cli/bin/hypo-workflow init-project --platform opencode --project "$tmp_project" >/tmp/hw-s56-init.log
 
 for agent in hw-plan hw-build hw-explore hw-review hw-debug hw-docs; do
   test -f "$tmp_project/.opencode/agents/$agent.md" || {

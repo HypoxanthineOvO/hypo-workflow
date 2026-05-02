@@ -6,7 +6,7 @@ permission:
   read: allow
   grep: allow
   glob: allow
-  edit: allow
+  edit: ask
   todowrite: allow
 ---
 

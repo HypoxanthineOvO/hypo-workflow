@@ -110,6 +110,7 @@ If `plan.interactive.min_rounds` is set, use it as an additional floor after res
 - `patches`: read all open Patch files under `.pipeline/patches/`
 - `deferred`: read every `.pipeline/archives/*/deferred.yaml`; also read `.pipeline/archives/cycle-0-legacy/summary.md` when present
 - `debug`: read the newest report under `.pipeline/debug/`
+- `explore:E001`: read `.pipeline/explorations/E001-*/summary.md`, `notes.md`, and `exploration.yaml`
 
 Context injection behavior:
 

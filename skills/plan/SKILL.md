@@ -135,7 +135,7 @@ The `plan-tool-required` built-in rule is active for Plan Mode unless disabled i
 
 1. Read `~/.hypo-workflow/config.yaml` if present.
 2. Read `plan.mode` and `plan.interaction_depth` from `.pipeline/config.yaml` when present.
-3. Parse `--context <sources>` when present. Split comma-separated values and allow only `audit`, `patches`, `deferred`, and `debug`.
+3. Parse `--context <sources>` when present. Split comma-separated values and allow only `audit`, `patches`, `deferred`, `debug`, and `explore:E001` style exploration context refs.
 4. Parse `--batch` and `--insert` when present. Without `--batch` or `--insert`, preserve the existing single-feature P1-P4 flow.
 5. If `--insert` is present, read `.pipeline/feature-queue.yaml`, convert the user request to a structured queue operation, show the queue diff, wait for confirmation, then apply and log the queue edit.
 6. If no `--context` flag is given, read `cycle.yaml` and use `cycle.context_sources` when present.

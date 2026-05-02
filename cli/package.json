@@ -1,0 +1,15 @@
+{
+  "name": "@hypo-workflow/cli",
+  "version": "10.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Hypo-Workflow setup CLI and global Ink TUI. This package is not a pipeline runner.",
+  "bin": {
+    "hypo-workflow": "bin/hypo-workflow",
+    "hw": "bin/hypo-workflow"
+  },
+  "dependencies": {
+    "ink": "^5.1.0",
+    "react": "^18.3.1"
+  }
+}

@@ -33,6 +33,7 @@ prompt_state:
 history:
   completed_prompts: []
 chat: {}
+acceptance: {}
 ```
 
 ## Milestone Record Fields
@@ -152,6 +153,34 @@ Read `state.yaml` at these moments:
 - optional `chat.*` state must never replace Cycle / Milestone / Patch state; it only annotates an append conversation lane.
 - optional `prompt_state.analysis_summary` must stay compact and must never replace the analysis ledger.
 - Knowledge Ledger records must stay outside `state.yaml`; if a future status, resume, or SessionStart surface needs recovery context, store only compact/index pointers such as `.pipeline/knowledge/knowledge.compact.md` and `.pipeline/knowledge/index/*.yaml`.
+- optional `acceptance.*` state is a compact mirror for status and TUI surfaces; Cycle-level truth stays in `.pipeline/cycle.yaml`.
+- `acceptance.feedback_ref` may point to structured rejection feedback under `.pipeline/acceptance/`.
+- `state.yaml` must not store full acceptance or rejection feedback text.
+
+## Acceptance State
+
+`acceptance:` is optional and mirrors minimal acceptance status for resume, status, and OpenCode TUI surfaces.
+
+Suggested fields:
+
+```yaml
+acceptance:
+  scope: cycle
+  state: pending | accepted | rejected
+  mode: manual | auto | timeout
+  cycle_id: C4
+  requested_at: 2026-05-03T00:10:00+08:00
+  feedback_ref: .pipeline/acceptance/cycle-C4-rejection-20260503T001200+0800.yaml
+  updated_at: 2026-05-03T00:12:00+08:00
+```
+
+Notes:
+
+- Cycle acceptance authority is `.pipeline/cycle.yaml`.
+- Patch acceptance authority belongs to Patch metadata.
+- Full feedback belongs in `feedback_ref`, not in `state.yaml`.
+- Timeout acceptance is a deterministic status/check decision. Status surfaces may display `accepted`, `timed_out: true`, and `automatic: true` after the configured timeout, but no background runner should rewrite `state.yaml`.
+- Rejection feedback files should be structured with `problem`, `reproduce_steps`, `expected`, `actual`, `context`, `iteration`, and `created_at`. A compatibility `feedback` field may exist for older Patch fix readers.
 
 ## Chat State
 

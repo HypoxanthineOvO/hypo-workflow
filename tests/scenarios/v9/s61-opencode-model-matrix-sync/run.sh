@@ -5,6 +5,7 @@ ROOT="$(cd "$(dirname "$0")/../../../.." && pwd)"
 cd "$ROOT"
 
 project="$(mktemp -d)"
+home="$(mktemp -d)"
 mkdir -p "$project/.pipeline"
 cat > "$project/.pipeline/config.yaml" <<'YAML'
 opencode:
@@ -27,7 +28,7 @@ opencode:
       model: scenario-report
 YAML
 
-node cli/bin/hypo-workflow sync --platform opencode --project "$project" >/dev/null
+HOME="$home" node cli/bin/hypo-workflow sync --platform opencode --project "$project" >/dev/null
 
 grep -Fq "model: scenario-plan" "$project/.opencode/agents/hw-plan.md"
 grep -Fq "model: scenario-compact" "$project/.opencode/agents/hw-compact.md"
@@ -66,7 +67,7 @@ for (const config of [rootConfig, adapterConfig]) {
 NODE
 
 legacy="$(mktemp -d)"
-node cli/bin/hypo-workflow sync --platform opencode --project "$legacy" >/dev/null
+HOME="$home" node cli/bin/hypo-workflow sync --platform opencode --project "$legacy" >/dev/null
 grep -Fq "model: openai/gpt-5.5" "$legacy/.opencode/agents/hw-plan.md"
 grep -Fq "model: mimo/mimo-v2.5-pro" "$legacy/.opencode/agents/hw-build.md"
 grep -Fq "model: deepseek/deepseek-v4-pro" "$legacy/.opencode/agents/hw-test.md"

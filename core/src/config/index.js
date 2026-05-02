@@ -1,10 +1,11 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
+import { createHash } from "node:crypto";
+import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 import { DEFAULT_ANALYSIS_INTERACTION } from "../analysis/index.js";
 import { DEFAULT_KNOWLEDGE_CONFIG } from "../knowledge/index.js";
 
 export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
-  version: "10.0.1",
+  version: "10.1.0",
   agent: {
     platform: "codex",
     model: "default",
@@ -21,6 +22,37 @@ export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
   },
   subagent: {
     provider: "codex",
+  },
+  model_pool: {
+    roles: {
+      plan: {
+        primary: "gpt-5.5",
+        fallback: ["deepseek-v4-pro"],
+      },
+      implement: {
+        primary: "mimo-v2.5-pro",
+        fallback: ["deepseek-v4-pro", "mimo-v2.5-pro"],
+      },
+      review: {
+        primary: "gpt-5.5",
+        fallback: ["deepseek-v4-pro"],
+      },
+      evaluate: {
+        primary: "deepseek-v4-flash",
+        fallback: ["deepseek-v4-pro"],
+      },
+      chat: {
+        primary: "deepseek-v4-pro",
+        fallback: ["gpt-5.5"],
+      },
+    },
+  },
+  acceptance: {
+    mode: "auto",
+    require_user_confirm: false,
+    default_state: "pending",
+    timeout_hours: 72,
+    reject_escalation_threshold: 3,
   },
   dashboard: {
     enabled: true,
@@ -86,6 +118,17 @@ export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
     default_gate: "auto",
   },
   knowledge: DEFAULT_KNOWLEDGE_CONFIG,
+  sync: {
+    project_registry: "~/.hypo-workflow/projects.yaml",
+    register_projects: true,
+    platforms: {
+      opencode: {
+        profile: "standard",
+        auto_continue: true,
+        auto_continue_mode: "safe",
+      },
+    },
+  },
 });
 
 export async function loadConfig(file, defaults = DEFAULT_GLOBAL_CONFIG) {
@@ -98,6 +141,116 @@ export async function writeConfig(file, config) {
   await writeFile(file, `${stringifyYaml(config).trimEnd()}\n`, "utf8");
 }
 
+export async function loadGlobalConfigForSave(file, defaults = DEFAULT_GLOBAL_CONFIG) {
+  const raw = await readFile(file, "utf8");
+  const parsed = parseYaml(raw);
+  const migrated = migrateGlobalConfigShape(parsed, defaults);
+  return {
+    config: migrated,
+    raw,
+    needsMigration: JSON.stringify(parsed) !== JSON.stringify(migrated),
+  };
+}
+
+export async function saveMigratedGlobalConfig(file, config, options = {}) {
+  await mkdir(dirname(file), { recursive: true });
+  const suffix = formatBackupTimestamp(options.now || new Date().toISOString());
+  await copyFile(file, `${file}.bak.${suffix}`);
+  await writeConfig(file, {
+    ...config,
+    version: DEFAULT_GLOBAL_CONFIG.version,
+    updated: options.now || config.updated || new Date().toISOString(),
+  });
+}
+
+export function migrateGlobalConfigShape(config = {}, defaults = DEFAULT_GLOBAL_CONFIG) {
+  const merged = mergeConfig(defaults, config);
+  const agents = config.opencode?.agents || {};
+  if (!config.model_pool && Object.keys(agents).length) {
+    merged.model_pool = {
+      ...merged.model_pool,
+      roles: {
+        ...merged.model_pool.roles,
+        plan: migrateRole(merged.model_pool.roles.plan, agents.plan?.model),
+        implement: migrateRole(
+          {
+            ...merged.model_pool.roles.implement,
+            fallback: [
+              agents["code-b"]?.model,
+              ...(merged.model_pool.roles.implement.fallback || []),
+            ].filter(Boolean),
+          },
+          agents["code-a"]?.model,
+        ),
+        review: migrateRole(merged.model_pool.roles.review, agents.debug?.model),
+        evaluate: migrateRole(merged.model_pool.roles.evaluate, agents.report?.model),
+      },
+    };
+  }
+  return {
+    ...merged,
+    version: DEFAULT_GLOBAL_CONFIG.version,
+  };
+}
+
+export function buildModelPoolOpenCodeAgents(config = {}) {
+  const roles = mergeConfig(DEFAULT_GLOBAL_CONFIG.model_pool.roles, config.model_pool?.roles || {});
+  const derived = {
+    plan: { model: roles.plan.primary },
+    compact: { model: roles.evaluate.primary },
+    test: { model: firstModel(roles.evaluate, roles.review.primary) },
+    "code-a": { model: roles.implement.primary },
+    "code-b": { model: firstModel(roles.implement, roles.implement.primary) },
+    debug: { model: roles.review.primary },
+    report: { model: roles.evaluate.primary },
+  };
+  if (!config.model_pool) {
+    return mergeConfig(DEFAULT_GLOBAL_CONFIG.opencode.agents, config.opencode?.agents || {});
+  }
+  return mergeConfig(derived, explicitOpenCodeAgentOverrides(config.opencode?.agents || {}));
+}
+
+export function projectRegistryId(projectPath) {
+  const normalized = normalizeProjectPath(projectPath);
+  const hash = createHash("sha256").update(normalized).digest("hex").slice(0, 12);
+  return `prj-${hash}`;
+}
+
+export async function loadProjectRegistry(file) {
+  try {
+    const raw = await readFile(file, "utf8");
+    const parsed = parseYaml(raw);
+    return {
+      schema_version: String(parsed.schema_version || "1"),
+      ...(parsed.selected_project_id ? { selected_project_id: parsed.selected_project_id } : {}),
+      projects: Array.isArray(parsed.projects) ? parsed.projects : [],
+    };
+  } catch (error) {
+    if (error.code === "ENOENT") return { schema_version: "1", projects: [] };
+    throw error;
+  }
+}
+
+export async function saveProjectRegistry(file, registry) {
+  await mkdir(dirname(file), { recursive: true });
+  const normalized = {
+    schema_version: String(registry.schema_version || "1"),
+    ...(registry.selected_project_id ? { selected_project_id: registry.selected_project_id } : {}),
+    projects: [...(registry.projects || [])].sort((a, b) => String(a.id).localeCompare(String(b.id))),
+  };
+  await writeFile(file, `${stringifyYaml(normalized)}\n`, "utf8");
+  return normalized;
+}
+
+export async function registerProject(file, project, options = {}) {
+  const registry = await loadProjectRegistry(file);
+  const normalized = normalizeRegistryProject(project, options);
+  const projects = registry.projects.filter((entry) => entry.id !== normalized.id);
+  projects.push(normalized);
+  const saved = await saveProjectRegistry(file, { ...registry, projects });
+  return { registry: saved, project: normalized };
+}
+
 export function mergeConfig(base, override) {
   if (!isPlainObject(base) || !isPlainObject(override)) {
     return override === undefined ? base : override;
@@ -107,6 +260,65 @@ export function mergeConfig(base, override) {
     merged[key] = key in merged ? mergeConfig(merged[key], value) : value;
   }
   return merged;
+}
+
+function migrateRole(role, primary) {
+  return {
+    ...role,
+    ...(primary ? { primary } : {}),
+  };
+}
+
+function firstModel(role, fallback) {
+  return role?.fallback?.find(Boolean) || fallback || role?.primary;
+}
+
+function explicitOpenCodeAgentOverrides(agents = {}) {
+  const overrides = {};
+  for (const [role, value] of Object.entries(agents)) {
+    if (!value?.model) continue;
+    if (value.model !== DEFAULT_GLOBAL_CONFIG.opencode.agents?.[role]?.model) {
+      overrides[role] = value;
+    }
+  }
+  return overrides;
+}
+
+function normalizeRegistryProject(project = {}, options = {}) {
+  const normalizedPath = normalizeProjectPath(project.path || options.path || ".");
+  const now = options.now || new Date().toISOString();
+  return {
+    id: project.id || projectRegistryId(normalizedPath),
+    display_name: project.display_name || project.name || basename(normalizedPath),
+    path: normalizedPath,
+    platform: project.platform || "unknown",
+    profile: project.profile || "default",
+    current_cycle: project.current_cycle || null,
+    pipeline_status: project.pipeline_status || "unknown",
+    open_patch_count: Number(project.open_patch_count || 0),
+    acceptance: {
+      mode: project.acceptance?.mode || DEFAULT_GLOBAL_CONFIG.acceptance.mode,
+      state: project.acceptance?.state || DEFAULT_GLOBAL_CONFIG.acceptance.default_state,
+    },
+    updated_at: project.updated_at || now,
+  };
+}
+
+function normalizeProjectPath(projectPath) {
+  return resolve(String(projectPath || ".")).replace(/\/+$/g, "");
+}
+
+function basename(path) {
+  const parts = String(path || "").split("/").filter(Boolean);
+  return parts.at(-1) || "project";
+}
+
+function formatBackupTimestamp(value) {
+  return String(value)
+    .replace(/[-:]/g, "")
+    .replace(/\.\d+/, "")
+    .replace(/\+/, "+")
+    .replace(/Z$/, "Z");
 }
 
 export function parseYaml(source) {

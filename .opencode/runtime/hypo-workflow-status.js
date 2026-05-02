@@ -3,6 +3,13 @@ import { join } from "node:path";
 
 const NA = "n/a";
 const OPENCODE_METADATA_PATH = ".opencode/hypo-workflow.json";
+const DEFAULT_ACCEPTANCE_POLICY = Object.freeze({
+  mode: "auto",
+  require_user_confirm: false,
+  default_state: "pending",
+  timeout_hours: 72,
+  reject_escalation_threshold: 3,
+});
 const OPENCODE_MODEL_AGENTS = Object.freeze([
   { name: "hw-plan", role: "plan", mode: "primary" },
   { name: "hw-build", role: "code-a", mode: "primary" },
@@ -22,6 +29,12 @@ export async function buildOpenCodeStatusModel(projectRoot = ".", options = {}) 
   const warnings = [];
 
   const state = await readYaml(join(root, "state.yaml"), { required: true, sources, warnings });
+  const config = await readYaml(join(root, "config.yaml"), { sources, warnings });
+  const globalConfig = options.globalConfig
+    ? { value: options.globalConfig }
+    : options.homeDir
+      ? await readYaml(join(options.homeDir, ".hypo-workflow", "config.yaml"), { sources, warnings })
+      : { value: { acceptance: DEFAULT_ACCEPTANCE_POLICY } };
   const cycle = await readYaml(join(root, "cycle.yaml"), { sources, warnings });
   const queue = await readYaml(join(root, "feature-queue.yaml"), { sources, warnings });
   const metrics = await readYaml(join(root, "metrics.yaml"), { sources, warnings });
@@ -42,6 +55,8 @@ export async function buildOpenCodeStatusModel(projectRoot = ".", options = {}) 
   const metricSummary = metricsSummary(metrics.value, feature, state.value);
   const recentEvents = recentEventsFromLog(log.value);
   const cycleModel = cycleFromSources(cycle.value, queue.value, state.value);
+  const acceptancePolicy = resolveAcceptancePolicy(config.value || {}, globalConfig.value || {});
+  const acceptance = acceptanceFromSources(cycle.value, state.value, acceptancePolicy, options);
   const pipeline = {
     name: state.value.pipeline?.name || "",
     status: state.value.pipeline?.status || "unknown",
@@ -53,6 +68,7 @@ export async function buildOpenCodeStatusModel(projectRoot = ".", options = {}) 
     sources,
     warnings,
     cycle: cycleModel,
+    acceptance,
     pipeline,
     progress,
     current,
@@ -83,6 +99,7 @@ function emptyModel({ sources, warnings, models }) {
     sources,
     warnings,
     cycle: { id: null, name: null, status: "missing" },
+    acceptance: { scope: null, state: "none", mode: null, feedback_ref: null, cycle_id: null, policy: resolveAcceptancePolicy() },
     pipeline: { name: "", status: "missing_pipeline", heartbeat: null },
     progress: { completed: 0, total: 0, percent: 0 },
     current: { milestone_id: null, prompt_name: null, step: null, feature_id: null },
@@ -280,6 +297,101 @@ function cycleFromSources(cycle, queue, state) {
   };
 }
 
+function acceptanceFromSources(cycle, state, policy, options = {}) {
+  const cycleAcceptance = cycle?.cycle?.acceptance || {};
+  const stateAcceptance = state.acceptance || {};
+  const raw = {
+    scope: stateAcceptance.scope || "cycle",
+    state: stateAcceptance.state || cycleAcceptance.state || "none",
+    mode: stateAcceptance.mode || cycleAcceptance.mode || policy.mode || null,
+    feedback_ref: stateAcceptance.feedback_ref || cycleAcceptance.feedback_ref || null,
+    cycle_id: stateAcceptance.cycle_id || cycleFromSources(cycle, null, state).id || null,
+    requested_at: stateAcceptance.requested_at || cycleAcceptance.requested_at || null,
+    updated_at: stateAcceptance.updated_at || cycleAcceptance.updated_at || null,
+  };
+  const evaluated = evaluateAcceptanceStatus(raw, policy, options);
+  return {
+    ...evaluated,
+    policy,
+  };
+}
+
+function resolveAcceptancePolicy(projectConfig = {}, globalConfig = {}) {
+  const merged = mergeObject(
+    mergeObject(DEFAULT_ACCEPTANCE_POLICY, globalConfig?.acceptance || {}),
+    projectConfig?.acceptance || {},
+  );
+  const mode = normalizeAcceptanceMode(merged.mode);
+  return {
+    mode,
+    require_user_confirm: mode === "manual" || mode === "confirm" ? true : Boolean(merged.require_user_confirm),
+    default_state: normalizeAcceptanceState(merged.default_state),
+    timeout_hours: positiveNumber(merged.timeout_hours, DEFAULT_ACCEPTANCE_POLICY.timeout_hours),
+    reject_escalation_threshold: positiveInteger(
+      merged.reject_escalation_threshold,
+      DEFAULT_ACCEPTANCE_POLICY.reject_escalation_threshold,
+    ),
+  };
+}
+
+function evaluateAcceptanceStatus(acceptance = {}, policy = {}, options = {}) {
+  const state = acceptance.state || policy.default_state || DEFAULT_ACCEPTANCE_POLICY.default_state;
+  const resolved = {
+    ...acceptance,
+    state,
+    mode: acceptance.mode || policy.mode || DEFAULT_ACCEPTANCE_POLICY.mode,
+    timed_out: false,
+    automatic: Boolean(acceptance.automatic),
+  };
+  if (state !== "pending" || policy.mode !== "timeout") return resolved;
+
+  const requestedAt = Date.parse(acceptance.requested_at || acceptance.updated_at || "");
+  const now = Date.parse(options.now || new Date().toISOString());
+  const timeoutHours = positiveNumber(policy.timeout_hours, DEFAULT_ACCEPTANCE_POLICY.timeout_hours);
+  if (!Number.isFinite(requestedAt) || !Number.isFinite(now)) return resolved;
+  if (now - requestedAt < timeoutHours * 60 * 60 * 1000) return resolved;
+
+  return {
+    ...resolved,
+    state: "accepted",
+    timed_out: true,
+    automatic: true,
+    reason: "timeout",
+  };
+}
+
+function mergeObject(base, override) {
+  if (!isPlainObject(base) || !isPlainObject(override)) {
+    return override === undefined ? base : override;
+  }
+  const merged = { ...base };
+  for (const [key, value] of Object.entries(override)) {
+    merged[key] = key in merged ? mergeObject(merged[key], value) : value;
+  }
+  return merged;
+}
+
+function isPlainObject(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function normalizeAcceptanceMode(value) {
+  return ["manual", "auto", "timeout", "confirm"].includes(value) ? value : DEFAULT_ACCEPTANCE_POLICY.mode;
+}
+
+function normalizeAcceptanceState(value) {
+  return ["pending", "accepted", "rejected"].includes(value) ? value : DEFAULT_ACCEPTANCE_POLICY.default_state;
+}
+
+function positiveNumber(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : fallback;
+}
+
+function positiveInteger(value, fallback) {
+  return Math.max(1, Math.trunc(positiveNumber(value, fallback)));
+}
+
 function renderSidebarModel(model) {
   const current = model.current.milestone_id || "no milestone";
   const progress = `${model.progress.completed}/${model.progress.total}`;
@@ -291,6 +403,7 @@ function renderSidebarModel(model) {
         title: "Current",
         items: [
           `Cycle: ${model.cycle.id || NA}`,
+          `Acceptance: ${model.acceptance?.state || NA} (${model.acceptance?.policy?.mode || model.acceptance?.mode || NA})`,
           `Feature: ${formatFeatureLabel(model.feature)}`,
           `Milestone: ${current}`,
           `Step: ${model.current.step || NA}`,
@@ -355,6 +468,7 @@ function renderFooterModel(model) {
     `cost:${model.metrics.cost}`,
   ];
   if (model.gate.status === "waiting_confirmation") parts.push("confirm");
+  if (model.acceptance?.state && model.acceptance.state !== "none") parts.push(`acceptance:${model.acceptance.state}`);
   return { text: parts.join(" | ") };
 }
 

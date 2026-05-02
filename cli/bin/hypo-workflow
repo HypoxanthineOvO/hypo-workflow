@@ -6,11 +6,14 @@ import { homedir } from "node:os";
 import { spawnSync } from "node:child_process";
 import {
   DEFAULT_GLOBAL_CONFIG,
+  buildGlobalTuiModel,
   loadConfig,
   normalizeProfile,
+  registerProject,
+  renderGlobalTuiSnapshot,
+  runProjectSync,
   stringifyYaml,
   writeConfig,
-  writeOpenCodeArtifacts,
 } from "../../core/src/index.js";
 
 const args = process.argv.slice(2);
@@ -22,12 +25,14 @@ try {
     if (!(await exists(globalConfigPath()))) {
       await setup(args);
     } else {
-      showMenu();
+      await tui([]);
     }
   } else if (command === "--help" || command === "-h" || command === "help") {
     help();
   } else if (command === "setup") {
     await setup(args.slice(1));
+  } else if (command === "tui") {
+    await tui(args.slice(1));
   } else if (command === "doctor") {
     await doctor();
   } else if (command === "sync") {
@@ -51,7 +56,7 @@ async function setup(flags) {
   const model = valueAfter(flags, "--model") || "default";
   const config = {
     ...DEFAULT_GLOBAL_CONFIG,
-    version: "10.0.1",
+    version: DEFAULT_GLOBAL_CONFIG.version,
     active_profile: platform,
     agent: {
       platform,
@@ -75,19 +80,42 @@ async function doctor() {
   process.stdout.write("Pipeline runner: host agent only\n");
 }
 
+async function tui(flags) {
+  const model = await buildGlobalTuiModel({ homeDir: homedir() });
+  if (flags.includes("--snapshot") || process.env.HW_TUI_SNAPSHOT === "1" || !process.stdout.isTTY) {
+    process.stdout.write(renderGlobalTuiSnapshot(model));
+    return;
+  }
+
+  try {
+    const ink = await import("ink");
+    const React = await import("react");
+    const App = () => React.createElement(
+      ink.Box,
+      { flexDirection: "column" },
+      ...renderGlobalTuiSnapshot(model).trimEnd().split("\n").map((line, index) =>
+        React.createElement(ink.Text, { key: index }, line),
+      ),
+    );
+    const instance = ink.render(React.createElement(App));
+    await instance.waitUntilExit();
+  } catch (error) {
+    process.stdout.write(renderGlobalTuiSnapshot(model));
+    process.stdout.write(`\nInk TUI fallback: ${error.message}\n`);
+  }
+}
+
 async function sync(flags) {
   const platform = valueAfter(flags, "--platform") || "opencode";
   const project = resolve(valueAfter(flags, "--project") || ".");
-  if (platform !== "opencode") {
-    process.stdout.write(`No generated artifacts required for ${platform}\n`);
-    return;
-  }
-  const config = await readEffectiveProjectConfig(project);
-  await writeOpenCodeArtifacts(project, {
-    config,
+  const mode = flags.includes("--light") ? "light" : flags.includes("--deep") ? "deep" : "standard";
+  const result = await runProjectSync(project, {
+    mode,
+    platform,
     profile: valueAfter(flags, "--profile"),
+    registryFile: registryPath(),
   });
-  process.stdout.write(`Synced OpenCode artifacts to ${join(project, ".opencode")}\n`);
+  process.stdout.write(`Synced project ${project} mode=${result.mode} operations=${result.operations.join(",")}\n`);
 }
 
 async function profile(flags) {
@@ -161,6 +189,19 @@ async function initProject(flags) {
     );
   }
   if (platform === "opencode") await sync(["--platform", "opencode", "--project", project]);
+  await registerProject(registryPath(), {
+    path: project,
+    display_name: project.split(/[\\/]/).filter(Boolean).at(-1) || "project",
+    platform,
+    profile: (await readEffectiveProjectConfig(project)).opencode?.profile || "standard",
+    current_cycle: null,
+    pipeline_status: "initialized",
+    open_patch_count: 0,
+    acceptance: {
+      mode: DEFAULT_GLOBAL_CONFIG.acceptance.mode,
+      state: DEFAULT_GLOBAL_CONFIG.acceptance.default_state,
+    },
+  });
   process.stdout.write(`Initialized project adapters in ${project}\n`);
 }
 
@@ -212,8 +253,9 @@ function help() {
   process.stdout.write(`hypo-workflow — setup utility, not a runner\n\n`);
   process.stdout.write("Commands:\n");
   process.stdout.write("  setup [--platform codex|claude-code|opencode] [--model <name>] [--yes]\n");
+  process.stdout.write("  tui [--snapshot]\n");
   process.stdout.write("  doctor\n");
-  process.stdout.write("  sync --platform opencode --project <dir>\n");
+  process.stdout.write("  sync [--light|--deep] --platform opencode --project <dir>\n");
   process.stdout.write("  profile list|use <name>|edit <name> [--platform <name>] [--model <name>]\n");
   process.stdout.write("  install opencode|codex|claude\n");
   process.stdout.write("  init-project --platform opencode --project <dir>\n");
@@ -232,6 +274,10 @@ function valueAfter(values, flag) {
 
 function globalConfigPath() {
   return join(homedir(), ".hypo-workflow", "config.yaml");
+}
+
+function registryPath() {
+  return join(homedir(), ".hypo-workflow", "projects.yaml");
 }
 
 function profilePath(name) {

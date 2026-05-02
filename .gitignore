@@ -1,5 +1,6 @@
 # Pipeline 运行时产物
 .pipeline/state.yaml
+.pipeline/.lock
 .pipeline/reports/
 .pipeline/log.md
 *.compact.*

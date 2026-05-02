@@ -11,6 +11,7 @@ rules:
   commit-format: error
   auto-continue-threshold: error
   plan-tool-required: error
+  knowledge-ledger-self-check: error
   review-strictness: error
   readme-freshness: error
   skill-quality: error

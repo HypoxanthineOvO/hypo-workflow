@@ -6,7 +6,7 @@ permission:
   read: allow
   grep: allow
   glob: allow
-  bash: allow
+  bash: ask
   todowrite: allow
   question: allow
 ---

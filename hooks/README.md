@@ -21,6 +21,16 @@ M13 起，Hook 规范额外支持 `/hw:chat` 的追加对话语义：
 - Stop Hook 可根据会话规模决定写 `chat summary`，或只保留 `chat_entry` 与修改痕迹
 - 当 chat 修改不再轻量时，Hook / runtime 可提示升级为 Patch escalation
 
+## Knowledge Ledger
+
+M03 起，Hook 规范支持 Knowledge Ledger 的轻量上下文和停止前自检：
+
+- SessionStart 注入 `.pipeline/knowledge/knowledge.compact.md`
+- SessionStart 注入 `.pipeline/knowledge/index/*.yaml`
+- SessionStart 默认不读取 `.pipeline/knowledge/records/*.yaml`
+- Stop Hook 在 `knowledge-ledger-self-check: error` 时阻止缺少 Knowledge record 的最终停止
+- warn 模式只提示 Agent 自检，不阻止继续
+
 ## 安装
 
 ### 方式 1：Plugin 安装（推荐，Claude Code）

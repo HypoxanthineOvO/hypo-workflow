@@ -1,0 +1,36 @@
+---
+name: reject
+description: Reject pending Hypo-Workflow Cycle work with structured feedback and reopen the Cycle.
+---
+
+# /hw:reject
+## Output Language Rules
+
+📌 输出语言规则：
+读取 config.yaml → output.language
+- zh-CN / zh：所有用户可见的输出使用中文（PROGRESS、报告、状态提示、错误消息、交互提问）
+- en：使用英文
+- auto：跟随用户对话语言
+内部日志（log.yaml、state.yaml）始终英文。
+
+Use this skill when the user invokes `/hw:reject`.
+
+## Semantics
+
+- Read `.pipeline/cycle.yaml` and `.pipeline/state.yaml`.
+- Require Cycle acceptance state `pending_acceptance` or `acceptance.state: pending`.
+- Parse the user feedback as plain text unless a structured file is supplied.
+- Write full feedback to `.pipeline/acceptance/cycle-C{N}-rejection-<timestamp>.yaml`.
+- Mark `cycle.status: active`.
+- Mark `cycle.acceptance.state: rejected`, `rejected_at`, and `feedback_ref`.
+- Mirror only compact acceptance state in `state.yaml`:
+  - `acceptance.scope: cycle`
+  - `acceptance.state: rejected`
+  - `acceptance.cycle_id`
+  - `acceptance.feedback_ref`
+  - `acceptance.updated_at`
+- Set `pipeline.status: running` and `current.phase: executing`.
+- Append a `cycle_reject` entry to `.pipeline/log.yaml`.
+- Update `.pipeline/PROGRESS.md` with a compact board row.
+
+Never store full rejection feedback in `state.yaml`; use `feedback_ref`.

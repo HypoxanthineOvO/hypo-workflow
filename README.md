@@ -6,7 +6,7 @@
 
 Plan -> Execute -> Review -> Report -> Recover -> Showcase
 
-[![Version](https://img.shields.io/badge/version-10.0.2-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-10.1.0-blue)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex%20%7C%20OpenCode-purple)](#平台支持)
 
@@ -42,7 +42,7 @@ Plan -> Prompt -> Step Chain -> Tests -> Review -> Report -> Evaluate -> Next / 
 | Rules | 统一管理规则严格度、生命周期钩子、自然语言偏好和规则包 |
 | 多平台 | Claude Code 使用 `/hypo-workflow:*`，Codex 使用兼容命令 `/hw:*`，OpenCode 使用原生 `/hw-*` scaffold |
 
-当前版本提供 **32 个用户指令**，另有一个内部 watchdog skill。
+当前版本提供 **36 个用户指令**，另有一个内部 watchdog skill。
 
 ---
 
@@ -711,7 +711,7 @@ V9 把确定性逻辑拆到 `core/`，把安装和同步放到 `cli/`：
 | `core/src/config/` | 读取、合并、写入全局和项目配置 |
 | `core/src/profile/` | 解析 `standard`、`strict`、`automation` 等 profile |
 | `core/src/platform/` | 维护 Codex / Claude Code / OpenCode capability map |
-| `core/src/commands/` | 维护 32 个 canonical command 到 OpenCode `/hw-*` 的映射 |
+| `core/src/commands/` | 维护 36 个 canonical command 到 OpenCode `/hw-*` 的映射 |
 | `core/src/rules/` | 生成 rules summary |
 | `core/src/artifacts/` | 渲染 OpenCode commands、agents、plugin 和配置 |
 | `cli/bin/hypo-workflow` | setup、doctor、profile、sync、install、init-project |
@@ -877,7 +877,7 @@ hypo-workflow init-project --platform opencode --project .
 | `opencode.json` | OpenCode 官方项目配置：instructions、compaction、permissions |
 | `AGENTS.md` | 项目级 Agent 指令，说明 `.pipeline/` 契约和受保护文件 |
 | `.opencode/hypo-workflow.json` | HW 私有 metadata：profile、auto-continue、file guard、command map、model matrix |
-| `.opencode/commands/hw-*.md` | 32 个 OpenCode 原生 slash commands |
+| `.opencode/commands/hw-*.md` | 36 个 OpenCode 原生 slash commands |
 | `.opencode/agents/hw-*.md` | `hw-plan`、`hw-build`、`hw-status`、`hw-compact`、`hw-test`、`hw-code-a`、`hw-code-b`、`hw-report`、`hw-review`、`hw-explore`、`hw-debug`、`hw-docs` |
 | `.opencode/plugins/hypo-workflow.ts` | command context、file guard、auto-continue、compact restore、permission logging scaffold |
 | `.opencode/package.json` | OpenCode adapter 包 metadata |
@@ -1028,6 +1028,14 @@ git diff --check
 ---
 
 ## Changelog
+
+### v10.1.0
+
+- Completed C4: Knowledge Ledger, OpenCode workflow-control hooks, Global TUI/model pool/project actions, Cycle/Patch acceptance loops, Explore Mode, and explicit `/hw:sync`.
+- Added `/hw:explore` lifecycle support with isolated global worktrees, dirty-worktree gates, structured summaries, archive retention, plan context upgrade, and analysis context upgrade.
+- Added `/hw:sync` light/standard/deep modes, shared CLI sync logic, SessionStart light external-change detection, TUI sync action, and OpenCode `/hw-sync` artifact.
+- Closed and archived C4 under `.pipeline/archives/C4-knowledge-ledger-global-tui-acceptance-loop-explore-mode/`.
+- Validation: core Node suite 156/156, scenario regression 62/62, config validation, JSON parse, and `git diff --check`.
 
 ### v10.0.2
 

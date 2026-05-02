@@ -6,8 +6,11 @@
 
 ```bash
 hypo-workflow setup
+hypo-workflow tui --snapshot
 hypo-workflow doctor
 hypo-workflow sync --platform opencode --project .
+hypo-workflow sync --light --project .
+hypo-workflow sync --deep --project .
 hypo-workflow profile list
 hypo-workflow profile use opencode
 hypo-workflow profile edit opencode --model qwen
@@ -15,4 +18,6 @@ hypo-workflow install opencode
 hypo-workflow init-project --platform opencode --project .
 ```
 
-When no command is provided, the CLI runs `setup` on first use and shows a small setup menu afterwards.
+When no command is provided, the CLI runs `setup` on first use and opens the global read-only Ink TUI afterwards. The `hw` bin alias points to the same entrypoint when the CLI package is installed or linked.
+
+The TUI reads `~/.hypo-workflow/config.yaml` and `~/.hypo-workflow/projects.yaml`, shows registered projects, project detail, global config, model pool, and explicit sync/action entries. It does not execute pipelines. Sync modes are light, standard, and deep; SessionStart uses only light external-change detection.

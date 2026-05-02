@@ -26,6 +26,7 @@ All compact files are written next to their source files:
 - `.pipeline/log.compact.yaml`
 - `.pipeline/reports.compact.md`
 - `.pipeline/patches.compact.md`
+- `.pipeline/knowledge/knowledge.compact.md`
 
 Never delete or rewrite the original files while generating compact views.
 
@@ -130,11 +131,26 @@ Include only closed Patches. For each closed Patch, keep:
 
 Open Patch files remain loaded separately in full by SessionStart.
 
+### `knowledge.compact.md`
+
+Source: `.pipeline/knowledge/records/*.yaml` plus generated category indexes.
+
+Keep:
+
+- recent durable decisions
+- reusable pitfalls
+- important dependencies
+- config notes
+- redacted secret refs
+
+Full raw knowledge records are not loaded by default. SessionStart loads `.pipeline/knowledge/knowledge.compact.md` and `.pipeline/knowledge/index/*.yaml` only.
+
 ## Auto Generation
 
 When `compact.auto: true`:
 
 - regenerate compact views after each Milestone report is generated and the Milestone reaches a final state
+- regenerate `.pipeline/knowledge/knowledge.compact.md` when Knowledge Ledger records or indexes changed
 - regenerate compact views during `/hw:cycle close` before or immediately after archive summary generation
 
 When `compact.auto: false`, do not generate compact files unless the user explicitly invokes `/hw:compact`.

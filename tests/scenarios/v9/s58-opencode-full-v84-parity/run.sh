@@ -5,7 +5,8 @@ ROOT="$(cd "$(dirname "$0")/../../../.." && pwd)"
 cd "$ROOT"
 
 tmp_project="$(mktemp -d)"
-node cli/bin/hypo-workflow init-project --platform opencode --project "$tmp_project" >/tmp/hw-s58-init.log
+tmp_home="$(mktemp -d)"
+HOME="$tmp_home" node cli/bin/hypo-workflow init-project --platform opencode --project "$tmp_project" >/tmp/hw-s58-init.log
 
 for command in cycle patch patch-fix compact showcase release dashboard audit debug check reset log report status guide rules; do
   test -f "$tmp_project/.opencode/commands/hw-$command.md" || {
