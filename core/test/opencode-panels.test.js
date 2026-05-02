@@ -14,16 +14,23 @@ test("renderOpenCodeStatusTuiPlugin registers sidebar and footer slots without m
   const source = await renderOpenCodeStatusTuiPlugin();
 
   assert.match(source, /from "@opencode-ai\/plugin\/tui"/);
+  assert.match(source, /@jsxImportSource @opentui\/solid/);
+  assert.match(source, /export const id = "hypo-workflow-status-panels"/);
   assert.match(source, /export const tui/);
   assert.match(source, /export const HypoWorkflowTuiPlugin = tui/);
+  assert.match(source, /export default \{ id, tui \}/);
   assert.match(source, /slots\.register/);
   assert.match(source, /sidebar_content/);
   assert.match(source, /sidebar_footer/);
   assert.match(source, /home_footer/);
   assert.match(source, /session_prompt_right/);
   assert.match(source, /buildOpenCodeStatusModel/);
+  assert.match(source, /collectOpenCodeRuntime/);
+  assert.match(source, /latestSubtaskModel/);
+  assert.match(source, /providerID.*modelID/s);
   assert.match(source, /toast/);
-  assert.doesNotMatch(source, /<text>/);
+  assert.match(source, /<text>\{renderSidebarText\(model\(\)\)\}<\/text>/);
+  assert.match(source, /<text>\{renderFooterText\(model\(\), false\)\}<\/text>/);
   assert.doesNotMatch(source, /jsx-dev-runtime/);
   assert.doesNotMatch(source, /writeFile|state\.yaml.*=/);
 });
@@ -42,17 +49,23 @@ test("writeOpenCodeArtifacts emits separate server and TUI plugin files", async 
 
   const serverPlugin = await readFile(join(dir, ".opencode", "plugins", "hypo-workflow.ts"), "utf8");
   const statusModule = await readFile(join(dir, ".opencode", "runtime", "hypo-workflow-status.js"), "utf8");
-  const tuiPlugin = await readFile(join(dir, ".opencode", "plugins", "hypo-workflow-tui.tsx"), "utf8");
+  const tuiPlugin = await readFile(join(dir, ".opencode", "tui", "hypo-workflow-tui.tsx"), "utf8");
+  const rootConfig = JSON.parse(await readFile(join(dir, "opencode.json"), "utf8"));
+  const tuiConfig = JSON.parse(await readFile(join(dir, "tui.json"), "utf8"));
 
   assert.match(serverPlugin, /fileGuard/);
   assert.match(serverPlugin, /commandMap/);
-  assert.match(serverPlugin, /export const server/);
+  assert.match(serverPlugin, /const server/);
+  assert.match(serverPlugin, /export default server/);
   assert.match(statusModule, /buildOpenCodeStatusModel/);
   assert.match(tuiPlugin, /export const tui/);
   assert.match(tuiPlugin, /sidebar_content/);
   assert.match(tuiPlugin, /home_footer/);
   assert.match(tuiPlugin, /session_prompt_right/);
+  assert.match(tuiPlugin, /<text>/);
   assert.match(tuiPlugin, /\.\.\/runtime\/hypo-workflow-status\.js/);
+  assert.deepEqual(rootConfig.plugin, [".opencode/plugins/hypo-workflow.ts"]);
+  assert.deepEqual(tuiConfig.plugin, [".opencode/tui/hypo-workflow-tui.tsx"]);
 });
 
 test("generated OpenCode plugins are importable and expose OpenCode module entrypoints", async (t) => {
@@ -65,6 +78,7 @@ test("generated OpenCode plugins are importable and expose OpenCode module entry
   const dir = await mkdtemp(join(tmpdir(), "hw-opencode-plugin-import-"));
   await writeOpenCodeArtifacts(dir, { profile: "standard" });
   await mkdir(join(dir, ".opencode", "node_modules", "@opencode-ai", "plugin"), { recursive: true });
+  await mkdir(join(dir, ".opencode", "node_modules", "@opentui", "solid"), { recursive: true });
   await mkdir(join(dir, ".opencode", "node_modules", "solid-js"), { recursive: true });
   await writeFile(
     join(dir, ".opencode", "node_modules", "@opencode-ai", "plugin", "package.json"),
@@ -72,6 +86,27 @@ test("generated OpenCode plugins are importable and expose OpenCode module entry
     "utf8",
   );
   await writeFile(join(dir, ".opencode", "node_modules", "@opencode-ai", "plugin", "tui.js"), "export {};\n", "utf8");
+  await writeFile(
+    join(dir, ".opencode", "node_modules", "@opentui", "solid", "package.json"),
+    JSON.stringify({
+      type: "module",
+      exports: {
+        "./jsx-runtime": "./jsx-runtime.js",
+        "./jsx-dev-runtime": "./jsx-dev-runtime.js",
+      },
+    }),
+    "utf8",
+  );
+  await writeFile(
+    join(dir, ".opencode", "node_modules", "@opentui", "solid", "jsx-runtime.js"),
+    "export function jsx(type, props) { return { type, props }; }\nexport const jsxs = jsx;\nexport const Fragment = 'fragment';\n",
+    "utf8",
+  );
+  await writeFile(
+    join(dir, ".opencode", "node_modules", "@opentui", "solid", "jsx-dev-runtime.js"),
+    "export function jsxDEV(type, props) { return { type, props }; }\nexport const Fragment = 'fragment';\n",
+    "utf8",
+  );
   await writeFile(
     join(dir, ".opencode", "node_modules", "solid-js", "package.json"),
     JSON.stringify({ type: "module", main: "./index.js", exports: { ".": "./index.js" } }),
@@ -85,10 +120,12 @@ test("generated OpenCode plugins are importable and expose OpenCode module entry
 
   const script = `
     const server = await import(${JSON.stringify(join(dir, ".opencode", "plugins", "hypo-workflow.ts"))});
-    const tui = await import(${JSON.stringify(join(dir, ".opencode", "plugins", "hypo-workflow-tui.tsx"))});
-    if (typeof server.server !== "function") throw new Error("missing server export");
+    const tui = await import(${JSON.stringify(join(dir, ".opencode", "tui", "hypo-workflow-tui.tsx"))});
+    if (typeof server.default !== "function") throw new Error("missing default server export");
     if (typeof tui.tui !== "function") throw new Error("missing tui export");
     if (typeof tui.HypoWorkflowTuiPlugin !== "function") throw new Error("missing compatibility export");
+    if (typeof tui.default?.tui !== "function") throw new Error("missing default tui module export");
+    if (tui.default?.id !== "hypo-workflow-status-panels") throw new Error("missing default tui id");
   `;
   const result = spawnSync("bun", ["-e", script], { encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr || result.stdout);
@@ -98,11 +135,15 @@ test("writeOpenCodeArtifacts removes legacy plugin-side status helper", async ()
   const dir = await mkdtemp(join(tmpdir(), "hw-opencode-panels-cleanup-"));
   const legacy = join(dir, ".opencode", "plugins", "hypo-workflow-status.js");
   await mkdir(join(dir, ".opencode", "plugins"), { recursive: true });
+  await mkdir(join(dir, ".opencode", "tui"), { recursive: true });
   await writeFile(legacy, "export const legacy = true;\n", "utf8");
+  await writeFile(join(dir, ".opencode", "plugins", "hypo-workflow-tui.tsx"), "export const legacyTui = true;\n", "utf8");
 
   await writeOpenCodeArtifacts(dir, { profile: "standard" });
 
   await assert.rejects(readFile(legacy, "utf8"));
+  await assert.rejects(readFile(join(dir, ".opencode", "plugins", "hypo-workflow-tui.tsx"), "utf8"));
+  assert.match(await readFile(join(dir, ".opencode", "tui", "hypo-workflow-tui.tsx"), "utf8"), /export const tui/);
 });
 
 test("writeOpenCodeArtifacts renders model matrix into role agent files", async () => {
@@ -155,18 +196,22 @@ test("OpenCode metadata carries agent model matrix and compaction settings", () 
     agents: {
       plan: { model: "gpt-5.5" },
       compact: { model: "deepseek-v4-flash" },
-      test: { model: "gpt-5.4" },
-      "code-a": { model: "gpt-5.4" },
-      "code-b": { model: "gpt-5.4-mini" },
-      report: { model: "gpt-5.4-mini" },
+      test: { model: "deepseek-v4-pro" },
+      "code-a": { model: "mimo-v2.5-pro" },
+      "code-b": { model: "deepseek-v4-pro" },
+      debug: { model: "gpt-5.5" },
+      report: { model: "deepseek-v4-flash" },
     },
   });
 
   assert.equal(metadata.compaction.effective_context_target, 900000);
   assert.equal(metadata.agents.plan.model, "gpt-5.5");
   assert.equal(metadata.agents.compact.model, "deepseek-v4-flash");
-  assert.equal(metadata.agents["code-b"].model, "gpt-5.4-mini");
-  assert.equal(metadata.agents.report.model, "gpt-5.4-mini");
+  assert.equal(metadata.agents.test.model, "deepseek-v4-pro");
+  assert.equal(metadata.agents["code-a"].model, "mimo-v2.5-pro");
+  assert.equal(metadata.agents["code-b"].model, "deepseek-v4-pro");
+  assert.equal(metadata.agents.debug.model, "gpt-5.5");
+  assert.equal(metadata.agents.report.model, "deepseek-v4-flash");
 });
 
 test("OpenCode spec documents model matrix contract without runner semantics", async () => {
@@ -177,4 +222,21 @@ test("OpenCode spec documents model matrix contract without runner semantics", a
   assert.match(spec, /plan:\n\s+model: gpt-5\.5/);
   assert.match(spec, /compact:\n\s+model: deepseek-v4-flash/);
   assert.match(spec, /not as a model-calling runner/);
+});
+
+test("OpenCode agent frontmatter uses provider-qualified model ids for known providers", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "hw-opencode-qualified-models-"));
+  await writeOpenCodeArtifacts(dir, { profile: "standard" });
+
+  const planAgent = await readFile(join(dir, ".opencode", "agents", "hw-plan.md"), "utf8");
+  const buildAgent = await readFile(join(dir, ".opencode", "agents", "hw-build.md"), "utf8");
+  const testAgent = await readFile(join(dir, ".opencode", "agents", "hw-test.md"), "utf8");
+  const reportAgent = await readFile(join(dir, ".opencode", "agents", "hw-report.md"), "utf8");
+  const metadata = JSON.parse(await readFile(join(dir, ".opencode", "hypo-workflow.json"), "utf8"));
+
+  assert.match(planAgent, /^model: openai\/gpt-5\.5$/m);
+  assert.match(buildAgent, /^model: mimo\/mimo-v2\.5-pro$/m);
+  assert.match(testAgent, /^model: deepseek\/deepseek-v4-pro$/m);
+  assert.match(reportAgent, /^model: deepseek\/deepseek-v4-flash$/m);
+  assert.equal(metadata.agents["code-a"].model, "mimo-v2.5-pro");
 });

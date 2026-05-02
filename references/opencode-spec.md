@@ -30,7 +30,7 @@ V8.4 parity is tracked in [`opencode-parity.md`](./opencode-parity.md).
 | Rules and instructions | native | `AGENTS.md`, `opencode.json.instructions` | Export HW rules into native instruction sources. |
 | Model selection | native | provider/model/variant config | Prefer OpenCode config; HW only supplies profile defaults. |
 | MCP servers | native | `mcp` config | Optional setup integration, not required for command parity. |
-| Plugin lifecycle | plugin-assisted | `.opencode/plugins/hypo-workflow.ts`, `.opencode/runtime/hypo-workflow-status.js`, `.opencode/plugins/hypo-workflow-tui.tsx` | Keep event/file-guard logic, read-only status loading, and TUI rendering loosely coupled. |
+| Plugin lifecycle | plugin-assisted | `.opencode/plugins/hypo-workflow.ts`, `.opencode/runtime/hypo-workflow-status.js`, `.opencode/tui/hypo-workflow-tui.tsx`, `tui.json` | Keep event/file-guard logic, read-only status loading, and TUI rendering loosely coupled. |
 | Command context capture | plugin-assisted | `command.executed`, `tui.command.execute` | Record invoked command, args, and current project state. |
 | Auto continue | plugin-assisted | `tool.execute.after`, `session.idle`, `session.status` | Apply HW evaluation rules and continue only under safe policy. |
 | File guard | plugin-assisted | `tool.execute.before`, permission config | Protect state/cycle/rules as errors; warn on ordinary `.pipeline` writes. |
@@ -105,6 +105,27 @@ Hypo-Workflow treats OpenCode model routing as a setup/sync contract, not as a m
 
 ```yaml
 opencode:
+  providers:
+    openai:
+      models:
+        gpt-5.5:
+          name: GPT 5.5
+    anthropic:
+      models:
+        claude-opus-4.6:
+          name: Claude Opus 4.6
+    mimo:
+      models:
+        mimo-v2.5-pro:
+          name: MiMo V2.5 Pro
+        mimo-v2.5-flash:
+          name: MiMo V2.5 Flash
+    deepseek:
+      models:
+        deepseek-v4-pro:
+          name: DeepSeek V4 Pro
+        deepseek-v4-flash:
+          name: DeepSeek V4 Flash
   compaction:
     effective_context_target: 900000
   agents:
@@ -113,15 +134,15 @@ opencode:
     compact:
       model: deepseek-v4-flash
     test:
-      model: gpt-5.4
+      model: deepseek-v4-pro
     code-a:
-      model: gpt-5.4
+      model: mimo-v2.5-pro
     code-b:
-      model: gpt-5.4-mini
+      model: deepseek-v4-pro
     debug:
-      model: gpt-5.4
+      model: gpt-5.5
     report:
-      model: gpt-5.4-mini
+      model: deepseek-v4-flash
 ```
 
 M01 defines the schema, defaults, and metadata contract. M02 renders model routing into generated `.opencode/agents/*.md` frontmatter and renders compaction intent plus the full matrix into `.opencode/hypo-workflow.json`. The project-root `opencode.json` and adapter-local `.opencode/opencode.json` stay limited to OpenCode-compatible configuration fields; Hypo-Workflow-specific values such as `effective_context_target` and `agents` belong in the sidecar metadata.
@@ -170,7 +191,7 @@ Recommended M09 layout:
 
 - server plugin: `.opencode/plugins/hypo-workflow.ts`
 - shared status module: `.opencode/runtime/hypo-workflow-status.js`
-- TUI plugin: `.opencode/plugins/hypo-workflow-tui.tsx`
+- TUI plugin: `.opencode/tui/hypo-workflow-tui.tsx`, registered from root `tui.json`
 - project-root `opencode.json.plugin` should load the server and TUI plugins, while `.opencode/opencode.json` must not redeclare those plugin paths
 - the TUI plugin imports the colocated status module instead of referencing Hypo-Workflow source paths outside the generated adapter
 - do not place helper modules under `.opencode/plugins/` unless they export a real plugin entry, because OpenCode auto-discovers local plugin files from that directory
@@ -183,6 +204,7 @@ Status model sources:
 - `.pipeline/metrics.yaml`
 - `.pipeline/log.yaml`
 - `.pipeline/reports.compact.md`
+- `.opencode/hypo-workflow.json` for the configured OpenCode role model matrix
 - `.pipeline/patches/` and `.pipeline/patches.compact.md` when present
 
 Required output fields:
@@ -195,6 +217,9 @@ Required output fields:
 - latest evaluation score
 - recent 10 events
 - duration, token/cost summary
+- current OpenCode agent/model from TUI session state when available
+- latest active subagent/model from `subtask` parts when available
+- configured primary/subagent role model matrix from `.opencode/hypo-workflow.json`
 - sidebar summary sections
 - footer one-line text
 - source read status and warnings

@@ -1,4 +1,15 @@
 entries:
+  - id: "P005-FIX"
+    type: patch_fix
+    patch: P005
+    ref: "P005"
+    status: closed
+    timestamp: "2026-05-02T15:51:56+08:00"
+    commit: "0fc5ac4"
+    summary: "Expose OpenCode current model and active subagent model in the TUI status panels."
+    tests: "node --test core/test/*.test.js; sync smoke; opencode run --agent hw-build"
+    trigger: user
+    related_milestone: null
   - id: "REL-1000"
     type: release
     ref: "v10.0.0"

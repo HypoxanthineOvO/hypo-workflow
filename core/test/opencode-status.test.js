@@ -30,8 +30,17 @@ test("OpenCode status model reads active state, queue, events, metrics, and late
     "log.yaml": logYaml(12),
     "reports.compact.md": reportsCompact(),
   });
+  await writeOpenCodeMetadata(root);
 
-  const model = await buildOpenCodeStatusModel(root);
+  const model = await buildOpenCodeStatusModel(root, {
+    opencode: {
+      current: { agent: "hw-build", model: "mimo/mimo-v2.5-pro" },
+      active_subagent: {
+        agent: "hw-test",
+        model: { providerID: "deepseek", modelID: "deepseek-v4-pro" },
+      },
+    },
+  });
 
   assert.equal(model.ok, true);
   assert.equal(model.cycle.id, "C2");
@@ -48,9 +57,16 @@ test("OpenCode status model reads active state, queue, events, metrics, and late
   assert.equal(model.metrics.duration_ms, "n/a");
   assert.equal(model.metrics.token_count, "n/a");
   assert.equal(model.metrics.cost, "n/a");
+  assert.equal(model.models.current.agent, "hw-build");
+  assert.equal(model.models.current.model, "mimo/mimo-v2.5-pro");
+  assert.equal(model.models.active_subagent.agent, "hw-test");
+  assert.equal(model.models.active_subagent.model, "deepseek/deepseek-v4-pro");
+  assert.ok(model.models.subagents.some((agent) => agent.agent === "hw-code-a" && agent.model === "mimo/mimo-v2.5-pro"));
   assert.match(model.sidebar.summary, /M08/);
   assert.ok(model.sidebar.sections.some((section) => section.title === "Feature Queue"));
   assert.ok(model.sidebar.sections.some((section) => section.title === "Milestones"));
+  assert.match(model.sidebar.sections.find((section) => section.title === "Models").items.join("\n"), /Current: hw-build -> mimo\/mimo-v2\.5-pro/);
+  assert.match(model.sidebar.sections.find((section) => section.title === "Models").items.join("\n"), /Active subagent: hw-test -> deepseek\/deepseek-v4-pro/);
   assert.ok(model.sidebar.sections.some((section) => section.title === "Blocked \/ Deferred"));
   assert.match(model.sidebar.sections.find((section) => section.title === "Feature Queue").items.join("\n"), /F003.*OpenCode status panels/);
   assert.match(model.sidebar.sections.find((section) => section.title === "Milestones").items.join("\n"), /M09/);
@@ -159,6 +175,22 @@ async function fixtureRoot() {
   const root = await mkdtemp(join(tmpdir(), "hw-status-"));
   await mkdir(join(root, ".pipeline"), { recursive: true });
   return root;
+}
+
+async function writeOpenCodeMetadata(root) {
+  await mkdir(join(root, ".opencode"), { recursive: true });
+  await writeFile(join(root, ".opencode", "hypo-workflow.json"), JSON.stringify({
+    profile: "standard",
+    agents: {
+      plan: { model: "gpt-5.5" },
+      compact: { model: "deepseek-v4-flash" },
+      test: { model: "deepseek-v4-pro" },
+      "code-a": { model: "mimo-v2.5-pro" },
+      "code-b": { model: "deepseek-v4-pro" },
+      debug: { model: "gpt-5.5" },
+      report: { model: "deepseek-v4-flash" },
+    },
+  }, null, 2), "utf8");
 }
 
 async function writePipeline(root, files) {

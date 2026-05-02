@@ -2,6 +2,18 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const NA = "n/a";
+const OPENCODE_METADATA_PATH = ".opencode/hypo-workflow.json";
+const OPENCODE_MODEL_AGENTS = Object.freeze([
+  { name: "hw-plan", role: "plan", mode: "primary" },
+  { name: "hw-build", role: "code-a", mode: "primary" },
+  { name: "hw-compact", role: "compact", mode: "primary" },
+  { name: "hw-test", role: "test", mode: "subagent" },
+  { name: "hw-code-a", role: "code-a", mode: "subagent" },
+  { name: "hw-code-b", role: "code-b", mode: "subagent" },
+  { name: "hw-report", role: "report", mode: "primary" },
+  { name: "hw-review", role: "debug", mode: "subagent" },
+  { name: "hw-debug", role: "debug", mode: "subagent" },
+]);
 
 export async function buildOpenCodeStatusModel(projectRoot = ".", options = {}) {
   const pipelineDir = options.pipelineDir || ".pipeline";
@@ -15,9 +27,11 @@ export async function buildOpenCodeStatusModel(projectRoot = ".", options = {}) 
   const metrics = await readYaml(join(root, "metrics.yaml"), { sources, warnings });
   const log = await readYaml(join(root, "log.yaml"), { sources, warnings });
   const reportsCompact = await readText(join(root, "reports.compact.md"), { sources, warnings });
+  const metadata = await readJson(join(projectRoot, OPENCODE_METADATA_PATH), { sources, warnings });
+  const models = modelsFromOpenCode(metadata.value, options.opencode || {});
 
   if (!state.value) {
-    return emptyModel({ sources, warnings });
+    return emptyModel({ sources, warnings, models });
   }
 
   const progress = progressFromState(state.value);
@@ -51,6 +65,7 @@ export async function buildOpenCodeStatusModel(projectRoot = ".", options = {}) 
     },
     gate,
     metrics: metricSummary,
+    models,
     latest_score: latestScore || fallbackScore(state.value),
     recent_events: recentEvents,
   };
@@ -62,7 +77,7 @@ export async function buildOpenCodeStatusModel(projectRoot = ".", options = {}) 
   };
 }
 
-function emptyModel({ sources, warnings }) {
+function emptyModel({ sources, warnings, models }) {
   const model = {
     ok: false,
     sources,
@@ -75,6 +90,7 @@ function emptyModel({ sources, warnings }) {
     queue: { current_feature: null, auto_chain: null, failure_policy: null, features: [] },
     gate: { status: "none", feature_id: null },
     metrics: { duration_ms: NA, token_count: NA, cost: NA },
+    models,
     latest_score: { diff_score: null, overall: null, code_quality: null },
     recent_events: [],
   };
@@ -83,6 +99,18 @@ function emptyModel({ sources, warnings }) {
     sidebar: renderSidebarModel(model),
     footer: renderFooterModel(model),
   };
+}
+
+async function readJson(path, context) {
+  const text = await readText(path, context);
+  if (!text.value) return { value: null };
+  try {
+    return { value: JSON.parse(text.value) };
+  } catch (error) {
+    recordSource(context.sources, path, "error", error.message);
+    context.warnings.push(`${path} parse error: ${error.message}`);
+    return { value: null };
+  }
 }
 
 async function readYaml(path, context) {
@@ -270,6 +298,14 @@ function renderSidebarModel(model) {
         ],
       },
       {
+        title: "Models",
+        items: [
+          `Current: ${formatAgentModel(model.models.current)}`,
+          `Active subagent: ${formatAgentModel(model.models.active_subagent)}`,
+          ...model.models.subagents.slice(0, 5).map(formatAgentModel),
+        ],
+      },
+      {
         title: "Feature Queue",
         items: [
           `Current: ${model.queue.current_feature || NA}`,
@@ -312,6 +348,8 @@ function renderFooterModel(model) {
     `${model.progress.completed}/${model.progress.total}`,
     model.current.milestone_id || "M?",
     model.current.step || model.gate.status,
+    `model:${shortModel(model.models.current.model)}`,
+    `sub:${shortModel(model.models.active_subagent.model)}`,
     `score:${score}`,
     `tokens:${model.metrics.token_count}`,
     `cost:${model.metrics.cost}`,
@@ -376,6 +414,82 @@ function blockedOrDeferred(features) {
     .filter((feature) => feature.status === "blocked" || feature.status === "deferred")
     .map((feature) => `${feature.id || NA} | ${feature.status} | ${feature.title || ""}`.trim());
   return items.length ? items : ["none"];
+}
+
+function modelsFromOpenCode(metadata, runtime) {
+  const configured = configuredAgentModels(metadata);
+  const current = normalizeRuntimeAgentModel(runtime.current)
+    || configured.find((agent) => agent.name === metadata?.default_agent)
+    || { agent: runtime.current?.agent || metadata?.default_agent || NA, model: runtime.current?.model || metadata?.model || NA };
+  const activeSubagent = normalizeRuntimeAgentModel(runtime.active_subagent || runtime.subagent)
+    || { agent: NA, model: NA };
+
+  return {
+    current,
+    active_subagent: activeSubagent,
+    configured,
+    subagents: configured.filter((agent) => agent.mode === "subagent"),
+  };
+}
+
+function configuredAgentModels(metadata) {
+  const agents = metadata?.agents || {};
+  return OPENCODE_MODEL_AGENTS.map((agent) => {
+    const rawModel = agents[agent.role]?.model;
+    return {
+      agent: agent.name,
+      role: agent.role,
+      mode: agent.mode,
+      model: rawModel ? qualifyModelId(rawModel, metadata) : NA,
+    };
+  });
+}
+
+function normalizeRuntimeAgentModel(value) {
+  if (!value || typeof value !== "object") return null;
+  const model = normalizeModelId(value.model) || normalizeModelId(value.modelID)
+    || normalizeProviderModel(value.providerID, value.modelID);
+  if (!model && !value.agent) return null;
+  return {
+    agent: value.agent || NA,
+    model: model || NA,
+  };
+}
+
+function normalizeModelId(model) {
+  if (!model) return null;
+  if (typeof model === "string") return model;
+  return normalizeProviderModel(model.providerID, model.modelID);
+}
+
+function normalizeProviderModel(providerID, modelID) {
+  if (!providerID || !modelID) return null;
+  return `${providerID}/${modelID}`;
+}
+
+function qualifyModelId(model, metadata) {
+  if (!model || model.includes("/")) return model || NA;
+  for (const [providerId, provider] of Object.entries(metadata?.providers || {})) {
+    if (provider?.models && Object.prototype.hasOwnProperty.call(provider.models, model)) {
+      return `${providerId}/${model}`;
+    }
+  }
+  if (model.startsWith("gpt-")) return `openai/${model}`;
+  if (model.startsWith("claude-")) return `anthropic/${model}`;
+  if (model.startsWith("mimo-")) return `mimo/${model}`;
+  if (model.startsWith("deepseek-")) return `deepseek/${model}`;
+  return model;
+}
+
+function formatAgentModel(value) {
+  if (!value) return NA;
+  const prefix = value.agent || value.role || NA;
+  return `${prefix} -> ${value.model || NA}`;
+}
+
+function shortModel(value) {
+  if (!value || value === NA) return NA;
+  return String(value).split("/").pop();
 }
 
 function formatBoolean(value) {
