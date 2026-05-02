@@ -6,15 +6,16 @@ repo_root="$(cd "$script_dir/../../../.." && pwd)"
 
 cd "$repo_root"
 
-test -f .pipeline/showcase/showcase.yaml
-test -f .pipeline/showcase/PROJECT-INTRO.md
-test -f .pipeline/showcase/TECHNICAL-DOC.md
-test -f .pipeline/showcase/slides.md
-rg -q 'version: 1' .pipeline/showcase/showcase.yaml
-rg -q 'Hypo-Workflow' .pipeline/showcase/PROJECT-INTRO.md
-rg -q '31 个用户指令' .pipeline/showcase/PROJECT-INTRO.md
-rg -q '```mermaid' .pipeline/showcase/slides.md
-rg -q 'type: poster' .pipeline/showcase/showcase.yaml
-rg -q 'OPENAI_API_KEY missing' .pipeline/showcase/showcase.yaml
+showcase_dir=.pipeline/archives/C2-new-cycle/showcase
+test -f "$showcase_dir/showcase.yaml"
+test -f "$showcase_dir/PROJECT-INTRO.md"
+test -f "$showcase_dir/TECHNICAL-DOC.md"
+test -f "$showcase_dir/slides.md"
+rg -q 'version: 1' "$showcase_dir/showcase.yaml"
+rg -q 'Hypo-Workflow' "$showcase_dir/PROJECT-INTRO.md"
+rg -q '31 个用户指令' "$showcase_dir/PROJECT-INTRO.md"
+rg -q '```mermaid' "$showcase_dir/slides.md"
+rg -q 'type: poster' "$showcase_dir/showcase.yaml"
+rg -q 'OPENAI_API_KEY missing' "$showcase_dir/showcase.yaml"
 
 echo "s49-showcase-bootstrap: PASS"

@@ -33,7 +33,7 @@ fi
 
 grep -Fq 'opencode debug config' tests/scenarios/v9/s54-opencode-plugin-scaffold/run.sh
 
-grep -Fq '当前预期回归数量为 `60/60`' README.md
+grep -Eq '当前预期回归数量为 `(60|62)/\1`' README.md
 grep -Fq 'OpenCode Native Adapter' README.md
 grep -Fq 'references/opencode-parity.md' README.md
 

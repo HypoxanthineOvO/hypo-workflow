@@ -1,0 +1,12 @@
+# P001: frametitle vspace 方向错误，文字更高了
+- 严重级: critical
+- 状态: closed
+- 发现于: C1/M2
+- 创建时间: 2026-05-02 00:15
+- 修复时间: 2026-05-02 00:20
+- 改动: theme/hypo-slide-theme-workflow.sty — vspace 从 0.05cm 增大到 0.5cm，ht 从 2.6ex 调到 2.8ex
+- 测试: ✅ make slides 编译通过
+- 关联: [P002, P003]
+- resolved_by: P001
+- related: [P002, P003]
+- supersedes: []

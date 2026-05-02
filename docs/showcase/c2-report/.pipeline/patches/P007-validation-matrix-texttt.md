@@ -1,0 +1,12 @@
+# P007: 表7.1 C2 Validation Matrix texttt字体溢出重叠
+- 严重级: critical
+- 状态: closed
+- 发现于: C1
+- 创建时间: 2026-05-02 00:25
+- 修复时间: 2026-05-02 00:30
+- 改动: report.tex — 所有 \texttt{...} 改为 {\small\ttfamily ...} 允许自动断行
+- 测试: ✅ make report 编译通过
+- 关联: []
+- resolved_by: P007
+- related: []
+- supersedes: []

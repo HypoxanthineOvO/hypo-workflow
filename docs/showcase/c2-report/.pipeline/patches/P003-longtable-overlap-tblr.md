@@ -1,0 +1,12 @@
+# P003: longtable 字体重叠未解决，改用 tblr 重做
+- 严重级: critical
+- 状态: closed
+- 发现于: C1/M2
+- 创建时间: 2026-05-02 00:15
+- 修复时间: 2026-05-02 00:20
+- 改动: report.tex — 全部 6 个 longtable/tabularx 改为 tabularray (longtblr/tblr)，添加 \UseTblrLibrary{booktabs}
+- 测试: ✅ make report 编译通过
+- 关联: [P001, P002]
+- resolved_by: P003
+- related: [P001, P002]
+- supersedes: []

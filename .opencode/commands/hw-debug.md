@@ -1,5 +1,5 @@
 ---
-agent: hw-build
+agent: hw-debug
 description: Hypo-Workflow mapping for /hw:debug
 ---
 

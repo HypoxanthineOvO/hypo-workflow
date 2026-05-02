@@ -10,8 +10,8 @@
     {
       "name": "hypo-workflow",
       "source": "./",
-      "version": "9.1.2",
-      "description": "Serialized prompt workflow with OpenCode native adapter scaffold plus 31 user-facing skills covering setup, planning, execution, cycles, patches, compact, guide, showcase, rules, debugging, auditing, release, watchdog, and dashboard.",
+      "version": "10.0.0",
+      "description": "Serialized prompt workflow with OpenCode native adapter scaffold, V10 Analysis Preset, evidence ledgers, and 31 user-facing skills covering setup, planning, execution, cycles, patches, compact, guide, showcase, rules, debugging, auditing, release, watchdog, and dashboard.",
       "author": {
         "name": "Hypoxanthine",
         "url": "https://github.com/HypoxanthineOvO"

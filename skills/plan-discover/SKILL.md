@@ -27,6 +27,13 @@ Before diving into details, start with three broad questions:
 
 Only after these are clear should the Agent go deeper into assumptions, ambiguities, tradeoffs, and validation criteria.
 
+Also classify the workflow lane in structured notes:
+
+- `workflow_kind: build | analysis | showcase`
+- if `workflow_kind=analysis`, set `analysis_kind: root_cause | metric | repo_system`
+
+Use `root_cause` for debugging or difference analysis, `metric` for trends or quantitative comparison, and `repo_system` for codebase/system investigation. This taxonomy selects the workflow lane; Test Profiles still select validation policy.
+
 Category-specific follow-up:
 
 - `webapp`: ask for E2E path, browser interaction, and visual evidence
@@ -123,6 +130,8 @@ When `--batch` is present:
 1. Collect multiple Feature candidates before moving to Decompose.
 2. For each Feature, capture:
    - title
+   - workflow_kind: `build`, `analysis`, or `showcase`
+   - analysis_kind when applicable: `root_cause`, `metric`, or `repo_system`
    - task category
    - desired effect
    - verification method

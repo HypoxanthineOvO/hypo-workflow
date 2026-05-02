@@ -1,4 +1,85 @@
 entries:
+  - id: "REL-1000"
+    type: release
+    ref: "v10.0.0"
+    status: completed
+    timestamp: "2026-05-02T14:42:48+08:00"
+    summary: "Prepared local v10.0.0 release with C3 Analysis Preset, restored 103/103 core tests and 62/62 scenario regression."
+    report: "CHANGELOG.md"
+    trigger: user
+    related_milestone: "C3"
+  - id: "C3-COMPLETE"
+    type: cycle
+    ref: "C3"
+    status: completed
+    timestamp: "2026-05-02T14:21:41+08:00"
+    summary: "Completed C3 OpenCode model matrix and V10 Analysis Preset with M01-M12 done."
+    report: ".pipeline/PROGRESS.md"
+    trigger: auto
+    related_milestone: null
+  - id: "M12-C3"
+    type: milestone
+    ref: "C3/M12"
+    status: completed
+    timestamp: "2026-05-02T14:21:41+08:00"
+    summary: "Locked C3 no-gate queue policy, docs, and analysis runtime regression scenario."
+    report: ".pipeline/reports/11-queue-auto-continue-docs-regression.report.md"
+    trigger: auto
+    related_milestone: "M12"
+  - id: "M11-C3"
+    type: milestone
+    ref: "C3/M11"
+    status: completed
+    timestamp: "2026-05-02T14:21:41+08:00"
+    summary: "Integrated analysis workflow kind and prompt generation guidance into planning skills."
+    report: ".pipeline/reports/10-analysis-planning-generate-integration.report.md"
+    trigger: auto
+    related_milestone: "M11"
+  - id: "M10-C3"
+    type: milestone
+    ref: "C3/M10"
+    status: completed
+    timestamp: "2026-05-02T14:21:41+08:00"
+    summary: "Added preset-aware analysis evaluation criteria and helper coverage."
+    report: ".pipeline/reports/09-preset-aware-evaluation.report.md"
+    trigger: auto
+    related_milestone: "M10"
+  - id: "M09-C3"
+    type: milestone
+    ref: "C3/M09"
+    status: completed
+    timestamp: "2026-05-02T14:21:41+08:00"
+    summary: "Added analysis step, ledger, and report templates with zh/en fallbacks."
+    report: ".pipeline/reports/08-analysis-report-evidence-templates.report.md"
+    trigger: auto
+    related_milestone: "M09"
+  - id: "M08-C3"
+    type: milestone
+    ref: "C3/M08"
+    status: completed
+    timestamp: "2026-05-02T14:21:41+08:00"
+    summary: "Defined analysis outcome semantics and build follow-up proposal handoff."
+    report: ".pipeline/reports/07-analysis-outcome-handoff.report.md"
+    trigger: auto
+    related_milestone: "M08"
+  - id: "M07-C3"
+    type: milestone
+    ref: "C3/M07"
+    status: completed
+    timestamp: "2026-05-02T14:21:41+08:00"
+    summary: "Defined executable analysis experiment result contract and boundary recording."
+    report: ".pipeline/reports/06-analysis-experiment-execution-contract.report.md"
+    trigger: auto
+    related_milestone: "M07"
+  - id: "M06-C3"
+    type: milestone
+    ref: "C3/M06"
+    status: completed
+    timestamp: "2026-05-02T13:59:25+08:00"
+    summary: "Defined analysis state summaries and evidence ledger format with fixture validation."
+    report: ".pipeline/reports/05-analysis-state-ledger-format.report.md"
+    trigger: auto
+    related_milestone: "M06"
   - id: "M0"
     type: milestone
     ref: "/hw:help /hw:reset /hw:log"
@@ -656,3 +737,165 @@ entries:
     summary: "Released V9.1 patch updates: Feature Queue README documentation, next-cycle OpenCode model-matrix draft, and the optimized 51-page C2 technical report Slides/report future-work refresh."
     report: "CHANGELOG.md"
     trigger: user
+  - id: "C3"
+    type: cycle_new
+    ref: "C3"
+    status: active
+    timestamp: "2026-05-02T02:02:58+08:00"
+    summary: "Started Cycle C3 for OpenCode Multi-Agent Matrix and V10 Analysis Preset after archiving C2 runtime artifacts."
+    report: ".pipeline/cycle.yaml"
+    trigger: user
+    related_milestone: null
+  - id: "PLAN-C3-P3"
+    type: plan_generate
+    ref: "C3"
+    status: completed
+    timestamp: "2026-05-02T02:02:58+08:00"
+    summary: "Generated C3 plan artifacts with 5 auto-gated Features, 12 Milestones, OpenCode model matrix scope, and V10 Analysis Preset scope. Compact files were intentionally left unchanged."
+    report: ".pipeline/confirm-summary.md"
+    trigger: user
+    related_milestone: null
+  - id: "M01-START-C3"
+    type: milestone_start
+    ref: "C3/M01"
+    status: active
+    timestamp: "2026-05-02T02:26:32+08:00"
+    summary: "Started M01 Matrix Contract and Schema under C3."
+    report: ".pipeline/prompts/00-opencode-model-matrix-contract-schema.md"
+    trigger: auto
+    related_milestone: "M01"
+  - id: "M01-WRITE-TESTS-C3"
+    type: step
+    ref: "C3/M01/write_tests"
+    status: active
+    timestamp: "2026-05-02T02:26:32+08:00"
+    summary: "Started write_tests for OpenCode multi-agent model matrix and compaction contract."
+    report: ".pipeline/prompts/00-opencode-model-matrix-contract-schema.md"
+    trigger: auto
+    related_milestone: "M01"
+  - id: "M01-COMPLETE-C3"
+    type: milestone_complete
+    ref: "C3/M01"
+    status: completed
+    timestamp: "2026-05-02T02:35:59+08:00"
+    summary: "Completed OpenCode model matrix contract: defaults, schema, metadata, config spec, OpenCode spec, and targeted tests."
+    report: ".pipeline/reports/00-opencode-model-matrix-contract-schema.report.md"
+    trigger: auto
+    related_milestone: "M01"
+  - id: "M02-START-C3"
+    type: milestone_start
+    ref: "C3/M02"
+    status: active
+    timestamp: "2026-05-02T02:36:30+08:00"
+    summary: "Started M02 OpenCode Artifact Rendering and Sync."
+    report: ".pipeline/prompts/01-opencode-artifact-rendering-sync.md"
+    trigger: auto
+    related_milestone: "M02"
+  - id: "M02-COMPLETE-C3"
+    type: milestone_complete
+    ref: "C3/M02"
+    status: completed
+    timestamp: "2026-05-02T12:13:49+08:00"
+    summary: "Completed OpenCode artifact rendering and sync: matrix model frontmatter, role agents, command routing, sidecar metadata, config-aware sync, docs, and targeted validation."
+    report: ".pipeline/reports/01-opencode-artifact-rendering-sync.report.md"
+    trigger: auto
+    related_milestone: "M02"
+  - id: "M03-START-C3"
+    type: milestone_start
+    ref: "C3/M03"
+    status: active
+    timestamp: "2026-05-02T12:13:49+08:00"
+    summary: "Started M03 Model Matrix Validation and Docs."
+    report: ".pipeline/prompts/02-opencode-model-matrix-validation-docs.md"
+    trigger: auto
+    related_milestone: "M03"
+  - id: "M03-COMPLETE-C3"
+    type: milestone_complete
+    ref: "C3/M03"
+    status: completed
+    timestamp: "2026-05-02T12:26:42+08:00"
+    summary: "Completed OpenCode model matrix validation and docs: README/spec/parity updates, s61 sync scenario, regression registration, and targeted validations."
+    report: ".pipeline/reports/02-opencode-model-matrix-validation-docs.report.md"
+    trigger: auto
+    related_milestone: "M03"
+  - id: "F001-COMPLETE-C3"
+    type: feature_complete
+    ref: "C3/F001"
+    status: completed
+    timestamp: "2026-05-02T12:26:42+08:00"
+    summary: "Completed OpenCode Multi-Agent Model Matrix feature across contract, renderer, sync, command routing, docs, and scenario validation."
+    report: ".pipeline/reports/02-opencode-model-matrix-validation-docs.report.md"
+    trigger: auto
+    related_milestone: "M03"
+  - id: "F002-START-C3"
+    type: feature_start
+    ref: "C3/F002"
+    status: active
+    timestamp: "2026-05-02T12:26:42+08:00"
+    summary: "Auto-continued into F002 Analysis Preset Core Contract with gate=auto."
+    report: ".pipeline/feature-queue.yaml"
+    trigger: auto
+    related_milestone: "M04"
+  - id: "M04-START-C3"
+    type: milestone_start
+    ref: "C3/M04"
+    status: active
+    timestamp: "2026-05-02T12:26:42+08:00"
+    summary: "Started M04 Analysis Preset and Workflow Taxonomy."
+    report: ".pipeline/prompts/03-analysis-preset-workflow-taxonomy.md"
+    trigger: auto
+    related_milestone: "M04"
+  - id: "M04-COMPLETE-C3"
+    type: milestone_complete
+    ref: "C3/M04"
+    status: completed
+    timestamp: "2026-05-02T12:41:59+08:00"
+    summary: "Completed Analysis Preset core contract: analysis spec, step sequence helper, workflow taxonomy, config/schema validation, and discover/batch integration."
+    report: ".pipeline/reports/03-analysis-preset-workflow-taxonomy.report.md"
+    trigger: auto
+    related_milestone: "M04"
+  - id: "M05-START-C3"
+    type: milestone_start
+    ref: "C3/M05"
+    status: active
+    timestamp: "2026-05-02T12:41:59+08:00"
+    summary: "Started M05 Analysis Interaction Model and Boundaries."
+    report: ".pipeline/prompts/04-analysis-interaction-boundaries.md"
+    trigger: auto
+    related_milestone: "M05"
+  - id: "M05-COMPLETE-C3"
+    type: milestone_complete
+    ref: "C3/M05"
+    status: completed
+    timestamp: "2026-05-02T12:56:40+08:00"
+    summary: "Completed Analysis interaction model and boundaries: manual/hybrid/auto defaults, boundary normalization, config schema, metadata, and OpenCode guidance."
+    report: ".pipeline/reports/04-analysis-interaction-boundaries.report.md"
+    trigger: auto
+    related_milestone: "M05"
+  - id: "F002-COMPLETE-C3"
+    type: feature_complete
+    ref: "C3/F002"
+    status: completed
+    timestamp: "2026-05-02T12:56:40+08:00"
+    summary: "Completed Analysis Preset Core Contract across preset taxonomy and interaction boundary configuration."
+    report: ".pipeline/reports/04-analysis-interaction-boundaries.report.md"
+    trigger: auto
+    related_milestone: "M05"
+  - id: "F003-START-C3"
+    type: feature_start
+    ref: "C3/F003"
+    status: active
+    timestamp: "2026-05-02T12:56:40+08:00"
+    summary: "Auto-continued into F003 Analysis Runtime, State, and Ledger with gate=auto."
+    report: ".pipeline/feature-queue.yaml"
+    trigger: auto
+    related_milestone: "M06"
+  - id: "M06-START-C3"
+    type: milestone_start
+    ref: "C3/M06"
+    status: active
+    timestamp: "2026-05-02T12:56:40+08:00"
+    summary: "Started M06 Analysis State Summary and Ledger Format."
+    report: ".pipeline/prompts/05-analysis-state-ledger-format.md"
+    trigger: auto
+    related_milestone: "M06"

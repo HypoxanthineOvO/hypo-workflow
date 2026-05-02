@@ -1,0 +1,12 @@
+# P005: 图5.2 v9-timeline 太长，需改紧凑布局
+- 严重级: critical
+- 状态: closed
+- 发现于: C1
+- 创建时间: 2026-05-02 00:25
+- 修复时间: 2026-05-02 00:30
+- 改动: figures/v9-timeline.dot — 从 LR 单行改为 TB 两行布局 (M0-M4 / M5-M9)，重新生成 PDF
+- 测试: ✅ make report 编译通过
+- 关联: [P004]
+- resolved_by: P005
+- related: [P004]
+- supersedes: []

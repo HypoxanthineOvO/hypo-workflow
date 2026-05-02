@@ -1,0 +1,12 @@
+# P006: frametitle 还需要再低一点
+- 严重级: normal
+- 状态: closed
+- 发现于: C1
+- 创建时间: 2026-05-02 00:25
+- 修复时间: 2026-05-02 00:30
+- 改动: theme/hypo-slide-theme-workflow.sty — vspace 从 0.5cm 增大到 0.8cm
+- 测试: ✅ make slides 编译通过
+- 关联: []
+- resolved_by: P006
+- related: []
+- supersedes: []

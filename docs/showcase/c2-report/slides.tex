@@ -27,15 +27,15 @@
     \begin{tikzpicture}[remember picture,overlay]
       \node[anchor=center,inner sep=0pt] at (current page.center)
         {\includegraphics[width=\paperwidth,height=\paperheight]{#3}};
-      \fill[white,opacity=0.88] (current page.north west) rectangle ([xshift=0.54\paperwidth]current page.south west);
+      \fill[white,opacity=0.90] (current page.north west) rectangle ([xshift=0.76\paperwidth]current page.south west);
       \fill[WorkflowBlue!80] ([xshift=0.055\paperwidth,yshift=-0.18\paperheight]current page.north west) rectangle ++(0.008\paperwidth,-0.28\paperheight);
     \end{tikzpicture}
-    \vspace*{1.25cm}
-    \hspace*{0.95cm}
-    \begin{minipage}{0.42\paperwidth}
+    \vspace*{1.5cm}
+    \hspace*{0.8cm}
+    \begin{minipage}{0.64\paperwidth}
       {\Large\bfseries\color{WorkflowBlue}#1\par}
-      \vspace{0.55cm}
-      {\fontsize{21}{25}\selectfont\bfseries\color{WorkflowText}#2\par}
+      \vspace{0.6cm}
+      {\fontsize{22}{28}\selectfont\bfseries\color{WorkflowText}#2\par}
     \end{minipage}
   \end{frame}
 }
@@ -329,12 +329,9 @@
 
 \WorkflowFigureFrame{\texttt{.pipeline/} File Protocol}{figures/pipeline-protocol.tex}{状态、队列、日志、指标、报告都进入统一目录协议}
 
-\begin{frame}{File-First Architecture：架构润色版}
+\begin{frame}{File-First Architecture}
   \centering
-  \includegraphics[width=0.86\linewidth,height=0.66\textheight,keepaspectratio]{assets/gpt-image/file-first-architecture.png}
-  \vspace{0.25cm}
-
-  {\small\color{WorkflowMuted}概念图负责帮助读者建立直觉；严格字段关系继续由 TikZ 图、真实 YAML 和测试合同作证。}
+  \includegraphics[width=0.86\linewidth,height=0.72\textheight,keepaspectratio]{assets/gpt-image/file-first-architecture.png}
 \end{frame}
 
 \WorkflowFigureFrame{Project / Cycle / Feature / Milestone / Patch}{figures/hierarchy.tex}{Cycle 提供交付边界，Feature 提供调度层，Milestone 提供执行粒度，Patch 处理旁路修复}

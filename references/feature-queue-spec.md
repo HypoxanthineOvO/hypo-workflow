@@ -127,6 +127,8 @@ batch:
 
 `gate: confirm` is the explicit pause mechanism. It should not be simulated by disabling auto_chain globally.
 
+Analysis preset does not imply any special gate. A Cycle may choose a no-gate policy with `defaults.auto_chain=true`, `defaults.default_gate=auto`, and per-Feature `gate: auto`. That policy belongs to the queue/Cycle, not to the analysis preset itself.
+
 ## Insert and Reorder
 
 `/hw:plan --insert` may update `.pipeline/feature-queue.yaml` while preserving historical feature IDs.

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { DEFAULT_GLOBAL_CONFIG, loadConfig } from "../src/config/index.js";
+import { DEFAULT_GLOBAL_CONFIG, loadConfig, parseYaml } from "../src/config/index.js";
 
 test("default config exposes batch planning defaults", async () => {
   assert.equal(DEFAULT_GLOBAL_CONFIG.batch.decompose_mode, "upfront");
@@ -78,12 +78,15 @@ test("metrics spec documents duration token cost fallback", async () => {
 test("feature queue and metrics fixtures are present", async () => {
   const queue = await readFile(".pipeline/feature-queue.yaml", "utf8");
   const metrics = await readFile(".pipeline/metrics.yaml", "utf8");
+  const parsedQueue = parseYaml(queue);
 
   assert.match(queue, /decompose_mode: upfront/);
-  assert.match(queue, /decompose_mode: just_in_time/);
-  assert.match(queue, /gate: confirm/);
   assert.match(queue, /failure_policy: skip_defer/);
   assert.match(queue, /current_feature:/);
+  assert.equal(parsedQueue.defaults.default_gate, "auto");
+  assert.equal(parsedQueue.defaults.auto_chain, true);
+  assert.equal((parsedQueue.features || []).some((feature) => feature.gate === "confirm"), false);
+  assert.equal((parsedQueue.features || []).every((feature) => feature.status === "done"), true);
   assert.match(metrics, /token_count: n\/a/);
   assert.match(metrics, /cost: n\/a/);
   assert.match(metrics, /duration_ms:/);

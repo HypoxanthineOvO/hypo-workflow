@@ -6,7 +6,7 @@
 
 Plan -> Execute -> Review -> Report -> Recover -> Showcase
 
-[![Version](https://img.shields.io/badge/version-9.1.2-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-10.0.0-blue)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex%20%7C%20OpenCode-purple)](#平台支持)
 
@@ -34,6 +34,7 @@ Plan -> Prompt -> Step Chain -> Tests -> Review -> Report -> Evaluate -> Next / 
 | 中断恢复 | 用 `state.yaml`、heartbeat、log 和 PROGRESS 保留可恢复状态 |
 | Plan Mode | 支持交互式/自动规划、需求澄清、里程碑拆解、生成、确认和扩展 |
 | Feature Queue | 用 `/hw:plan --batch` 把多个 Feature 排成长期队列，并用 gate、优先级、upfront/JIT 拆解和 auto-chain 管理推进 |
+| Analysis Preset | 用 `analysis` preset 执行 root-cause、metric、repo/system 调查，产出 ledger-backed 结论和 build follow-up |
 | Lifecycle | 覆盖 init、check、audit、debug、release、cycle archive 等项目生命周期动作 |
 | Patch Track | 用 `P001` 轨道记录小问题，并可通过 Patch Fix 直接修复 |
 | Context Compact | 生成 `.compact` 视图，减少 SessionStart 加载上下文 |
@@ -146,6 +147,24 @@ AGENTS.md
 /hw:status
 /hw:resume
 ```
+
+### Analysis Preset
+
+`analysis` 是 preset，不是 Test Profile。它决定 step chain：
+
+```text
+define_question -> gather_context -> hypothesize -> experiment -> interpret -> conclude
+```
+
+Analysis 适合 root-cause/debug、metric/research、repo/system 调查。完整证据写入 `.pipeline/analysis/<milestone-id>-analysis-ledger.yaml`，`state.yaml` 只保留轻量 `prompt_state.analysis_summary` 和 ledger path。
+
+Analysis 有独立的交互边界：
+
+- `manual`：只做分析、报告和 proposal，不改代码
+- `hybrid`：可提出 fix/experiment，但改代码前确认
+- `auto`：可在配置边界内直接 patch 和验证
+
+如果分析结论需要实现，报告应给出 build follow-up proposal，而不是把所有 analysis 结果都强行视为 failed build。
 
 ### 5. 生成项目展示物料
 
@@ -855,9 +874,9 @@ hypo-workflow init-project --platform opencode --project .
 |---|---|
 | `opencode.json` | OpenCode 官方项目配置：instructions、compaction、permissions |
 | `AGENTS.md` | 项目级 Agent 指令，说明 `.pipeline/` 契约和受保护文件 |
-| `.opencode/hypo-workflow.json` | HW 私有 metadata：profile、auto-continue、file guard、command map |
+| `.opencode/hypo-workflow.json` | HW 私有 metadata：profile、auto-continue、file guard、command map、model matrix |
 | `.opencode/commands/hw-*.md` | 31 个 OpenCode 原生 slash commands |
-| `.opencode/agents/hw-*.md` | `hw-plan`、`hw-build`、`hw-status`、`hw-review`、`hw-explore`、`hw-debug`、`hw-docs` |
+| `.opencode/agents/hw-*.md` | `hw-plan`、`hw-build`、`hw-status`、`hw-compact`、`hw-test`、`hw-code-a`、`hw-code-b`、`hw-report`、`hw-review`、`hw-explore`、`hw-debug`、`hw-docs` |
 | `.opencode/plugins/hypo-workflow.ts` | command context、file guard、auto-continue、compact restore、permission logging scaffold |
 | `.opencode/package.json` | OpenCode adapter 包 metadata |
 
@@ -868,10 +887,51 @@ hypo-workflow init-project --platform opencode --project .
 | `/hw:*` 指令 | Slash commands | 映射为 `/hw-*` |
 | Plan 交互 | `question` tool / Ask | Plan 阶段优先使用 Ask |
 | 任务计划 | `todowrite` | `/hw-plan*` 强制维护 todo/plan |
-| Subagent | Agents / subagents | 映射 explorer、worker、reviewer 等角色 |
+| Subagent | Agents / subagents | 映射 test、code、debug、explore、reviewer 等角色 |
 | 自动继续 | Plugin events | 默认开启 safe auto-continue |
 | 文件门禁 | Permissions + plugin hooks | state/cycle/rules error-gated，普通 `.pipeline` 写入 warn |
 | 规则/说明 | `AGENTS.md` / instructions | 导出 HW always-rules 和平台说明 |
+
+#### OpenCode Model Matrix
+
+OpenCode adapter 支持 role-level model matrix。Hypo-Workflow 只负责把配置同步成 OpenCode command / agent / metadata 文件；OpenCode 仍然负责实际模型调用，HW 不做模型路由 runner。
+
+发布默认使用一组保守的公开默认值：
+
+```yaml
+opencode:
+  compaction:
+    effective_context_target: 900000
+  agents:
+    plan:
+      model: gpt-5.5
+    compact:
+      model: deepseek-v4-flash
+    test:
+      model: gpt-5.4
+    code-a:
+      model: gpt-5.4
+    code-b:
+      model: gpt-5.4-mini
+    debug:
+      model: gpt-5.4
+    report:
+      model: gpt-5.4-mini
+```
+
+推荐含义：
+
+| Role | Agent | 推荐用途 |
+|---|---|---|
+| `plan` | `hw-plan` | 规划、需求澄清、P1/P2/P3/P4 checkpoint |
+| `compact` | `hw-compact` | 大上下文压缩和 compact summary |
+| `test` | `hw-test` | 测试设计、测试执行、验证证据整理 |
+| `code-a` | `hw-build` / `hw-code-a` | 主实现路径和主要代码 worker |
+| `code-b` | `hw-code-b` | 次级并行 worker 或低成本实现分支 |
+| `debug` | `hw-debug` | 症状驱动排障和 hypothesis 记录 |
+| `report` | `hw-report` | 报告、总结、证据链整理 |
+
+自用/private 配置可以在 `~/.hypo-workflow/config.yaml` 或项目 `.pipeline/config.yaml` 覆盖这些模型。`effective_context_target` 和 `agents` 会写入 `.opencode/hypo-workflow.json` 与 agent frontmatter，不会写入根 `opencode.json`，避免污染 OpenCode 官方 schema。
 
 #### 常用 OpenCode 命令
 
@@ -887,7 +947,7 @@ hypo-workflow init-project --platform opencode --project .
 /hw-release
 ```
 
-`/hw-plan*` 默认使用 `hw-plan`，需要用户确认的地方使用 Ask/question。执行类命令使用 `hw-build`。状态、日志、规则和帮助类命令使用 `hw-status`。审计/评审类命令使用 `hw-review`。
+`/hw-plan*` 默认使用 `hw-plan`，需要用户确认的地方使用 Ask/question。执行类命令使用 `hw-build`。`/hw-compact`、`/hw-debug`、`/hw-report` 分别使用 `hw-compact`、`hw-debug`、`hw-report`，方便按角色配置模型。状态、日志、规则和帮助类命令使用 `hw-status`。审计/评审类命令使用 `hw-review`。
 
 #### Auto Continue 与 File Guard
 
@@ -961,11 +1021,18 @@ python3 tests/run_regression.py
 git diff --check
 ```
 
-当前预期回归数量为 `60/60`。
+当前预期回归数量为 `62/62`。
 
 ---
 
 ## Changelog
+
+### v10.0.0
+
+- Added V10 Analysis Preset runtime contracts: experiment execution records, evidence ledgers, outcomes, follow-up proposals, analysis templates, and preset-aware evaluation criteria.
+- Added Analysis planning/generation guidance for `workflow_kind: analysis` and `analysis_kind`.
+- Added `s62-analysis-preset-runtime` and restored full regression to 62/62.
+- Completed C3 OpenCode Multi-Agent Matrix and V10 Analysis Preset with 12/12 Milestones done.
 
 ### v9.1.2
 

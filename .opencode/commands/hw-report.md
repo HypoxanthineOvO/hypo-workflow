@@ -1,5 +1,5 @@
 ---
-agent: hw-status
+agent: hw-report
 description: Hypo-Workflow mapping for /hw:report
 ---
 

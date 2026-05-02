@@ -30,10 +30,43 @@ const autoContinue = {
   mode: "safe",
 };
 
-export async function activate({ app, client }) {
-  const log = (message) => {
-    if (client?.log) client.log(`[hypo-workflow] ${message}`);
+export const server = async ({ client }) => {
+  const log = createLogger(client);
+  return {
+    event: async ({ event }) => {
+      if (event?.type === "session.compacted") restoreCompactContext(event, log);
+      if (event?.type === "permission.asked" || event?.type === "permission.replied") {
+        recordPermissionEvent(event.type, event, log);
+      }
+      if (event?.type === "command.executed") recordCommandContext(event, log);
+    },
+    "command.execute.before": async (input) => {
+      recordCommandContext({ command: input.command, args: input.arguments, cwd: undefined }, log);
+    },
+    "tool.execute.before": async (_input, output) => {
+      const decision = fileGuard({ tool: { args: output.args || {} } }, log);
+      if (decision?.behavior === "deny") {
+        throw new Error(decision.message);
+      }
+    },
+    "tool.execute.after": async () => {
+      log("tool.execute.after heartbeat bridge");
+    },
+    "permission.ask": async (input) => {
+      recordPermissionEvent("permission.ask", input, log);
+    },
+    "experimental.session.compacting": async (_input, output) => {
+      const restored = restoreCompactContext({}, log);
+      output.context.push(`Hypo-Workflow compact context files: ${restored.files.join(", ")}`);
+    },
+    "experimental.compaction.autocontinue": async (_input, output) => {
+      if (!autoContinue.enabled || autoContinue.mode === "ask") output.enabled = false;
+    },
   };
+};
+
+export async function activate({ app, client }) {
+  const log = createLogger(client);
 
   app.on("command.executed", async (event) => {
     recordCommandContext(event, log);
@@ -72,6 +105,12 @@ export async function activate({ app, client }) {
     // recovery has one stable path: .plan-state/todo.yaml.
     return event;
   });
+}
+
+function createLogger(client) {
+  return (message) => {
+    if (client?.log) client.log(`[hypo-workflow] ${message}`);
+  };
 }
 
 function recordCommandContext(event, log) {

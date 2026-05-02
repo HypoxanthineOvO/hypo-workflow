@@ -1,0 +1,67 @@
+cycle:
+  number: 1
+  name: "C2 Report & Slides Visual Fixes"
+  type: feature
+  status: active
+  started: "2026-05-02T00:00:00+08:00"
+
+milestones:
+  - name: "M1-Report视觉修复"
+    status: pending
+    description: "修复 report.tex 中的 4 个视觉问题：案例插框命名、Test Profile 矩阵表格化、longtable 字体重叠、执行闭环回环化"
+    tasks:
+      - id: R1
+        title: "案例插框 → 案例"
+        description: "将 report.tex 中 4 处 '案例插框' 改为 '案例'"
+        files: [report.tex]
+        status: pending
+      - id: R2
+        title: "Test Profile 矩阵改 LaTeX 表格"
+        description: "将 figures/test-profile-matrix.tex 从 TikZ matrix 改为 booktabs 风格表格，内联到 report.tex"
+        files: [report.tex, figures/test-profile-matrix.tex]
+        status: pending
+      - id: R3
+        title: "longtable 列宽字号修复"
+        description: "修复 report.tex 中 3 个 longtable 的字体重叠问题：验证矩阵、工具对比、C2 Validation Matrix"
+        files: [report.tex]
+        status: pending
+      - id: R4
+        title: "执行闭环改五边形回环"
+        description: "将 figures/execution-loop.tex 从线性布局改为五边形环形布局"
+        files: [figures/execution-loop.tex]
+        status: pending
+    validation:
+      - "make report 编译通过"
+      - "build/report.pdf 无视觉问题"
+
+  - name: "M2-Slides视觉修复"
+    status: pending
+    description: "修复 slides.tex 中的 2 个视觉问题：Part 页面全屏文字、frametitle 高度"
+    tasks:
+      - id: S1
+        title: "Part 页面全屏文字覆盖"
+        description: "修改 slides.tex 中 WorkflowSectionFrame，白色遮罩覆盖全屏，文字铺满"
+        files: [slides.tex]
+        status: pending
+      - id: S2
+        title: "frametitle 高度调整"
+        description: "修改 theme/hypo-slide-theme-workflow.sty，调整 frametitle 的 vspace 和 ht 参数"
+        files: [theme/hypo-slide-theme-workflow.sty]
+        status: pending
+    validation:
+      - "make slides 编译通过"
+      - "build/slides.pdf 中 Part 页面文字完整显示"
+      - "frametitle 不再顶住上边缘"
+
+  - name: "M3-全局草稿审查"
+    status: pending
+    description: "全局审查 report.tex 和 slides.tex，删除或润色所有草稿/注释性文字"
+    tasks:
+      - id: S3
+        title: "全局草稿文字审查"
+        description: "扫描 report.tex 和 slides.tex，找出所有草稿/注释性/非正式文字，删除或润色为正式内容"
+        files: [report.tex, slides.tex]
+        status: pending
+    validation:
+      - "make all 编译通过"
+      - "全文搜索无草稿痕迹"

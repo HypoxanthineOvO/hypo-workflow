@@ -51,7 +51,7 @@ async function setup(flags) {
   const model = valueAfter(flags, "--model") || "default";
   const config = {
     ...DEFAULT_GLOBAL_CONFIG,
-    version: "9.1.1-alpha.0",
+    version: "10.0.0",
     active_profile: platform,
     agent: {
       platform,
@@ -82,8 +82,10 @@ async function sync(flags) {
     process.stdout.write(`No generated artifacts required for ${platform}\n`);
     return;
   }
+  const config = await readEffectiveProjectConfig(project);
   await writeOpenCodeArtifacts(project, {
-    profile: valueAfter(flags, "--profile") || "standard",
+    config,
+    profile: valueAfter(flags, "--profile"),
   });
   process.stdout.write(`Synced OpenCode artifacts to ${join(project, ".opencode")}\n`);
 }
@@ -165,6 +167,13 @@ async function initProject(flags) {
 async function readOrDefaultConfig() {
   if (await exists(globalConfigPath())) return loadConfig(globalConfigPath());
   return { ...DEFAULT_GLOBAL_CONFIG, profiles: profileIndex() };
+}
+
+async function readEffectiveProjectConfig(project) {
+  const globalConfig = await readOrDefaultConfig();
+  const projectConfig = join(project, ".pipeline", "config.yaml");
+  if (await exists(projectConfig)) return loadConfig(projectConfig, globalConfig);
+  return globalConfig;
 }
 
 async function ensureDefaultProfiles() {

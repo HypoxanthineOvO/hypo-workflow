@@ -1,0 +1,27 @@
+pipeline:
+  name: "C2 Showcase — Book Report & Beamer Slides"
+  source: local
+  output: local
+  prompts_dir: .pipeline/prompts
+  reports_dir: .pipeline/reports
+
+plan:
+  mode: interactive
+  interaction_depth: medium
+  interactive:
+    min_rounds: 3
+    require_explicit_confirm: true
+
+execution:
+  mode: self
+
+evaluation:
+  auto_continue: true
+  checks:
+    - latex_build_pass
+    - no_regressions
+    - matches_plan
+
+output:
+  language: zh-CN
+  timezone: Asia/Shanghai

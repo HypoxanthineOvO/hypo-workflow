@@ -1,0 +1,12 @@
+# P008: 附录内容不够丰富
+- 严重级: normal
+- 状态: closed
+- 发现于: C1
+- 创建时间: 2026-05-02 00:25
+- 修复时间: 2026-05-02 00:30
+- 改动: report.tex — 新增 4 个附录节：Rules 配置样例、PROGRESS.md 样例、生命周期日志样例、完整命令参考表（24 个命令）
+- 测试: ✅ make report 编译通过（34 页）
+- 关联: []
+- resolved_by: P008
+- related: []
+- supersedes: []

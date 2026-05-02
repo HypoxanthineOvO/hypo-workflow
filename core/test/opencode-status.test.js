@@ -49,6 +49,12 @@ test("OpenCode status model reads active state, queue, events, metrics, and late
   assert.equal(model.metrics.token_count, "n/a");
   assert.equal(model.metrics.cost, "n/a");
   assert.match(model.sidebar.summary, /M08/);
+  assert.ok(model.sidebar.sections.some((section) => section.title === "Feature Queue"));
+  assert.ok(model.sidebar.sections.some((section) => section.title === "Milestones"));
+  assert.ok(model.sidebar.sections.some((section) => section.title === "Blocked \/ Deferred"));
+  assert.match(model.sidebar.sections.find((section) => section.title === "Feature Queue").items.join("\n"), /F003.*OpenCode status panels/);
+  assert.match(model.sidebar.sections.find((section) => section.title === "Milestones").items.join("\n"), /M09/);
+  assert.equal(model.sidebar.sections.find((section) => section.title === "Recent").items.length, 10);
   assert.match(model.footer.text, /C2/);
   assert.match(model.footer.text, /M08/);
 });
@@ -90,6 +96,31 @@ test("OpenCode status model handles failed state and malformed optional files", 
   assert.equal(model.metrics.cost, "n/a");
   assert.ok(model.sources.some((source) => source.path.endsWith("metrics.yaml") && source.status === "error"));
   assert.ok(model.warnings.some((warning) => /metrics\.yaml/.test(warning)));
+});
+
+test("OpenCode status model tolerates legacy scalar-aligned milestone blocks", async () => {
+  const root = await fixtureRoot();
+  await writePipeline(root, {
+    "state.yaml": `
+pipeline:
+  name: Legacy
+  status: completed
+  prompts_total: 1
+  prompts_completed: 1
+current:
+  prompt_name: "R7: Legacy prompt"
+  step: done
+milestones:
+- name: "R7: Legacy prompt"
+  status: done
+`,
+  });
+
+  const model = await buildOpenCodeStatusModel(root);
+
+  assert.equal(model.ok, true);
+  assert.equal(model.pipeline.status, "completed");
+  assert.match(model.footer.text, /completed/);
 });
 
 test("OpenCode status model summarizes completed pipelines", async () => {

@@ -76,9 +76,12 @@ export function buildProgressiveDiscoverPlan(input = {}, options = {}) {
 
 export function normalizeDiscoverFeature(feature = {}) {
   const verification = normalizeVerification(feature.verification, feature);
+  const workflowKind = normalizeWorkflowKind(feature.workflow_kind || feature.workflowKind || feature.workflow, feature);
   return {
     ...feature,
     category: normalizeCategory(feature.category || feature.type || feature.profile),
+    workflow_kind: workflowKind,
+    analysis_kind: normalizeAnalysisKind(feature.analysis_kind || feature.analysisKind || feature.investigation_kind, workflowKind),
     desired_effect:
       feature.desired_effect ||
       feature.desiredEffect ||
@@ -87,6 +90,27 @@ export function normalizeDiscoverFeature(feature = {}) {
       "",
     verification,
   };
+}
+
+export function normalizeWorkflowKind(value, feature = {}) {
+  const normalized = String(value || "").trim().toLowerCase().replace(/[-\s]+/g, "_");
+  if (["build", "implementation", "feature", "bugfix", "hotfix"].includes(normalized)) return "build";
+  if (["analysis", "analyze", "debug", "root_cause", "metric", "repo_system", "research_analysis"].includes(normalized)) {
+    return "analysis";
+  }
+  if (["showcase", "demo", "presentation"].includes(normalized)) return "showcase";
+
+  const category = String(feature.category || feature.type || "").trim().toLowerCase();
+  if (category === "showcase") return "showcase";
+  return "build";
+}
+
+export function normalizeAnalysisKind(value, workflowKind = "build") {
+  const normalized = String(value || "").trim().toLowerCase().replace(/[-\s]+/g, "_");
+  if (["root_cause", "rootcause", "debug", "bug", "incident"].includes(normalized)) return "root_cause";
+  if (["metric", "metrics", "trend", "research", "measurement"].includes(normalized)) return "metric";
+  if (["repo_system", "repo", "system", "architecture", "codebase"].includes(normalized)) return "repo_system";
+  return workflowKind === "analysis" ? "root_cause" : null;
 }
 
 function normalizeCategory(value) {

@@ -1,10 +1,10 @@
 ---
 name: hypo-workflow
-version: 9.1.2
+version: 10.0.0
 description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:chat`, `/hw:plan`, `/hw:plan:extend`, `/hw:plan:review`, `/hw:cycle`, `/hw:patch`, `/hw:compact`, `/hw:guide`, `/hw:showcase`, `/hw:rules`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, or `/hw:dashboard`.
 ---
 
-# Hypo-Workflow v9.1.2
+# Hypo-Workflow v10.0.0
 
 > **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 31 个用户指令。
 >

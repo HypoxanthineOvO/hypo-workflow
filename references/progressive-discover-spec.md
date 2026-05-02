@@ -27,6 +27,8 @@ This is a strong template, not a rigid questionnaire. The Agent may merge relate
 
 Batch Discover still runs one unified interview, but every Feature candidate should capture:
 
+- workflow_kind: `build`, `analysis`, or `showcase`
+- analysis_kind when `workflow_kind=analysis`: `root_cause`, `metric`, or `repo_system`
 - task category
 - desired effect
 - verification method
@@ -35,6 +37,12 @@ Batch Discover still runs one unified interview, but every Feature candidate sho
 - acceptance boundary
 
 Feature Queue previews should carry category and verification metadata so later Test Profiles can reuse them.
+
+`workflow_kind` decides the workflow lane. `analysis_kind` refines investigative work without turning analysis into a Test Profile:
+
+- `root_cause`: debug or explain an unexpected behavior.
+- `metric`: compare trends, measurements, or before/after data.
+- `repo_system`: inspect codebase architecture or system behavior.
 
 ## Plan Extend Coverage
 

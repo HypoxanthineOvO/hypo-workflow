@@ -1,51 +1,54 @@
-# C2 Plan Confirm Summary
+# C3 Plan Confirm Summary
 
 ## Project
 
-- Name: Hypo-Workflow C2 Maintainability, Observability, Batch Plan, and Showcase
-- Cycle: C2 — New Cycle
-- Preset: tdd
+- Name: Hypo-Workflow C3 OpenCode Multi-Agent Matrix and V10 Analysis Preset
+- Cycle: C3 — OpenCode Multi-Agent Matrix and V10 Analysis Preset
+- Implementation preset: tdd
+- New workflow preset being delivered: analysis
 - Milestones: 12
-- Mode: interactive planning completed through P2; P3 artifacts generated after user confirmation.
+- Mode: auto planning and auto queue continuation
 - Language/timezone: zh-CN / Asia/Shanghai
 
 ## Scope
 
-C2 turns Hypo-Workflow from a V9 OpenCode-compatible workflow into a more maintainable, observable, batch-capable, and presentable project.
+C3 delivers:
 
-Primary Feature groups:
-
-1. README 自动更新：README spec、release `update_readme`、`readme-freshness`。
-2. Skill 体系整理：Skill quality spec、conservative normalization、`skill-quality`。
-3. Batch Plan：Feature Queue、Metrics、`/hw:plan --batch`、`/hw:plan --insert`、auto-chain、JIT。
-4. OpenCode 状态面板：TUI status data adapter、sidebar/footer panels。
-5. 项目技术报告与 Beamer Slides：详细技术报告、V9 Case Study、Demo script、Slides PDF。
+1. OpenCode multi-agent model matrix and agent compaction configuration.
+2. V10 Analysis Preset with real experiment execution, interaction modes, evidence ledger, analysis reports, evaluation, and planning/runtime integration.
 
 ## Generated Prompt Files
 
 | Milestone | Feature | Prompt |
 |---|---|---|
-| M01 | F001 README | `.pipeline/prompts/00-readme-spec-and-data-inventory.md` |
-| M02 | F001 README | `.pipeline/prompts/01-release-readme-automation-freshness.md` |
-| M03 | F002 Skills | `.pipeline/prompts/02-skill-asset-audit-quality-spec.md` |
-| M04 | F002 Skills | `.pipeline/prompts/03-skill-format-normalization-quality-rule.md` |
-| M05 | F004 Batch | `.pipeline/prompts/04-feature-queue-and-metrics-contracts.md` |
-| M06 | F004 Batch | `.pipeline/prompts/05-batch-plan-discover-upfront-decomposition.md` |
-| M07 | F004 Batch | `.pipeline/prompts/06-queue-insert-auto-chain-jit.md` |
-| M08 | F003 OpenCode UI | `.pipeline/prompts/07-opencode-tui-status-data-adapter.md` |
-| M09 | F003 OpenCode UI | `.pipeline/prompts/08-opencode-sidebar-footer-panels.md` |
-| M10 | F005 Report | `.pipeline/prompts/09-report-outline-evidence-assets.md` |
-| M11 | F005 Report | `.pipeline/prompts/10-full-technical-report.md` |
-| M12 | F005 Slides | `.pipeline/prompts/11-beamer-slides-demo-cycle-validation.md` |
+| M01 | F001 Model Matrix | `.pipeline/prompts/00-opencode-model-matrix-contract-schema.md` |
+| M02 | F001 Model Matrix | `.pipeline/prompts/01-opencode-artifact-rendering-sync.md` |
+| M03 | F001 Model Matrix | `.pipeline/prompts/02-opencode-model-matrix-validation-docs.md` |
+| M04 | F002 Analysis Core | `.pipeline/prompts/03-analysis-preset-workflow-taxonomy.md` |
+| M05 | F002 Analysis Core | `.pipeline/prompts/04-analysis-interaction-boundaries.md` |
+| M06 | F003 Analysis Runtime | `.pipeline/prompts/05-analysis-state-ledger-format.md` |
+| M07 | F003 Analysis Runtime | `.pipeline/prompts/06-analysis-experiment-execution-contract.md` |
+| M08 | F003 Analysis Runtime | `.pipeline/prompts/07-analysis-outcome-handoff.md` |
+| M09 | F004 Analysis Templates | `.pipeline/prompts/08-analysis-report-evidence-templates.md` |
+| M10 | F004 Analysis Templates | `.pipeline/prompts/09-preset-aware-evaluation.md` |
+| M11 | F005 Integration | `.pipeline/prompts/10-analysis-planning-generate-integration.md` |
+| M12 | F005 Integration | `.pipeline/prompts/11-queue-auto-continue-docs-regression.md` |
+
+## Queue Policy
+
+- `auto_chain: true`
+- `default_gate: auto`
+- every C3 Feature uses `gate: auto`
+- no `gate: confirm` is generated
 
 ## Validation Expectations
 
 - Existing core tests remain green.
-- Single-feature `/hw:plan` remains unchanged.
-- README freshness, Skill quality, Batch queue/metrics, OpenCode artifact/TUI, and report/slides build checks are introduced during their respective Milestones.
-- OpenCode TUI runtime validation may require manual smoke testing.
-- Report/slides PDF compilation depends on local LaTeX tooling.
+- Existing `tdd`, `implement-only`, and `custom` behavior remains compatible.
+- OpenCode artifact generation remains deterministic and schema-compatible.
+- Analysis preset adds its own ledger/report/evaluation semantics without replacing build reports.
+- C3 final validation must prove no generated queue entry uses a confirm gate.
 
-## Confirmation Required
+## P4 Behavior
 
-Interactive P4 is a hard gate. Do not run `/hw:start` until the user explicitly confirms this generated plan.
+Project config sets `plan.mode: auto`, so P4 is a summary checkpoint rather than a hard confirmation gate.

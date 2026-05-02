@@ -1,0 +1,12 @@
+# P004: 图3.1 execution-loop 误改为五边形，需恢复线性布局
+- 严重级: critical
+- 状态: closed
+- 发现于: C1
+- 创建时间: 2026-05-02 00:25
+- 修复时间: 2026-05-02 00:30
+- 改动: figures/execution-loop.tex — 恢复原始线性布局 Plan→Execute→Review→Report→Evaluate + Recover 分支
+- 测试: ✅ make report 编译通过
+- 关联: [P005]
+- resolved_by: P004
+- related: [P005]
+- supersedes: []

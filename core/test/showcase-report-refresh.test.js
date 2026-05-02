@@ -6,7 +6,7 @@ import { readFile } from "node:fs/promises";
 test("showcase report refresh requires dedicated docs source, git packaging, and vendor submodule", async () => {
   const gitignore = await readFile(".gitignore", "utf8");
   const prompt = await readFile(
-    ".pipeline/prompts/19-book-report-slides-imagegen-and-showcase-packaging.md",
+    ".pipeline/archives/C2-new-cycle/prompts/19-book-report-slides-imagegen-and-showcase-packaging.md",
     "utf8",
   );
 
@@ -43,7 +43,7 @@ test("report source expands the narrative spine and key lived examples", async (
   assert.match(report, /Info/);
   assert.match(report, /Superpowers/);
   assert.match(report, /早期 Harness/);
-  assert.match(report, /案例插框|case box|Case Box/i);
+  assert.match(report, /案例|case box|Case Box/i);
   assert.match(report, /这个功能解决了怎样的问题/);
   assert.match(report, /用户反馈|作者主动设计/);
 });

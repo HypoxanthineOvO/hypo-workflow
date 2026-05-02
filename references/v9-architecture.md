@@ -52,7 +52,7 @@ The global `hypo-workflow` command should provide setup only:
 
 - `hypo-workflow setup` opens a small TUI or guided config flow.
 - `hypo-workflow doctor` checks installed adapters and global config.
-- `hypo-workflow sync opencode` writes OpenCode command, agent, plugin, and instruction files.
+- `hypo-workflow sync opencode` writes OpenCode command, agent, plugin, metadata, and instruction files.
 - `hypo-workflow init-project` can prepare project-level `.pipeline/` and `.opencode/` files.
 
 It is not a runner and should not execute `/hw:start`, `/hw:resume`, or model calls directly. This keeps a single workflow instead of a forked OpenCode implementation.
@@ -63,8 +63,8 @@ The first implementation lives in `cli/bin/hypo-workflow` with non-interactive f
 
 | Component | Output | Responsibility |
 |---|---|---|
-| Command generator | `.opencode/commands/hw-*.md` | Map all 30 HW user commands to OpenCode slash commands. |
-| Agent generator | `.opencode/agents/hw-*.md` | Bind plan/build/status/review/explore/worker roles. |
+| Command generator | `.opencode/commands/hw-*.md` | Map all 31 HW user commands to OpenCode slash commands. |
+| Agent generator | `.opencode/agents/hw-*.md` | Bind plan/build/status/compact/test/code/debug/report/review/explore roles with optional model frontmatter. |
 | Plugin | `.opencode/plugins/hypo-workflow.ts` | Event hooks, context injection, file guard, auto-continue, command context capture. |
 | Instruction exporter | `AGENTS.md` or config instructions | Export stable HW guidance and active always-rules. |
 | Permission profile | `opencode.json` snippets | Set standard, strict, and automation profiles. |

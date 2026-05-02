@@ -24,8 +24,8 @@ V8.4 parity is tracked in [`opencode-parity.md`](./opencode-parity.md).
 | Slash command invocation | native | `.opencode/commands/*.md` | Generate command files and stable templates. |
 | Plan-phase user questions | native | `question` tool / Ask flow | Decide when to ask and enforce gates. |
 | Todo and plan tracking | native | `todowrite` tool | Translate milestones and steps into useful todo groups. |
-| Primary agents | native | `agent: plan`, `agent: build`, custom `hw-*` agents | Generate agent definitions from HW profiles. |
-| Subagents | native | markdown agents with `mode: subagent` | Map HW explorer/worker/reviewer roles. |
+| Primary agents | native | `agent: plan`, `agent: build`, custom `hw-*` agents | Generate agent definitions and model frontmatter from HW profiles. |
+| Subagents | native | markdown agents with `mode: subagent` | Map HW test/code/debug/explore/reviewer roles. |
 | Permissions | native | `permission` allow/ask/deny config | Provide safe presets and file-guard policy. |
 | Rules and instructions | native | `AGENTS.md`, `opencode.json.instructions` | Export HW rules into native instruction sources. |
 | Model selection | native | provider/model/variant config | Prefer OpenCode config; HW only supplies profile defaults. |
@@ -55,7 +55,7 @@ V8.4 parity is tracked in [`opencode-parity.md`](./opencode-parity.md).
 | `/hw:status` | `/hw-status` | `hw-status` | Native slash command, reads compact state. |
 | `/hw:skip` | `/hw-skip` | `hw-build` | Native slash command, HW-specific state mutation. |
 | `/hw:stop` | `/hw-stop` | `hw-status` | Native slash command, HW-specific state mutation. |
-| `/hw:report` | `/hw-report` | `hw-status` | Native slash command, HW-specific report contract. |
+| `/hw:report` | `/hw-report` | `hw-report` | Native slash command, HW-specific report contract. |
 | `/hw:chat` | `/hw-chat` | `hw-build` | Native slash command, lightweight append conversation lane. |
 | `/hw:plan` | `/hw-plan` | `hw-plan` | Native slash command, OpenCode question/todowrite required. |
 | `/hw:plan:discover` | `/hw-plan-discover` | `hw-plan` | Native slash command, Ask-gated discovery. |
@@ -67,7 +67,7 @@ V8.4 parity is tracked in [`opencode-parity.md`](./opencode-parity.md).
 | `/hw:cycle` | `/hw-cycle` | `hw-status` | Native slash command group; subcommands remain prompt arguments. |
 | `/hw:patch` | `/hw-patch` | `hw-build` | Native slash command group; file lifecycle stays HW-specific. |
 | `/hw:patch fix` | `/hw-patch-fix` | `hw-build` | Native slash command, six-step patch repair lane. |
-| `/hw:compact` | `/hw-compact` | `hw-status` | Native slash command, compact generator. |
+| `/hw:compact` | `/hw-compact` | `hw-compact` | Native slash command, compact generator. |
 | `/hw:guide` | `/hw-guide` | `hw-plan` | Native slash command, question-driven onboarding. |
 | `/hw:showcase` | `/hw-showcase` | `hw-build` | Native slash command, showcase preset. |
 | `/hw:rules` | `/hw-rules` | `hw-status` | Native slash command, rules file management. |
@@ -75,7 +75,7 @@ V8.4 parity is tracked in [`opencode-parity.md`](./opencode-parity.md).
 | `/hw:check` | `/hw-check` | `hw-status` | Native slash command, health checks. |
 | `/hw:audit` | `/hw-audit` | `hw-review` | Native slash command, preventive audit. |
 | `/hw:release` | `/hw-release` | `hw-build` | Native slash command, release automation. |
-| `/hw:debug` | `/hw-debug` | `hw-build` | Native slash command, symptom-driven debug. |
+| `/hw:debug` | `/hw-debug` | `hw-debug` | Native slash command, symptom-driven debug. |
 | `/hw:help` | `/hw-help` | `hw-status` | Native slash command, generated help. |
 | `/hw:reset` | `/hw-reset` | `hw-status` | Native slash command, guarded reset. |
 | `/hw:log` | `/hw-log` | `hw-status` | Native slash command, lifecycle log view. |
@@ -88,12 +88,57 @@ V8.4 parity is tracked in [`opencode-parity.md`](./opencode-parity.md).
 |---|---|---|---|
 | `hw-plan` | primary | read/question/todowrite allowed, edit ask | Plan, history import review, guide, and plan review. |
 | `hw-build` | primary | read/edit/bash ask according to profile | Start/resume/release/debug/showcase implementation work. |
-| `hw-status` | primary | read allowed, edit deny by default | Status, help, log, check, rules list, compact summaries. |
+| `hw-status` | primary | read allowed, edit deny by default | Status, help, log, check, and rules list. |
+| `hw-compact` | primary | read allowed, edit ask | Context compaction and compact summary generation. |
+| `hw-test` | subagent | read/bash allowed by permission profile | Test design, execution, and focused validation. |
+| `hw-code-a` | subagent | edit/bash ask according to profile | Primary implementation worker for scoped code changes. |
+| `hw-code-b` | subagent | edit/bash ask according to profile | Secondary implementation worker for parallel scoped code changes. |
+| `hw-report` | primary | read/todowrite allowed | Report synthesis, evidence summaries, and final delivery notes. |
 | `hw-review` | subagent | read allowed, edit deny | Audit and architecture/code review. |
-| `hw-explorer` | subagent | read/search allowed, edit deny | Bounded codebase exploration. |
-| `hw-worker` | subagent | edit ask, scoped by task | Optional parallel implementation where OpenCode supports subtasks. |
+| `hw-explore` | subagent | read/search allowed, edit deny | Bounded codebase exploration. |
 
 Plan commands must bind to `hw-plan` by default. If OpenCode exposes nested planning through `todowrite` only, HW treats nested plans as hierarchical todos instead of inventing a second state machine.
+
+## OpenCode Model Matrix Contract
+
+Hypo-Workflow treats OpenCode model routing as a setup/sync contract, not as a model-calling runner. The structured config surface is:
+
+```yaml
+opencode:
+  compaction:
+    effective_context_target: 900000
+  agents:
+    plan:
+      model: gpt-5.5
+    compact:
+      model: deepseek-v4-flash
+    test:
+      model: gpt-5.4
+    code-a:
+      model: gpt-5.4
+    code-b:
+      model: gpt-5.4-mini
+    debug:
+      model: gpt-5.4
+    report:
+      model: gpt-5.4-mini
+```
+
+M01 defines the schema, defaults, and metadata contract. M02 renders model routing into generated `.opencode/agents/*.md` frontmatter and renders compaction intent plus the full matrix into `.opencode/hypo-workflow.json`. The project-root `opencode.json` and adapter-local `.opencode/opencode.json` stay limited to OpenCode-compatible configuration fields; Hypo-Workflow-specific values such as `effective_context_target` and `agents` belong in the sidecar metadata.
+
+Rendered agent model roles:
+
+| Matrix role | Generated agent |
+|---|---|
+| `plan` | `hw-plan` |
+| `compact` | `hw-compact` |
+| `test` | `hw-test` |
+| `code-a` | `hw-build`, `hw-code-a` |
+| `code-b` | `hw-code-b` |
+| `debug` | `hw-debug` |
+| `report` | `hw-report` |
+
+This is still used as a setup/sync surface and not as a model-calling runner. Actual model invocation remains OpenCode's responsibility.
 
 ## Event and Guard Strategy
 

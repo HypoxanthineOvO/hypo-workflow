@@ -11,3 +11,5 @@ export * from "./progressive-discover/index.js";
 export * from "./test-profile/index.js";
 export * from "./opencode-status/index.js";
 export * from "./chat/index.js";
+export * from "./presets/index.js";
+export * from "./analysis/index.js";

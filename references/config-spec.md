@@ -57,6 +57,24 @@ Resolve every configurable value in this order:
 | batch failure policy | `batch.failure_policy` | `batch.failure_policy` | `skip_defer` |
 | batch auto-chain | `batch.auto_chain` | `batch.auto_chain` | `true` |
 | batch default gate | `batch.default_gate` | `batch.default_gate` | `auto` |
+| workflow kind | plan/discover artifact `workflow_kind` | n/a | `build` |
+| analysis kind | plan/discover artifact `analysis_kind` | n/a | `root_cause` when workflow is analysis |
+| analysis interaction mode | `execution.analysis.interaction_mode` | `execution.analysis.interaction_mode` | `hybrid` |
+| analysis code-change boundary | `execution.analysis.boundaries.code_changes` | `execution.analysis.boundaries.code_changes` | `manual=deny`, `hybrid=confirm`, `auto=allow` |
+| analysis service restart boundary | `execution.analysis.boundaries.restart_services` | `execution.analysis.boundaries.restart_services` | `confirm` |
+| analysis system dependency boundary | `execution.analysis.boundaries.install_system_dependencies` | `execution.analysis.boundaries.install_system_dependencies` | `ask` |
+| analysis network/remote boundary | `execution.analysis.boundaries.network_remote_resources` | `execution.analysis.boundaries.network_remote_resources` | `manual=ask`, `hybrid=ask`, `auto=allow` |
+| analysis destructive/external boundary | `execution.analysis.boundaries.destructive_or_external_side_effects` | `execution.analysis.boundaries.destructive_or_external_side_effects` | `ask` |
+| OpenCode auto-continue | `opencode.auto_continue` | `opencode.auto_continue` | `true` |
+| OpenCode profile | `opencode.profile` | `opencode.profile` | `standard` |
+| OpenCode compaction target | `opencode.compaction.effective_context_target` | `opencode.compaction.effective_context_target` | `900000` |
+| OpenCode plan model | `opencode.agents.plan.model` | `opencode.agents.plan.model` | `gpt-5.5` |
+| OpenCode compact model | `opencode.agents.compact.model` | `opencode.agents.compact.model` | `deepseek-v4-flash` |
+| OpenCode test model | `opencode.agents.test.model` | `opencode.agents.test.model` | `gpt-5.4` |
+| OpenCode code-a model | `opencode.agents.code-a.model` | `opencode.agents.code-a.model` | `gpt-5.4` |
+| OpenCode code-b model | `opencode.agents.code-b.model` | `opencode.agents.code-b.model` | `gpt-5.4-mini` |
+| OpenCode debug model | `opencode.agents.debug.model` | `opencode.agents.debug.model` | `gpt-5.4` |
+| OpenCode report model | `opencode.agents.report.model` | `opencode.agents.report.model` | `gpt-5.4-mini` |
 | test profile enabled | `execution.test_profiles.enabled` | `execution.test_profiles.enabled` | `true` |
 | test profile selection mode | `execution.test_profiles.selection` | `execution.test_profiles.selection` | `auto` |
 | test profile compose | `execution.test_profiles.compose` | `execution.test_profiles.compose` | `true` |
@@ -91,6 +109,20 @@ agent:
   model: claude-sonnet-4-20250514
 execution:
   default_mode: self
+  analysis:
+    interaction_mode: hybrid
+    boundaries:
+      code_changes:
+        manual: deny
+        hybrid: confirm
+        auto: allow
+      restart_services: confirm
+      install_system_dependencies: ask
+      network_remote_resources:
+        manual: ask
+        hybrid: ask
+        auto: allow
+      destructive_or_external_side_effects: ask
   test_profiles:
     enabled: true
     selection: auto
@@ -152,6 +184,26 @@ batch:
   failure_policy: skip_defer
   auto_chain: true
   default_gate: auto
+opencode:
+  auto_continue: true
+  profile: standard
+  compaction:
+    effective_context_target: 900000
+  agents:
+    plan:
+      model: gpt-5.5
+    compact:
+      model: deepseek-v4-flash
+    test:
+      model: gpt-5.4
+    code-a:
+      model: gpt-5.4
+    code-b:
+      model: gpt-5.4-mini
+    debug:
+      model: gpt-5.4
+    report:
+      model: gpt-5.4-mini
 rules:
   extends: recommended
   rules: {}
@@ -185,4 +237,8 @@ rules:
 
 Supported built-in presets are `recommended`, `strict`, and `minimal`. External rule packs use string references such as `github:owner/repo`.
 
-Test Profiles live under `execution.test_profiles` so they stay close to `execution.steps.preset`. Preset controls step order; Test Profile controls validation policy.
+Supported execution step presets are `tdd`, `implement-only`, `custom`, and `analysis`.
+
+Test Profiles live under `execution.test_profiles` so they stay close to `execution.steps.preset`. Preset controls step order; Test Profile controls validation policy. `analysis` is a preset, not a Test Profile.
+
+Preset-aware evaluation may use build checks (`tests_pass`, `no_regressions`, `matches_plan`, `code_quality`) or analysis checks (`question_addressed`, `evidence_complete`, `conclusion_traceable`, `experiment_executed`, `change_validated`, `followup_recorded`). `change_validated` is not applicable unless code changed during analysis.

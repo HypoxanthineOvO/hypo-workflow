@@ -47,6 +47,7 @@ export async function buildOpenCodeStatusModel(projectRoot = ".", options = {}) 
       current_feature: queue.value?.current_feature ?? null,
       auto_chain: queue.value?.defaults?.auto_chain ?? null,
       failure_policy: queue.value?.defaults?.failure_policy ?? null,
+      features: summarizeFeatures(queue.value?.features || []),
     },
     gate,
     metrics: metricSummary,
@@ -71,7 +72,7 @@ function emptyModel({ sources, warnings }) {
     progress: { completed: 0, total: 0, percent: 0 },
     current: { milestone_id: null, prompt_name: null, step: null, feature_id: null },
     feature: { id: null, title: null, status: "missing", gate: null, milestones: [] },
-    queue: { current_feature: null, auto_chain: null, failure_policy: null },
+    queue: { current_feature: null, auto_chain: null, failure_policy: null, features: [] },
     gate: { status: "none", feature_id: null },
     metrics: { duration_ms: NA, token_count: NA, cost: NA },
     latest_score: { diff_score: null, overall: null, code_quality: null },
@@ -132,7 +133,7 @@ function progressFromState(state) {
 function currentFromState(state) {
   const promptName = state.current?.prompt_name || "";
   const milestoneId = extractMilestoneId(promptName) || extractMilestoneId(state.current?.prompt_file);
-  const milestone = (state.milestones || []).find((item) => item.id === milestoneId) || {};
+  const milestone = asArray(state.milestones).find((item) => item.id === milestoneId) || {};
   return {
     milestone_id: milestoneId,
     prompt_name: state.current?.prompt_name || null,
@@ -142,7 +143,7 @@ function currentFromState(state) {
 }
 
 function currentFeature({ state, queue, current }) {
-  const features = queue?.features || [];
+  const features = asArray(queue?.features);
   const queueFeature = features.find((feature) => feature.id === queue?.current_feature)
     || features.find((feature) => feature.id === current.feature_id)
     || features.find((feature) => feature.gate === "confirm" && feature.status === "queued")
@@ -154,7 +155,7 @@ function currentFeature({ state, queue, current }) {
       status: queueFeature.status || "unknown",
       gate: queueFeature.gate || null,
       decompose_mode: queueFeature.decompose_mode || null,
-      milestones: queueFeature.milestones || [],
+      milestones: asArray(queueFeature.milestones),
     };
   }
   return {
@@ -193,10 +194,10 @@ function gateFromQueue(queue, feature, state) {
 }
 
 function metricsSummary(metrics, feature, state) {
-  const cycleRecord = (metrics?.cycles || []).find((item) => item.id === metrics?.cycle_id);
-  const featureRecord = (metrics?.features || []).find((item) => item.id === feature?.id);
+  const cycleRecord = asArray(metrics?.cycles).find((item) => item.id === metrics?.cycle_id);
+  const featureRecord = asArray(metrics?.features).find((item) => item.id === feature?.id);
   const milestoneId = currentFromState(state).milestone_id;
-  const milestoneRecord = (metrics?.milestones || []).find((item) => item.id === milestoneId);
+  const milestoneRecord = asArray(metrics?.milestones).find((item) => item.id === milestoneId);
   const record = milestoneRecord || featureRecord || cycleRecord || {};
   return {
     duration_ms: fallbackMetric(record.duration_ms),
@@ -232,7 +233,7 @@ function fallbackScore(state) {
 }
 
 function recentEventsFromLog(log) {
-  const entries = log?.entries || [];
+  const entries = asArray(log?.entries);
   return entries.slice(-10).reverse().map((entry) => ({
     id: entry.id || null,
     type: entry.type || null,
@@ -262,10 +263,30 @@ function renderSidebarModel(model) {
         title: "Current",
         items: [
           `Cycle: ${model.cycle.id || NA}`,
-          `Feature: ${model.feature.id || NA} ${model.feature.status || ""}`.trim(),
+          `Feature: ${formatFeatureLabel(model.feature)}`,
           `Milestone: ${current}`,
           `Step: ${model.current.step || NA}`,
+          `Gate: ${model.gate.status === "none" ? model.feature.gate || NA : model.gate.status}`,
         ],
+      },
+      {
+        title: "Feature Queue",
+        items: [
+          `Current: ${model.queue.current_feature || NA}`,
+          `Auto-chain: ${formatBoolean(model.queue.auto_chain)}`,
+          `Failure policy: ${model.queue.failure_policy || NA}`,
+          ...model.queue.features.slice(0, 6).map(formatQueueFeature),
+        ],
+      },
+      {
+        title: "Milestones",
+        items: model.feature.milestones.length
+          ? model.feature.milestones.map(formatMilestone)
+          : [NA],
+      },
+      {
+        title: "Blocked / Deferred",
+        items: blockedOrDeferred(model.queue.features),
       },
       {
         title: "Metrics",
@@ -277,7 +298,7 @@ function renderSidebarModel(model) {
       },
       {
         title: "Recent",
-        items: model.recent_events.slice(0, 5).map((event) => event.summary),
+        items: model.recent_events.slice(0, 10).map((event) => event.summary),
       },
     ],
   };
@@ -313,6 +334,60 @@ function numberOrZero(value) {
 
 function fallbackMetric(value) {
   return value === undefined || value === null ? NA : value;
+}
+
+function summarizeFeatures(features) {
+  return asArray(features).map((feature) => ({
+    id: feature.id || null,
+    title: feature.title || null,
+    status: feature.status || "unknown",
+    gate: feature.gate || null,
+    decompose_mode: feature.decompose_mode || null,
+    milestones: asArray(feature.milestones),
+  }));
+}
+
+function formatFeatureLabel(feature) {
+  const parts = [feature.id || NA];
+  if (feature.title) parts.push(feature.title);
+  if (feature.status) parts.push(`(${feature.status})`);
+  return parts.join(" ");
+}
+
+function formatQueueFeature(feature) {
+  const pieces = [
+    feature.id || NA,
+    feature.status || "unknown",
+    feature.gate ? `gate:${feature.gate}` : null,
+    feature.decompose_mode ? `mode:${feature.decompose_mode}` : null,
+    feature.title || null,
+  ].filter(Boolean);
+  return pieces.join(" | ");
+}
+
+function formatMilestone(milestone) {
+  return [milestone.id || NA, milestone.status || "unknown", milestone.prompt_file || null]
+    .filter(Boolean)
+    .join(" | ");
+}
+
+function blockedOrDeferred(features) {
+  const items = features
+    .filter((feature) => feature.status === "blocked" || feature.status === "deferred")
+    .map((feature) => `${feature.id || NA} | ${feature.status} | ${feature.title || ""}`.trim());
+  return items.length ? items : ["none"];
+}
+
+function formatBoolean(value) {
+  if (value === true) return "true";
+  if (value === false) return "false";
+  return NA;
+}
+
+function asArray(value) {
+  if (Array.isArray(value)) return value;
+  if (!value || typeof value !== "object") return [];
+  return Object.values(value).filter((item) => item && typeof item === "object");
 }
 
 function relativePipelinePath(path) {

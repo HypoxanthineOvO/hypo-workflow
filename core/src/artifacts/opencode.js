@@ -1,19 +1,26 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { normalizeAnalysisInteraction } from "../analysis/index.js";
 import { commandMap } from "../commands/index.js";
-import { normalizeProfile } from "../profile/index.js";
+import { DEFAULT_GLOBAL_CONFIG, mergeConfig } from "../config/index.js";
+import { normalizeProfile, selectProfile } from "../profile/index.js";
 
-const HW_VERSION = "9.1.1-alpha.0";
+const HW_VERSION = "10.0.0";
+const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = resolve(MODULE_DIR, "..", "..", "..");
 
 export const OPENCODE_AGENTS = Object.freeze([
   {
     name: "hw-plan",
+    modelRole: "plan",
     mode: "primary",
     tools: ["read", "grep", "glob", "question", "todowrite"],
     description: "Plan, discovery, guide, and confirmation work.",
   },
   {
     name: "hw-build",
+    modelRole: "code-a",
     mode: "primary",
     tools: ["read", "grep", "glob", "edit", "bash", "todowrite"],
     description: "Pipeline execution, patch fix, debug, release, and showcase generation.",
@@ -23,6 +30,41 @@ export const OPENCODE_AGENTS = Object.freeze([
     mode: "primary",
     tools: ["read", "grep", "glob"],
     description: "Status, help, log, compact, check, and rules inspection.",
+  },
+  {
+    name: "hw-compact",
+    modelRole: "compact",
+    mode: "primary",
+    tools: ["read", "grep", "glob", "edit", "todowrite"],
+    description: "Context compaction and compact summary generation.",
+  },
+  {
+    name: "hw-test",
+    modelRole: "test",
+    mode: "subagent",
+    tools: ["read", "grep", "glob", "bash", "todowrite"],
+    description: "Test design, execution, and focused validation.",
+  },
+  {
+    name: "hw-code-a",
+    modelRole: "code-a",
+    mode: "subagent",
+    tools: ["read", "grep", "glob", "edit", "bash", "todowrite"],
+    description: "Primary implementation worker for scoped code changes.",
+  },
+  {
+    name: "hw-code-b",
+    modelRole: "code-b",
+    mode: "subagent",
+    tools: ["read", "grep", "glob", "edit", "bash", "todowrite"],
+    description: "Secondary implementation worker for parallel scoped code changes.",
+  },
+  {
+    name: "hw-report",
+    modelRole: "report",
+    mode: "primary",
+    tools: ["read", "grep", "glob", "todowrite"],
+    description: "Report synthesis, evidence summaries, and final delivery notes.",
   },
   {
     name: "hw-review",
@@ -38,6 +80,7 @@ export const OPENCODE_AGENTS = Object.freeze([
   },
   {
     name: "hw-debug",
+    modelRole: "debug",
     mode: "subagent",
     tools: ["read", "grep", "glob", "bash", "todowrite", "question"],
     description: "Symptom-driven debugging with hypothesis tracking and user Ask gates.",
@@ -51,7 +94,7 @@ export const OPENCODE_AGENTS = Object.freeze([
 ]);
 
 export async function writeOpenCodeArtifacts(outDir, options = {}) {
-  const profile = normalizeProfile(options.profile || "standard");
+  const profile = normalizeArtifactProfile(options);
   const adapterDir = outDir.endsWith(".opencode") ? outDir : join(outDir, ".opencode");
   const projectRoot = dirname(adapterDir);
   const rootConfig = renderOpenCodeConfig(profile, { includePlugins: true });
@@ -70,7 +113,7 @@ export async function writeOpenCodeArtifacts(outDir, options = {}) {
     );
   }
 
-  for (const agent of OPENCODE_AGENTS) {
+  for (const agent of renderableOpenCodeAgents(profile)) {
     await writeFile(join(adapterDir, "agents", `${agent.name}.md`), renderAgent(agent), "utf8");
   }
 
@@ -123,7 +166,8 @@ function commandSpecificGuidance(command) {
 }
 
 export function renderAgent(agent) {
-  return `---\ndescription: ${agent.description}\nmode: ${agent.mode}\npermission:\n${renderAgentPermissions(agent.tools)}---\n\n# ${agent.name}\n\n${agent.description}\n\nUse \`question\` / Ask for required user interaction and \`todowrite\` for visible plan discipline when those tools are available. For Plan work, every P1/P2/P3/P4 checkpoint must be represented in the todo state before continuing.\n`;
+  const model = agent.model ? `model: ${agent.model}\n` : "";
+  return `---\ndescription: ${agent.description}\nmode: ${agent.mode}\n${model}permission:\n${renderAgentPermissions(agent.tools)}---\n\n# ${agent.name}\n\n${agent.description}\n\nAnalysis boundary: read \`.opencode/hypo-workflow.json.analysis\` before executing an \`analysis\` preset. Manual mode denies code changes, hybrid mode confirms before code changes, and auto mode may change code within the configured boundaries. Always honor restart, system dependency, network, destructive, and external side-effect boundaries.\n\nUse \`question\` / Ask for required user interaction and \`todowrite\` for visible plan discipline when those tools are available. For Plan work, every P1/P2/P3/P4 checkpoint must be represented in the todo state before continuing.\n`;
 }
 
 function renderAgentPermissions(tools) {
@@ -176,17 +220,54 @@ export function renderOpenCodeConfig(profile, options = {}) {
 }
 
 export function renderHypoWorkflowMetadata(profile) {
+  const normalized = withOpenCodeRenderingDefaults(normalizeProfile(profile));
   return {
-    profile: profile.name,
-    autoContinue: profile.auto_continue,
+    profile: normalized.name,
+    autoContinue: normalized.auto_continue,
     auto_continue: {
-      enabled: profile.auto_continue,
-      mode: profile.auto_continue_mode || "safe",
+      enabled: normalized.auto_continue,
+      mode: normalized.auto_continue_mode || "safe",
     },
-    fileGuard: profile.file_guard,
+    compaction: normalized.compaction,
+    agents: normalized.agents,
+    analysis: normalizeAnalysisInteraction(normalized.analysis || {}),
+    fileGuard: normalized.file_guard,
     version: HW_VERSION,
     commandMap: commandMap("opencode"),
   };
+}
+
+function normalizeArtifactProfile(options = {}) {
+  if (options.config) {
+    const config = mergeConfig(
+      options.config,
+      typeof options.profile === "string"
+        ? { opencode: { profile: options.profile } }
+        : typeof options.profile === "object" && options.profile
+          ? { opencode: options.profile }
+          : {},
+    );
+    return withOpenCodeRenderingDefaults({
+      ...selectProfile(config),
+      analysis: normalizeAnalysisInteraction(config),
+    });
+  }
+  return withOpenCodeRenderingDefaults(normalizeProfile(options.profile || "standard"));
+}
+
+function withOpenCodeRenderingDefaults(profile) {
+  return {
+    ...profile,
+    compaction: mergeConfig(DEFAULT_GLOBAL_CONFIG.opencode.compaction, profile.compaction || {}),
+    agents: mergeConfig(DEFAULT_GLOBAL_CONFIG.opencode.agents, profile.agents || {}),
+  };
+}
+
+function renderableOpenCodeAgents(profile) {
+  return OPENCODE_AGENTS.map((agent) => {
+    const model = agent.modelRole ? profile.agents?.[agent.modelRole]?.model : undefined;
+    return model ? { ...agent, model } : agent;
+  });
 }
 
 async function renderAgentsInstruction() {
@@ -203,11 +284,11 @@ export async function renderOpenCodeStatusTuiPlugin() {
 }
 
 export async function renderOpenCodeStatusModule() {
-  return readFile(resolve("core", "src", "opencode-status", "index.js"), "utf8");
+  return readFile(resolve(REPO_ROOT, "core", "src", "opencode-status", "index.js"), "utf8");
 }
 
 async function renderTemplate(name) {
-  const templatePath = resolve("plugins", "opencode", "templates", name);
+  const templatePath = resolve(REPO_ROOT, "plugins", "opencode", "templates", name);
   const template = await readFile(templatePath, "utf8");
   return template.replaceAll("__HW_VERSION__", HW_VERSION);
 }

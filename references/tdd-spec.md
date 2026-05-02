@@ -4,6 +4,13 @@ Use this reference when the active pipeline step belongs to the TDD preset. The 
 
 ## Sequence Map
 
+Built-in presets:
+
+- `tdd`
+- `implement-only`
+- `custom`
+- `analysis`
+
 `tdd` expands to:
 
 1. `write_tests`
@@ -18,6 +25,8 @@ Use this reference when the active pipeline step belongs to the TDD preset. The 
 1. `implement`
 2. `run_tests`
 3. `review_code`
+
+`analysis` uses a separate investigative chain defined in [`analysis-spec.md`](./analysis-spec.md). It is not an alias for `implement-only`.
 
 ## Shared TDD Rules
 

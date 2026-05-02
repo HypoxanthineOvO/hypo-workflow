@@ -6,7 +6,7 @@ import type { TuiPlugin } from "@opencode-ai/plugin/tui";
 import { createSignal } from "solid-js";
 import { buildOpenCodeStatusModel } from "../runtime/hypo-workflow-status.js";
 
-export const HypoWorkflowTuiPlugin: TuiPlugin = async (api) => {
+export const tui: TuiPlugin = async (api) => {
   const [model, setModel] = createSignal(await loadStatus(api));
   let lastWarningKey = "";
 
@@ -43,23 +43,25 @@ export const HypoWorkflowTuiPlugin: TuiPlugin = async (api) => {
     id: "hypo-workflow-status-panels",
     slots: {
       sidebar_content() {
-        return <text>{renderSidebarText(model())}</text>;
+        return renderSidebarText(model());
       },
       sidebar_footer() {
-        return <text>{renderSidebarFooter(model())}</text>;
+        return renderSidebarFooter(model());
       },
       home_footer() {
-        return <text>{renderFooterText(model(), true)}</text>;
+        return renderFooterText(model(), true);
       },
       session_prompt_right() {
-        return <text>{renderFooterText(model(), false)}</text>;
+        return renderFooterText(model(), false);
       },
     },
   });
 };
 
+export const HypoWorkflowTuiPlugin = tui;
+
 async function loadStatus(api) {
-  const root = api.state.path.worktree || api.state.path.directory || ".";
+  const root = api.state?.path?.worktree || api.state?.path?.directory || process.cwd();
   return buildOpenCodeStatusModel(root);
 }
 

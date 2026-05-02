@@ -78,6 +78,8 @@ TARGET_SCENARIOS = {
     "s58-opencode-full-v84-parity",
     "s59-v9-regression-bundle",
     "s60-progress-board-format",
+    "s61-opencode-model-matrix-sync",
+    "s62-analysis-preset-runtime",
 }
 
 
@@ -273,6 +275,8 @@ def scenario_specific(scene: Path, result: ScenarioResult) -> None:
         "s58-opencode-full-v84-parity",
         "s59-v9-regression-bundle",
         "s60-progress-board-format",
+        "s61-opencode-model-matrix-sync",
+        "s62-analysis-preset-runtime",
     }:
         proc = run(f'bash "{scene / "run.sh"}"', cwd=scene)
         add(result, "run_sh", proc.returncode == 0, (proc.stdout + proc.stderr).strip())

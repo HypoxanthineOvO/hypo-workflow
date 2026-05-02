@@ -194,6 +194,8 @@ function normalizeFeatures(features, mode) {
       source: discover.source || "batch-discover",
       summary: discover.summary || discover.desired_effect || "",
       category: discover.category,
+      workflow_kind: discover.workflow_kind,
+      analysis_kind: discover.analysis_kind,
       desired_effect: discover.desired_effect,
       verification: discover.verification,
       test_profiles: normalizeTestProfileSelection(discover).profiles,
@@ -327,6 +329,8 @@ function normalizeInsertedFeature(queue, feature = {}) {
     source: discover.source || "insert",
     summary: discover.summary || discover.desired_effect || "",
     category: discover.category,
+    workflow_kind: discover.workflow_kind,
+    analysis_kind: discover.analysis_kind,
     desired_effect: discover.desired_effect,
     verification: discover.verification,
     test_profiles: normalizeTestProfileSelection(discover).profiles,
@@ -395,8 +399,8 @@ function renderFeatureTable(features, mode) {
   const lines = [
     `Batch decompose mode: ${mode}`,
     "",
-    "| Feature | Priority | Gate | Decompose | Status | Milestones | Category | Verification | Profiles |",
-    "|---|---:|---|---|---|---|---|---|---|",
+    "| Feature | Priority | Gate | Decompose | Status | Milestones | Workflow | Analysis Kind | Category | Verification | Profiles |",
+    "|---|---:|---|---|---|---|---|---|---|---|---|",
   ];
   for (const feature of features) {
     const milestones = feature.milestones.length
@@ -404,7 +408,7 @@ function renderFeatureTable(features, mode) {
       : "JIT decomposition pending";
     const verification = feature.verification?.method || "TBD";
     const profiles = feature.test_profiles?.length ? feature.test_profiles.join("+") : "preset-only";
-    lines.push(`| ${feature.id} ${feature.title} | ${feature.priority} | ${feature.gate} | ${feature.decompose_mode} | ${feature.status} | ${milestones} | ${feature.category || "other"} | ${verification} | ${profiles} |`);
+    lines.push(`| ${feature.id} ${feature.title} | ${feature.priority} | ${feature.gate} | ${feature.decompose_mode} | ${feature.status} | ${milestones} | ${feature.workflow_kind || "build"} | ${feature.analysis_kind || "n/a"} | ${feature.category || "other"} | ${verification} | ${profiles} |`);
   }
   return `${lines.join("\n")}\n`;
 }

@@ -437,7 +437,8 @@ Behavior:
 - use the requested template when provided
 - otherwise choose a template from planning context
 - detect append mode when an existing `.pipeline/` workspace is present
-- choose `implement-only` for planning-heavy or document-heavy plans unless the project clearly requires executable TDD
+- choose `implement-only` for planning-heavy or document-heavy build plans unless the project clearly requires executable TDD
+- choose `analysis` for root-cause, metric, or repo/system investigations whose primary deliverable is a conclusion and evidence chain
 - on prompt-number conflicts, preserve executed prompts and append new prompt numbers after the highest existing number unless explicit resequencing is approved
 
 ### `/hw:plan:confirm`

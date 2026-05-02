@@ -174,3 +174,9 @@ The `plan-tool-required` built-in rule is active for Plan Mode unless disabled i
 - `references/commands-spec.md` — command routing semantics
 - `references/config-spec.md` — plan-mode fallback rules
 - `SKILL.md` — overall pipeline context
+
+## Analysis Planning Notes
+
+When a request is investigative, root-cause-oriented, metric-oriented, or repository/system analysis, classify it with `workflow_kind: analysis` and choose `analysis_kind: root_cause | metric | repo_system`.
+
+Analysis planning should treat one Milestone as one investigation question. The Milestone may contain multiple hypotheses and experiments, and a disproved hypothesis is progress rather than failure.

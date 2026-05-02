@@ -34,6 +34,17 @@ Use this skill for P3 Generate only.
 6. Convert that implementation plan into the final prompt file.
 7. Detect append mode and preserve already executed numbering.
 
+When `execution.steps.preset: analysis` or a Feature has `workflow_kind: analysis`, generated prompts should include the analysis step chain:
+
+- `define_question`
+- `gather_context`
+- `hypothesize`
+- `experiment`
+- `interpret`
+- `conclude`
+
+Generated analysis prompts should point to `templates/analysis/*`, `references/analysis-spec.md`, and `references/analysis-ledger-spec.md`, and should require an external ledger instead of expanding `state.yaml`.
+
 ## Interactive Behavior
 
 - in interactive mode, surface any major append-mode conflict or architecture uncertainty before finalizing

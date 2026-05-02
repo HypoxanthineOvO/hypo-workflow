@@ -1,5 +1,15 @@
 # Changelog
 
+## v10.0.0 - 2026-05-02
+
+### Features
+
+- Added V10 Analysis Preset runtime contracts: experiment execution records, evidence ledgers, outcomes, follow-up proposals, analysis templates, and preset-aware evaluation criteria.
+
+### Tests
+
+- Added Node coverage for analysis experiment results, outcome semantics, report/ledger templates, evaluation criteria, planning hints, and C3 no-confirm queue policy.
+
 ## v9.1.2 - 2026-05-02
 
 ### Documentation

@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { mkdtemp, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
@@ -9,6 +10,9 @@ test("commandMap contains 31 OpenCode mappings", () => {
   const commands = commandMap("opencode");
   assert.equal(commands.length, 31);
   assert.equal(commandByCanonical("/hw:plan").opencode, "/hw-plan");
+  assert.equal(commandByCanonical("/hw:report").agent, "hw-report");
+  assert.equal(commandByCanonical("/hw:compact").agent, "hw-compact");
+  assert.equal(commandByCanonical("/hw:debug").agent, "hw-debug");
   assert.equal(commandByCanonical("/hw:dashboard").agent, "hw-status");
   assert.equal(commandByCanonical("/hw:chat").opencode, "/hw-chat");
 });
@@ -42,6 +46,7 @@ test("writeOpenCodeArtifacts renders commands, agents, and config", async () => 
   assert.match(chatCommand, /chat entries instead of Milestone reports/);
   assert.match(agent, /todowrite/);
   assert.match(agent, /permission:/);
+  assert.match(agent, /^model: gpt-5\.5$/m);
   assert.doesNotMatch(agent, /^tools:/m);
   assert.match(plugin, /commandMap/);
   assert.equal(config.$schema, "https://opencode.ai/config.json");
@@ -53,6 +58,30 @@ test("writeOpenCodeArtifacts renders commands, agents, and config", async () => 
   assert.equal("plugin" in adapterConfig, false);
   assert.equal(config.compaction.auto, true);
   assert.equal(config.compaction.prune, true);
+  assert.equal(config.compaction.effective_context_target, undefined);
+  assert.equal(config.agents, undefined);
   assert.equal(metadata.autoContinue, true);
   assert.equal(metadata.auto_continue.mode, "safe");
+  assert.equal(metadata.compaction.effective_context_target, 900000);
+  assert.equal(metadata.agents.test.model, "gpt-5.4");
+});
+
+test("OpenCode artifact rendering resolves templates from the installed package, not cwd", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "hw-foreign-cwd-"));
+  const outDir = join(cwd, "target-project");
+  const script = `
+    import { writeOpenCodeArtifacts } from ${JSON.stringify(new URL("../src/index.js", import.meta.url).href)};
+    await writeOpenCodeArtifacts(${JSON.stringify(outDir)}, { profile: "standard" });
+  `;
+
+  const result = spawnSync(process.execPath, ["--input-type=module", "-e", script], {
+    cwd,
+    encoding: "utf8",
+  });
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  const agents = await readFile(join(outDir, "AGENTS.md"), "utf8");
+  const tui = await readFile(join(outDir, ".opencode", "plugins", "hypo-workflow-tui.tsx"), "utf8");
+  assert.match(agents, /Hypo-Workflow managed OpenCode instructions/);
+  assert.match(tui, /export const tui/);
 });

@@ -74,3 +74,7 @@ When `--batch` is present:
 - `plan/PLAN-SKILL.md` — Decompose phase rules
 - `references/commands-spec.md` — command routing
 - `SKILL.md` — broader planning context
+
+## Analysis Decomposition Notes
+
+For `workflow_kind: analysis`, decompose by question rather than by implementation slice. Each analysis Milestone should be able to define a question, gather context, hypothesize, experiment, interpret, and conclude with a ledger-backed report.

@@ -6,7 +6,7 @@ Use this reference when planning or evaluating work where validation style depen
 
 Profile is a superset of preset.
 
-- preset controls the step sequence
+- Preset controls step order
 - profile controls the validation policy
 - they may compose, for example `webapp + tdd`
 

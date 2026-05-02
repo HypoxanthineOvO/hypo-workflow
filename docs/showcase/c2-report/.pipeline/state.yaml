@@ -1,0 +1,13 @@
+current:
+  phase: completed
+  step: null
+  cycle: 1
+  milestone: null
+  last_heartbeat: "2026-05-02T00:10:00+08:00"
+
+history:
+  last_command: "/hw:start"
+  last_command_time: "2026-05-02T00:10:00+08:00"
+
+created: "2026-05-02T00:00:00+08:00"
+updated: "2026-05-02T00:10:00+08:00"

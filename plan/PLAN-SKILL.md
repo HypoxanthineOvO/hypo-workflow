@@ -213,6 +213,7 @@ Preset selection rules:
 
 - choose `tdd` for engineering projects with executable tests
 - choose `implement-only` for documentation, research, or planning-heavy work
+- choose `analysis` for root-cause analysis, metric investigation, or repo/system investigation where the primary deliverable is an evidence-backed conclusion
 - choose `custom` only when the user explicitly needs a non-standard sequence
 - for each milestone, write a concrete implementation plan with ordered steps, dependencies, verification points, test spec, and constraints before rendering the prompt file
 - convert that implementation plan into the final prompt file format instead of freehand summary text

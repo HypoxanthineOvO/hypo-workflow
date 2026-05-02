@@ -9,7 +9,7 @@
 # 2. pipeline.name 非空
 # 3. pipeline.source 是 local|notion 之一
 # 4. pipeline.output 是 local|notion 之一
-# 5. execution.steps.preset 是 tdd|implement-only|custom 之一
+# 5. execution.steps.preset 是 tdd|implement-only|custom|analysis 之一
 # 6. 如果 execution.mode=subagent，subagent_tool 必须存在
 # 7. 如果 hooks.enabled=true，hooks/ 目录必须存在
 # 8. platform 如果存在，必须是 auto|claude|codex 之一
@@ -92,9 +92,9 @@ case "$pipeline_output" in
 esac
 
 case "$preset" in
-  tdd|implement-only|custom) ;;
+  tdd|implement-only|custom|analysis) ;;
   *)
-    echo "execution.steps.preset must be one of: tdd, implement-only, custom"
+    echo "execution.steps.preset must be one of: tdd, implement-only, custom, analysis"
     errors=1
     ;;
 esac

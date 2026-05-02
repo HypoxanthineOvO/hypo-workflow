@@ -40,5 +40,12 @@ export function normalizeProfile(input = {}) {
 }
 
 export function selectProfile(config = {}) {
-  return normalizeProfile(config?.opencode?.profile || config?.profile || "standard");
+  const opencode = config?.opencode || {};
+  const profile = normalizeProfile(opencode.profile || config?.profile || "standard");
+  return {
+    ...profile,
+    auto_continue: opencode.auto_continue ?? profile.auto_continue,
+    compaction: opencode.compaction || profile.compaction,
+    agents: opencode.agents || profile.agents,
+  };
 }

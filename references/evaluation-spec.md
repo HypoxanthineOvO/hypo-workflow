@@ -37,6 +37,23 @@ Apply only the checks listed in `evaluation.checks`.
 - `code_quality`
   `code_quality >= 3`.
 
+For `analysis` preset, use evidence-oriented checks instead of TDD red/green assumptions:
+
+- `question_addressed`
+  The ledger/report contains a clear question and conclusion.
+- `evidence_complete`
+  Required ledger fields are present, including the environment snapshot.
+- `conclusion_traceable`
+  The conclusion links back to observations and experiments.
+- `experiment_executed`
+  At least one concrete command, script, comparison, log query, metric collection, or source/config inspection was recorded.
+- `change_validated`
+  Required only when analysis actually changed code; non-code analysis marks this criterion `not_applicable`.
+- `followup_recorded`
+  Follow-up actions or a build follow-up proposal are recorded.
+
+`analysis` evaluation must not require TDD red/green. `partial`, `disproved`, and `inconclusive` outcomes can still be valid completed analysis results when the evidence chain is traceable.
+
 ## Test Profile Evidence
 
 When `execution.test_profiles` is enabled or a Feature declares a matching profile, required evidence becomes category-specific:
@@ -105,6 +122,8 @@ Minimum report content:
 - next action
 
 If the prompt blocks, the report should still be written with the final blocking reason.
+
+Analysis reports should use `templates/analysis/report.md` or the language-specific analysis report fallback. They must include question, environment snapshot, hypotheses, experiments, observations, metrics, ruled-out alternatives, threats to validity, conclusion, confidence, next actions, and code change refs.
 
 ## 多维度评分体系（V4）
 

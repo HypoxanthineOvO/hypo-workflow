@@ -28,6 +28,7 @@ prompt_state:
   result: running | pass | blocked | aborted | stopped | skipped
   diff_score: null
   code_quality: null
+  analysis_summary: null
   steps: []
 history:
   completed_prompts: []
@@ -64,6 +65,43 @@ Each `prompt_state.steps[]` item may contain:
 - `finished_at`
 - `duration_seconds`
 - `notes`
+
+## Analysis State Summary
+
+`prompt_state.analysis_summary` is optional and is used by analysis Milestones to keep resume/status/watchdog/report surfaces useful without turning `.pipeline/state.yaml` into an evidence database.
+
+Suggested shape:
+
+```yaml
+prompt_state:
+  analysis_summary:
+    milestone_id: M06
+    question: "Why did the metric change?"
+    ledger_path: .pipeline/analysis/M06-analysis-ledger.yaml
+    hypothesis_counts:
+      total: 2
+      confirmed: 1
+      disproved: 1
+      partial: 0
+      pending: 0
+    experiment_counts:
+      total: 2
+      completed: 2
+      blocked: 0
+      pending: 0
+    conclusion: "Most likely explanation."
+    confidence: high
+    updated_at: 2026-05-02T13:00:00+08:00
+```
+
+Boundary rules:
+
+- `prompt_state.analysis_summary` must include `ledger_path` when a ledger exists.
+- `state.yaml` must not store full hypotheses.
+- `state.yaml` must not store full experiments.
+- `state.yaml` must not store full observations.
+- Full evidence belongs in `.pipeline/analysis/<milestone-id>-analysis-ledger.yaml`.
+- Hypothesis backtracking should update the ledger and summary counts; it must not require rolling back `current.step`.
 
 ## Read / Write Timing
 
@@ -112,6 +150,7 @@ Read `state.yaml` at these moments:
 - prompt-level `result=skipped` should not increment `pipeline.prompts_completed`.
 - `history.completed_prompts` is a legacy field name and may contain non-pass entries such as `blocked`, `aborted`, or `skipped`.
 - optional `chat.*` state must never replace Cycle / Milestone / Patch state; it only annotates an append conversation lane.
+- optional `prompt_state.analysis_summary` must stay compact and must never replace the analysis ledger.
 
 ## Chat State
 
@@ -201,6 +240,14 @@ Added:
 - optional `chat:` append conversation state
 - chat recovery hints for SessionStart / Stop Hook integration
 - explicit note that chat mode does not replace Cycle / Milestone / Patch
+
+### V10 Analysis
+
+Added:
+
+- optional `prompt_state.analysis_summary`
+- analysis ledger pointer through `analysis_summary.ledger_path`
+- explicit boundary keeping full hypotheses, experiments, and observations out of `state.yaml`
 
 ## V4 新增字段
 

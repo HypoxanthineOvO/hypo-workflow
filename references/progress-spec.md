@@ -126,3 +126,5 @@ Compact time format:
 - current milestone report files
 
 It is a summary surface, not a replacement for state or lifecycle logs.
+
+For analysis Milestones, `PROGRESS.md` should mention the current question, outcome/confidence when known, and the ledger path if it helps recovery. Full hypotheses, experiments, observations, and validity discussion belong in the analysis ledger and report, not the progress board.

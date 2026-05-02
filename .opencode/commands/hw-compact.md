@@ -1,5 +1,5 @@
 ---
-agent: hw-status
+agent: hw-compact
 description: Hypo-Workflow mapping for /hw:compact
 ---
 

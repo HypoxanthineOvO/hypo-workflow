@@ -1,16 +1,16 @@
 pipeline:
-  name: "Hypo-Workflow C2 Maintainability, Observability, Batch Plan, and Showcase"
+  name: "Hypo-Workflow C3 OpenCode Multi-Agent Matrix and V10 Analysis Preset"
   source: local
   output: local
   prompts_dir: .pipeline/prompts
   reports_dir: .pipeline/reports
 
 plan:
-  mode: interactive
+  mode: auto
   interaction_depth: high
   interactive:
     min_rounds: 5
-    require_explicit_confirm: true
+    require_explicit_confirm: false
 
 execution:
   mode: self

@@ -1,14 +1,16 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
+import { DEFAULT_ANALYSIS_INTERACTION } from "../analysis/index.js";
 
 export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
-  version: "9.1.1-alpha.0",
+  version: "10.0.0",
   agent: {
     platform: "codex",
     model: "default",
   },
   execution: {
     default_mode: "self",
+    analysis: DEFAULT_ANALYSIS_INTERACTION,
     test_profiles: {
       enabled: true,
       selection: "auto",
@@ -43,6 +45,32 @@ export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
   opencode: {
     auto_continue: true,
     profile: "standard",
+    compaction: {
+      effective_context_target: 900000,
+    },
+    agents: {
+      plan: {
+        model: "gpt-5.5",
+      },
+      compact: {
+        model: "deepseek-v4-flash",
+      },
+      test: {
+        model: "gpt-5.4",
+      },
+      "code-a": {
+        model: "gpt-5.4",
+      },
+      "code-b": {
+        model: "gpt-5.4-mini",
+      },
+      debug: {
+        model: "gpt-5.4",
+      },
+      report: {
+        model: "gpt-5.4-mini",
+      },
+    },
   },
   release: {
     readme: {
@@ -80,41 +108,65 @@ export function mergeConfig(base, override) {
 }
 
 export function parseYaml(source) {
-  const root = {};
-  const stack = [{ indent: -1, value: root }];
-  const lines = source.split(/\r?\n/);
+  const lines = source
+    .split(/\r?\n/)
+    .filter((raw) => raw.trim() && !raw.trimStart().startsWith("#"))
+    .map((raw) => ({
+      indent: raw.match(/^ */)[0].length,
+      text: raw.trim(),
+    }));
+  let index = 0;
 
-  for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
-    const rawLine = lines[lineIndex];
-    if (!rawLine.trim() || rawLine.trimStart().startsWith("#")) continue;
-    const indent = rawLine.match(/^ */)[0].length;
-    const line = rawLine.trim();
-    while (stack.length > 1 && indent <= stack.at(-1).indent) stack.pop();
-    const parent = stack.at(-1).value;
-
-    if (line.startsWith("- ")) {
-      if (!Array.isArray(parent)) {
-        throw new Error(`YAML list item without array parent: ${line}`);
-      }
-      parent.push(parseScalar(line.slice(2).trim()));
-      continue;
-    }
-
-    const match = /^([^:]+):(.*)$/.exec(line);
-    if (!match) continue;
-    const key = match[1].trim();
-    const rawValue = match[2].trim();
-
-    if (!rawValue) {
-      const next = nextMeaningful(lines, lineIndex + 1);
-      const child = next && next.trim().startsWith("- ") ? [] : {};
-      parent[key] = child;
-      stack.push({ indent, value: child });
-      continue;
-    }
-    parent[key] = parseScalar(rawValue);
+  function parseNode(indent) {
+    return lines[index]?.text.startsWith("-") ? parseArray(indent) : parseObject(indent);
   }
-  return root;
+
+  function parseArray(indent) {
+    const value = [];
+    while (index < lines.length && lines[index].indent === indent && lines[index].text.startsWith("-")) {
+      const rest = lines[index].text.slice(1).trim();
+      index += 1;
+      if (!rest) {
+        value.push(index < lines.length && lines[index].indent > indent ? parseNode(lines[index].indent) : null);
+        continue;
+      }
+
+      const pair = parseYamlKeyValue(rest);
+      if (!pair) {
+        value.push(parseScalar(rest));
+        continue;
+      }
+
+      const item = {};
+      item[pair.key] = pair.rawValue
+        ? parseScalar(pair.rawValue)
+        : index < lines.length && lines[index].indent > indent
+          ? parseNode(lines[index].indent)
+          : {};
+      if (index < lines.length && lines[index].indent > indent) {
+        Object.assign(item, parseObject(lines[index].indent));
+      }
+      value.push(item);
+    }
+    return value;
+  }
+
+  function parseObject(indent) {
+    const object = {};
+    while (index < lines.length && lines[index].indent === indent && !lines[index].text.startsWith("-")) {
+      const pair = parseYamlKeyValue(lines[index].text);
+      index += 1;
+      if (!pair) continue;
+      object[pair.key] = pair.rawValue
+        ? parseScalar(pair.rawValue)
+        : index < lines.length && lines[index].indent > indent
+          ? parseNode(lines[index].indent)
+          : {};
+    }
+    return object;
+  }
+
+  return lines.length ? parseNode(lines[0].indent) : {};
 }
 
 export function stringifyYaml(value, indent = 0) {
@@ -147,6 +199,15 @@ function nextMeaningful(lines, start) {
     if (line.trim() && !line.trimStart().startsWith("#")) return line;
   }
   return null;
+}
+
+function parseYamlKeyValue(text) {
+  const match = /^([^:]+):(.*)$/.exec(text);
+  if (!match) return null;
+  return {
+    key: match[1].trim(),
+    rawValue: match[2].trim(),
+  };
 }
 
 function parseScalar(value) {

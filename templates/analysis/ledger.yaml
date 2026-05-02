@@ -1,0 +1,22 @@
+# analysis evidence ledger
+question: ""
+environment_snapshot:
+  branch_commit: ""
+  effective_config_summary: ""
+  command_parameters: {}
+  data_log_sources: []
+  time_window: ""
+  model_provider_parameters: {}
+hypotheses: []
+experiments: []
+observations: []
+metrics: {}
+interpretation: ""
+outcome: inconclusive
+conclusion: ""
+confidence: medium
+next_actions: []
+followup_proposal: null
+code_change_refs: []
+threats_to_validity: []
+ruled_out_alternatives: []

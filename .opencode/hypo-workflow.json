@@ -5,8 +5,59 @@
     "enabled": true,
     "mode": "safe"
   },
+  "compaction": {
+    "effective_context_target": 900000
+  },
+  "agents": {
+    "plan": {
+      "model": "gpt-5.5"
+    },
+    "compact": {
+      "model": "deepseek-v4-flash"
+    },
+    "test": {
+      "model": "gpt-5.4"
+    },
+    "code-a": {
+      "model": "gpt-5.4"
+    },
+    "code-b": {
+      "model": "gpt-5.4-mini"
+    },
+    "debug": {
+      "model": "gpt-5.4"
+    },
+    "report": {
+      "model": "gpt-5.4-mini"
+    }
+  },
+  "analysis": {
+    "interaction_mode": "hybrid",
+    "boundaries": {
+      "code_changes": {
+        "manual": "deny",
+        "hybrid": "confirm",
+        "auto": "allow"
+      },
+      "restart_services": "confirm",
+      "install_system_dependencies": "ask",
+      "network_remote_resources": {
+        "manual": "ask",
+        "hybrid": "ask",
+        "auto": "allow"
+      },
+      "destructive_or_external_side_effects": "ask"
+    },
+    "effective": {
+      "code_changes": "confirm",
+      "restart_services": "confirm",
+      "install_system_dependencies": "ask",
+      "network_remote_resources": "ask",
+      "destructive_or_external_side_effects": "ask"
+    }
+  },
   "fileGuard": "standard",
-  "version": "9.1.1-alpha.0",
+  "version": "10.0.0",
   "commandMap": [
     {
       "canonical": "/hw:start",
@@ -46,7 +97,7 @@
     {
       "canonical": "/hw:report",
       "opencode": "/hw-report",
-      "agent": "hw-status",
+      "agent": "hw-report",
       "route": "read",
       "skill": "skills/report/SKILL.md"
     },
@@ -130,7 +181,7 @@
     {
       "canonical": "/hw:compact",
       "opencode": "/hw-compact",
-      "agent": "hw-status",
+      "agent": "hw-compact",
       "route": "tool",
       "skill": "skills/compact/SKILL.md"
     },
@@ -186,7 +237,7 @@
     {
       "canonical": "/hw:debug",
       "opencode": "/hw-debug",
-      "agent": "hw-build",
+      "agent": "hw-debug",
       "route": "debug",
       "skill": "skills/debug/SKILL.md"
     },
