@@ -1,6 +1,7 @@
 ---
 description: Documentation, showcase, and release-note assistance.
 mode: subagent
+model: deepseek/deepseek-v4-pro
 permission:
   read: allow
   grep: allow

@@ -29,6 +29,8 @@ Test Profiles sit on top of presets. Keep `preset` for step order, but collect c
 
 Use `/hw:plan --batch` only when the user wants to plan multiple Features in one conversation and create a Feature Queue.
 
+Feature DAG concepts belong only to long-running, batch, multi-Feature, AFK, or HITL coordination. Ordinary single-feature `/hw:plan` must stay simple and should not require or display Feature DAG fields.
+
 Use `/hw:plan --insert <natural language>` to edit an existing Feature Queue. Convert the natural-language request to a structured queue operation first, show the queue diff, then wait for explicit confirmation before writing `.pipeline/feature-queue.yaml`.
 
 ## Preconditions
@@ -66,6 +68,7 @@ Batch behavior:
 6. If `batch.decompose_mode=just_in_time`, create queue entries first and defer Milestone decomposition until each Feature becomes current.
 7. Generate Feature-level Markdown tables and Mermaid diagrams for queue order, dependencies, and architecture impact.
 8. Keep P1 interactive hard gates unless `plan.mode=auto` and config allows unattended planning.
+9. When dependencies are present, include Feature DAG fields such as `depends_on`, `blocked_by`, `execution_hint`, `handoff_hint`, and ready/blocked status. Do not create Milestone-level DAG scheduling.
 
 Batch artifacts:
 

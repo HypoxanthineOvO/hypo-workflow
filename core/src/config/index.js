@@ -5,7 +5,7 @@ import { DEFAULT_ANALYSIS_INTERACTION } from "../analysis/index.js";
 import { DEFAULT_KNOWLEDGE_CONFIG } from "../knowledge/index.js";
 
 export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
-  version: "10.1.0",
+  version: "10.2.0",
   agent: {
     platform: "codex",
     model: "default",
@@ -99,6 +99,9 @@ export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
       },
       debug: {
         model: "gpt-5.5",
+      },
+      docs: {
+        model: "deepseek-v4-pro",
       },
       report: {
         model: "deepseek-v4-flash",
@@ -202,6 +205,7 @@ export function buildModelPoolOpenCodeAgents(config = {}) {
     "code-a": { model: roles.implement.primary },
     "code-b": { model: firstModel(roles.implement, roles.implement.primary) },
     debug: { model: roles.review.primary },
+    docs: { model: firstModel(roles.review, roles.review.primary) },
     report: { model: roles.evaluate.primary },
   };
   if (!config.model_pool) {

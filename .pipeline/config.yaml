@@ -1,5 +1,5 @@
 pipeline:
-  name: "Hypo-Workflow C4 Knowledge Ledger, Global TUI, Acceptance Loop, and Explore Mode"
+  name: "Hypo-Workflow C5 Follow-Up AI Coding Workflow Redesign"
   source: local
   output: local
   prompts_dir: .pipeline/prompts

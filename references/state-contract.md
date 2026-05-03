@@ -34,7 +34,57 @@ history:
   completed_prompts: []
 chat: {}
 acceptance: {}
+continuation: {}
 ```
+
+## Cycle Workflow Metadata
+
+Cycle-level workflow truth lives in `.pipeline/cycle.yaml`, not in `state.yaml`.
+`state.yaml` may mirror only the currently active continuation. The Cycle schema uses:
+
+```yaml
+cycle:
+  workflow_kind: build | analysis | showcase
+  analysis_kind: root_cause | metric | repo_system
+  type: feature | analysis | showcase
+  lifecycle_policy:
+    reject:
+      default_action: needs_revision
+    accept:
+      next: complete | auto_continue | follow_up_plan
+    resume:
+      default_action: continue_current | continue_revision
+    gates:
+      acceptance: auto | confirm | manual_qa
+    auto_continue: true
+  continuations:
+    - id: C5-follow-up
+      kind: follow_up_plan
+      status: planned | active | done | blocked
+      prompt_ref: .pipeline/plan-continuations/C5-follow-up.yaml
+```
+
+Rules:
+
+- `workflow_kind` is Cycle-scoped and is the single source for Plan, Start, Status, Report, Acceptance, and platform boundary semantics inside one Cycle.
+- `cycle.type` is a legacy/internal alias derived from `workflow_kind`; it must not become a second user-facing taxonomy.
+- `execution.steps.preset` defaults from `workflow_kind`: `analysis -> analysis`, `showcase -> implement-only`, `build -> tdd`.
+- `lifecycle_policy.reject.default_action` defaults to `needs_revision`.
+- `cycle.continuations[]` is the authority for planned follow-up nodes. `state.yaml` only mirrors the active continuation.
+
+Canonical user-facing phases are:
+
+- `planning`
+- `ready_to_start`
+- `executing`
+- `pending_acceptance`
+- `needs_revision`
+- `accepted`
+- `follow_up_planning`
+- `blocked`
+- `completed`
+
+Status surfaces should derive one canonical phase and one next action from Cycle metadata, state, acceptance, and continuation facts.
 
 ## Milestone Record Fields
 
@@ -119,6 +169,14 @@ Write `state.yaml` at these moments:
 - prompt blocked
 - abort or restart
 
+Protected lifecycle writes must go through the workflow commit helper instead of direct ad hoc file writes. The helper contract is:
+
+- prevalidate the next authoritative snapshot before writing `.pipeline/state.yaml`, `.pipeline/cycle.yaml`, or `.pipeline/rules.yaml`
+- write authority files with temp-file atomic replacement
+- run post-write invariants for step pointers, rejected acceptance state, prompt completion counts, and follow-up continuation state
+- refresh affected derived views such as `.pipeline/log.yaml`, `.pipeline/PROGRESS.md`, metrics mirrors, compact views, project summaries, and OpenCode status inputs as derived targets
+- if authority commits but a derived refresh fails, keep authority committed, write `.pipeline/derived-refresh.yaml`, return a warning/failure status, and tell the user to repair with `/hw:sync --light` or rerun the lifecycle command after fixing the derived artifact
+
 Read `state.yaml` at these moments:
 
 - `start pipeline`
@@ -140,6 +198,11 @@ Read `state.yaml` at these moments:
 - `current.step_index` must match the index of `current.step` inside `prompt_state.steps`.
 - `current.phase` should reflect whether the system is in planning, execution, lifecycle, or completion state.
 - `last_heartbeat` should be updated with an ISO-8601 timestamp whenever execution state is persisted during `/hw:start` or `/hw:resume`.
+- `.pipeline/.lock` is a structured execution lease, not a bare sentinel file.
+- Execution leases include `schema_version`, `platform`, `session_id`, `owner`, `command`, `phase`, `created_at`, `heartbeat_at`, `expires_at`, `workflow_kind`, `cycle_id`, and `handoff_allowed`.
+- Fresh foreign leases block resume. Expired leases may be taken over and must log `lease_takeover` evidence.
+- Platform-reported failures should be recorded as `reported_failure`; timeout-only recovery is `inferred_stall`.
+- Malformed leases require repair guidance instead of silent deletion.
 - `pipeline.prompts_completed` must equal the number of successful prompt entries in `history.completed_prompts`.
 - `prompt_state.diff_score` drives the final decision gate.
 - `prompt_state.code_quality` informs the `code_quality` evaluation check.
@@ -156,6 +219,8 @@ Read `state.yaml` at these moments:
 - optional `acceptance.*` state is a compact mirror for status and TUI surfaces; Cycle-level truth stays in `.pipeline/cycle.yaml`.
 - `acceptance.feedback_ref` may point to structured rejection feedback under `.pipeline/acceptance/`.
 - `state.yaml` must not store full acceptance or rejection feedback text.
+- `current.phase=needs_revision` means `/hw:resume` should continue the revision path using `acceptance.feedback_ref` as input instead of resuming a completed step.
+- `current.phase=follow_up_planning` means accepted work is waiting to start the active `continuation` record.
 
 ## Acceptance State
 
@@ -181,6 +246,28 @@ Notes:
 - Full feedback belongs in `feedback_ref`, not in `state.yaml`.
 - Timeout acceptance is a deterministic status/check decision. Status surfaces may display `accepted`, `timed_out: true`, and `automatic: true` after the configured timeout, but no background runner should rewrite `state.yaml`.
 - Rejection feedback files should be structured with `problem`, `reproduce_steps`, `expected`, `actual`, `context`, `iteration`, and `created_at`. A compatibility `feedback` field may exist for older Patch fix readers.
+
+## Continuation Mirror
+
+`continuation:` is optional and mirrors only the active Cycle continuation for status and resume surfaces.
+
+Suggested fields:
+
+```yaml
+continuation:
+  id: C5-follow-up
+  kind: follow_up_plan
+  status: active
+  title: Plan build follow-up
+  prompt_ref: .pipeline/plan-continuations/C5-follow-up.yaml
+  updated_at: 2026-05-03T10:00:00+08:00
+```
+
+Notes:
+
+- The authoritative planned list is `cycle.continuations[]`.
+- Do not mirror inactive or historical continuations into `state.yaml`.
+- A follow-up planning continuation should surface canonical phase `follow_up_planning` and next action `start_follow_up_plan`.
 
 ## Chat State
 

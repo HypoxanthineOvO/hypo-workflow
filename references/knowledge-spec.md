@@ -61,6 +61,24 @@ Supported categories are:
 
 Generated index files contain concise entries grouped by record id, source, tags, and summary. They are optimized for loading and filtering; they are not the authoritative raw record.
 
+## Design Concept And Glossary Indexing
+
+Deep Discover and Grill-Me may create durable design concept artifacts outside the Knowledge Ledger:
+
+- `.pipeline/design-concepts.yaml`
+- `.pipeline/glossary.md`
+- `.pipeline/architecture.md`
+- generated prompt files
+
+Knowledge Ledger indexes confirmed decisions and references about those artifacts. It must not duplicate full design-concepts or glossary bodies into every compact context.
+
+Recommended record categories:
+
+- `decisions` for accepted terminology, source-of-truth, non-goal, lifecycle, or architecture choices
+- `references` for links to `.pipeline/design-concepts.yaml`, `.pipeline/glossary.md`, relevant architecture sections, and generated prompts
+
+Raw discussion is not authoritative until the agent extracts and confirms a decision or concept.
+
 ## Compact Summary
 
 `.pipeline/knowledge/knowledge.compact.md` is a human-readable synthesis of high-value current knowledge:

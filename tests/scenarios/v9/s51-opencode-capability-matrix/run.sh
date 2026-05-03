@@ -45,8 +45,8 @@ mapping_count="$(
   ' references/opencode-spec.md
 )"
 
-test "$mapping_count" = "35" || {
-  echo "expected 35 OpenCode command mappings, found $mapping_count" >&2
+test "$mapping_count" = "37" || {
+  echo "expected 37 OpenCode command mappings, found $mapping_count" >&2
   exit 1
 }
 
@@ -54,7 +54,7 @@ for cmd in \
   "/hw:start" "/hw:resume" "/hw:status" "/hw:skip" "/hw:stop" "/hw:report" "/hw:chat" \
   "/hw:plan" "/hw:plan:discover" "/hw:plan:decompose" "/hw:plan:generate" \
   "/hw:plan:confirm" "/hw:plan:extend" "/hw:plan:review" "/hw:cycle" \
-  "/hw:accept" "/hw:reject" \
+  "/hw:accept" "/hw:reject" "/hw:explore" "/hw:sync" "/hw:docs" \
   "/hw:patch" "/hw:patch fix" "/hw:compact" "/hw:knowledge" "/hw:guide" "/hw:showcase" \
   "/hw:rules" "/hw:init" "/hw:check" "/hw:audit" "/hw:release" "/hw:debug" \
   "/hw:help" "/hw:reset" "/hw:log" "/hw:setup" "/hw:dashboard"
@@ -84,8 +84,13 @@ for term in "not a runner" "hypo-workflow" "plugins/opencode" "core/"; do
   }
 done
 
-grep -Fq "OpenCode Native Adapter" README.md || {
-  echo "README.md missing V9 OpenCode reference" >&2
+grep -Fq "37 个用户指令" README.md || {
+  echo "README.md missing current command count" >&2
+  exit 1
+}
+
+grep -Fq "docs/platforms/opencode.md" README.md || {
+  echo "README.md missing OpenCode guide link" >&2
   exit 1
 }
 

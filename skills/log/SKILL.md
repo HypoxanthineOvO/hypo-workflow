@@ -28,6 +28,8 @@ Use this skill to inspect `.pipeline/log.yaml`.
    - `--full`
 6. If the log file is missing, state that no lifecycle log has been created yet in `output.language`.
 
+Recent/status readers must sort by timestamp rather than file order and must use the shared secret-safe redaction helper before showing summaries. `/hw:log --full` may show complete lifecycle history, but status/dashboard Recent should remain a filtered user activity feed.
+
 ## Flags
 
 - `/hw:log --full`: ignore `.pipeline/log.compact.yaml` and load the complete lifecycle log.

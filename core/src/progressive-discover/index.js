@@ -1,3 +1,9 @@
+import {
+  normalizeAnalysisKind,
+  normalizeWorkflowKind,
+} from "../lifecycle/index.js";
+import { evaluateDiscoverGrillMeRisk } from "../guide/index.js";
+
 export const DISCOVER_BIG_QUESTIONS = Object.freeze([
   {
     id: "task_category",
@@ -46,7 +52,8 @@ const LIGHTWEIGHT_STAGES = Object.freeze([
 
 export function buildProgressiveDiscoverPlan(input = {}, options = {}) {
   const mode = input.mode || "single";
-  const coverage = mode === "extend" ? "lightweight" : "full";
+  const risk = evaluateDiscoverGrillMeRisk(input);
+  const coverage = mode === "extend" || risk.mode === "light_discover" ? "lightweight" : "full";
   const stages = coverage === "lightweight" ? LIGHTWEIGHT_STAGES : FULL_STAGES;
   const minRounds = options.minRounds ?? (coverage === "lightweight" ? 1 : 3);
   const requiredOutputs = [".pipeline/design-spec.md", ".plan-state/discover.yaml"];
@@ -54,10 +61,14 @@ export function buildProgressiveDiscoverPlan(input = {}, options = {}) {
   if (mode === "batch") {
     requiredOutputs.push(".plan-state/batch-discover.yaml");
   }
+  if (risk.requires_design_concept_alignment) {
+    requiredOutputs.push(".pipeline/design-concepts.yaml", ".pipeline/glossary.md");
+  }
 
   return {
     mode,
     coverage,
+    grill_me: risk,
     min_rounds: minRounds,
     big_questions: DISCOVER_BIG_QUESTIONS.map((item) => ({ ...item })),
     stages: stages.map((item) => ({ ...item })),
@@ -76,7 +87,10 @@ export function buildProgressiveDiscoverPlan(input = {}, options = {}) {
 
 export function normalizeDiscoverFeature(feature = {}) {
   const verification = normalizeVerification(feature.verification, feature);
-  const workflowKind = normalizeWorkflowKind(feature.workflow_kind || feature.workflowKind || feature.workflow, feature);
+  const workflowKind = normalizeWorkflowKind(
+    feature.workflow_kind || feature.workflowKind || feature.workflow || workflowKindFromAnalysisKind(feature),
+    feature,
+  );
   return {
     ...feature,
     category: normalizeCategory(feature.category || feature.type || feature.profile),
@@ -92,25 +106,8 @@ export function normalizeDiscoverFeature(feature = {}) {
   };
 }
 
-export function normalizeWorkflowKind(value, feature = {}) {
-  const normalized = String(value || "").trim().toLowerCase().replace(/[-\s]+/g, "_");
-  if (["build", "implementation", "feature", "bugfix", "hotfix"].includes(normalized)) return "build";
-  if (["analysis", "analyze", "debug", "root_cause", "metric", "repo_system", "research_analysis"].includes(normalized)) {
-    return "analysis";
-  }
-  if (["showcase", "demo", "presentation"].includes(normalized)) return "showcase";
-
-  const category = String(feature.category || feature.type || "").trim().toLowerCase();
-  if (category === "showcase") return "showcase";
-  return "build";
-}
-
-export function normalizeAnalysisKind(value, workflowKind = "build") {
-  const normalized = String(value || "").trim().toLowerCase().replace(/[-\s]+/g, "_");
-  if (["root_cause", "rootcause", "debug", "bug", "incident"].includes(normalized)) return "root_cause";
-  if (["metric", "metrics", "trend", "research", "measurement"].includes(normalized)) return "metric";
-  if (["repo_system", "repo", "system", "architecture", "codebase"].includes(normalized)) return "repo_system";
-  return workflowKind === "analysis" ? "root_cause" : null;
+function workflowKindFromAnalysisKind(feature = {}) {
+  return feature.analysis_kind || feature.analysisKind || feature.investigation_kind ? "analysis" : null;
 }
 
 function normalizeCategory(value) {

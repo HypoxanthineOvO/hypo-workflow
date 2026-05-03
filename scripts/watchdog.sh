@@ -106,6 +106,12 @@ last_heartbeat() {
   sed -nE 's/^last_heartbeat:[[:space:]]*"?([^"]*)"?[[:space:]]*$/\1/p' "$state_file" | head -n1 | trim
 }
 
+lock_value() {
+  local key="$1"
+  [[ -r "$lock_file" ]] || return 0
+  sed -nE "s/^[[:space:]]*${key}:[[:space:]]*\"?([^\"]*)\"?[[:space:]]*$/\\1/p" "$lock_file" | head -n1 | trim
+}
+
 read_watchdog_state() {
   local key="$1"
   [[ -r "$watchdog_state" ]] || return 0
@@ -149,7 +155,7 @@ if ! heartbeat_epoch="$(date -d "$heartbeat" +%s 2>/dev/null)"; then
   exit 0
 fi
 
-now_epoch="$(date +%s)"
+now_epoch="${HYPO_WORKFLOW_NOW_EPOCH:-$(date +%s)}"
 timeout_s="$(config_value watchdog heartbeat_timeout 300)"
 interval_s="$(config_value watchdog interval 300)"
 max_retries="$(config_value watchdog max_retries 5)"
@@ -162,8 +168,22 @@ if (( age_s < timeout_s )); then
 fi
 
 if [[ -e "$lock_file" ]]; then
-  log "skip: lock exists"
-  exit 0
+  lock_session="$(lock_value session_id)"
+  lock_expires="$(lock_value expires_at)"
+  lock_failure="$(lock_value reported_failure)"
+  if [[ -z "$lock_session" || -z "$lock_expires" ]]; then
+    log "skip: legacy or malformed lock exists"
+    exit 0
+  fi
+  if ! lock_expires_epoch="$(date -d "$lock_expires" +%s 2>/dev/null)"; then
+    log "skip: malformed lock expires_at=$lock_expires"
+    exit 0
+  fi
+  if (( now_epoch < lock_expires_epoch )) && [[ -z "$lock_failure" ]]; then
+    log "skip: fresh lease exists session=${lock_session}"
+    exit 0
+  fi
+  log "takeover: stale lease session=${lock_session} expires_at=${lock_expires}"
 fi
 
 failures="$(read_watchdog_state consecutive_failures)"

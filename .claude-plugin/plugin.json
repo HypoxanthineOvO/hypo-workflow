@@ -1,7 +1,7 @@
 {
   "name": "hypo-workflow",
-  "version": "10.1.0",
-  "description": "Serialized prompt workflow with OpenCode native adapter scaffold, V10 Analysis Preset, Knowledge Ledger, Explore Mode, global setup CLI/TUI, acceptance loops, explicit sync, and 36 user-facing skills covering setup, plan, execute, cycles, patches, compact, guide, showcase, rules, review, debug, release, watchdog, and dashboard.",
+  "version": "10.2.0",
+  "description": "Serialized prompt workflow with OpenCode native adapter scaffold, V10 Analysis Preset, Knowledge Ledger, Explore Mode, global setup CLI/TUI, acceptance loops, explicit sync, docs governance, and 37 user-facing skills covering setup, plan, execute, cycles, patches, compact, guide, showcase, rules, review, debug, release, watchdog, and dashboard.",
   "author": {
     "name": "Hypoxanthine",
     "url": "https://github.com/HypoxanthineOvO"

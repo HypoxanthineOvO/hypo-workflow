@@ -114,8 +114,13 @@ async function sync(flags) {
     platform,
     profile: valueAfter(flags, "--profile"),
     registryFile: registryPath(),
+    checkOnly: flags.includes("--check-only"),
+    repair: flags.includes("--repair"),
   });
-  process.stdout.write(`Synced project ${project} mode=${result.mode} operations=${result.operations.join(",")}\n`);
+  const derived = result.derived_health
+    ? ` derived=${result.derived_health.ok ? "fresh" : `stale:${result.derived_health.stale_count}/errors:${result.derived_health.error_count}`}`
+    : "";
+  process.stdout.write(`Synced project ${project} mode=${result.mode} operations=${result.operations.join(",")}${derived}\n`);
 }
 
 async function profile(flags) {
@@ -255,7 +260,7 @@ function help() {
   process.stdout.write("  setup [--platform codex|claude-code|opencode] [--model <name>] [--yes]\n");
   process.stdout.write("  tui [--snapshot]\n");
   process.stdout.write("  doctor\n");
-  process.stdout.write("  sync [--light|--deep] --platform opencode --project <dir>\n");
+  process.stdout.write("  sync [--light|--deep] [--check-only|--repair] --platform opencode --project <dir>\n");
   process.stdout.write("  profile list|use <name>|edit <name> [--platform <name>] [--model <name>]\n");
   process.stdout.write("  install opencode|codex|claude\n");
   process.stdout.write("  init-project --platform opencode --project <dir>\n");

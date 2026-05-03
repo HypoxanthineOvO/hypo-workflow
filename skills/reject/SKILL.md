@@ -29,8 +29,16 @@ Use this skill when the user invokes `/hw:reject`.
   - `acceptance.cycle_id`
   - `acceptance.feedback_ref`
   - `acceptance.updated_at`
-- Set `pipeline.status: running` and `current.phase: executing`.
-- Append a `cycle_reject` entry to `.pipeline/log.yaml`.
-- Update `.pipeline/PROGRESS.md` with a compact board row.
+- Set `pipeline.status: running`.
+- By default, route rejection through `cycle.lifecycle_policy.reject.default_action=needs_revision`:
+  - set `current.phase: needs_revision`
+  - set `current.step: revise`
+  - preserve `acceptance.feedback_ref` as revision input
+  - status next action is `resume_revision`
+- Only use `current.phase: executing` when the Cycle policy explicitly chooses a non-revision reject action.
+- Use the workflow commit helper so authoritative rejection facts commit atomically before derived refreshes.
+- Append a `cycle_reject` entry to `.pipeline/log.yaml` through the derived refresh path.
+- Update `.pipeline/PROGRESS.md` with a compact board row through the derived refresh path.
+- If a derived refresh fails after authority commits, keep the rejection facts, write `.pipeline/derived-refresh.yaml`, and surface a warning with repair guidance.
 
 Never store full rejection feedback in `state.yaml`; use `feedback_ref`.

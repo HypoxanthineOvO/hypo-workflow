@@ -1,6 +1,96 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
+const RECENT_FAMILIES = new Set([
+  "cycle",
+  "plan",
+  "feature",
+  "milestone",
+  "patch",
+  "acceptance",
+  "sync",
+  "recovery",
+  "handoff",
+  "derived_refresh",
+  "audit",
+  "debug",
+  "release",
+  "chat",
+]);
+
+const INTERNAL_TYPES = new Set([
+  "step_heartbeat",
+  "platform_heartbeat",
+  "hook_heartbeat",
+  "watchdog_heartbeat",
+  "compact_refresh",
+]);
+
+function buildRecentEvents(log = {}, options = {}) {
+  const limit = Number(options.limit || 10);
+  const entries = Array.isArray(log?.entries) ? log.entries : [];
+  return entries
+    .filter(isRecentEvent)
+    .sort(compareByTimestampDesc)
+    .slice(0, limit)
+    .map((entry) => ({
+      id: entry.id || null,
+      type: entry.type || null,
+      family: logFamily(entry.type),
+      status: entry.status || null,
+      timestamp: entry.timestamp || null,
+      summary: redactSecrets(entry.summary || ""),
+      report: entry.report || null,
+    }));
+}
+
+function logFamily(type) {
+  const normalized = normalizeLogType(type);
+  if (!normalized) return null;
+  if (normalized === "plan_review" || normalized.startsWith("plan_")) return "plan";
+  if (normalized.startsWith("cycle")) return "cycle";
+  if (normalized.startsWith("feature")) return "feature";
+  if (normalized.startsWith("milestone")) return "milestone";
+  if (normalized.startsWith("step")) return "step";
+  if (normalized.startsWith("patch")) return "patch";
+  if (normalized.startsWith("acceptance") || normalized.startsWith("cycle_accept") || normalized.startsWith("cycle_reject")) return "acceptance";
+  if (normalized.startsWith("sync")) return "sync";
+  if (normalized.startsWith("recovery") || normalized.includes("lease") || normalized.includes("takeover")) return "recovery";
+  if (normalized.startsWith("handoff")) return "handoff";
+  if (normalized.startsWith("derived")) return "derived_refresh";
+  if (normalized.startsWith("platform")) return "platform";
+  if (normalized.startsWith("audit")) return "audit";
+  if (normalized.startsWith("debug")) return "debug";
+  if (normalized.startsWith("release")) return "release";
+  if (normalized.startsWith("watchdog")) return "watchdog";
+  if (normalized.startsWith("chat")) return "chat";
+  if (normalized.startsWith("pipeline")) return "cycle";
+  if (["fix"].includes(normalized)) return "patch";
+  return null;
+}
+
+function isRecentEvent(entry) {
+  const type = normalizeLogType(entry.type);
+  if (INTERNAL_TYPES.has(type)) return false;
+  const family = logFamily(type);
+  if (!RECENT_FAMILIES.has(family)) return false;
+  const status = String(entry.status || "");
+  if (family === "platform" && !["blocked", "failed", "warning"].includes(status)) return false;
+  return true;
+}
+
+function compareByTimestampDesc(a, b) {
+  const diff = Date.parse(b.timestamp || "") - Date.parse(a.timestamp || "");
+  if (Number.isFinite(diff) && diff !== 0) return diff;
+  return String(b.id || "").localeCompare(String(a.id || ""));
+}
+
+function normalizeLogType(value) {
+  return String(value || "").trim().toLowerCase().replace(/[-\s]+/g, "_");
+}
+
+function redactSecrets(value) { return value; }
+
 const NA = "n/a";
 const OPENCODE_METADATA_PATH = ".opencode/hypo-workflow.json";
 const DEFAULT_ACCEPTANCE_POLICY = Object.freeze({
@@ -39,6 +129,8 @@ export async function buildOpenCodeStatusModel(projectRoot = ".", options = {}) 
   const queue = await readYaml(join(root, "feature-queue.yaml"), { sources, warnings });
   const metrics = await readYaml(join(root, "metrics.yaml"), { sources, warnings });
   const log = await readYaml(join(root, "log.yaml"), { sources, warnings });
+  const lock = await readYaml(join(root, ".lock"), { sources, warnings });
+  const derivedHealth = await readYaml(join(root, "derived-health.yaml"), { sources, warnings });
   const reportsCompact = await readText(join(root, "reports.compact.md"), { sources, warnings });
   const metadata = await readJson(join(projectRoot, OPENCODE_METADATA_PATH), { sources, warnings });
   const models = modelsFromOpenCode(metadata.value, options.opencode || {});
@@ -55,8 +147,12 @@ export async function buildOpenCodeStatusModel(projectRoot = ".", options = {}) 
   const metricSummary = metricsSummary(metrics.value, feature, state.value);
   const recentEvents = recentEventsFromLog(log.value);
   const cycleModel = cycleFromSources(cycle.value, queue.value, state.value);
+  const dag = resolveFeatureDagBoard(queue.value || {});
   const acceptancePolicy = resolveAcceptancePolicy(config.value || {}, globalConfig.value || {});
   const acceptance = acceptanceFromSources(cycle.value, state.value, acceptancePolicy, options);
+  const lifecycle = lifecycleFromSources(cycle.value, state.value, acceptance);
+  const lease = assessStatusLease(lock.value, options);
+  const derived = derivedHealthFromSources(derivedHealth.value, sources);
   const pipeline = {
     name: state.value.pipeline?.name || "",
     status: state.value.pipeline?.status || "unknown",
@@ -69,6 +165,9 @@ export async function buildOpenCodeStatusModel(projectRoot = ".", options = {}) 
     warnings,
     cycle: cycleModel,
     acceptance,
+    lifecycle,
+    lease,
+    derived,
     pipeline,
     progress,
     current,
@@ -78,6 +177,7 @@ export async function buildOpenCodeStatusModel(projectRoot = ".", options = {}) 
       auto_chain: queue.value?.defaults?.auto_chain ?? null,
       failure_policy: queue.value?.defaults?.failure_policy ?? null,
       features: summarizeFeatures(queue.value?.features || []),
+      dag: summarizeDagBoard(dag),
     },
     gate,
     metrics: metricSummary,
@@ -100,12 +200,15 @@ function emptyModel({ sources, warnings, models }) {
     warnings,
     cycle: { id: null, name: null, status: "missing" },
     acceptance: { scope: null, state: "none", mode: null, feedback_ref: null, cycle_id: null, policy: resolveAcceptancePolicy() },
+    lifecycle: { phase: "missing", next_action: "none", reason: "missing_pipeline", feedback_ref: null, continuation: null },
     pipeline: { name: "", status: "missing_pipeline", heartbeat: null },
     progress: { completed: 0, total: 0, percent: 0 },
     current: { milestone_id: null, prompt_name: null, step: null, feature_id: null },
     feature: { id: null, title: null, status: "missing", gate: null, milestones: [] },
-    queue: { current_feature: null, auto_chain: null, failure_policy: null, features: [] },
+    queue: { current_feature: null, auto_chain: null, failure_policy: null, features: [], dag: summarizeDagBoard(resolveFeatureDagBoard({ features: [] })) },
     gate: { status: "none", feature_id: null },
+    lease: { action: "none", reason: "missing_pipeline", repair_hint: null },
+    derived: { ok: true, stale_count: 0, error_count: 0, artifacts: [] },
     metrics: { duration_ms: NA, token_count: NA, cost: NA },
     models,
     latest_score: { diff_score: null, overall: null, code_quality: null },
@@ -182,6 +285,7 @@ function currentFromState(state) {
   return {
     milestone_id: milestoneId,
     prompt_name: state.current?.prompt_name || null,
+    phase: state.current?.phase || null,
     step: state.current?.step || null,
     feature_id: milestone.feature_id || extractFeatureId(promptName),
   };
@@ -278,14 +382,7 @@ function fallbackScore(state) {
 }
 
 function recentEventsFromLog(log) {
-  const entries = asArray(log?.entries);
-  return entries.slice(-10).reverse().map((entry) => ({
-    id: entry.id || null,
-    type: entry.type || null,
-    status: entry.status || null,
-    timestamp: entry.timestamp || null,
-    summary: entry.summary || "",
-  }));
+  return buildRecentEvents(log, { limit: 10 });
 }
 
 function cycleFromSources(cycle, queue, state) {
@@ -314,6 +411,200 @@ function acceptanceFromSources(cycle, state, policy, options = {}) {
     ...evaluated,
     policy,
   };
+}
+
+function lifecycleFromSources(cycle, state, acceptance) {
+  const cycleNode = cycle?.cycle || {};
+  const policy = resolveStatusLifecyclePolicy(cycleNode);
+  const feedbackRef = acceptance?.feedback_ref || state.acceptance?.feedback_ref || cycleNode.acceptance?.feedback_ref || null;
+  const continuation = normalizeStatusContinuation(
+    state.continuation || selectStatusContinuation(cycleNode) || selectStatusContinuation(policy),
+  );
+
+  if (
+    state.current?.phase === "needs_revision" ||
+    (acceptance?.state === "rejected" && policy.reject.default_action === "needs_revision")
+  ) {
+    return {
+      phase: "needs_revision",
+      next_action: "resume_revision",
+      reason: "cycle_rejected",
+      feedback_ref: feedbackRef,
+      continuation: null,
+    };
+  }
+
+  if (
+    state.current?.phase === "follow_up_planning" ||
+    cycleNode.status === "follow_up_planning" ||
+    state.continuation?.kind === "follow_up_plan" ||
+    (acceptance?.state === "accepted" && policy.accept.next === "follow_up_plan" && continuation)
+  ) {
+    return {
+      phase: "follow_up_planning",
+      next_action: "start_follow_up_plan",
+      reason: "accepted_with_continuation",
+      feedback_ref: feedbackRef,
+      continuation,
+    };
+  }
+
+  if (
+    state.pipeline?.status === "pending_acceptance" ||
+    cycleNode.status === "pending_acceptance" ||
+    acceptance?.state === "pending"
+  ) {
+    return {
+      phase: "pending_acceptance",
+      next_action: "accept_or_reject",
+      reason: "awaiting_acceptance",
+      feedback_ref: feedbackRef,
+      continuation,
+    };
+  }
+
+  if (state.pipeline?.status === "blocked" || cycleNode.status === "blocked" || state.prompt_state?.result === "blocked") {
+    return {
+      phase: "blocked",
+      next_action: "inspect_blocker",
+      reason: "pipeline_blocked",
+      feedback_ref: feedbackRef,
+      continuation,
+    };
+  }
+
+  if (state.pipeline?.status === "completed" || cycleNode.status === "completed" || state.current?.phase === "completed") {
+    return {
+      phase: "completed",
+      next_action: "none",
+      reason: "pipeline_completed",
+      feedback_ref: feedbackRef,
+      continuation: null,
+    };
+  }
+
+  const phase = normalizeStatusPhase(state.current?.phase);
+  if (phase) {
+    return {
+      phase,
+      next_action: nextActionForStatusPhase(phase),
+      reason: "current_phase",
+      feedback_ref: feedbackRef,
+      continuation,
+    };
+  }
+
+  if (acceptance?.state === "accepted") {
+    return {
+      phase: "accepted",
+      next_action: policy.accept.next === "auto_continue" ? "auto_continue" : "none",
+      reason: "cycle_accepted",
+      feedback_ref: feedbackRef,
+      continuation,
+    };
+  }
+
+  return {
+    phase: state.current?.step ? "executing" : "ready_to_start",
+    next_action: state.current?.step ? "continue_execution" : "start",
+    reason: state.current?.step ? "active_step" : "no_active_step",
+    feedback_ref: feedbackRef,
+    continuation,
+  };
+}
+
+function resolveStatusLifecyclePolicy(cycle = {}) {
+  const explicit = cycle.lifecycle_policy || {};
+  const continuations = normalizeStatusContinuations(cycle.continuations || explicit.continuations || []);
+  const hasFollowUp = continuations.some((item) => item.kind === "follow_up_plan");
+  return {
+    workflow_kind: normalizeStatusWorkflowKind(cycle.workflow_kind || cycle.type),
+    reject: {
+      default_action: normalizeStatusRejectAction(explicit.reject?.default_action || explicit.reject_default_action),
+    },
+    accept: {
+      next: normalizeStatusAcceptNext(explicit.accept?.next || explicit.accept_next || (hasFollowUp ? "follow_up_plan" : "complete")),
+    },
+    resume: {
+      default_action: "continue_revision",
+    },
+    gates: {
+      acceptance: "auto",
+      ...(explicit.gates || {}),
+    },
+    auto_continue: explicit.auto_continue ?? true,
+    continuations,
+  };
+}
+
+function selectStatusContinuation(value = {}) {
+  const continuations = normalizeStatusContinuations(Array.isArray(value) ? value : value.continuations || []);
+  return continuations.find((item) => item.kind === "follow_up_plan" && item.status === "active")
+    || continuations.find((item) => item.kind === "follow_up_plan" && ["planned", "queued", "pending"].includes(item.status))
+    || continuations.find((item) => item.kind === "follow_up_plan")
+    || null;
+}
+
+function normalizeStatusContinuations(value) {
+  return (Array.isArray(value) ? value : []).map(normalizeStatusContinuation).filter(Boolean);
+}
+
+function normalizeStatusContinuation(value) {
+  if (!value || typeof value !== "object") return null;
+  const kind = normalizeStatusToken(value.kind || value.type || value.next);
+  const status = normalizeStatusToken(value.status) || "planned";
+  return {
+    ...value,
+    id: value.id || value.name || "follow-up",
+    kind: ["follow_up_plan", "follow_up_planning", "followup_plan", "plan_follow_up"].includes(kind) ? "follow_up_plan" : kind || "follow_up_plan",
+    status: status === "completed" ? "done" : status,
+  };
+}
+
+function normalizeStatusWorkflowKind(value) {
+  const normalized = normalizeStatusToken(value);
+  if (["analysis", "analyze", "audit", "debug", "root_cause", "metric", "repo_system"].includes(normalized)) return "analysis";
+  if (["showcase", "demo", "presentation"].includes(normalized)) return "showcase";
+  return "build";
+}
+
+function normalizeStatusRejectAction(value) {
+  const normalized = normalizeStatusToken(value);
+  if (["replan", "abandon", "abort"].includes(normalized)) return normalized;
+  return "needs_revision";
+}
+
+function normalizeStatusAcceptNext(value) {
+  const normalized = normalizeStatusToken(value);
+  if (["follow_up_plan", "follow_up_planning", "followup_plan", "plan_follow_up"].includes(normalized)) return "follow_up_plan";
+  if (["auto_continue", "continue"].includes(normalized)) return "auto_continue";
+  return "complete";
+}
+
+function normalizeStatusPhase(value) {
+  const normalized = normalizeStatusToken(value);
+  return [
+    "planning",
+    "ready_to_start",
+    "executing",
+    "pending_acceptance",
+    "needs_revision",
+    "accepted",
+    "follow_up_planning",
+    "blocked",
+    "completed",
+  ].includes(normalized) ? normalized : null;
+}
+
+function nextActionForStatusPhase(phase) {
+  if (phase === "planning") return "continue_planning";
+  if (phase === "ready_to_start") return "start";
+  if (phase === "executing") return "continue_execution";
+  if (phase === "pending_acceptance") return "accept_or_reject";
+  if (phase === "needs_revision") return "resume_revision";
+  if (phase === "follow_up_planning") return "start_follow_up_plan";
+  if (phase === "blocked") return "inspect_blocker";
+  return "none";
 }
 
 function resolveAcceptancePolicy(projectConfig = {}, globalConfig = {}) {
@@ -403,6 +694,8 @@ function renderSidebarModel(model) {
         title: "Current",
         items: [
           `Cycle: ${model.cycle.id || NA}`,
+          `Phase: ${model.lifecycle?.phase || NA}`,
+          `Next: ${model.lifecycle?.next_action || NA}`,
           `Acceptance: ${model.acceptance?.state || NA} (${model.acceptance?.policy?.mode || model.acceptance?.mode || NA})`,
           `Feature: ${formatFeatureLabel(model.feature)}`,
           `Milestone: ${current}`,
@@ -410,6 +703,7 @@ function renderSidebarModel(model) {
           `Gate: ${model.gate.status === "none" ? model.feature.gate || NA : model.gate.status}`,
         ],
       },
+      ...renderRecoverySections(model),
       {
         title: "Models",
         items: [
@@ -427,6 +721,7 @@ function renderSidebarModel(model) {
           ...model.queue.features.slice(0, 6).map(formatQueueFeature),
         ],
       },
+      ...renderDagSections(model),
       {
         title: "Milestones",
         items: model.feature.milestones.length
@@ -436,6 +731,10 @@ function renderSidebarModel(model) {
       {
         title: "Blocked / Deferred",
         items: blockedOrDeferred(model.queue.features),
+      },
+      {
+        title: "Derived Health",
+        items: renderDerivedHealthItems(model.derived),
       },
       {
         title: "Metrics",
@@ -461,6 +760,7 @@ function renderFooterModel(model) {
     `${model.progress.completed}/${model.progress.total}`,
     model.current.milestone_id || "M?",
     model.current.step || model.gate.status,
+    `phase:${model.lifecycle?.phase || NA}`,
     `model:${shortModel(model.models.current.model)}`,
     `sub:${shortModel(model.models.active_subagent.model)}`,
     `score:${score}`,
@@ -468,8 +768,89 @@ function renderFooterModel(model) {
     `cost:${model.metrics.cost}`,
   ];
   if (model.gate.status === "waiting_confirmation") parts.push("confirm");
+  if (model.lease?.action === "repair") parts.push("lease:repair");
+  if (model.derived && model.derived.ok === false) parts.push(`derived:${model.derived.stale_count || model.derived.error_count}`);
   if (model.acceptance?.state && model.acceptance.state !== "none") parts.push(`acceptance:${model.acceptance.state}`);
   return { text: parts.join(" | ") };
+}
+
+function derivedHealthFromSources(health, sources = []) {
+  if (!health) {
+    const source = sources.find((item) => item.path.endsWith(".pipeline/derived-health.yaml"));
+    return {
+      ok: true,
+      stale_count: 0,
+      error_count: 0,
+      artifacts: [],
+      source: source?.status || "missing_optional",
+    };
+  }
+  const artifacts = asArray(health.artifacts).map((artifact) => ({
+    id: artifact.id || null,
+    path: artifact.path || null,
+    status: artifact.status || "unknown",
+    severity: artifact.severity || "unknown",
+    repair_hint: artifact.repair_hint || null,
+  }));
+  return {
+    ok: health.ok !== false && Number(health.stale_count || 0) === 0 && Number(health.error_count || 0) === 0,
+    stale_count: numberOrZero(health.stale_count),
+    error_count: numberOrZero(health.error_count),
+    checked_at: health.checked_at || null,
+    artifacts,
+  };
+}
+
+function renderDerivedHealthItems(derived = {}) {
+  const items = [
+    `Status: ${derived.ok === false ? "needs_repair" : "fresh"}`,
+    `Stale: ${derived.stale_count ?? 0}`,
+    `Errors: ${derived.error_count ?? 0}`,
+  ];
+  const needsRepair = asArray(derived.artifacts).filter((artifact) => artifact.status !== "fresh");
+  if (needsRepair.length) {
+    items.push(...needsRepair.slice(0, 4).map((artifact) => (
+      `${artifact.id || artifact.path}: ${artifact.status}${artifact.repair_hint ? ` (${artifact.repair_hint})` : ""}`
+    )));
+  }
+  return items;
+}
+
+function assessStatusLease(lease, options = {}) {
+  if (!lease) return { action: "none", reason: "no_lease", repair_hint: null };
+  const errors = [];
+  if (!lease.platform) errors.push("platform is required");
+  if (!lease.session_id && !lease.sessionId) errors.push("session_id is required");
+  if (!validStatusDate(lease.heartbeat_at || lease.heartbeatAt)) errors.push("heartbeat_at must be an ISO timestamp");
+  if (!validStatusDate(lease.expires_at || lease.expiresAt)) errors.push("expires_at must be an ISO timestamp");
+  if (errors.length) {
+    return {
+      action: "repair",
+      reason: "malformed_lease",
+      errors,
+      repair_hint: "Run /hw:check and inspect .pipeline/.lock before resuming.",
+    };
+  }
+  const now = Date.parse(options.now || new Date().toISOString());
+  const expires = Date.parse(lease.expires_at || lease.expiresAt);
+  if (Number.isFinite(now) && Number.isFinite(expires) && now >= expires) {
+    return { action: "takeover_available", reason: "expired_lease", repair_hint: null };
+  }
+  return { action: "block", reason: "fresh_foreign_lease", repair_hint: null };
+}
+
+function renderRecoverySections(model) {
+  if (!model.lease || model.lease.action === "none") return [];
+  const items = [
+    `Lease: ${model.lease.action}`,
+    `Reason: ${model.lease.reason}`,
+  ];
+  if (model.lease.repair_hint) items.push(`Repair: ${model.lease.repair_hint}`);
+  return [{ title: "Recovery", items }];
+}
+
+function validStatusDate(value) {
+  return Boolean(value) && Number.isFinite(Date.parse(value));
 }
 
 function extractMilestoneId(value = "") {
@@ -495,8 +876,84 @@ function summarizeFeatures(features) {
     status: feature.status || "unknown",
     gate: feature.gate || null,
     decompose_mode: feature.decompose_mode || null,
+    depends_on: asArray(feature.depends_on),
+    blocked_by: asArray(feature.blocked_by),
+    execution_hint: feature.execution_hint || null,
+    handoff_hint: feature.handoff_hint || null,
     milestones: asArray(feature.milestones),
   }));
+}
+
+function summarizeDagBoard(board) {
+  return {
+    ok: board.ok,
+    visible: board.visible,
+    errors: board.errors,
+    ready_features: board.ready_features.map((feature) => feature.id),
+    blocked_features: board.blocked_features.map((feature) => ({
+      id: feature.id,
+      blocked_by: feature.blocked_by,
+    })),
+    parallel_candidates: board.parallel_candidates.map((feature) => feature.id),
+  };
+}
+
+function resolveFeatureDagBoard(queue = {}) {
+  const features = asArray(queue.features).map((feature, index) => ({
+    ...feature,
+    id: String(feature.id || `F${String(index + 1).padStart(3, "0")}`),
+    title: feature.title || feature.id || `F${String(index + 1).padStart(3, "0")}`,
+    status: normalizeDagStatus(feature.status),
+    depends_on: asArray(feature.depends_on || feature.dependsOn || feature.dependencies).map(String),
+    blocked_by: asArray(feature.blocked_by || feature.blockedBy).map(String),
+    execution_hint: feature.execution_hint || feature.executionHint || "",
+    handoff_hint: feature.handoff_hint || feature.handoffHint || "",
+  }));
+  const doneIds = new Set(features.filter((feature) => ["done", "completed"].includes(feature.status)).map((feature) => feature.id));
+  const enriched = features.map((feature) => {
+    const blockedBy = feature.depends_on.filter((dependency) => !doneIds.has(dependency));
+    const ready = !["done", "completed", "active", "running", "in_progress"].includes(feature.status)
+      && blockedBy.length === 0
+      && ["queued", "decomposed", "pending"].includes(feature.status);
+    return {
+      ...feature,
+      ready,
+      blocked_by: blockedBy,
+    };
+  });
+  const visible = features.length > 1 && features.some((feature) => feature.depends_on.length || feature.blocked_by.length || feature.execution_hint || feature.handoff_hint);
+  const readyFeatures = enriched.filter((feature) => feature.ready);
+  return {
+    ok: true,
+    visible,
+    errors: [],
+    features: enriched,
+    ready_features: readyFeatures,
+    blocked_features: enriched.filter((feature) => feature.blocked_by.length > 0),
+    parallel_candidates: readyFeatures.length > 1 ? readyFeatures : [],
+  };
+}
+
+function normalizeDagStatus(value) {
+  const normalized = String(value || "queued").trim().toLowerCase();
+  if (normalized === "completed") return "done";
+  if (normalized === "running" || normalized === "in-progress") return "active";
+  return normalized;
+}
+
+function renderDagSections(model) {
+  const dag = model.queue?.dag;
+  if (!dag?.visible) return [];
+  const items = [];
+  if (!dag.ok) {
+    items.push(...dag.errors.map((error) => `Error: ${error.message}`));
+  }
+  items.push(`Ready: ${dag.ready_features.length ? dag.ready_features.join(", ") : NA}`);
+  items.push(`Parallel: ${dag.parallel_candidates.length ? dag.parallel_candidates.join(", ") : NA}`);
+  if (dag.blocked_features.length) {
+    items.push(...dag.blocked_features.map((feature) => `${feature.id} blocked by ${feature.blocked_by.join(", ")}`));
+  }
+  return [{ title: "Feature DAG", items }];
 }
 
 function formatFeatureLabel(feature) {
@@ -612,6 +1069,10 @@ function formatBoolean(value) {
   return NA;
 }
 
+function normalizeStatusToken(value) {
+  return String(value || "").trim().toLowerCase().replace(/[-\s]+/g, "_");
+}
+
 function asArray(value) {
   if (Array.isArray(value)) return value;
   if (!value || typeof value !== "object") return [];
@@ -632,7 +1093,7 @@ function parseStatusYaml(source) {
 
   function parseNode(indent) {
     if (index >= lines.length) return {};
-    return lines[index].text.startsWith("- ") && lines[index].indent === indent
+    return isArrayItem(lines[index].text) && lines[index].indent === indent
       ? parseArray(indent)
       : parseObject(indent);
   }
@@ -642,12 +1103,14 @@ function parseStatusYaml(source) {
     while (index < lines.length) {
       const line = lines[index];
       if (line.indent < indent) break;
-      if (line.indent !== indent || !line.text.startsWith("- ")) break;
+      if (line.indent !== indent || !isArrayItem(line.text)) break;
 
-      const rest = line.text.slice(2).trim();
+      const rest = line.text === "-" ? "" : line.text.slice(2).trim();
       index += 1;
       if (!rest) {
-        value.push(index < lines.length && lines[index].indent > indent ? parseNode(lines[index].indent) : null);
+        value.push(index < lines.length && lines[index].indent > indent
+          ? parseArrayChild(lines[index].indent)
+          : null);
         continue;
       }
 
@@ -666,13 +1129,23 @@ function parseStatusYaml(source) {
     return value;
   }
 
+  function parseArrayChild(childIndent) {
+    if (index >= lines.length) return null;
+    const child = lines[index];
+    if (child.indent !== childIndent) return parseNode(childIndent);
+    const pair = parseKeyValue(child.text);
+    if (pair) return parseObject(childIndent);
+    index += 1;
+    return parseScalar(child.text);
+  }
+
   function parseObject(indent) {
     const value = {};
     while (index < lines.length) {
       const line = lines[index];
       if (line.indent < indent) break;
       if (line.indent !== indent) break;
-      if (line.text.startsWith("- ")) break;
+      if (isArrayItem(line.text)) break;
 
       const pair = parseKeyValue(line.text);
       if (!pair) {
@@ -696,13 +1169,25 @@ function parseStatusYaml(source) {
   return lines.length ? parseNode(lines[0].indent) : {};
 }
 
+function isArrayItem(text) {
+  return text === "-" || text.startsWith("- ");
+}
+
 function parseKeyValue(text) {
+  if (isQuotedScalar(text)) return null;
   const match = /^([^:]+):(.*)$/.exec(text);
   if (!match) return null;
   return {
     key: match[1].trim(),
     rawValue: match[2].trim(),
   };
+}
+
+function isQuotedScalar(text) {
+  return (
+    (text.startsWith('"') && text.endsWith('"')) ||
+    (text.startsWith("'") && text.endsWith("'"))
+  );
 }
 
 function parseScalar(value) {

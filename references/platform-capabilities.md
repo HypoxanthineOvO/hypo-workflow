@@ -13,6 +13,7 @@ Hypo-Workflow remains a single workflow system with platform adapters. V9 adds O
 | Subagents | Available in Codex sessions | Available in Claude Code workflows where configured | Native agents and subagents | Map HW explorer/worker/reviewer roles per platform. |
 | Hooks/events | Limited from the HW side | Claude hooks for session/start/stop behavior | Plugin events for command/tool/session/todo/permission | OpenCode gets richer automation; shared state contract remains unchanged. |
 | Permissions | Environment/sandbox controlled | Claude permissions/hooks | Native allow/ask/deny rules | Use native controls where present; keep HW file guard as policy. |
+| Recovery signal | Structured lease + heartbeat | Structured lease + heartbeat/hooks | Structured lease + heartbeat/plugin events | Lease/heartbeat timeout is the portable recovery signal; platform failures add `reported_failure` when available. |
 | Rules/instructions | `SKILL.md` + rules files | `SKILL.md` + plugin context | `AGENTS.md`, instructions, plugin context | Export HW rules to native instructions without replacing `.pipeline/rules.yaml`. |
 | Model routing | Host-provided model selection | Host-provided model selection | Native provider/model/variant config | V9 uses OpenCode native model config first; HW router only if a platform lacks enough control later. |
 | Context compaction | Compact files + skill policy | Compact files + hooks | Plugin compaction hook + compact files | OpenCode can inject compact summaries natively. |
@@ -26,6 +27,7 @@ V9 must not degrade Codex or Claude Code.
 - Existing `/hw:*` and `/hypo-workflow:*` command behavior remains valid.
 - Shared workflow semantics stay in common specs and generated skill content, not in an OpenCode-only runner.
 - OpenCode-only features are additive adapter capabilities. They may improve Ask, todowrite, hooks, and permissions on OpenCode, but cannot become required for Codex/Claude execution.
+- Codex/OpenCode/Claude handoff must preserve the strictest permission, network, destructive/external-side-effect, and auto-continue boundaries. Handoff may not widen permissions without explicit confirmation.
 - New `core/` helpers must emit the same `.pipeline/` contracts currently consumed by Codex and Claude Code.
 - Regression tests continue to validate existing scenarios before OpenCode-specific smoke tests are considered green.
 

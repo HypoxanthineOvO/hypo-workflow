@@ -60,6 +60,7 @@ test("model pool maps roles to the OpenCode agent matrix without breaking overri
   assert.equal(agents["code-a"].model, "impl-model");
   assert.equal(agents["code-b"].model, "impl-fallback");
   assert.equal(agents.debug.model, "review-model");
+  assert.equal(agents.docs.model, "review-fallback");
   assert.equal(agents.report.model, "eval-model");
   assert.equal(agents.compact.model, "explicit-compact");
 

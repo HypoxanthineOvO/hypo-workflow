@@ -130,16 +130,6 @@ export async function checkReadmeFreshness(readmeFile = "README.md", options = {
     }
   }
 
-  for (const releaseTerm of ["regression", "version", "changelog", "commit", "tag", "push"]) {
-    if (!new RegExp(releaseTerm, "i").test(readme)) {
-      failures.push({
-        check: "release-summary",
-        expected: releaseTerm,
-        message: `README release summary is missing ${releaseTerm}`,
-      });
-    }
-  }
-
   return {
     fresh: failures.length === 0,
     failures,

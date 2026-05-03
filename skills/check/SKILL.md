@@ -31,6 +31,7 @@ Use this skill for the seven-surface health check.
    - Notion
    - Architecture
    - Skill quality via `checkSkillQuality`
+  - Execution lease: parse `.pipeline/.lock` when present, report fresh/stale/malformed status, and show repair guidance for malformed leases.
 4. Print `✅`, `⚠️`, or `❌` for each surface.
 5. Summarize overall health, effective config source, and recommended next action in `output.language`.
 6. Set `current.phase=lifecycle_check` when tracking this command through state.

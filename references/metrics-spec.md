@@ -11,7 +11,7 @@ Metrics should answer:
 - how many tokens were reported by the platform
 - what cost was reported by the platform
 
-Metrics must not estimate model cost from a hand-maintained price table. If the host platform or SDK does not provide token or cost data, store `n/a`.
+Metrics must not estimate model cost from a hand-maintained price table. If the host platform or SDK does not provide token or cost data, store `telemetry_unavailable`.
 
 ## Metrics File
 
@@ -66,14 +66,17 @@ status: running
 started_at: "2026-05-01T03:27:00+08:00"
 finished_at: null
 duration_ms: n/a
-message_count: n/a
+message_count: telemetry_unavailable
 tokens:
-  input: n/a
-  output: n/a
-  total: n/a
-token_count: n/a
-cost: n/a
-currency: n/a
+  input: telemetry_unavailable
+  output: telemetry_unavailable
+  total: telemetry_unavailable
+token_count: telemetry_unavailable
+cost: telemetry_unavailable
+currency: telemetry_unavailable
+telemetry_status:
+  token_count: telemetry_unavailable
+  cost: telemetry_unavailable
 updated_at: "2026-05-01T03:27:00+08:00"
 source: agent
 ```
@@ -84,7 +87,8 @@ Rules:
 - `message_count` may be counted from agent-visible interactions when available.
 - `tokens` and `token_count` must come from platform/SDK telemetry.
 - `cost` must come from platform/SDK telemetry.
-- Use `n/a` when a value is unavailable.
+- Use `telemetry_unavailable` when token, cost, currency, or message telemetry is unavailable.
+- Existing archived fixtures may still contain `n/a`; readers should normalize it to `telemetry_unavailable` when creating new records.
 
 ## Cost and Token Policy
 
@@ -94,7 +98,7 @@ Token and cost values are telemetry, not estimates.
 - Do not mix currencies in one aggregate without a conversion source.
 - If a platform provides input/output token split, store it under `tokens`.
 - If only total tokens are available, set `tokens.total` and `token_count`.
-- If no telemetry is available, use `n/a`.
+- If no telemetry is available, use `telemetry_unavailable`.
 
 ## Update Timing
 

@@ -1,6 +1,11 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { DEFAULT_GLOBAL_CONFIG, mergeConfig, parseYaml, writeConfig } from "../config/index.js";
+import {
+  commitWorkflowUpdate,
+  resolveCycleLifecyclePolicy,
+  selectLifecycleContinuation,
+} from "../lifecycle/index.js";
 
 export function resolveAcceptancePolicy(projectConfig = {}, globalConfig = DEFAULT_GLOBAL_CONFIG) {
   const merged = mergeConfig(
@@ -93,8 +98,7 @@ export async function markCyclePendingAcceptance(projectRoot = ".", options = {}
     }),
   };
 
-  await persistAcceptanceContext(context, { cycle, state });
-  await appendLifecycleLog(context.logFile, {
+  const logEntry = {
     id: `CYCLE-PENDING-${cycleId}-${compactTimestamp(now)}`,
     type: "cycle_pending_acceptance",
     ref: cycleId,
@@ -102,21 +106,43 @@ export async function markCyclePendingAcceptance(projectRoot = ".", options = {}
     timestamp: now,
     summary: `Cycle ${cycleId} is pending user acceptance.`,
     trigger: "auto",
+  };
+  const commit = await commitAcceptanceUpdate(context, {
+    id: `cycle-pending-${cycleId}-${compactTimestamp(now)}`,
+    now,
+    cycle,
+    state,
+    logEntry,
+    progress: {
+      timestamp: now,
+      type: "Cycle",
+      event: `${cycleId} pending_acceptance`,
+      result: "等待用户 acceptance",
+    },
+    derivedRefreshers: options.derivedRefreshers,
   });
-  await appendProgressRow(context.progressFile, now, "Cycle", `${cycleId} pending_acceptance`, "等待用户 acceptance");
-  return { cycle, state, archived: false };
+  return { cycle, state, archived: false, commit };
 }
 
 export async function acceptCycle(projectRoot = ".", options = {}) {
   const context = await loadAcceptanceContext(projectRoot);
   const now = options.now || new Date().toISOString();
   const cycleId = cycleIdentifier(context.cycle);
+  const policy = resolveCycleLifecyclePolicy(context.cycle);
+  const followUp = policy.accept.next === "follow_up_plan"
+    ? selectLifecycleContinuation(context.cycle, "follow_up_plan")
+    : null;
+  const enteringFollowUp = Boolean(followUp);
+  const continuations = enteringFollowUp
+    ? activateContinuation(context.cycle.cycle?.continuations, followUp.id)
+    : context.cycle.cycle?.continuations;
   const cycle = {
     ...context.cycle,
     cycle: {
       ...context.cycle.cycle,
-      status: "completed",
-      finished: now,
+      status: enteringFollowUp ? "follow_up_planning" : "completed",
+      finished: enteringFollowUp ? context.cycle.cycle?.finished || null : now,
+      ...(continuations ? { continuations } : {}),
       acceptance: {
         ...(context.cycle.cycle?.acceptance || {}),
         state: "accepted",
@@ -128,12 +154,13 @@ export async function acceptCycle(projectRoot = ".", options = {}) {
     ...context.state,
     pipeline: {
       ...(context.state.pipeline || {}),
-      status: "completed",
-      finished: now,
+      status: enteringFollowUp ? "stopped" : "completed",
+      finished: enteringFollowUp ? context.state.pipeline?.finished || null : now,
     },
     current: {
       ...(context.state.current || {}),
-      phase: "completed",
+      phase: enteringFollowUp ? "follow_up_planning" : "completed",
+      ...(enteringFollowUp ? { step: null } : {}),
     },
     acceptance: compactAcceptanceState({
       ...(context.state.acceptance || {}),
@@ -142,26 +169,43 @@ export async function acceptCycle(projectRoot = ".", options = {}) {
       cycle_id: cycleId,
       updated_at: now,
     }),
+    ...(enteringFollowUp ? { continuation: compactContinuationState(followUp, now) } : {}),
   };
 
-  await persistAcceptanceContext(context, { cycle, state });
-  await appendLifecycleLog(context.logFile, {
+  const logEntry = {
     id: `CYCLE-ACCEPTED-${cycleId}-${compactTimestamp(now)}`,
     type: "cycle_accept",
     ref: cycleId,
-    status: "completed",
+    status: enteringFollowUp ? "follow_up_planning" : "completed",
     timestamp: now,
-    summary: `Cycle ${cycleId} accepted.`,
+    summary: enteringFollowUp
+      ? `Cycle ${cycleId} accepted; entering follow-up planning.`
+      : `Cycle ${cycleId} accepted.`,
     trigger: "manual",
+  };
+  const commit = await commitAcceptanceUpdate(context, {
+    id: `cycle-accept-${cycleId}-${compactTimestamp(now)}`,
+    now,
+    cycle,
+    state,
+    logEntry,
+    progress: {
+      timestamp: now,
+      type: "Cycle",
+      event: `${cycleId} accepted`,
+      result: enteringFollowUp ? "进入 follow_up_planning" : "Cycle accepted",
+    },
+    derivedRefreshers: options.derivedRefreshers,
   });
-  await appendProgressRow(context.progressFile, now, "Cycle", `${cycleId} accepted`, "Cycle accepted");
-  return { cycle, state, archived: options.archive === true };
+  return { cycle, state, archived: options.archive === true, commit };
 }
 
 export async function rejectCycle(projectRoot = ".", options = {}) {
   const context = await loadAcceptanceContext(projectRoot);
   const now = options.now || new Date().toISOString();
   const cycleId = cycleIdentifier(context.cycle);
+  const policy = resolveCycleLifecyclePolicy(context.cycle);
+  const needsRevision = policy.reject.default_action === "needs_revision";
   const feedbackRef = options.feedback_ref || `.pipeline/acceptance/cycle-${cycleId}-rejection-${compactTimestamp(now)}.yaml`;
   const cycle = {
     ...context.cycle,
@@ -184,7 +228,12 @@ export async function rejectCycle(projectRoot = ".", options = {}) {
     },
     current: {
       ...(context.state.current || {}),
-      phase: "executing",
+      phase: needsRevision ? "needs_revision" : "executing",
+      ...(needsRevision ? { step: "revise", step_index: 0 } : {}),
+    },
+    prompt_state: {
+      ...(context.state.prompt_state || {}),
+      ...(needsRevision ? { result: "running", updated_at: now } : {}),
     },
     acceptance: compactAcceptanceState({
       scope: "cycle",
@@ -195,8 +244,7 @@ export async function rejectCycle(projectRoot = ".", options = {}) {
     }),
   };
 
-  await mkdir(join(projectRoot, ".pipeline", "acceptance"), { recursive: true });
-  await writeConfig(join(projectRoot, feedbackRef), {
+  const feedback = {
     ...createRejectionFeedbackTemplate({
       scope: "cycle",
       ref: cycleId,
@@ -207,20 +255,37 @@ export async function rejectCycle(projectRoot = ".", options = {}) {
     rejected_at: now,
     problem: String(options.feedback || "").trim(),
     feedback: String(options.feedback || "").trim(),
-  });
-  await persistAcceptanceContext(context, { cycle, state });
-  await appendLifecycleLog(context.logFile, {
+  };
+  const logEntry = {
     id: `CYCLE-REJECTED-${cycleId}-${compactTimestamp(now)}`,
     type: "cycle_reject",
     ref: cycleId,
-    status: "rejected",
+    status: needsRevision ? "needs_revision" : "rejected",
     timestamp: now,
-    summary: `Cycle ${cycleId} rejected; feedback stored at ${feedbackRef}.`,
+    summary: needsRevision
+      ? `Cycle ${cycleId} rejected; revision needed with feedback at ${feedbackRef}.`
+      : `Cycle ${cycleId} rejected; feedback stored at ${feedbackRef}.`,
     report: feedbackRef,
     trigger: "manual",
+  };
+  const commit = await commitAcceptanceUpdate(context, {
+    id: `cycle-reject-${cycleId}-${compactTimestamp(now)}`,
+    now,
+    cycle,
+    state,
+    extraAuthority: {
+      [feedbackRef]: feedback,
+    },
+    logEntry,
+    progress: {
+      timestamp: now,
+      type: "Cycle",
+      event: `${cycleId} needs_revision`,
+      result: `反馈已保存到 ${feedbackRef}`,
+    },
+    derivedRefreshers: options.derivedRefreshers,
   });
-  await appendProgressRow(context.progressFile, now, "Cycle", `${cycleId} rejected`, `反馈已保存到 ${feedbackRef}`);
-  return { cycle, state, feedback_ref: feedbackRef };
+  return { cycle, state, feedback_ref: feedbackRef, commit };
 }
 
 async function loadAcceptanceContext(projectRoot) {
@@ -236,11 +301,6 @@ async function loadAcceptanceContext(projectRoot) {
   };
 }
 
-async function persistAcceptanceContext(context, { cycle, state }) {
-  await writeConfig(context.cycleFile, cycle);
-  await writeConfig(context.stateFile, state);
-}
-
 async function readYaml(file) {
   try {
     return parseYaml(await readFile(file, "utf8"));
@@ -250,37 +310,80 @@ async function readYaml(file) {
   }
 }
 
-async function appendLifecycleLog(file, entry) {
-  const log = await readYaml(file);
-  const entries = Array.isArray(log.entries) ? log.entries : [];
-  await writeConfig(file, {
-    ...log,
-    entries: [entry, ...entries],
+async function commitAcceptanceUpdate(context, update) {
+  const logPath = ".pipeline/log.yaml";
+  const progressPath = ".pipeline/PROGRESS.md";
+  const progressRefresh = update.derivedRefreshers?.progress || ((source) => appendProgressRowSource(
+    source,
+    update.progress.timestamp,
+    update.progress.type,
+    update.progress.event,
+    update.progress.result,
+  ));
+  const logRefresh = update.derivedRefreshers?.log || ((source) => appendLifecycleLogSource(source, update.logEntry));
+
+  return commitWorkflowUpdate(context.projectRoot, {
+    id: update.id,
+    now: update.now,
+    authority: {
+      [toProjectPath(context.cycleFile, context.projectRoot)]: update.cycle,
+      [toProjectPath(context.stateFile, context.projectRoot)]: update.state,
+      ...(update.extraAuthority || {}),
+    },
+    derived: [
+      {
+        path: logPath,
+        refresh: logRefresh,
+      },
+      {
+        path: progressPath,
+        refresh: progressRefresh,
+      },
+    ],
   });
 }
 
-async function appendProgressRow(file, timestamp, type, event, result) {
-  let source = "";
-  try {
-    source = await readFile(file, "utf8");
-  } catch (error) {
-    if (error.code !== "ENOENT") throw error;
-  }
+function appendLifecycleLogSource(source, entry) {
+  const log = source ? parseYaml(source) : {};
+  const entries = Array.isArray(log.entries) ? log.entries : [];
+  return {
+    ...log,
+    entries: [entry, ...entries],
+  };
+}
+
+function appendProgressRowSource(source, timestamp, type, event, result) {
   const row = `| ${formatProgressTime(timestamp)} | ${type} | ${event} | ${result} |`;
   if (source.includes("| 时间 | 类型 | 事件 | 结果 |")) {
     const marker = "|---|---|---|---|";
     const index = source.indexOf(marker);
     const insertAt = index === -1 ? source.length : index + marker.length;
-    const updated = `${source.slice(0, insertAt)}\n${row}${source.slice(insertAt)}`;
-    await writeFile(file, updated, "utf8");
-    return;
+    return `${source.slice(0, insertAt)}\n${row}${source.slice(insertAt)}`;
   }
-  await writeFile(file, `${source.trimEnd()}\n\n## 时间线\n\n| 时间 | 类型 | 事件 | 结果 |\n|---|---|---|---|\n${row}\n`, "utf8");
+  return `${source.trimEnd()}\n\n## 时间线\n\n| 时间 | 类型 | 事件 | 结果 |\n|---|---|---|---|\n${row}\n`;
 }
 
 function compactAcceptanceState(value) {
   const allowed = ["scope", "state", "mode", "cycle_id", "feedback_ref", "updated_at"];
   return Object.fromEntries(allowed.filter((key) => value[key] !== undefined).map((key) => [key, value[key]]));
+}
+
+function compactContinuationState(value, timestamp) {
+  return {
+    id: value.id,
+    kind: value.kind,
+    status: "active",
+    title: value.title || null,
+    prompt_ref: value.prompt_ref || value.ref || null,
+    updated_at: timestamp,
+  };
+}
+
+function activateContinuation(continuations = [], id) {
+  return (Array.isArray(continuations) ? continuations : []).map((continuation) => {
+    const key = continuation.id || continuation.name;
+    return key === id ? { ...continuation, status: "active" } : continuation;
+  });
 }
 
 function normalizeAcceptanceMode(value) {
@@ -316,4 +419,8 @@ function compactTimestamp(value) {
 function formatProgressTime(value) {
   const match = /T(\d{2}:\d{2})/.exec(String(value));
   return match?.[1] || String(value);
+}
+
+function toProjectPath(file, projectRoot) {
+  return file.replace(`${projectRoot.replace(/\/+$/, "")}/`, "");
 }

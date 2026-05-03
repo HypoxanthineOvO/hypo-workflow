@@ -12,12 +12,15 @@ count="$(awk '
   in_table && /^When the user types/ {print c; exit}
 ' SKILL.md)"
 
-test "$count" = "36"
-rg -q '36 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility' references/commands-spec.md
+test "$count" = "37"
+rg -q '37 user-facing commands across Setup, Pipeline, Plan, Lifecycle, Docs, and Utility groups' references/commands-spec.md
+rg -q 'lists all 37 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, Docs, and Utility' references/commands-spec.md
 rg -q '\| `/hw:cycle` \|' SKILL.md
 rg -q '\| `/hw:accept` \|' SKILL.md
 rg -q '\| `/hw:reject` \|' SKILL.md
+rg -q '\| `/hw:explore` \|' SKILL.md
 rg -q '\| `/hw:sync` \|' SKILL.md
+rg -q '\| `/hw:docs` \|' SKILL.md
 rg -q '\| `/hw:patch` \|' SKILL.md
 rg -q '\| `/hw:compact` \|' SKILL.md
 rg -q '\| `/hw:knowledge` \|' SKILL.md
@@ -25,10 +28,12 @@ rg -q '\| `/hw:guide` \|' SKILL.md
 rg -q '\| `/hw:showcase` \|' SKILL.md
 rg -q '\| `/hw:rules` \|' SKILL.md
 rg -q '\| `/hw:plan:extend` \|' SKILL.md
-rg -q '^#### 设置$' README.md
-rg -q '^#### Pipeline$' README.md
-rg -q '^#### Plan$' README.md
-rg -q '^#### 生命周期$' README.md
-rg -q '^#### 工具$' README.md
+rg -q '^## 命令概览$' README.md
+rg -q '\| Pipeline \|' README.md
+rg -q '\| Plan \|' README.md
+rg -q '\| Lifecycle \|' README.md
+rg -q '\| Analysis/Review \|' README.md
+rg -q '\| Utility \|' README.md
+rg -q '\[Commands Reference\]\(docs/reference/commands.md\)' README.md
 
 echo "s19-help-list: PASS"

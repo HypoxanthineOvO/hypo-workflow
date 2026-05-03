@@ -71,6 +71,47 @@ test("test profile selection composes with preset and preserves legacy preset-on
   assert.deepEqual(inferred.profiles, ["webapp"]);
 });
 
+test("workflow and preset names never become Test Profiles", () => {
+  const selection = normalizeTestProfileSelection({
+    workflow_kind: "analysis",
+    analysis_kind: "repo_system",
+    preset: "analysis",
+    profiles: ["analysis", "webapp", "tdd", "showcase", "research"],
+    test_profiles: "implement-only,agent-service",
+  });
+
+  assert.equal(selection.preset, "analysis");
+  assert.deepEqual(selection.profiles, ["webapp", "research", "agent-service"]);
+  assert.equal(selection.compose, "webapp+research+agent-service+analysis");
+  assert.deepEqual(selection.ignored, ["analysis", "tdd", "showcase", "implement-only"]);
+});
+
+test("analysis workflow planning artifacts do not emit analysis as a Test Profile", () => {
+  const artifacts = renderBatchPlanArtifacts(
+    {
+      cycle_id: "C12",
+      features: [
+        {
+          id: "F900",
+          title: "Investigate regression",
+          workflow_kind: "analysis",
+          analysis_kind: "root_cause",
+          preset: "analysis",
+          profiles: ["analysis", "research"],
+          verification: { method: "analysis ledger" },
+        },
+      ],
+    },
+    { decompose_mode: "upfront" },
+  );
+
+  const feature = artifacts.queue.features[0];
+  assert.equal(feature.workflow_kind, "analysis");
+  assert.equal(feature.analysis_kind, "root_cause");
+  assert.deepEqual(feature.test_profiles, ["research"]);
+  assert.doesNotMatch(artifacts.markdown, /analysis\+analysis/);
+});
+
 test("test profile contract merges discover and runtime requirements", () => {
   const contract = buildTestProfileContract({
     preset: "tdd",

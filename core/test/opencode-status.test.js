@@ -93,6 +93,34 @@ test("OpenCode status model surfaces confirm gates without an active current fea
   assert.match(model.footer.text, /confirm/);
 });
 
+test("OpenCode status model shows concise DAG board only when dependencies exist", async () => {
+  const root = await fixtureRoot();
+  await writePipeline(root, {
+    "state.yaml": activeStateYaml(),
+    "feature-queue.yaml": featureQueueYaml({
+      currentFeature: null,
+      f003Status: "queued",
+      includeDependency: true,
+    }),
+    "log.yaml": logYaml(2),
+  });
+
+  const model = await buildOpenCodeStatusModel(root);
+
+  assert.equal(model.queue.dag.visible, true);
+  assert.deepEqual(model.queue.dag.ready_features, ["F003"]);
+  assert.match(model.sidebar.sections.find((section) => section.title === "Feature DAG").items.join("\n"), /Ready: F003/);
+
+  const ordinaryRoot = await fixtureRoot();
+  await writePipeline(ordinaryRoot, {
+    "state.yaml": activeStateYaml(),
+    "feature-queue.yaml": featureQueueYaml({ currentFeature: "F003", f003Status: "active" }),
+  });
+  const ordinary = await buildOpenCodeStatusModel(ordinaryRoot);
+  assert.equal(ordinary.queue.dag.visible, false);
+  assert.equal(ordinary.sidebar.sections.some((section) => section.title === "Feature DAG"), false);
+});
+
 test("OpenCode status model handles failed state and malformed optional files", async () => {
   const root = await fixtureRoot();
   await writePipeline(root, {
@@ -112,6 +140,23 @@ test("OpenCode status model handles failed state and malformed optional files", 
   assert.equal(model.metrics.cost, "n/a");
   assert.ok(model.sources.some((source) => source.path.endsWith("metrics.yaml") && source.status === "error"));
   assert.ok(model.warnings.some((warning) => /metrics\.yaml/.test(warning)));
+});
+
+test("OpenCode status model reports malformed lease repair guidance", async () => {
+  const root = await fixtureRoot();
+  await writePipeline(root, {
+    "state.yaml": activeStateYaml(),
+    ".lock": `
+platform: opencode
+heartbeat_at: invalid
+`,
+  });
+
+  const model = await buildOpenCodeStatusModel(root);
+
+  assert.equal(model.lease.action, "repair");
+  assert.match(model.lease.repair_hint, /hw:check/i);
+  assert.match(model.sidebar.sections.find((section) => section.title === "Recovery").items.join("\n"), /malformed_lease/);
 });
 
 test("OpenCode status model tolerates legacy scalar-aligned milestone blocks", async () => {
@@ -137,6 +182,70 @@ milestones:
   assert.equal(model.ok, true);
   assert.equal(model.pipeline.status, "completed");
   assert.match(model.footer.text, /completed/);
+});
+
+test("OpenCode status model parses dash-only YAML array items from workflow commits", async () => {
+  const root = await fixtureRoot();
+  await writePipeline(root, {
+    "state.yaml": `
+pipeline:
+  name: Demo
+  status: running
+  prompts_total: 2
+  prompts_completed: 1
+current:
+  phase: executing
+  prompt_name: M02 - Demo
+  step: write_tests
+  step_index: 0
+milestones:
+  -
+    id: M01
+    feature_id: F001
+    status: done
+  -
+    id: M02
+    feature_id: F002
+    status: in_progress
+prompt_state:
+  steps:
+    -
+      name: write_tests
+      status: running
+acceptance:
+  scope: cycle
+  state: accepted
+  mode: auto
+  cycle_id: C9
+history:
+  completed_prompts:
+    -
+      prompt_index: 0
+      result: pass
+      evaluation:
+        diff_score: 2
+        warnings:
+          -
+            "contains: colon"
+`,
+    "cycle.yaml": `
+cycle:
+  number: 9
+  status: active
+  acceptance:
+    state: accepted
+`,
+  });
+
+  const model = await buildOpenCodeStatusModel(root);
+
+  assert.equal(model.ok, true);
+  assert.equal(model.current.milestone_id, "M02");
+  assert.equal(model.acceptance.state, "accepted");
+  assert.equal(model.lifecycle.phase, "executing");
+  assert.equal(model.progress.completed, 1);
+  assert.equal(model.latest_score.diff_score, 2);
+  assert.deepEqual(model.latest_score.warnings, ["contains: colon"]);
 });
 
 test("OpenCode status model summarizes completed pipelines", async () => {
@@ -288,8 +397,30 @@ cycle:
 `;
 }
 
-function featureQueueYaml({ currentFeature, f003Status }) {
+function featureQueueYaml({ currentFeature, f003Status, includeDependency = false }) {
   const current = currentFeature === null ? "null" : currentFeature;
+  const dependencyFeature = includeDependency
+    ? `  - id: F002
+    title: Foundation
+    status: done
+    gate: auto
+    decompose_mode: upfront
+    milestones:
+      - id: M07
+        status: done
+    metric_summary:
+      duration_ms: n/a
+      token_count: n/a
+      cost: n/a
+`
+    : "";
+  const dependencyFields = includeDependency
+    ? `    depends_on:
+      - F002
+    execution_hint: afk
+    handoff_hint: HITL copy review
+`
+    : "";
   return `
 version: 1
 cycle_id: C2
@@ -298,11 +429,13 @@ defaults:
   auto_chain: true
   failure_policy: skip_defer
 features:
+${dependencyFeature}\
   - id: F003
     title: OpenCode status panels
     status: ${f003Status}
     gate: confirm
     decompose_mode: just_in_time
+${dependencyFields}\
     milestones:
       - id: M08
         status: ${f003Status === "active" ? "in_progress" : "queued"}

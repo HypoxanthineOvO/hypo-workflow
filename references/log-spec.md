@@ -4,7 +4,7 @@ Use this reference for the V6 lifecycle ledger at `.pipeline/log.yaml`.
 
 ## Goal
 
-`log.yaml` is the durable, queryable activity ledger for milestone delivery and post-plan lifecycle work. It complements the legacy step trace in `log.md` instead of replacing it outright.
+`log.yaml` is the durable, queryable activity ledger for milestone delivery and post-plan lifecycle work. Status and dashboard Recent Events are filtered user activity feeds derived from this ledger; they are not the complete audit history.
 
 ## File Location
 
@@ -19,9 +19,9 @@ Use this reference for the V6 lifecycle ledger at `.pipeline/log.yaml`.
 ```yaml
 entries:
   - id: "M0"
-    type: milestone | fix | audit | debug | plan_review | release | cycle | patch | watchdog | chat_entry | chat_session
-    ref: "milestone-m0"
-    status: completed | warning | blocked | failed | proposed
+    type: milestone_start | milestone_complete | feature_start | feature_complete | step_complete | cycle_accept | cycle_reject | sync_repair | lease_takeover | handoff | derived_refresh | platform_failure | audit | debug | release | patch | watchdog | chat_entry | chat_session
+    ref: "C5/M08"
+    status: active | completed | warning | blocked | failed | proposed | queued | skipped | accepted | rejected | deferred | running | done | closed | revised | pending_acceptance | waiting_confirmation | confirmed
     timestamp: "2026-04-24T10:00:00Z"
     summary: "Added unified logging foundation."
     report: ".pipeline/fixes/fix-001.md"
@@ -32,7 +32,7 @@ entries:
 Field rules:
 
 - `id`: stable entry id such as `M0`, `FIX-003`, `AUDIT-002`
-- `type`: one of `milestone`, `fix`, `audit`, `debug`, `plan_review`, `release`, `cycle`, `patch`, `watchdog`, `chat_entry`, `chat_session`
+- `type`: belongs to one lifecycle family: cycle, plan, feature, milestone, step, patch, acceptance, sync, recovery, handoff, derived refresh, platform, audit, debug, release, watchdog, or chat
 - `ref`: human-readable pointer to a prompt, command, report, release tag, or issue
 - `status`: lifecycle result for the entry
 - `timestamp`: ISO-8601 timestamp
@@ -56,6 +56,30 @@ Write a new entry when:
 - watchdog retries are exhausted or automatic resume succeeds
 - a chat summary is written
 - a chat session starts, ends, or is recovered
+
+## Recent Feed
+
+Status and dashboard Recent Events must:
+
+- sort entries by `timestamp` newest-first rather than relying on file order
+- include user-relevant lifecycle entries such as cycle, feature, milestone, patch, acceptance, sync, recovery, handoff, derived refresh, audit, debug, release, and chat
+- exclude internal noise such as step heartbeats, hook heartbeats, platform heartbeats, watchdog heartbeats, and compact refreshes unless the event is blocked, failed, or warning-level and affects user action
+- pass summaries through the shared secret-safe evidence redaction helper before rendering
+
+The full `/hw:log` view may show all durable entries with filtering flags. Recent is intentionally a concise first-screen activity feed.
+
+## Secret-Safe Evidence
+
+All durable and user-facing evidence surfaces share one conservative redaction contract:
+
+- debug reports
+- audit reports
+- milestone reports
+- `log.yaml`
+- status/dashboard Recent
+- Knowledge Ledger records, indexes, and compact views
+
+Raw API keys, tokens, Authorization headers, cookies, passwords, private keys, access tokens, refresh tokens, client secrets, and similar provider credentials must be redacted or blocked before durable writes. Successful reports cannot be marked successful when secret validation finds unredacted raw secret evidence.
 
 ## Chat Logging
 

@@ -30,14 +30,17 @@ Use this skill to start execution from a local `.pipeline/` workspace. This is t
    - `execution.subagent_tool` falls back to global `subagent.provider`, then `auto`
    - `dashboard.*` and `plan.*` use the same priority when relevant
 4. Read `.pipeline/state.yaml` if present; otherwise initialize state from `assets/state-init.yaml`.
-5. If `watchdog.enabled=true`, register the project watchdog cron entry before long-running execution begins.
-6. Create `.pipeline/.lock` before entering active execution.
-7. Set `current.phase=executing` and update top-level `last_heartbeat` with an ISO-8601 timestamp before running milestones.
-8. Treat Claude as the orchestrator:
+5. Read `.pipeline/cycle.yaml` when present and derive Cycle behavior from `cycle.workflow_kind` and `cycle.lifecycle_policy`.
+6. Default step preset from workflow kind when no explicit compatible preset exists: `build -> tdd`, `analysis -> analysis`, `showcase -> implement-only`.
+7. If `watchdog.enabled=true`, register the project watchdog cron entry before long-running execution begins.
+8. Create a structured execution lease at `.pipeline/.lock` before entering active execution. The lease must include platform, session id, owner, command, phase, created_at, heartbeat_at, expires_at, workflow kind, cycle id, and handoff_allowed.
+9. Set `current.phase=executing` and update top-level `last_heartbeat` with an ISO-8601 timestamp before running milestones.
+10. Use the workflow commit helper for any protected lifecycle write so authority facts commit atomically before derived refreshes.
+11. Treat Claude as the orchestrator:
    - Claude plans the current step
    - Claude delegates concrete sub-work to serial subagent tasks when appropriate
    - Claude verifies results, updates state, logging, and progress artifacts
-9. Execute the active milestone serially:
+12. Execute the active milestone serially:
    - `write_tests`
    - `review_tests`
    - `run_tests_red`
@@ -45,31 +48,32 @@ Use this skill to start execution from a local `.pipeline/` workspace. This is t
    - `run_tests_green`
    - `review_code`
    - report and commit work if the prompt requires it
-10. After every meaningful step, update:
+13. After every meaningful step, update:
    - `.pipeline/state.yaml`
    - `.pipeline/log.yaml`
    - `.pipeline/PROGRESS.md`
    - top-level `last_heartbeat`
-11. After a Milestone report is generated and the Milestone reaches a final state, resolve `compact.auto` from project > global > defaults. If `compact.auto=true`, run the `/hw:compact` generation rules before advancing to the next Milestone.
-12. If `.pipeline/feature-queue.yaml` exists, apply batch auto-chain after a Feature's final Milestone passes:
+14. After a Milestone report is generated and the Milestone reaches a final state, resolve `compact.auto` from project > global > defaults. If `compact.auto=true`, run the `/hw:compact` generation rules before advancing to the next Milestone.
+15. If `.pipeline/feature-queue.yaml` exists, apply batch auto-chain after a Feature's final Milestone passes:
    - mark the completed Feature `done`
    - advance to the next queued Feature when `auto_chain=true`
    - pause before the next Feature when it has `gate: confirm`
    - when the next Feature uses `just_in_time`, decompose its Milestones before starting execution
    - sync queue metric summaries from `.pipeline/metrics.yaml`, using `n/a` when token/cost telemetry is unavailable
-13. When `execution.test_profiles` or Feature-level Test Profiles are active, require the matching profile evidence before declaring GREEN:
+16. When `execution.test_profiles` or Feature-level Test Profiles are active, require the matching profile evidence before declaring GREEN:
    - `webapp`: E2E + browser interaction + visual evidence
    - `agent-service`: CLI plan + shared core + real CLI run
    - `research`: baseline + script execution + before/after/delta
-14. On failure, Claude must choose one of:
+17. On failure, Claude must choose one of:
    - `retry`: revise instructions and rerun the failed step
    - `deferred`: mark the milestone deferred if downstream work can continue safely
    - `stop`: stop and surface the blocking reason to the user
-15. If a Feature fails and the resolved `failure_policy=skip_defer`, mark the Feature `deferred`, preserve its report and metrics, then auto-chain to the next queued Feature unless blocked by `gate: confirm`.
-16. Keep moving automatically between milestones while unfinished work remains.
-17. Remove `.pipeline/.lock` when the execution turn completes, stops, blocks, aborts, or finishes.
-18. If the pipeline completes or stops intentionally, unregister the watchdog cron entry.
-19. Only allow the turn to end naturally when all milestones are complete or Claude has explicitly chosen the `stop` outcome.
+18. If a derived refresh fails after authority commits, keep the authoritative fact committed, write `.pipeline/derived-refresh.yaml`, and surface repair guidance instead of rolling back the lifecycle write.
+19. If a Feature fails and the resolved `failure_policy=skip_defer`, mark the Feature `deferred`, preserve its report and metrics, then auto-chain to the next queued Feature unless blocked by `gate: confirm`.
+20. Keep moving automatically between milestones while unfinished work remains.
+21. Remove `.pipeline/.lock` when the execution turn completes, stops, blocks, aborts, or finishes.
+22. If the pipeline completes or stops intentionally, unregister the watchdog cron entry.
+23. Only allow the turn to end naturally when all milestones are complete or Claude has explicitly chosen the `stop` outcome.
 
 ## Watchdog Integration
 
@@ -77,8 +81,10 @@ Use this skill to start execution from a local `.pipeline/` workspace. This is t
 - when `watchdog.enabled=false`, do not register cron
 - when enabled, register `scripts/watchdog.sh <project-root>` with marker `# hypo-workflow-watchdog:<project-root>`
 - write `last_heartbeat` every time state is persisted during execution
-- create `.pipeline/.lock` before executing steps so watchdog cannot reenter the same run
+- create `.pipeline/.lock` as a structured lease before executing steps so watchdog cannot reenter a fresh run
+- update the lease heartbeat/expiry whenever `last_heartbeat` is persisted
 - remove `.pipeline/.lock` on all clean exits and blocking exits
+- stale lease takeover must log `lease_takeover`; platform failure hooks should record `reported_failure`, while heartbeat-only timeout records `inferred_stall`
 
 ## Failure Handling
 

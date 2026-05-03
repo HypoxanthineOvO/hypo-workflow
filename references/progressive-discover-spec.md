@@ -23,6 +23,32 @@ After the big questions, the default full structure is:
 
 This is a strong template, not a rigid questionnaire. The Agent may merge related prompts in one round, but it should not skip the structure entirely.
 
+## Adaptive Grill-Me
+
+After the big questions, Discover decides whether to stay light or enter deep Grill-Me.
+
+Use light Discover for low-risk, incremental tasks. Escalate to deep Grill-Me when the request affects architecture, source-of-truth ownership, workflow lifecycle semantics, user-facing product concepts, long-running batch/DAG coordination, or prompt-generation vocabulary.
+
+Deep Grill-Me records confirmed concepts rather than raw conversation:
+
+- stable terms
+- examples and non-examples
+- common misunderstandings
+- source-of-truth ownership
+- state transitions
+- prompt-generation hints and non-goals
+
+The pure helper `evaluateDiscoverGrillMeRisk` exposes the deterministic risk decision for tests and command adapters.
+
+## Design Concept Artifacts
+
+Confirmed design concepts use two durable artifact layers:
+
+- `.pipeline/design-concepts.yaml` stores machine-readable concept records with `id`, `term`, `definition`, `boundaries`, `source_of_truth`, `state_transitions`, `decision_refs`, and `prompt_hints`.
+- `.pipeline/glossary.md` explains stable terms for humans with examples, non-examples, and common misunderstandings.
+
+These artifacts do not replace `.pipeline/architecture.md` or the Knowledge Ledger. Architecture remains the system contract; Knowledge Ledger indexes confirmed decisions and references without copying full glossary or design-concepts bodies into every context.
+
 ## Batch Discover
 
 Batch Discover still runs one unified interview, but every Feature candidate should capture:

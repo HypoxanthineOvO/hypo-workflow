@@ -215,6 +215,29 @@ export function evaluateAnalysisEvidence(ledger = {}, options = {}) {
   };
 }
 
+export function buildAnalysisReportContract(ledger = {}, options = {}) {
+  const milestoneId = options.milestoneId || options.milestone_id || ledger.milestone_id || "analysis";
+  const ledgerPath = options.ledgerPath || options.ledger_path || analysisLedgerPath(milestoneId);
+  return {
+    preset: "analysis",
+    report_type: "analysis",
+    milestone_id: milestoneId,
+    ledger_path: ledgerPath,
+    report_file: options.reportFile || options.report_file || null,
+    question: ledger.question || null,
+    conclusion: ledger.conclusion || null,
+    confidence: ledger.confidence || null,
+    outcome: determineAnalysisOutcome(ledger),
+    metrics: ledger.metrics || {},
+    evidence_refs: [
+      ledgerPath,
+      ...normalizeStringArray(ledger.evidence_refs || ledger.evidenceRefs),
+      ...normalizeStringArray((ledger.experiments || []).flatMap((experiment) => experiment.evidence_refs || [])),
+    ].filter(Boolean),
+    evaluation: evaluateAnalysisEvidence(ledger, options),
+  };
+}
+
 export function renderAnalysisPromptPlan(feature = {}) {
   const normalizedKind = feature.analysis_kind || feature.analysisKind || "root_cause";
   return [

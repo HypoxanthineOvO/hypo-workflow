@@ -52,10 +52,14 @@ test("progressive discover spec defines big questions, stages, and command cover
   assert.match(commandsSpec, /task category.*desired effect.*verification method/is);
 });
 
-test("buildProgressiveDiscoverPlan starts broad and keeps plan-extend lightweight", () => {
-  const full = buildProgressiveDiscoverPlan({ mode: "batch" }, { minRounds: 5 });
+test("buildProgressiveDiscoverPlan starts broad and keeps low-risk work lightweight", () => {
+  const full = buildProgressiveDiscoverPlan({
+    mode: "batch",
+    intent: "redesign workflow source of truth",
+  }, { minRounds: 5 });
 
   assert.equal(full.coverage, "full");
+  assert.equal(full.grill_me.mode, "deep_grill_me");
   assert.equal(full.min_rounds, 5);
   assert.deepEqual(
     full.big_questions.map((question) => question.id),
@@ -66,11 +70,17 @@ test("buildProgressiveDiscoverPlan starts broad and keeps plan-extend lightweigh
     ["assumption_statement", "ambiguity_resolution", "tradeoff_review", "validation_criteria"],
   );
   assert.ok(full.required_outputs.includes(".plan-state/batch-discover.yaml"));
+  assert.ok(full.required_outputs.includes(".pipeline/design-concepts.yaml"));
+  assert.ok(full.required_outputs.includes(".pipeline/glossary.md"));
 
   const extend = buildProgressiveDiscoverPlan({ mode: "extend" });
   assert.equal(extend.coverage, "lightweight");
   assert.equal(extend.stages.length, 2);
   assert.match(extend.notes.join("\n"), /does not force the full four-stage interview/i);
+
+  const ordinary = buildProgressiveDiscoverPlan({ mode: "single", intent: "small copy fix" });
+  assert.equal(ordinary.coverage, "lightweight");
+  assert.equal(ordinary.grill_me.requires_design_concept_alignment, false);
 });
 
 test("batch feature artifacts carry category, desired effect, and verification requirements", () => {

@@ -74,6 +74,8 @@ See also [`external-docs-index.md`](./external-docs-index.md) for the cross-plat
 | `/hw:accept` | `/hw-accept` | `hw-build` | Native slash command, Cycle acceptance gate. |
 | `/hw:reject` | `/hw-reject` | `hw-build` | Native slash command, Cycle rejection feedback. |
 | `/hw:explore` | `/hw-explore` | `hw-explore` | Native slash command, isolated global worktree exploration. |
+| `/hw:sync` | `/hw-sync` | `hw-build` | Native slash command, adapter and derived-context synchronization. |
+| `/hw:docs` | `/hw-docs` | `hw-docs` | Native slash command, generated documentation governance. |
 | `/hw:patch` | `/hw-patch` | `hw-build` | Native slash command group; file lifecycle stays HW-specific. |
 | `/hw:patch fix` | `/hw-patch-fix` | `hw-build` | Native slash command, six-step patch repair lane. |
 | `/hw:compact` | `/hw-compact` | `hw-compact` | Native slash command, compact generator. |
@@ -223,6 +225,8 @@ OpenCode exposes a TUI Slot API through `@opencode-ai/plugin` TUI plugins. The r
 
 M08 implements the read-only status model first. M09 may render that model into sidebar and footer slots, but the model itself must stay platform-neutral and must not mutate `.pipeline/`.
 
+C5 adds a read-only progress dashboard projection over the same canonical status model. It must expose phase, next action, lease status, Recent Events, derived health, and an active config summary. It is explicitly not a workflow action panel: no start/resume/accept/reject/sync/repair dispatch should be attached to this surface.
+
 Recommended M09 layout:
 
 - server plugin: `.opencode/plugins/hypo-workflow.ts`
@@ -256,6 +260,9 @@ Required output fields:
 - current OpenCode agent/model from TUI session state when available
 - latest active subagent/model from `subtask` parts when available
 - configured primary/subagent role model matrix from `.opencode/hypo-workflow.json`
+- lease action/reason and repair hint when present
+- derived health status, stale count, error count, and stale artifacts
+- active config summary: platform, execution mode, execution preset, plan mode, output language/timezone, and OpenCode profile
 - sidebar summary sections
 - footer one-line text
 - source read status and warnings

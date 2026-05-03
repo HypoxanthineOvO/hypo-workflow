@@ -17,11 +17,12 @@ Use this reference for `/hw:check`, the quick health probe for a `.pipeline/` wo
 | Prompts | prompt files referenced by state | each file exists and is non-empty |
 | Notion | Notion token + target access, only when `source/output=notion` | API call returns 200 and target page/database is readable |
 | Architecture | architecture baseline presence | file or folder exists and is non-empty |
+| Execution lease | `.pipeline/.lock` when present | structured lease parses; fresh/stale/malformed status is explicit; malformed leases show repair guidance |
 
 ## Command Forms
 
 - `/hw:check`
-  Run all six checks.
+  Run all seven checks.
 - `/hw:check --config`
   Validate config only.
 - `/hw:check --notion`
@@ -54,6 +55,7 @@ Status meanings:
 - Global config warning: rerun `/hypo-workflow:setup` or edit `~/.hypo-workflow/config.yaml`
 - Pipeline failure: run `/hw:init`
 - State failure: repair or reset state before `/hw:resume`
+- Execution lease warning: fresh foreign lease means wait or confirm handoff; stale lease can be taken over with evidence; malformed lease requires `/hw:check` repair guidance before resume
 - Prompt failure: recreate or restore prompt files
 - Notion failure: verify token, permissions, and target ids
 - Architecture failure: run `/hw:init --rescan`

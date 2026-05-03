@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { renderBatchPlanArtifacts } from "../src/index.js";
+import { assessRunnableVerticalSlice, renderBatchPlanArtifacts } from "../src/index.js";
 
 test("plan docs keep single-feature plan behavior and add --batch semantics", async () => {
   const planSkill = await readFile("skills/plan/SKILL.md", "utf8");
@@ -69,3 +69,137 @@ test("renderBatchPlanArtifacts honors just_in_time scaffold without full decompo
   assert.match(result.markdown, /just_in_time/);
   assert.match(result.markdown, /JIT decomposition pending/);
 });
+
+test("decompose assessment flags horizontal-only milestones as weak", () => {
+  const assessment = assessRunnableVerticalSlice({
+    objective: "Prepare database schema, API contracts, and UI shell separately.",
+    implementation_scope: [
+      "database schema only",
+      "API interface only",
+      "UI skeleton only",
+    ],
+    test_spec: ["schema migration test", "type contract test"],
+    expected_artifacts: ["schema.sql", "openapi.yaml", "empty page shell"],
+  });
+
+  assert.equal(assessment.status, "weak");
+  assert.ok(assessment.flags.includes("horizontal_only"));
+  assert.ok(assessment.flags.includes("missing_runnable_behavior"));
+  assert.match(assessment.summary, /runnable vertical slice/i);
+});
+
+test("decompose assessment accepts a thin runnable vertical slice", () => {
+  const assessment = assessRunnableVerticalSlice({
+    objective: "User can run a CLI command that writes lifecycle state and see the status update.",
+    implementation_scope: [
+      "CLI command",
+      "shared lifecycle core helper",
+      "state persistence",
+      "status output",
+    ],
+    test_spec: [
+      "failing node:test for command-to-state behavior",
+      "real CLI validation command",
+    ],
+    validation_commands: ["node --test core/test/workflow-commit.test.js"],
+    evidence: ["before/after status output"],
+  });
+
+  assert.equal(assessment.status, "acceptable");
+  assert.ok(assessment.layers.length >= 2);
+  assert.equal(assessment.runnable_behavior, true);
+});
+
+test("batch plan artifacts retain explicit milestone slice-quality fixtures", () => {
+  const result = renderBatchPlanArtifacts(
+    {
+      cycle_id: "C9",
+      features: [
+        {
+          id: "F301",
+          title: "Status command",
+          category: "agent-service",
+          milestones: [
+            {
+              id: "F301-M01",
+              title: "Runnable status command slice",
+              objective: "User runs hw-core status and sees persisted lifecycle phase.",
+              implementation_scope: ["CLI command", "shared core", "state read", "status output"],
+              test_spec: ["node:test plus real CLI validation"],
+              validation_commands: ["node --test core/test/opencode-status.test.js"],
+              expected_artifacts: ["core/src/opencode-status/index.js"],
+            },
+          ],
+        },
+      ],
+    },
+    { decompose_mode: "upfront" },
+  );
+
+  const [milestone] = result.queue.features[0].milestones;
+  assert.equal(milestone.slice_quality.status, "acceptable");
+  assert.match(result.markdown, /acceptable/);
+});
+
+test("batch plan DAG output renders dependencies without changing ordinary plans", () => {
+  const result = renderBatchPlanArtifacts(
+    {
+      cycle_id: "C10",
+      features: [
+        { id: "F401", title: "Foundation", status: "done" },
+        { id: "F402", title: "Dashboard", depends_on: ["F401"], execution_hint: "afk" },
+        { id: "F403", title: "Release", depends_on: ["F402"], gate: "confirm", handoff_hint: "hitl" },
+      ],
+    },
+    { decompose_mode: "upfront" },
+  );
+
+  assert.equal(result.dag.ok, true);
+  assert.match(result.markdown, /Depends On/);
+  assert.match(result.markdown, /Ready/);
+  assert.match(result.markdown, /F402/);
+  assert.match(result.mermaid, /F401\s*-->\s*F402/);
+  assert.match(result.mermaid, /F402\s*-->\s*F403/);
+  assert.ok(result.dag.features.find((feature) => feature.id === "F402").ready);
+
+  const ordinary = renderBatchPlanArtifacts(
+    { cycle_id: "C11", features: [{ id: "F501", title: "Single feature" }] },
+    { decompose_mode: "upfront" },
+  );
+  assert.equal(ordinary.dag.visible, false);
+  assert.doesNotMatch(ordinary.markdown, /Depends On/);
+});
+
+test("vertical-slice docs require one-behavior TDD loops, prompt evidence, and stable compact authority", async () => {
+  const planSkill = await readFile("plan/PLAN-SKILL.md", "utf8");
+  const decomposeSkill = await readFile("skills/plan-decompose/SKILL.md", "utf8");
+  const tddSpec = await readFile("references/tdd-spec.md", "utf8");
+  const promptTemplate = await readFile("plan/assets/prompt-template.md", "utf8");
+  const compactSkill = await readFile("skills/compact/SKILL.md", "utf8");
+
+  assert.match(`${planSkill}\n${decomposeSkill}`, /runnable vertical slice/i);
+  assert.match(`${planSkill}\n${decomposeSkill}`, /horizontal-only/i);
+  assert.match(`${planSkill}\n${decomposeSkill}`, /database\/API\/UI\/schema/i);
+
+  assert.match(tddSpec, /one behavior/i);
+  assert.match(tddSpec, /red.*green.*refactor/is);
+  assert.match(tddSpec, /do not batch unrelated/i);
+
+  for (const heading of [
+    "## Objective",
+    "## Boundaries",
+    "## Non-Goals",
+    "## Validation Commands",
+    "## Evidence",
+    "## Human QA",
+  ]) {
+    assert.match(promptTemplate, new RegExp(`^${escapeRegExp(heading)}$`, "m"));
+  }
+
+  assert.match(compactSkill, /stable prompt\/design artifacts/i);
+  assert.match(compactSkill, /not.*design authority/i);
+});
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}

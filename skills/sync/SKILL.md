@@ -18,8 +18,19 @@ Follow the root Hypo-Workflow output language config. Use Chinese for user-facin
 Supported modes:
 
 - `/hw:sync --light`: refresh registry status, refresh Knowledge Ledger compact/index when source records changed, detect external changes, and report what needs attention.
-- `/hw:sync`: run light sync, sync OpenCode adapters, validate config loading, and refresh lightweight compact views.
-- `/hw:sync --deep`: run standard sync plus dependency scan and architecture rescan hints.
+- `/hw:sync`: run light sync, sync OpenCode adapters, validate config loading, check declared derived artifacts, and refresh lightweight compact views.
+- `/hw:sync --check-only`: detect external changes and declared stale derived artifacts without writing adapters, compact files, reports, or protected authority files.
+- `/hw:sync --repair`: run standard sync plus safe refresh of declared derived artifacts such as `PROGRESS.compact.md`, metrics/report compact views, `PROJECT-SUMMARY.md`, and derived health.
+- `/hw:sync --deep`: run standard repair sync plus dependency scan and architecture rescan hints.
+
+## Derived Artifact Map
+
+The sync contract distinguishes protected authority files from derived views.
+
+- Protected authority files: `.pipeline/state.yaml`, `.pipeline/cycle.yaml`, `.pipeline/rules.yaml`.
+- Safe derived views: compact files, metrics/report mirrors, project summary, OpenCode status inputs, generated references, and managed doc blocks.
+- Authority conflicts must be reported as repair-needed and must not be guessed or silently fixed.
+- Derived health is written to `.pipeline/derived-health.yaml` only during repair/deep sync, then surfaced by status/dashboard readers.
 
 ## SessionStart
 
@@ -29,6 +40,8 @@ SessionStart performs only light external-change detection. It may prompt the us
 
 - Do not execute pipeline prompts or milestone steps.
 - Do not mutate `.pipeline/state.yaml`, `.pipeline/cycle.yaml`, or `.pipeline/rules.yaml`.
+- `--check-only` must not write.
+- `--repair` may only write declared safe derived artifacts.
 - Deep sync must be explicit.
 - Heavy scans, adapter writes, and compact writes are not allowed from SessionStart light detection.
 

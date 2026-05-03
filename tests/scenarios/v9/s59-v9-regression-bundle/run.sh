@@ -33,8 +33,10 @@ fi
 
 grep -Fq 'opencode debug config' tests/scenarios/v9/s54-opencode-plugin-scaffold/run.sh
 
-grep -Eq '当前预期回归数量为 `(60|62)/\1`' README.md
-grep -Fq 'OpenCode Native Adapter' README.md
-grep -Fq 'references/opencode-parity.md' README.md
+grep -Fq '37 个用户指令' README.md
+grep -Fq '[Commands Reference](docs/reference/commands.md)' README.md
+grep -Fq '[OpenCode Command Map](references/opencode-command-map.md)' README.md
+grep -Fq '/hw:docs' README.md
+grep -Fq '/hw:explore' README.md
 
 echo "s59 passed"

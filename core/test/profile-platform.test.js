@@ -19,4 +19,6 @@ test("capabilityFor exposes OpenCode native primitives", () => {
   assert.equal(capabilities.commands, "native-slash");
   assert.equal(capabilities.ask, "question-tool");
   assert.equal(capabilities.plan, "todowrite");
+  assert.equal(capabilities.recovery, "lease-heartbeat-plugin-events");
+  assert.match(capabilities.handoff_boundaries, /permissions/);
 });

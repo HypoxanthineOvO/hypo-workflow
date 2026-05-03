@@ -47,6 +47,9 @@ Use this skill to launch the Hypo-Workflow dashboard server in the background.
 - default port is `7700`
 - global setup can override the default port through `~/.hypo-workflow/config.yaml`
 - if `7700` is busy, probe upward until a free port is found
+- dashboard progress/status surfaces are read-only projections over `.pipeline/`
+- show phase, next action, lease, Recent Events, derived health, and active config summary from the canonical status model
+- do not dispatch start/resume/accept/reject/sync/repair actions from the dashboard in C5
 
 ## Troubleshooting
 

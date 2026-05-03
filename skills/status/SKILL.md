@@ -30,6 +30,7 @@ Use this skill to inspect pipeline progress only.
 7. Report:
    - pipeline name
    - overall status
+   - canonical phase and next action derived from Cycle workflow/lifecycle policy
    - current milestone or prompt
    - current step and step index
    - effective execution mode and subagent provider
@@ -38,7 +39,18 @@ Use this skill to inspect pipeline progress only.
    - deferred items if any
    - `last_heartbeat` and watchdog state when present
 8. If `.pipeline/PROGRESS.md` or `.pipeline/PROGRESS.compact.md` exists, use it as a human-facing summary source, but do not rewrite it during status inspection.
-9. If project-root `PROJECT-SUMMARY.md` exists, include its top summary line and Open Patches / Deferred counts.
+9. If `.pipeline/feature-queue.yaml` contains Feature DAG dependencies, show a concise board summary with ready, blocked, and parallel candidates. Hide DAG concepts for ordinary single-feature queues.
+10. Include derived health from `.pipeline/derived-health.yaml` when present and route stale derived views to `/hw:sync --repair` or `/hw:docs repair` as appropriate.
+11. Show Recent Events from `.pipeline/log.yaml` sorted by timestamp newest-first, filtered to user-relevant lifecycle events, and redacted through the shared secret-safe evidence helper.
+12. If project-root `PROJECT-SUMMARY.md` exists, include its top summary line and Open Patches / Deferred counts.
+
+Status must expose one user-facing canonical phase and one next action. Derive these from `.pipeline/cycle.yaml`, `.pipeline/state.yaml`, acceptance state, and active continuation state. Important phases:
+
+- `needs_revision` -> next action `resume_revision`
+- `follow_up_planning` -> next action `start_follow_up_plan`
+- `pending_acceptance` -> next action `accept_or_reject`
+
+Do not make the user reconcile separate execution, acceptance, continuation, and lock axes on the first screen.
 
 ## Flags
 
@@ -50,6 +62,7 @@ Use this skill to inspect pipeline progress only.
 - do not mutate `state.yaml`
 - do not mutate logs or reports
 - do not advance any step or milestone
+- do not display raw secrets from logs, reports, Knowledge records, or status sources
 
 ## Reference Files
 

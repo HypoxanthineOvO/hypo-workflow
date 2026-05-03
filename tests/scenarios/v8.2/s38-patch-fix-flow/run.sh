@@ -8,7 +8,8 @@ cd "$repo_root"
 
 rg -q '/hw:patch fix P001' skills/patch/SKILL.md
 rg -q 'Patch Fix 执行约束' skills/patch/SKILL.md
-rg -q 'Step 1: 读取 Patch' README.md
+rg -q 'Step 1: Read Patch' .opencode/commands/hw-patch-fix.md
+rg -q '/hw:patch fix P001' README.md
 rg -Fq 'fix(P<NNN>): <描述>' skills/patch/SKILL.md
 rg -q 'Patch fix must never write `.pipeline/state.yaml`' skills/patch/SKILL.md
 rg -q 'type: patch_fix' skills/patch/SKILL.md

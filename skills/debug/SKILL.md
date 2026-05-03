@@ -32,8 +32,9 @@ Use this skill for the five-step debug workflow.
 5. Validate them in order.
 6. Produce a root-cause report and optional fix suggestion in `output.language`.
 7. With `--auto-fix`, only claim success after validation passes.
-8. Write the report to `.pipeline/debug/` with timestamps in `output.timezone` and append a debug lifecycle entry.
-9. Set `current.phase=lifecycle_debug` when state tracking is used.
+8. Apply the shared secret-safe evidence redaction helper before durable writes; do not store raw API keys, tokens, Authorization headers, cookies, passwords, or private keys.
+9. Write the report to `.pipeline/debug/` with timestamps in `output.timezone` and append a debug lifecycle entry.
+10. Set `current.phase=lifecycle_debug` when state tracking is used.
 
 ## Reference Files
 

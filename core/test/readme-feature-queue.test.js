@@ -2,8 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-test("README explains Feature Queue long-range planning", async () => {
-  const readme = await readFile("README.md", "utf8");
+test("User guide explains Feature Queue long-range planning", async () => {
+  const readme = await readFile("docs/user-guide.md", "utf8");
 
   for (const pattern of [
     /Feature Queue/,

@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import {
   applyFeatureQueueOperation,
   decomposeFeatureJustInTime,
+  resolveFeatureDagBoard,
   resolveFeatureAutoChain,
   syncFeatureMetricSummary,
 } from "../src/index.js";
@@ -189,6 +190,48 @@ test("metric summary sync preserves telemetry and falls back to n/a when unavail
   });
 });
 
+test("feature DAG board computes ready, blocked, unlocks, and parallel candidates", () => {
+  const board = resolveFeatureDagBoard(sampleQueue({
+    current_feature: null,
+    features: [
+      { id: "F001", title: "Foundation", status: "done", depends_on: [] },
+      { id: "F002", title: "Docs", status: "queued", depends_on: ["F001"], execution_hint: "AFK" },
+      { id: "F003", title: "Dashboard", status: "queued", depends_on: ["F001"], gate: "confirm", handoff_hint: "HITL copy review" },
+      { id: "F004", title: "Release", status: "queued", depends_on: ["F002", "F003"] },
+    ],
+  }));
+
+  assert.equal(board.ok, true);
+  assert.deepEqual(board.ready_features.map((feature) => feature.id), ["F002", "F003"]);
+  assert.deepEqual(board.parallel_candidates.map((feature) => feature.id), ["F002", "F003"]);
+
+  const release = board.features.find((feature) => feature.id === "F004");
+  assert.equal(release.status, "blocked");
+  assert.deepEqual(release.blocked_by, ["F002", "F003"]);
+  assert.equal(release.ready_reason, "waiting_on_dependencies");
+
+  const foundation = board.features.find((feature) => feature.id === "F001");
+  assert.deepEqual(foundation.unlocks, ["F002", "F003"]);
+  assert.equal(board.features.find((feature) => feature.id === "F002").execution_hint, "afk");
+  assert.equal(board.features.find((feature) => feature.id === "F003").handoff_hint, "HITL copy review");
+});
+
+test("feature DAG board reports dependency cycles clearly", () => {
+  const board = resolveFeatureDagBoard(sampleQueue({
+    current_feature: null,
+    features: [
+      { id: "F001", title: "A", status: "queued", depends_on: ["F003"] },
+      { id: "F002", title: "B", status: "queued", depends_on: ["F001"] },
+      { id: "F003", title: "C", status: "queued", depends_on: ["F002"] },
+    ],
+  }));
+
+  assert.equal(board.ok, false);
+  assert.equal(board.errors[0].code, "dependency_cycle");
+  assert.deepEqual(board.errors[0].cycle, ["F001", "F003", "F002", "F001"]);
+  assert.match(board.errors[0].message, /dependency cycle/i);
+});
+
 test("M07 docs describe insert confirmation, auto-chain gates, JIT, and metrics fallback", async () => {
   const commandsSpec = await readFile("references/commands-spec.md", "utf8");
   const featureSpec = await readFile("references/feature-queue-spec.md", "utf8");
@@ -216,7 +259,7 @@ function sampleQueue(overrides = {}) {
   return {
     version: 1,
     cycle_id: "C9",
-    current_feature: "F001",
+    current_feature: overrides.current_feature ?? "F001",
     updated_at: "2026-05-01T04:00:00+08:00",
     defaults: {
       decompose_mode: "upfront",

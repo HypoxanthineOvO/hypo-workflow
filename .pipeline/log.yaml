@@ -1,1721 +1,2402 @@
 entries:
-  - id: "C4-COMPLETE"
+  -
+    id: M03-START-C5-20260503T200447+0800
+    type: milestone_start
+    ref: C5/M03
+    status: active
+    timestamp: "2026-05-03T20:04:47+08:00"
+    summary: Auto-continued to Consistent Lifecycle Commit and Derived Refresh Slice after M02 passed.
+    report: .pipeline/prompts/02-consistent-lifecycle-commit-and-derived-refresh-slice.md
+    trigger: auto
+    related_milestone: M03
+  -
+    id: M02-COMPLETE-C5-20260503T175957+0800
+    type: milestone_complete
+    ref: C5/M02
+    status: completed
+    timestamp: "2026-05-03T17:59:57+08:00"
+    summary: Completed workflow kind, lifecycle policy, reject-to-revision, follow-up continuation, and OpenCode status phase slice.
+    report: .pipeline/reports/01-workflow-kind-lifecycle-policy-and-follow-up-continuation-slice.report.md
+    tests: node --test core/test/lifecycle-policy.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; git diff --check; validate-config
+    trigger: auto
+    related_milestone: M02
+  -
+    id: AUDIT-001-DISCUSSION-PLAN-20260503T150800+0800
+    type: plan_discussion
+    ref: C5/audit-001
+    status: proposed
+    timestamp: "2026-05-03T15:08:00+08:00"
+    summary: Created a follow-up discussion plan to review audit findings one by one and record product/workflow decisions before implementation planning.
+    report: .pipeline/audits/audit-001-discussion-plan.md
+    trigger: manual
+    related_milestone: M01
+  -
+    id: CYCLE-ACCEPTED-C5-20260503T150800+0800
+    type: cycle_accept
+    ref: C5
+    status: accepted
+    timestamp: "2026-05-03T15:08:00+08:00"
+    summary: User accepted the revised C5/M01 workflow architecture audit and requested next-step discussion planning for each finding.
+    report: .pipeline/audits/audit-001.md
+    trigger: manual
+    related_milestone: M01
+  -
+    id: AUDIT-001-C5-REVISION-20260503T150000+0800
+    type: audit
+    ref: C5/M01
+    status: revised
+    timestamp: "2026-05-03T15:00:00+08:00"
+    summary: Revised the C5/M01 audit around product workflow design, academic research fit, global sync governance, and README documentation boundaries.
+    report: .pipeline/audits/audit-001.md
+    trigger: manual
+    related_milestone: M01
+  -
+    id: CYCLE-REJECTED-C5-20260503T145439+0800
+    type: cycle_reject
+    ref: C5
+    status: rejected
+    timestamp: "2026-05-03T14:54:39+08:00"
+    summary: User rejected the initial C5/M01 audit because it focused on implementation details instead of overall workflow architecture, academic workflow fit, global sync, and documentation governance.
+    report: .pipeline/acceptance/cycle-C5-rejection-20260503T145439+0800.yaml
+    trigger: manual
+    related_milestone: M01
+  -
+    id: C5-PENDING-ACCEPTANCE
+    type: cycle_pending_acceptance
+    ref: C5
+    status: pending_acceptance
+    timestamp: "2026-05-03T14:41:25+08:00"
+    summary: C5/M01 audit report generated and the Cycle is waiting for manual acceptance.
+    report: .pipeline/audits/audit-001.md
+    trigger: auto
+    related_milestone: M01
+  -
+    id: AUDIT-001-C5
+    type: audit
+    ref: C5/M01
+    status: completed
+    timestamp: "2026-05-03T14:41:25+08:00"
+    summary: Generated full workflow architecture audit with 1 Critical, 9 High, 7 Medium, 4 Low, and 2 Info findings; highlighted stale lock recovery as the top issue.
+    report: .pipeline/audits/audit-001.md
+    trigger: auto
+    related_milestone: M01
+  -
+    id: M01-COMPLETE-C5
+    type: milestone_complete
+    ref: C5/M01
+    status: completed
+    timestamp: "2026-05-03T14:41:25+08:00"
+    summary: Completed C5/M01 full workflow architecture audit and stopped for manual acceptance.
+    report: .pipeline/audits/audit-001.md
+    tests: bash scripts/validate-config.sh .pipeline/config.yaml; node --test core/test/*.test.js; python3 tests/run_regression.py; git diff --check
+    trigger: auto
+    related_milestone: M01
+  -
+    id: M01-START-C5
+    type: milestone_start
+    ref: C5/M01
+    status: active
+    timestamp: "2026-05-03T14:14:29+08:00"
+    summary: Started C5/M01 full workflow architecture audit after manual plan confirmation.
+    report: .pipeline/prompts/00-full-workflow-architecture-audit.md
+    trigger: user
+    related_milestone: M01
+  -
+    id: C5-PLAN-GENERATE
+    type: step
+    ref: C5/plan/generate
+    status: completed
+    timestamp: "2026-05-03T14:00:33+08:00"
+    summary: Generated C5 audit planning artifacts with one analysis milestone, a manual acceptance gate, and an audit report deliverable.
+    report: .pipeline/prompts/00-full-workflow-architecture-audit.md
+    trigger: user
+    related_milestone: M01
+  -
+    id: C4-COMPLETE
     type: pipeline_complete
-    ref: "C4"
+    ref: C4
     status: completed
     timestamp: "2026-05-03T02:41:00+08:00"
     summary: "Completed C4 with Knowledge Ledger, Global TUI, Acceptance Loop, Explore Mode, and /hw:sync standardization across 14 milestones."
-    report: ".pipeline/reports/13-hw-sync-standardization.report.md"
-    tests: "node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; JSON parse; git diff --check"
+    report: .pipeline/reports/13-hw-sync-standardization.report.md
+    tests: node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; JSON parse; git diff --check
     trigger: auto
-    related_milestone: "M14"
-  - id: "M14-COMPLETE-C4"
+    related_milestone: M14
+  -
+    id: M14-COMPLETE-C4
     type: milestone_complete
-    ref: "C4/M14"
+    ref: C4/M14
     status: completed
     timestamp: "2026-05-03T02:41:00+08:00"
     summary: "Completed /hw:sync standardization with light/standard/deep sync modes, shared CLI helper, SessionStart light detection, TUI action, command map, Skill docs, and generated OpenCode artifact sync."
-    report: ".pipeline/reports/13-hw-sync-standardization.report.md"
-    tests: "node --test core/test/sync-standardization.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; JSON parse; git diff --check"
+    report: .pipeline/reports/13-hw-sync-standardization.report.md
+    tests: node --test core/test/sync-standardization.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; JSON parse; git diff --check
     trigger: auto
-    related_milestone: "M14"
-  - id: "M14-REVIEW-CODE-C4"
+    related_milestone: M14
+  -
+    id: M14-REVIEW-CODE-C4
     type: step
-    ref: "C4/M14/review_code"
+    ref: C4/M14/review_code
     status: completed
     timestamp: "2026-05-03T02:40:00+08:00"
     summary: "Reviewed M14 implementation scope: /hw:sync is not a runner, SessionStart only performs light detection, and deep sync is explicit."
-    report: ".pipeline/reports/13-hw-sync-standardization.report.md"
+    report: .pipeline/reports/13-hw-sync-standardization.report.md
     trigger: auto
-    related_milestone: "M14"
-  - id: "M14-GREEN-C4"
+    related_milestone: M14
+  -
+    id: M14-GREEN-C4
     type: step
-    ref: "C4/M14/run_tests_green"
+    ref: C4/M14/run_tests_green
     status: completed
     timestamp: "2026-05-03T02:40:00+08:00"
-    summary: "Green validation passed for sync standardization, affected suites, core suite, regression suite, config validation, JSON parse, and diff check."
-    report: "core/test/sync-standardization.test.js"
-    tests: "node --test core/test/sync-standardization.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; JSON parse; git diff --check"
+    summary: Green validation passed for sync standardization, affected suites, core suite, regression suite, config validation, JSON parse, and diff check.
+    report: core/test/sync-standardization.test.js
+    tests: node --test core/test/sync-standardization.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; JSON parse; git diff --check
     trigger: auto
-    related_milestone: "M14"
-  - id: "M14-IMPLEMENT-C4"
+    related_milestone: M14
+  -
+    id: M14-IMPLEMENT-C4
     type: step
-    ref: "C4/M14/implement"
+    ref: C4/M14/implement
     status: completed
     timestamp: "2026-05-03T02:35:00+08:00"
     summary: "Implemented sync core helpers, CLI shared sync path, /hw:sync command map, Sync skill, SessionStart light detection, TUI sync action label, docs, regression updates, and OpenCode generated artifact."
-    report: "core/src/sync/index.js"
+    report: core/src/sync/index.js
     trigger: auto
-    related_milestone: "M14"
-  - id: "M14-RED-C4"
+    related_milestone: M14
+  -
+    id: M14-RED-C4
     type: step
-    ref: "C4/M14/run_tests_red"
+    ref: C4/M14/run_tests_red
     status: completed
     timestamp: "2026-05-03T02:28:00+08:00"
     summary: "Red validation failed as expected because /hw:sync helper exports and command map entry were not implemented yet."
-    report: "core/test/sync-standardization.test.js"
-    tests: "node --test core/test/sync-standardization.test.js"
+    report: core/test/sync-standardization.test.js
+    tests: node --test core/test/sync-standardization.test.js
     trigger: auto
-    related_milestone: "M14"
-  - id: "M14-REVIEW-TESTS-C4"
+    related_milestone: M14
+  -
+    id: M14-REVIEW-TESTS-C4
     type: step
-    ref: "C4/M14/review_tests"
+    ref: C4/M14/review_tests
     status: completed
     timestamp: "2026-05-03T02:27:30+08:00"
-    summary: "Reviewed M14 tests for command map, sync modes, CLI sharing, SessionStart no-heavy-write boundary, OpenCode artifact smoke, and TUI action exposure."
-    report: "core/test/sync-standardization.test.js"
+    summary: Reviewed M14 tests for command map, sync modes, CLI sharing, SessionStart no-heavy-write boundary, OpenCode artifact smoke, and TUI action exposure.
+    report: core/test/sync-standardization.test.js
     trigger: auto
-    related_milestone: "M14"
-  - id: "M14-WRITE-TESTS-C4"
+    related_milestone: M14
+  -
+    id: M14-WRITE-TESTS-C4
     type: step
-    ref: "C4/M14/write_tests"
+    ref: C4/M14/write_tests
     status: completed
     timestamp: "2026-05-03T02:27:00+08:00"
     summary: "Added M14 tests for /hw:sync command exposure, light/standard/deep sync modes, CLI sync compatibility, SessionStart light detection, and TUI sync action."
-    report: "core/test/sync-standardization.test.js"
+    report: core/test/sync-standardization.test.js
     trigger: auto
-    related_milestone: "M14"
-  - id: "M14-START-C4"
+    related_milestone: M14
+  -
+    id: M14-START-C4
     type: milestone_start
-    ref: "C4/M14"
+    ref: C4/M14
     status: active
     timestamp: "2026-05-03T02:23:00+08:00"
-    summary: "Auto-continued into C4 M14 Sync standardization in write_tests."
-    report: ".pipeline/prompts/13-hw-sync-standardization.md"
+    summary: Auto-continued into C4 M14 Sync standardization in write_tests.
+    report: .pipeline/prompts/13-hw-sync-standardization.md
     trigger: auto
-    related_milestone: "M14"
-  - id: "M13-COMPLETE-C4"
+    related_milestone: M14
+  -
+    id: M13-COMPLETE-C4
     type: milestone_complete
-    ref: "C4/M13"
+    ref: C4/M13
     status: completed
     timestamp: "2026-05-03T02:23:00+08:00"
-    summary: "Completed Explore lifecycle and upgrade with status, end, archive, plan context, analysis context, and parallel exploration isolation."
-    report: ".pipeline/reports/12-explore-lifecycle-upgrade.report.md"
-    tests: "node --test core/test/explore-lifecycle.test.js; node --test core/test/explore-contract.test.js core/test/explore-lifecycle.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; JSON parse; git diff --check"
+    summary: Completed Explore lifecycle and upgrade with status, end, archive, plan context, analysis context, and parallel exploration isolation.
+    report: .pipeline/reports/12-explore-lifecycle-upgrade.report.md
+    tests: node --test core/test/explore-lifecycle.test.js; node --test core/test/explore-contract.test.js core/test/explore-lifecycle.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; JSON parse; git diff --check
     trigger: auto
-    related_milestone: "M13"
-  - id: "M13-REVIEW-CODE-C4"
+    related_milestone: M13
+  -
+    id: M13-REVIEW-CODE-C4
     type: step
-    ref: "C4/M13/review_code"
+    ref: C4/M13/review_code
     status: completed
     timestamp: "2026-05-03T02:23:00+08:00"
     summary: "Reviewed M13 implementation scope: upgrade helpers create context sources only, do not merge branches, and archive retains worktrees unless deletion is explicitly confirmed."
-    report: ".pipeline/reports/12-explore-lifecycle-upgrade.report.md"
+    report: .pipeline/reports/12-explore-lifecycle-upgrade.report.md
     trigger: auto
-    related_milestone: "M13"
-  - id: "M13-GREEN-C4"
+    related_milestone: M13
+  -
+    id: M13-GREEN-C4
     type: step
-    ref: "C4/M13/run_tests_green"
+    ref: C4/M13/run_tests_green
     status: completed
     timestamp: "2026-05-03T02:22:00+08:00"
-    summary: "Green validation passed for Explore lifecycle/upgrade, core suite, regression suite, config validation, JSON parse, and diff check."
-    report: "core/test/explore-lifecycle.test.js"
-    tests: "node --test core/test/explore-lifecycle.test.js; node --test core/test/explore-contract.test.js core/test/explore-lifecycle.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; JSON parse; git diff --check"
+    summary: Green validation passed for Explore lifecycle/upgrade, core suite, regression suite, config validation, JSON parse, and diff check.
+    report: core/test/explore-lifecycle.test.js
+    tests: node --test core/test/explore-lifecycle.test.js; node --test core/test/explore-contract.test.js core/test/explore-lifecycle.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; JSON parse; git diff --check
     trigger: auto
-    related_milestone: "M13"
-  - id: "M13-IMPLEMENT-C4"
+    related_milestone: M13
+  -
+    id: M13-IMPLEMENT-C4
     type: step
-    ref: "C4/M13/implement"
+    ref: C4/M13/implement
     status: completed
     timestamp: "2026-05-03T02:20:00+08:00"
-    summary: "Implemented Explore status/end/archive helpers, plan context injection helper, analysis context generation, and Explore/Plan docs."
-    report: "core/src/explore/index.js"
+    summary: Implemented Explore status/end/archive helpers, plan context injection helper, analysis context generation, and Explore/Plan docs.
+    report: core/src/explore/index.js
     trigger: auto
-    related_milestone: "M13"
-  - id: "M13-RED-C4"
+    related_milestone: M13
+  -
+    id: M13-RED-C4
     type: step
-    ref: "C4/M13/run_tests_red"
+    ref: C4/M13/run_tests_red
     status: completed
     timestamp: "2026-05-03T02:18:00+08:00"
-    summary: "Red validation failed as expected because Explore lifecycle helper exports were not implemented yet."
-    report: "core/test/explore-lifecycle.test.js"
-    tests: "node --test core/test/explore-lifecycle.test.js"
+    summary: Red validation failed as expected because Explore lifecycle helper exports were not implemented yet.
+    report: core/test/explore-lifecycle.test.js
+    tests: node --test core/test/explore-lifecycle.test.js
     trigger: auto
-    related_milestone: "M13"
-  - id: "M13-REVIEW-TESTS-C4"
+    related_milestone: M13
+  -
+    id: M13-REVIEW-TESTS-C4
     type: step
-    ref: "C4/M13/review_tests"
+    ref: C4/M13/review_tests
     status: completed
     timestamp: "2026-05-03T02:17:30+08:00"
-    summary: "Reviewed M13 tests for lifecycle status, summary generation, archive retention, plan context injection, analysis context generation, and parallel exploration isolation."
-    report: "core/test/explore-lifecycle.test.js"
+    summary: Reviewed M13 tests for lifecycle status, summary generation, archive retention, plan context injection, analysis context generation, and parallel exploration isolation.
+    report: core/test/explore-lifecycle.test.js
     trigger: auto
-    related_milestone: "M13"
-  - id: "M13-WRITE-TESTS-C4"
+    related_milestone: M13
+  -
+    id: M13-WRITE-TESTS-C4
     type: step
-    ref: "C4/M13/write_tests"
+    ref: C4/M13/write_tests
     status: completed
     timestamp: "2026-05-03T02:17:00+08:00"
-    summary: "Added M13 tests for Explore status/end/archive, context upgrades, and multiple active explorations."
-    report: "core/test/explore-lifecycle.test.js"
+    summary: Added M13 tests for Explore status/end/archive, context upgrades, and multiple active explorations.
+    report: core/test/explore-lifecycle.test.js
     trigger: auto
-    related_milestone: "M13"
-  - id: "M13-START-C4"
+    related_milestone: M13
+  -
+    id: M13-START-C4
     type: milestone_start
-    ref: "C4/M13"
+    ref: C4/M13
     status: active
     timestamp: "2026-05-03T02:17:00+08:00"
-    summary: "Auto-continued into C4 M13 Explore lifecycle and upgrade in write_tests."
-    report: ".pipeline/prompts/12-explore-lifecycle-upgrade.md"
+    summary: Auto-continued into C4 M13 Explore lifecycle and upgrade in write_tests.
+    report: .pipeline/prompts/12-explore-lifecycle-upgrade.md
     trigger: auto
-    related_milestone: "M13"
-  - id: "M12-COMPLETE-C4"
+    related_milestone: M13
+  -
+    id: M12-COMPLETE-C4
     type: milestone_complete
-    ref: "C4/M12"
+    ref: C4/M12
     status: completed
     timestamp: "2026-05-03T02:17:00+08:00"
-    summary: "Completed Explore contract and worktree with exploration metadata, isolated global worktree creation, dirty main worktree gate, OpenCode command/artifact sync, and Knowledge Ledger start record."
-    report: ".pipeline/reports/11-explore-contract-worktree.report.md"
-    tests: "node --test core/test/explore-contract.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml"
+    summary: Completed Explore contract and worktree with exploration metadata, isolated global worktree creation, dirty main worktree gate, OpenCode command/artifact sync, and Knowledge Ledger start record.
+    report: .pipeline/reports/11-explore-contract-worktree.report.md
+    tests: node --test core/test/explore-contract.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml
     trigger: auto
-    related_milestone: "M12"
-  - id: "M12-REVIEW-CODE-C4"
+    related_milestone: M12
+  -
+    id: M12-REVIEW-CODE-C4
     type: step
-    ref: "C4/M12/review_code"
+    ref: C4/M12/review_code
     status: completed
     timestamp: "2026-05-03T02:15:00+08:00"
     summary: "Reviewed M12 implementation scope: exploration start does not merge code, does not delete worktrees, and only authorizes Hypo-Workflow owned worktree paths."
-    report: ".pipeline/reports/11-explore-contract-worktree.report.md"
+    report: .pipeline/reports/11-explore-contract-worktree.report.md
     trigger: auto
-    related_milestone: "M12"
-  - id: "M12-GREEN-C4"
+    related_milestone: M12
+  -
+    id: M12-GREEN-C4
     type: step
-    ref: "C4/M12/run_tests_green"
+    ref: C4/M12/run_tests_green
     status: completed
     timestamp: "2026-05-03T02:16:00+08:00"
-    summary: "Green validation passed for Explore contract/worktree, core suite, regression suite, and config validation."
-    report: "core/test/explore-contract.test.js"
-    tests: "node --test core/test/explore-contract.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml"
+    summary: Green validation passed for Explore contract/worktree, core suite, regression suite, and config validation.
+    report: core/test/explore-contract.test.js
+    tests: node --test core/test/explore-contract.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml
     trigger: auto
-    related_milestone: "M12"
-  - id: "M12-IMPLEMENT-C4"
+    related_milestone: M12
+  -
+    id: M12-IMPLEMENT-C4
     type: step
-    ref: "C4/M12/implement"
+    ref: C4/M12/implement
     status: completed
     timestamp: "2026-05-03T01:56:00+08:00"
-    summary: "Implemented Explore helper, metadata contract, global isolated worktree path, dirty-worktree decision gate, Knowledge record append, OpenCode artifact sync, and Explore skill docs."
-    report: "core/src/explore/index.js"
+    summary: Implemented Explore helper, metadata contract, global isolated worktree path, dirty-worktree decision gate, Knowledge record append, OpenCode artifact sync, and Explore skill docs.
+    report: core/src/explore/index.js
     trigger: auto
-    related_milestone: "M12"
-  - id: "M12-RED-C4"
+    related_milestone: M12
+  -
+    id: M12-RED-C4
     type: step
-    ref: "C4/M12/run_tests_red"
+    ref: C4/M12/run_tests_red
     status: completed
     timestamp: "2026-05-03T01:48:00+08:00"
-    summary: "Red validation failed as expected because Explore helper exports, command map, and OpenCode artifacts were not implemented yet."
-    report: "core/test/explore-contract.test.js"
-    tests: "node --test core/test/explore-contract.test.js"
+    summary: Red validation failed as expected because Explore helper exports, command map, and OpenCode artifacts were not implemented yet.
+    report: core/test/explore-contract.test.js
+    tests: node --test core/test/explore-contract.test.js
     trigger: auto
-    related_milestone: "M12"
-  - id: "M12-REVIEW-TESTS-C4"
+    related_milestone: M12
+  -
+    id: M12-REVIEW-TESTS-C4
     type: step
-    ref: "C4/M12/review_tests"
+    ref: C4/M12/review_tests
     status: completed
     timestamp: "2026-05-03T01:46:00+08:00"
-    summary: "Reviewed M12 tests for metadata creation, dirty-worktree gate, isolated worktree path, command map, and OpenCode artifact exposure."
-    report: "core/test/explore-contract.test.js"
+    summary: Reviewed M12 tests for metadata creation, dirty-worktree gate, isolated worktree path, command map, and OpenCode artifact exposure.
+    report: core/test/explore-contract.test.js
     trigger: auto
-    related_milestone: "M12"
-  - id: "M12-WRITE-TESTS-C4"
+    related_milestone: M12
+  -
+    id: M12-WRITE-TESTS-C4
     type: step
-    ref: "C4/M12/write_tests"
+    ref: C4/M12/write_tests
     status: completed
     timestamp: "2026-05-03T01:45:00+08:00"
-    summary: "Added M12 tests for Explore contract metadata, dirty worktree decision, global worktree path, command map, skill docs, and generated OpenCode artifacts."
-    report: "core/test/explore-contract.test.js"
+    summary: Added M12 tests for Explore contract metadata, dirty worktree decision, global worktree path, command map, skill docs, and generated OpenCode artifacts.
+    report: core/test/explore-contract.test.js
     trigger: auto
-    related_milestone: "M12"
-  - id: "M12-START-C4"
+    related_milestone: M12
+  -
+    id: M12-START-C4
     type: milestone_start
-    ref: "C4/M12"
+    ref: C4/M12
     status: active
     timestamp: "2026-05-03T01:43:00+08:00"
-    summary: "User confirmed workflow mutation and continued into C4 M12 Explore contract and worktree in write_tests."
-    report: ".pipeline/prompts/11-explore-contract-worktree.md"
+    summary: User confirmed workflow mutation and continued into C4 M12 Explore contract and worktree in write_tests.
+    report: .pipeline/prompts/11-explore-contract-worktree.md
     trigger: user
-    related_milestone: "M12"
-  - id: "M11-COMPLETE-C4"
+    related_milestone: M12
+  -
+    id: M11-COMPLETE-C4
     type: milestone_complete
-    ref: "C4/M11"
+    ref: C4/M11
     status: completed
     timestamp: "2026-05-03T01:41:51+08:00"
-    summary: "Completed Acceptance policy and status with manual/auto/timeout policy resolution, deterministic timeout status decisions, structured rejection feedback templates, OpenCode status exposure, Global TUI config display, schema/docs updates, and standalone generated runtime sync."
-    report: ".pipeline/reports/10-acceptance-policy-status.report.md"
-    tests: "node --test core/test/acceptance-policy-status.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; JSON parse; git diff --check"
+    summary: Completed Acceptance policy and status with manual/auto/timeout policy resolution, deterministic timeout status decisions, structured rejection feedback templates, OpenCode status exposure, Global TUI config display, schema/docs updates, and standalone generated runtime sync.
+    report: .pipeline/reports/10-acceptance-policy-status.report.md
+    tests: node --test core/test/acceptance-policy-status.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; JSON parse; git diff --check
     trigger: auto
-    related_milestone: "M11"
-  - id: "M11-REVIEW-CODE-C4"
+    related_milestone: M11
+  -
+    id: M11-REVIEW-CODE-C4
     type: step
-    ref: "C4/M11/review_code"
+    ref: C4/M11/review_code
     status: completed
     timestamp: "2026-05-03T01:41:00+08:00"
     summary: "Reviewed M11 implementation scope: timeout acceptance is read-only status/check logic, OpenCode runtime remains standalone, feedback is structured, and protected state/cycle/rules files were not changed."
-    report: ".pipeline/reports/10-acceptance-policy-status.report.md"
+    report: .pipeline/reports/10-acceptance-policy-status.report.md
     trigger: auto
-    related_milestone: "M11"
-  - id: "M11-GREEN-C4"
+    related_milestone: M11
+  -
+    id: M11-GREEN-C4
     type: step
-    ref: "C4/M11/run_tests_green"
+    ref: C4/M11/run_tests_green
     status: completed
     timestamp: "2026-05-03T01:40:00+08:00"
-    summary: "Green validation passed for acceptance policy/status, OpenCode/TUI surfaces, config/schema/docs, core suite, and full regression."
-    report: "core/test/acceptance-policy-status.test.js"
-    tests: "node --test core/test/acceptance-policy-status.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; JSON parse; git diff --check"
+    summary: Green validation passed for acceptance policy/status, OpenCode/TUI surfaces, config/schema/docs, core suite, and full regression.
+    report: core/test/acceptance-policy-status.test.js
+    tests: node --test core/test/acceptance-policy-status.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; JSON parse; git diff --check
     trigger: auto
-    related_milestone: "M11"
-  - id: "M11-IMPLEMENT-C4"
+    related_milestone: M11
+  -
+    id: M11-IMPLEMENT-C4
     type: step
-    ref: "C4/M11/implement"
+    ref: C4/M11/implement
     status: completed
     timestamp: "2026-05-03T01:31:00+08:00"
-    summary: "Implemented acceptance policy resolution, deterministic timeout evaluator, structured rejection feedback template, OpenCode acceptance status policy display, Global TUI config display, and schema/spec/skill updates."
-    report: "core/src/acceptance/index.js"
+    summary: Implemented acceptance policy resolution, deterministic timeout evaluator, structured rejection feedback template, OpenCode acceptance status policy display, Global TUI config display, and schema/spec/skill updates.
+    report: core/src/acceptance/index.js
     trigger: auto
-    related_milestone: "M11"
-  - id: "M11-RED-C4"
+    related_milestone: M11
+  -
+    id: M11-RED-C4
     type: step
-    ref: "C4/M11/run_tests_red"
+    ref: C4/M11/run_tests_red
     status: completed
     timestamp: "2026-05-03T01:15:00+08:00"
-    summary: "Red validation failed as expected because acceptance policy/status APIs and structured rejection template were not yet exported or implemented."
-    report: "core/test/acceptance-policy-status.test.js"
-    tests: "node --test core/test/acceptance-policy-status.test.js"
+    summary: Red validation failed as expected because acceptance policy/status APIs and structured rejection template were not yet exported or implemented.
+    report: core/test/acceptance-policy-status.test.js
+    tests: node --test core/test/acceptance-policy-status.test.js
     trigger: auto
-    related_milestone: "M11"
-  - id: "M11-REVIEW-TESTS-C4"
+    related_milestone: M11
+  -
+    id: M11-REVIEW-TESTS-C4
     type: step
-    ref: "C4/M11/review_tests"
+    ref: C4/M11/review_tests
     status: completed
     timestamp: "2026-05-03T01:14:30+08:00"
-    summary: "Reviewed M11 tests for acceptance defaults and overrides, timeout status decisions, structured feedback templates, OpenCode status model, and Global TUI config display."
-    report: "core/test/acceptance-policy-status.test.js"
+    summary: Reviewed M11 tests for acceptance defaults and overrides, timeout status decisions, structured feedback templates, OpenCode status model, and Global TUI config display.
+    report: core/test/acceptance-policy-status.test.js
     trigger: auto
-    related_milestone: "M11"
-  - id: "M11-WRITE-TESTS-C4"
+    related_milestone: M11
+  -
+    id: M11-WRITE-TESTS-C4
     type: step
-    ref: "C4/M11/write_tests"
+    ref: C4/M11/write_tests
     status: completed
     timestamp: "2026-05-03T01:14:00+08:00"
-    summary: "Added M11 tests for acceptance policy resolution, timeout behavior, structured rejection template, OpenCode status surface, and Global TUI acceptance display."
-    report: "core/test/acceptance-policy-status.test.js"
+    summary: Added M11 tests for acceptance policy resolution, timeout behavior, structured rejection template, OpenCode status surface, and Global TUI acceptance display.
+    report: core/test/acceptance-policy-status.test.js
     trigger: auto
-    related_milestone: "M11"
-  - id: "M11-START-C4"
+    related_milestone: M11
+  -
+    id: M11-START-C4
     type: milestone_start
-    ref: "C4/M11"
+    ref: C4/M11
     status: active
     timestamp: "2026-05-03T01:13:31+08:00"
-    summary: "Auto-continued into C4 M11 Acceptance policy and status in write_tests."
-    report: ".pipeline/prompts/10-acceptance-policy-status.md"
+    summary: Auto-continued into C4 M11 Acceptance policy and status in write_tests.
+    report: .pipeline/prompts/10-acceptance-policy-status.md
     trigger: auto
-    related_milestone: "M11"
-  - id: "M10-COMPLETE-C4"
+    related_milestone: M11
+  -
+    id: M10-COMPLETE-C4
     type: milestone_complete
-    ref: "C4/M10"
+    ref: C4/M10
     status: completed
     timestamp: "2026-05-03T01:13:31+08:00"
-    summary: "Completed Patch acceptance with pending acceptance metadata, accept/reject helpers, iteration tracking, structured feedback refs, repeated-rejection escalation, and fix-context feedback injection."
-    report: ".pipeline/reports/09-patch-acceptance.report.md"
-    tests: "node --test core/test/patch-acceptance.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh; claude plugin validate .; opencode debug config; JSON parse; git diff --check"
+    summary: Completed Patch acceptance with pending acceptance metadata, accept/reject helpers, iteration tracking, structured feedback refs, repeated-rejection escalation, and fix-context feedback injection.
+    report: .pipeline/reports/09-patch-acceptance.report.md
+    tests: node --test core/test/patch-acceptance.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh; claude plugin validate .; opencode debug config; JSON parse; git diff --check
     trigger: auto
-    related_milestone: "M10"
-  - id: "M10-REVIEW-CODE-C4"
+    related_milestone: M10
+  -
+    id: M10-REVIEW-CODE-C4
     type: step
-    ref: "C4/M10/review_code"
+    ref: C4/M10/review_code
     status: completed
     timestamp: "2026-05-03T01:12:30+08:00"
     summary: "Reviewed M10 implementation scope: Patch acceptance writes only Patch files, feedback, PROGRESS, and log; it does not write state.yaml or add a top-level slash command."
-    report: ".pipeline/reports/09-patch-acceptance.report.md"
+    report: .pipeline/reports/09-patch-acceptance.report.md
     trigger: auto
-    related_milestone: "M10"
-  - id: "M10-GREEN-C4"
+    related_milestone: M10
+  -
+    id: M10-GREEN-C4
     type: step
-    ref: "C4/M10/run_tests_green"
+    ref: C4/M10/run_tests_green
     status: completed
     timestamp: "2026-05-03T01:12:00+08:00"
-    summary: "Green validation passed for Patch acceptance helper and full regression suite."
-    report: "core/test/patch-acceptance.test.js"
-    tests: "node --test core/test/patch-acceptance.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh; claude plugin validate .; opencode debug config; JSON parse; git diff --check"
+    summary: Green validation passed for Patch acceptance helper and full regression suite.
+    report: core/test/patch-acceptance.test.js
+    tests: node --test core/test/patch-acceptance.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh; claude plugin validate .; opencode debug config; JSON parse; git diff --check
     trigger: auto
-    related_milestone: "M10"
-  - id: "M10-IMPLEMENT-C4"
+    related_milestone: M10
+  -
+    id: M10-IMPLEMENT-C4
     type: step
-    ref: "C4/M10/implement"
+    ref: C4/M10/implement
     status: completed
     timestamp: "2026-05-03T01:11:00+08:00"
-    summary: "Implemented Patch acceptance helpers, metadata roundtrip, structured rejection feedback refs, repeated-rejection escalation, and fix context loading."
-    report: "core/src/patches/index.js"
+    summary: Implemented Patch acceptance helpers, metadata roundtrip, structured rejection feedback refs, repeated-rejection escalation, and fix context loading.
+    report: core/src/patches/index.js
     trigger: auto
-    related_milestone: "M10"
-  - id: "M10-RED-C4"
+    related_milestone: M10
+  -
+    id: M10-RED-C4
     type: step
-    ref: "C4/M10/run_tests_red"
+    ref: C4/M10/run_tests_red
     status: completed
     timestamp: "2026-05-03T01:09:30+08:00"
-    summary: "Red validation failed as expected because Patch acceptance helpers were not yet exported or implemented."
-    report: "core/test/patch-acceptance.test.js"
-    tests: "node --test core/test/patch-acceptance.test.js"
+    summary: Red validation failed as expected because Patch acceptance helpers were not yet exported or implemented.
+    report: core/test/patch-acceptance.test.js
+    tests: node --test core/test/patch-acceptance.test.js
     trigger: auto
-    related_milestone: "M10"
-  - id: "M10-REVIEW-TESTS-C4"
+    related_milestone: M10
+  -
+    id: M10-REVIEW-TESTS-C4
     type: step
-    ref: "C4/M10/review_tests"
+    ref: C4/M10/review_tests
     status: completed
     timestamp: "2026-05-03T01:09:00+08:00"
-    summary: "Reviewed M10 tests for Patch state boundary, pending acceptance, accept/reject lifecycle, iteration count, feedback refs, escalation, and Skill docs."
-    report: "core/test/patch-acceptance.test.js"
+    summary: Reviewed M10 tests for Patch state boundary, pending acceptance, accept/reject lifecycle, iteration count, feedback refs, escalation, and Skill docs.
+    report: core/test/patch-acceptance.test.js
     trigger: auto
-    related_milestone: "M10"
-  - id: "M10-WRITE-TESTS-C4"
+    related_milestone: M10
+  -
+    id: M10-WRITE-TESTS-C4
     type: step
-    ref: "C4/M10/write_tests"
+    ref: C4/M10/write_tests
     status: completed
     timestamp: "2026-05-03T01:08:00+08:00"
-    summary: "Added M10 tests for Patch acceptance lifecycle, structured rejection feedback, fix context feedback injection, metadata roundtrip, and Patch Skill documentation."
-    report: "core/test/patch-acceptance.test.js"
+    summary: Added M10 tests for Patch acceptance lifecycle, structured rejection feedback, fix context feedback injection, metadata roundtrip, and Patch Skill documentation.
+    report: core/test/patch-acceptance.test.js
     trigger: auto
-    related_milestone: "M10"
-  - id: "M10-START-C4"
+    related_milestone: M10
+  -
+    id: M10-START-C4
     type: milestone_start
-    ref: "C4/M10"
+    ref: C4/M10
     status: active
     timestamp: "2026-05-03T01:07:32+08:00"
-    summary: "Auto-continued into C4 M10 Patch acceptance in write_tests."
-    report: ".pipeline/prompts/09-patch-acceptance.md"
+    summary: Auto-continued into C4 M10 Patch acceptance in write_tests.
+    report: .pipeline/prompts/09-patch-acceptance.md
     trigger: auto
-    related_milestone: "M10"
-  - id: "M09-COMPLETE-C4"
+    related_milestone: M10
+  -
+    id: M09-COMPLETE-C4
     type: milestone_complete
-    ref: "C4/M09"
+    ref: C4/M09
     status: completed
     timestamp: "2026-05-03T01:07:32+08:00"
     summary: "Completed Cycle acceptance with pending_acceptance lifecycle, /hw:accept and /hw:reject commands, feedback_ref storage, OpenCode status exposure, generated command artifacts, and docs/spec updates."
-    report: ".pipeline/reports/08-cycle-acceptance.report.md"
-    tests: "node --test core/test/cycle-acceptance.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh; claude plugin validate .; opencode debug config; JSON parse; git diff --check"
+    report: .pipeline/reports/08-cycle-acceptance.report.md
+    tests: node --test core/test/cycle-acceptance.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh; claude plugin validate .; opencode debug config; JSON parse; git diff --check
     trigger: auto
-    related_milestone: "M09"
-  - id: "M09-REVIEW-CODE-C4"
+    related_milestone: M09
+  -
+    id: M09-REVIEW-CODE-C4
     type: step
-    ref: "C4/M09/review_code"
+    ref: C4/M09/review_code
     status: completed
     timestamp: "2026-05-03T01:06:00+08:00"
     summary: "Reviewed M09 implementation scope: acceptance helpers do not run pipeline work, full rejection feedback stays outside state.yaml, and archive flow remains separate."
-    report: ".pipeline/reports/08-cycle-acceptance.report.md"
+    report: .pipeline/reports/08-cycle-acceptance.report.md
     trigger: auto
-    related_milestone: "M09"
-  - id: "M09-GREEN-C4"
+    related_milestone: M09
+  -
+    id: M09-GREEN-C4
     type: step
-    ref: "C4/M09/run_tests_green"
+    ref: C4/M09/run_tests_green
     status: completed
     timestamp: "2026-05-03T01:05:00+08:00"
-    summary: "Green validation passed for Cycle acceptance and command-map expansion."
-    report: "core/test/cycle-acceptance.test.js"
-    tests: "node --test core/test/cycle-acceptance.test.js; node --test core/test/commands-rules-artifacts.test.js core/test/opencode-status.test.js core/test/cycle-acceptance.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; claude plugin validate .; opencode debug config; JSON parse; git diff --check"
+    summary: Green validation passed for Cycle acceptance and command-map expansion.
+    report: core/test/cycle-acceptance.test.js
+    tests: node --test core/test/cycle-acceptance.test.js; node --test core/test/commands-rules-artifacts.test.js core/test/opencode-status.test.js core/test/cycle-acceptance.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; claude plugin validate .; opencode debug config; JSON parse; git diff --check
     trigger: auto
-    related_milestone: "M09"
-  - id: "M09-IMPLEMENT-C4"
+    related_milestone: M09
+  -
+    id: M09-IMPLEMENT-C4
     type: step
-    ref: "C4/M09/implement"
+    ref: C4/M09/implement
     status: completed
     timestamp: "2026-05-03T00:52:00+08:00"
-    summary: "Implemented Cycle acceptance helpers, accept/reject Skills, command map entries, OpenCode status acceptance model, docs/spec updates, and generated OpenCode command artifacts."
-    report: "core/src/acceptance/index.js"
+    summary: Implemented Cycle acceptance helpers, accept/reject Skills, command map entries, OpenCode status acceptance model, docs/spec updates, and generated OpenCode command artifacts.
+    report: core/src/acceptance/index.js
     trigger: auto
-    related_milestone: "M09"
-  - id: "M09-RED-C4"
+    related_milestone: M09
+  -
+    id: M09-RED-C4
     type: step
-    ref: "C4/M09/run_tests_red"
+    ref: C4/M09/run_tests_red
     status: completed
     timestamp: "2026-05-03T00:24:00+08:00"
-    summary: "Red validation failed as expected because Cycle acceptance helpers were not yet exported or implemented."
-    report: "core/test/cycle-acceptance.test.js"
-    tests: "node --test core/test/cycle-acceptance.test.js"
+    summary: Red validation failed as expected because Cycle acceptance helpers were not yet exported or implemented.
+    report: core/test/cycle-acceptance.test.js
+    tests: node --test core/test/cycle-acceptance.test.js
     trigger: auto
-    related_milestone: "M09"
-  - id: "M09-REVIEW-TESTS-C4"
+    related_milestone: M09
+  -
+    id: M09-REVIEW-TESTS-C4
     type: step
-    ref: "C4/M09/review_tests"
+    ref: C4/M09/review_tests
     status: completed
     timestamp: "2026-05-03T00:20:00+08:00"
-    summary: "Reviewed M09 tests for pending acceptance, accept/reject semantics, feedback_ref boundary, status/TUI exposure, command map, and docs."
-    report: "core/test/cycle-acceptance.test.js"
+    summary: Reviewed M09 tests for pending acceptance, accept/reject semantics, feedback_ref boundary, status/TUI exposure, command map, and docs.
+    report: core/test/cycle-acceptance.test.js
     trigger: auto
-    related_milestone: "M09"
-  - id: "M09-WRITE-TESTS-C4"
+    related_milestone: M09
+  -
+    id: M09-WRITE-TESTS-C4
     type: step
-    ref: "C4/M09/write_tests"
+    ref: C4/M09/write_tests
     status: completed
     timestamp: "2026-05-03T00:18:00+08:00"
-    summary: "Added M09 tests for Cycle acceptance lifecycle, accept/reject commands, compact state feedback references, OpenCode status model, and docs exposure."
-    report: "core/test/cycle-acceptance.test.js"
+    summary: Added M09 tests for Cycle acceptance lifecycle, accept/reject commands, compact state feedback references, OpenCode status model, and docs exposure.
+    report: core/test/cycle-acceptance.test.js
     trigger: auto
-    related_milestone: "M09"
-  - id: "M09-START-C4"
+    related_milestone: M09
+  -
+    id: M09-START-C4
     type: milestone_start
-    ref: "C4/M09"
+    ref: C4/M09
     status: active
     timestamp: "2026-05-03T00:02:04+08:00"
-    summary: "Auto-continued into C4 M09 Cycle acceptance in write_tests."
-    report: ".pipeline/prompts/08-cycle-acceptance.md"
+    summary: Auto-continued into C4 M09 Cycle acceptance in write_tests.
+    report: .pipeline/prompts/08-cycle-acceptance.md
     trigger: auto
-    related_milestone: "M09"
-  - id: "M08-COMPLETE-C4"
+    related_milestone: M09
+  -
+    id: M08-COMPLETE-C4
     type: milestone_complete
-    ref: "C4/M08"
+    ref: C4/M08
     status: completed
     timestamp: "2026-05-03T00:02:04+08:00"
-    summary: "Completed Model pool and project actions with model pool edit helpers, project add/scan/refresh/sync actions, selected project registry state, OpenCode sync override preservation, and TUI acceptance/knowledge detail."
-    report: ".pipeline/reports/07-model-pool-project-actions.report.md"
-    tests: "node --test core/test/model-pool-actions.test.js; node --test core/test/ink-tui.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh; claude plugin validate .; opencode debug config; JSON parse; git diff --check"
+    summary: Completed Model pool and project actions with model pool edit helpers, project add/scan/refresh/sync actions, selected project registry state, OpenCode sync override preservation, and TUI acceptance/knowledge detail.
+    report: .pipeline/reports/07-model-pool-project-actions.report.md
+    tests: node --test core/test/model-pool-actions.test.js; node --test core/test/ink-tui.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh; claude plugin validate .; opencode debug config; JSON parse; git diff --check
     trigger: auto
-    related_milestone: "M08"
-  - id: "M08-REVIEW-CODE-C4"
+    related_milestone: M08
+  -
+    id: M08-REVIEW-CODE-C4
     type: step
-    ref: "C4/M08/review_code"
+    ref: C4/M08/review_code
     status: completed
     timestamp: "2026-05-03T00:01:00+08:00"
     summary: "Reviewed M08 implementation scope: TUI model remains read-only, writes are explicit action helpers, selected project sync is deterministic, and project-local OpenCode overrides remain authoritative."
-    report: ".pipeline/reports/07-model-pool-project-actions.report.md"
+    report: .pipeline/reports/07-model-pool-project-actions.report.md
     trigger: auto
-    related_milestone: "M08"
-  - id: "M08-GREEN-C4"
+    related_milestone: M08
+  -
+    id: M08-GREEN-C4
     type: step
-    ref: "C4/M08/run_tests_green"
+    ref: C4/M08/run_tests_green
     status: completed
     timestamp: "2026-05-03T00:00:00+08:00"
-    summary: "Green validation passed for model pool actions, project actions, TUI detail state, full core suite, and regression suite."
-    report: "core/test/model-pool-actions.test.js"
-    tests: "node --test core/test/model-pool-actions.test.js; node --test core/test/ink-tui.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh; claude plugin validate .; opencode debug config; JSON parse; git diff --check"
+    summary: Green validation passed for model pool actions, project actions, TUI detail state, full core suite, and regression suite.
+    report: core/test/model-pool-actions.test.js
+    tests: node --test core/test/model-pool-actions.test.js; node --test core/test/ink-tui.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh; claude plugin validate .; opencode debug config; JSON parse; git diff --check
     trigger: auto
-    related_milestone: "M08"
-  - id: "M08-IMPLEMENT-C4"
+    related_milestone: M08
+  -
+    id: M08-IMPLEMENT-C4
     type: step
-    ref: "C4/M08/implement"
+    ref: C4/M08/implement
     status: completed
     timestamp: "2026-05-02T23:50:00+08:00"
-    summary: "Implemented model pool role edits with backup save, project registry add/scan/refresh/sync helpers, selected project tracking, OpenCode artifact sync from merged config, and TUI acceptance/knowledge detail/actions."
-    report: "core/src/actions/index.js"
+    summary: Implemented model pool role edits with backup save, project registry add/scan/refresh/sync helpers, selected project tracking, OpenCode artifact sync from merged config, and TUI acceptance/knowledge detail/actions.
+    report: core/src/actions/index.js
     trigger: auto
-    related_milestone: "M08"
-  - id: "M08-RED-C4"
+    related_milestone: M08
+  -
+    id: M08-RED-C4
     type: step
-    ref: "C4/M08/run_tests_red"
+    ref: C4/M08/run_tests_red
     status: completed
     timestamp: "2026-05-02T23:38:00+08:00"
-    summary: "Red validation failed as expected because M08 action helpers were not yet exported or implemented."
-    report: "core/test/model-pool-actions.test.js"
-    tests: "node --test core/test/model-pool-actions.test.js"
+    summary: Red validation failed as expected because M08 action helpers were not yet exported or implemented.
+    report: core/test/model-pool-actions.test.js
+    tests: node --test core/test/model-pool-actions.test.js
     trigger: auto
-    related_milestone: "M08"
-  - id: "M08-REVIEW-TESTS-C4"
+    related_milestone: M08
+  -
+    id: M08-REVIEW-TESTS-C4
     type: step
-    ref: "C4/M08/review_tests"
+    ref: C4/M08/review_tests
     status: completed
     timestamp: "2026-05-02T23:37:00+08:00"
-    summary: "Reviewed M08 tests for fallback chain validation, registry action behavior, selected project sync override precedence, and TUI action/status exposure."
-    report: "core/test/model-pool-actions.test.js"
+    summary: Reviewed M08 tests for fallback chain validation, registry action behavior, selected project sync override precedence, and TUI action/status exposure.
+    report: core/test/model-pool-actions.test.js
     trigger: auto
-    related_milestone: "M08"
-  - id: "M08-WRITE-TESTS-C4"
+    related_milestone: M08
+  -
+    id: M08-WRITE-TESTS-C4
     type: step
-    ref: "C4/M08/write_tests"
+    ref: C4/M08/write_tests
     status: completed
     timestamp: "2026-05-02T23:37:00+08:00"
-    summary: "Added M08 tests for model pool role edits, project add/scan/refresh/sync actions, project-local sync override precedence, and global TUI action/detail exposure."
-    report: "core/test/model-pool-actions.test.js"
+    summary: Added M08 tests for model pool role edits, project add/scan/refresh/sync actions, project-local sync override precedence, and global TUI action/detail exposure.
+    report: core/test/model-pool-actions.test.js
     trigger: auto
-    related_milestone: "M08"
-  - id: "M08-START-C4"
+    related_milestone: M08
+  -
+    id: M08-START-C4
     type: milestone_start
-    ref: "C4/M08"
+    ref: C4/M08
     status: active
     timestamp: "2026-05-02T23:32:29+08:00"
-    summary: "Auto-continued into C4 M08 Model pool and project actions in write_tests."
-    report: ".pipeline/prompts/07-model-pool-project-actions.md"
+    summary: Auto-continued into C4 M08 Model pool and project actions in write_tests.
+    report: .pipeline/prompts/07-model-pool-project-actions.md
     trigger: auto
-    related_milestone: "M08"
-  - id: "M07-COMPLETE-C4"
+    related_milestone: M08
+  -
+    id: M07-COMPLETE-C4
     type: milestone_complete
-    ref: "C4/M07"
+    ref: C4/M07
     status: completed
     timestamp: "2026-05-02T23:32:29+08:00"
-    summary: "Completed Ink TUI foundation with read-only global TUI model/snapshot rendering, no-command CLI routing, tui snapshot command, hw alias package metadata, Ink dependency lock, and registry-isolated tests."
-    report: ".pipeline/reports/06-ink-tui-foundation.report.md"
-    tests: "node --test core/test/ink-tui.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; npm install --package-lock-only --ignore-scripts --dry-run in cli; bash scripts/validate-config.sh .pipeline/config.yaml; claude plugin validate .; JSON parse; opencode debug config; git diff --check"
+    summary: Completed Ink TUI foundation with read-only global TUI model/snapshot rendering, no-command CLI routing, tui snapshot command, hw alias package metadata, Ink dependency lock, and registry-isolated tests.
+    report: .pipeline/reports/06-ink-tui-foundation.report.md
+    tests: node --test core/test/ink-tui.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; npm install --package-lock-only --ignore-scripts --dry-run in cli; bash scripts/validate-config.sh .pipeline/config.yaml; claude plugin validate .; JSON parse; opencode debug config; git diff --check
     trigger: auto
-    related_milestone: "M07"
-  - id: "M07-REVIEW-CODE-C4"
+    related_milestone: M07
+  -
+    id: M07-REVIEW-CODE-C4
     type: step
-    ref: "C4/M07/review_code"
+    ref: C4/M07/review_code
     status: completed
     timestamp: "2026-05-02T23:32:29+08:00"
-    summary: "Reviewed M07 implementation for read-only TUI behavior, no pipeline execution, non-interactive snapshot support, dependency lock consistency, and no real registry pollution."
-    report: ".pipeline/reports/06-ink-tui-foundation.report.md"
+    summary: Reviewed M07 implementation for read-only TUI behavior, no pipeline execution, non-interactive snapshot support, dependency lock consistency, and no real registry pollution.
+    report: .pipeline/reports/06-ink-tui-foundation.report.md
     trigger: auto
-    related_milestone: "M07"
-  - id: "M07-GREEN-C4"
+    related_milestone: M07
+  -
+    id: M07-GREEN-C4
     type: step
-    ref: "C4/M07/run_tests_green"
+    ref: C4/M07/run_tests_green
     status: completed
     timestamp: "2026-05-02T23:29:00+08:00"
-    summary: "Green validation passed for Ink TUI foundation and full regression suite."
-    report: "core/test/ink-tui.test.js"
-    tests: "node --test core/test/ink-tui.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; npm install --package-lock-only --ignore-scripts --dry-run in cli; bash scripts/validate-config.sh .pipeline/config.yaml; claude plugin validate .; JSON parse; opencode debug config; git diff --check"
+    summary: Green validation passed for Ink TUI foundation and full regression suite.
+    report: core/test/ink-tui.test.js
+    tests: node --test core/test/ink-tui.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; npm install --package-lock-only --ignore-scripts --dry-run in cli; bash scripts/validate-config.sh .pipeline/config.yaml; claude plugin validate .; JSON parse; opencode debug config; git diff --check
     trigger: auto
-    related_milestone: "M07"
-  - id: "M07-IMPLEMENT-C4"
+    related_milestone: M07
+  -
+    id: M07-IMPLEMENT-C4
     type: step
-    ref: "C4/M07/implement"
+    ref: C4/M07/implement
     status: completed
     timestamp: "2026-05-02T23:26:00+08:00"
-    summary: "Implemented global TUI model/snapshot helpers, CLI tui routing, no-command TUI entry, hw alias package metadata, Ink/React lockfile, CLI docs, and registry-isolated regression scenarios."
-    report: "core/src/tui/index.js"
+    summary: Implemented global TUI model/snapshot helpers, CLI tui routing, no-command TUI entry, hw alias package metadata, Ink/React lockfile, CLI docs, and registry-isolated regression scenarios.
+    report: core/src/tui/index.js
     trigger: auto
-    related_milestone: "M07"
-  - id: "M07-RED-C4"
+    related_milestone: M07
+  -
+    id: M07-RED-C4
     type: step
-    ref: "C4/M07/run_tests_red"
+    ref: C4/M07/run_tests_red
     status: completed
     timestamp: "2026-05-02T23:24:29+08:00"
-    summary: "Red run failed as expected because global TUI model/render helpers, CLI tui routing, hw alias metadata, and CLI package lock are missing."
-    report: "core/test/ink-tui.test.js"
-    tests: "node --test core/test/ink-tui.test.js failed as expected"
+    summary: Red run failed as expected because global TUI model/render helpers, CLI tui routing, hw alias metadata, and CLI package lock are missing.
+    report: core/test/ink-tui.test.js
+    tests: node --test core/test/ink-tui.test.js failed as expected
     trigger: auto
-    related_milestone: "M07"
-  - id: "M07-REVIEW-TESTS-C4"
+    related_milestone: M07
+  -
+    id: M07-REVIEW-TESTS-C4
     type: step
-    ref: "C4/M07/review_tests"
+    ref: C4/M07/review_tests
     status: completed
     timestamp: "2026-05-02T23:23:40+08:00"
-    summary: "Reviewed M07 tests and accepted deterministic read-only TUI snapshot coverage for non-interactive CI."
-    report: "core/test/ink-tui.test.js"
+    summary: Reviewed M07 tests and accepted deterministic read-only TUI snapshot coverage for non-interactive CI.
+    report: core/test/ink-tui.test.js
     trigger: auto
-    related_milestone: "M07"
-  - id: "M07-WRITE-TESTS-C4"
+    related_milestone: M07
+  -
+    id: M07-WRITE-TESTS-C4
     type: step
-    ref: "C4/M07/write_tests"
+    ref: C4/M07/write_tests
     status: completed
     timestamp: "2026-05-02T23:23:10+08:00"
-    summary: "Added tests for global TUI model, snapshot rendering, no-command CLI route, hw alias metadata, dependency lock, and init-project registry visibility."
-    report: "core/test/ink-tui.test.js"
+    summary: Added tests for global TUI model, snapshot rendering, no-command CLI route, hw alias metadata, dependency lock, and init-project registry visibility.
+    report: core/test/ink-tui.test.js
     trigger: auto
-    related_milestone: "M07"
-  - id: "M07-START-C4"
+    related_milestone: M07
+  -
+    id: M07-START-C4
     type: milestone_start
-    ref: "C4/M07"
+    ref: C4/M07
     status: active
     timestamp: "2026-05-02T23:18:18+08:00"
-    summary: "Auto-continued into C4 M07 Ink TUI foundation in write_tests."
-    report: ".pipeline/prompts/06-ink-tui-foundation.md"
+    summary: Auto-continued into C4 M07 Ink TUI foundation in write_tests.
+    report: .pipeline/prompts/06-ink-tui-foundation.md
     trigger: auto
-    related_milestone: "M07"
-  - id: "M06-COMPLETE-C4"
+    related_milestone: M07
+  -
+    id: M06-COMPLETE-C4
     type: milestone_complete
-    ref: "C4/M06"
+    ref: C4/M06
     status: completed
     timestamp: "2026-05-02T23:18:18+08:00"
-    summary: "Completed Global config and registry model with model_pool defaults, lazy global config migration, projects.yaml registry persistence, OpenCode matrix mapping, CLI init-project registration, schema docs, and tests."
-    report: ".pipeline/reports/05-global-config-registry-model.report.md"
-    tests: "node --test core/test/global-config-registry.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; claude plugin validate .; OpenCode JSON parse; opencode debug config; git diff --check"
+    summary: Completed Global config and registry model with model_pool defaults, lazy global config migration, projects.yaml registry persistence, OpenCode matrix mapping, CLI init-project registration, schema docs, and tests.
+    report: .pipeline/reports/05-global-config-registry-model.report.md
+    tests: node --test core/test/global-config-registry.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; claude plugin validate .; OpenCode JSON parse; opencode debug config; git diff --check
     trigger: auto
-    related_milestone: "M06"
-  - id: "M06-REVIEW-CODE-C4"
+    related_milestone: M06
+  -
+    id: M06-REVIEW-CODE-C4
     type: step
-    ref: "C4/M06/review_code"
+    ref: C4/M06/review_code
     status: completed
     timestamp: "2026-05-02T23:18:18+08:00"
-    summary: "Reviewed M06 implementation for read-only load behavior, explicit migration save backups, OpenCode metadata boundaries, and registry-only CLI side effects."
-    report: ".pipeline/reports/05-global-config-registry-model.report.md"
+    summary: Reviewed M06 implementation for read-only load behavior, explicit migration save backups, OpenCode metadata boundaries, and registry-only CLI side effects.
+    report: .pipeline/reports/05-global-config-registry-model.report.md
     trigger: auto
-    related_milestone: "M06"
-  - id: "M06-GREEN-C4"
+    related_milestone: M06
+  -
+    id: M06-GREEN-C4
     type: step
-    ref: "C4/M06/run_tests_green"
+    ref: C4/M06/run_tests_green
     status: completed
     timestamp: "2026-05-02T23:16:00+08:00"
-    summary: "Green validation passed for global config and registry model."
-    report: "core/test/global-config-registry.test.js"
-    tests: "node --test core/test/global-config-registry.test.js; node --test core/test/config.test.js core/test/commands-rules-artifacts.test.js core/test/opencode-panels.test.js core/test/profile-platform.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; claude plugin validate .; OpenCode JSON parse; opencode debug config; git diff --check"
+    summary: Green validation passed for global config and registry model.
+    report: core/test/global-config-registry.test.js
+    tests: node --test core/test/global-config-registry.test.js; node --test core/test/config.test.js core/test/commands-rules-artifacts.test.js core/test/opencode-panels.test.js core/test/profile-platform.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; claude plugin validate .; OpenCode JSON parse; opencode debug config; git diff --check
     trigger: auto
-    related_milestone: "M06"
-  - id: "M06-IMPLEMENT-C4"
+    related_milestone: M06
+  -
+    id: M06-IMPLEMENT-C4
     type: step
-    ref: "C4/M06/implement"
+    ref: C4/M06/implement
     status: completed
     timestamp: "2026-05-02T23:08:00+08:00"
-    summary: "Implemented global model_pool/acceptance/sync defaults, lazy migration helpers, project registry persistence, OpenCode agent matrix mapping, CLI init-project registration, and config schema/spec updates."
-    report: "core/src/config/index.js"
+    summary: Implemented global model_pool/acceptance/sync defaults, lazy migration helpers, project registry persistence, OpenCode agent matrix mapping, CLI init-project registration, and config schema/spec updates.
+    report: core/src/config/index.js
     trigger: auto
-    related_milestone: "M06"
-  - id: "M06-RED-C4"
+    related_milestone: M06
+  -
+    id: M06-RED-C4
     type: step
-    ref: "C4/M06/run_tests_red"
+    ref: C4/M06/run_tests_red
     status: completed
     timestamp: "2026-05-02T23:01:38+08:00"
-    summary: "Red run failed as expected because model-pool, lazy migration, and project registry helpers are not implemented yet."
-    report: "core/test/global-config-registry.test.js"
-    tests: "node --test core/test/global-config-registry.test.js failed as expected"
+    summary: Red run failed as expected because model-pool, lazy migration, and project registry helpers are not implemented yet.
+    report: core/test/global-config-registry.test.js
+    tests: node --test core/test/global-config-registry.test.js failed as expected
     trigger: auto
-    related_milestone: "M06"
-  - id: "M06-REVIEW-TESTS-C4"
+    related_milestone: M06
+  -
+    id: M06-REVIEW-TESTS-C4
     type: step
-    ref: "C4/M06/review_tests"
+    ref: C4/M06/review_tests
     status: completed
     timestamp: "2026-05-02T23:00:44+08:00"
-    summary: "Reviewed M06 tests for global config, model-pool mapping, lazy migration, project registry, and CLI registration contracts."
-    report: "core/test/global-config-registry.test.js"
+    summary: Reviewed M06 tests for global config, model-pool mapping, lazy migration, project registry, and CLI registration contracts.
+    report: core/test/global-config-registry.test.js
     trigger: auto
-    related_milestone: "M06"
-  - id: "M06-WRITE-TESTS-C4"
+    related_milestone: M06
+  -
+    id: M06-WRITE-TESTS-C4
     type: step
-    ref: "C4/M06/write_tests"
+    ref: C4/M06/write_tests
     status: completed
     timestamp: "2026-05-02T23:00:10+08:00"
-    summary: "Added M06 tests for default model_pool/acceptance/sync config, OpenCode matrix mapping, lazy migration backups, projects.yaml registry persistence, stable project IDs, and init-project auto registration."
-    report: "core/test/global-config-registry.test.js"
+    summary: Added M06 tests for default model_pool/acceptance/sync config, OpenCode matrix mapping, lazy migration backups, projects.yaml registry persistence, stable project IDs, and init-project auto registration.
+    report: core/test/global-config-registry.test.js
     trigger: auto
-    related_milestone: "M06"
-  - id: "M06-START-C4"
+    related_milestone: M06
+  -
+    id: M06-START-C4
     type: milestone_start
-    ref: "C4/M06"
+    ref: C4/M06
     status: active
     timestamp: "2026-05-02T22:55:19+08:00"
-    summary: "User confirmed F001 gate and resumed into C4 M06 Global config and registry model in write_tests."
-    report: ".pipeline/prompts/05-global-config-registry-model.md"
+    summary: User confirmed F001 gate and resumed into C4 M06 Global config and registry model in write_tests.
+    report: .pipeline/prompts/05-global-config-registry-model.md
     trigger: user
-    related_milestone: "M06"
-  - id: "M05-COMPLETE-C4"
+    related_milestone: M06
+  -
+    id: M05-COMPLETE-C4
     type: milestone_complete
-    ref: "C4/M05"
+    ref: C4/M05
     status: completed
     timestamp: "2026-05-02T22:01:16+08:00"
-    summary: "Completed the F001 integration gate and paused before F002 for user confirmation."
-    report: ".pipeline/reports/04-knowledge-opencode-integration-gate.report.md"
-    tests: "node --test core/test/*.test.js; python3 tests/run_regression.py; s50/s57/s61 scenarios; opencode debug config; claude plugin validate .; config validation; opencode JSON parse; git diff --check"
+    summary: Completed the F001 integration gate and paused before F002 for user confirmation.
+    report: .pipeline/reports/04-knowledge-opencode-integration-gate.report.md
+    tests: node --test core/test/*.test.js; python3 tests/run_regression.py; s50/s57/s61 scenarios; opencode debug config; claude plugin validate .; config validation; opencode JSON parse; git diff --check
     trigger: auto
-    related_milestone: "M05"
-  - id: "M05-REVIEW-CODE-C4"
+    related_milestone: M05
+  -
+    id: M05-REVIEW-CODE-C4
     type: step
-    ref: "C4/M05/review_code"
+    ref: C4/M05/review_code
     status: completed
     timestamp: "2026-05-02T22:01:16+08:00"
-    summary: "Reviewed M05 gate changes, verified standard/safe OpenCode sidecar policy, and confirmed the s61 regression no longer depends on the real HOME config."
-    report: ".pipeline/reports/04-knowledge-opencode-integration-gate.report.md"
+    summary: Reviewed M05 gate changes, verified standard/safe OpenCode sidecar policy, and confirmed the s61 regression no longer depends on the real HOME config.
+    report: .pipeline/reports/04-knowledge-opencode-integration-gate.report.md
     trigger: auto
-    related_milestone: "M05"
-  - id: "M05-GREEN-C4"
+    related_milestone: M05
+  -
+    id: M05-GREEN-C4
     type: step
-    ref: "C4/M05/run_tests_green"
+    ref: C4/M05/run_tests_green
     status: completed
     timestamp: "2026-05-02T22:00:00+08:00"
-    summary: "Green validation passed for F001 Knowledge/OpenCode integration gate and full regression suite."
-    report: "core/test/knowledge-opencode-gate.test.js"
-    tests: "node --test core/test/knowledge-opencode-gate.test.js; node --test core/test/*.test.js; bash tests/scenarios/v9/s57-opencode-events-auto-continue-file-guard/run.sh; bash tests/scenarios/v8.4/s50-rules-system/run.sh; bash tests/scenarios/v9/s61-opencode-model-matrix-sync/run.sh; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; claude plugin validate .; OpenCode JSON parse; opencode debug config; policy smoke; git diff --check"
+    summary: Green validation passed for F001 Knowledge/OpenCode integration gate and full regression suite.
+    report: core/test/knowledge-opencode-gate.test.js
+    tests: node --test core/test/knowledge-opencode-gate.test.js; node --test core/test/*.test.js; bash tests/scenarios/v9/s57-opencode-events-auto-continue-file-guard/run.sh; bash tests/scenarios/v8.4/s50-rules-system/run.sh; bash tests/scenarios/v9/s61-opencode-model-matrix-sync/run.sh; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; claude plugin validate .; OpenCode JSON parse; opencode debug config; policy smoke; git diff --check
     trigger: auto
-    related_milestone: "M05"
-  - id: "M05-IMPLEMENT-C4"
+    related_milestone: M05
+  -
+    id: M05-IMPLEMENT-C4
     type: step
-    ref: "C4/M05/implement"
+    ref: C4/M05/implement
     status: completed
     timestamp: "2026-05-02T21:56:00+08:00"
-    summary: "Created the C4/M05 Knowledge Ledger record, rebuilt compact/index files, synced OpenCode artifacts to standard/safe policy, and hardened s61 HOME isolation."
-    report: ".pipeline/knowledge/records/C4-M05-f001-knowledge-and-opencode-integration-gate-18c2eaab.yaml"
+    summary: Created the C4/M05 Knowledge Ledger record, rebuilt compact/index files, synced OpenCode artifacts to standard/safe policy, and hardened s61 HOME isolation.
+    report: .pipeline/knowledge/records/C4-M05-f001-knowledge-and-opencode-integration-gate-18c2eaab.yaml
     trigger: auto
-    related_milestone: "M05"
-  - id: "M05-RED-C4"
+    related_milestone: M05
+  -
+    id: M05-RED-C4
     type: step
-    ref: "C4/M05/run_tests_red"
+    ref: C4/M05/run_tests_red
     status: completed
     timestamp: "2026-05-02T21:51:33+08:00"
-    summary: "Red run failed as expected because the F001 gate Knowledge Ledger record is missing and OpenCode sidecar exposes aggressive auto-continue mode."
-    report: "core/test/knowledge-opencode-gate.test.js"
-    tests: "node --test core/test/knowledge-opencode-gate.test.js failed as expected"
+    summary: Red run failed as expected because the F001 gate Knowledge Ledger record is missing and OpenCode sidecar exposes aggressive auto-continue mode.
+    report: core/test/knowledge-opencode-gate.test.js
+    tests: node --test core/test/knowledge-opencode-gate.test.js failed as expected
     trigger: auto
-    related_milestone: "M05"
-  - id: "M05-REVIEW-TESTS-C4"
+    related_milestone: M05
+  -
+    id: M05-REVIEW-TESTS-C4
     type: step
-    ref: "C4/M05/review_tests"
+    ref: C4/M05/review_tests
     status: completed
     timestamp: "2026-05-02T21:49:02+08:00"
-    summary: "Reviewed M05 gate tests and accepted real Knowledge Ledger plus OpenCode policy smoke scope."
-    report: "core/test/knowledge-opencode-gate.test.js"
+    summary: Reviewed M05 gate tests and accepted real Knowledge Ledger plus OpenCode policy smoke scope.
+    report: core/test/knowledge-opencode-gate.test.js
     trigger: auto
-    related_milestone: "M05"
-  - id: "M05-WRITE-TESTS-C4"
+    related_milestone: M05
+  -
+    id: M05-WRITE-TESTS-C4
     type: step
-    ref: "C4/M05/write_tests"
+    ref: C4/M05/write_tests
     status: completed
     timestamp: "2026-05-02T21:48:11+08:00"
-    summary: "Added F001 integration gate tests for Knowledge Ledger records, compact/index output, and OpenCode runtime policy surfaces."
-    report: "core/test/knowledge-opencode-gate.test.js"
+    summary: Added F001 integration gate tests for Knowledge Ledger records, compact/index output, and OpenCode runtime policy surfaces.
+    report: core/test/knowledge-opencode-gate.test.js
     trigger: auto
-    related_milestone: "M05"
-  - id: "M05-START-C4"
+    related_milestone: M05
+  -
+    id: M05-START-C4
     type: milestone_start
-    ref: "C4/M05"
+    ref: C4/M05
     status: active
     timestamp: "2026-05-02T21:44:36+08:00"
-    summary: "Auto-continued into C4 M05 F001 integration gate in write_tests after state sanity repair."
-    report: ".pipeline/prompts/04-knowledge-opencode-integration-gate.md"
+    summary: Auto-continued into C4 M05 F001 integration gate in write_tests after state sanity repair.
+    report: .pipeline/prompts/04-knowledge-opencode-integration-gate.md
     trigger: auto
-    related_milestone: "M05"
-  - id: "M04-COMPLETE-C4"
+    related_milestone: M05
+  -
+    id: M04-COMPLETE-C4
     type: milestone_complete
-    ref: "C4/M04"
+    ref: C4/M04
     status: completed
     timestamp: "2026-05-02T21:30:28+08:00"
-    summary: "Completed OpenCode workflow-control hooks with policy runtime helpers, generated plugin wiring, permission decisions, file guard, auto-continue, stop-equivalent status, and regression validation."
-    report: ".pipeline/reports/03-opencode-workflow-control-hooks.report.md"
-    tests: "node --test core/test/opencode-hooks.test.js core/test/commands-rules-artifacts.test.js core/test/opencode-panels.test.js; node --test core/test/*.test.js; bash tests/scenarios/v9/s57-opencode-events-auto-continue-file-guard/run.sh; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; claude plugin validate .; node JSON parse .opencode/hypo-workflow.json; git diff --check"
+    summary: Completed OpenCode workflow-control hooks with policy runtime helpers, generated plugin wiring, permission decisions, file guard, auto-continue, stop-equivalent status, and regression validation.
+    report: .pipeline/reports/03-opencode-workflow-control-hooks.report.md
+    tests: node --test core/test/opencode-hooks.test.js core/test/commands-rules-artifacts.test.js core/test/opencode-panels.test.js; node --test core/test/*.test.js; bash tests/scenarios/v9/s57-opencode-events-auto-continue-file-guard/run.sh; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; claude plugin validate .; node JSON parse .opencode/hypo-workflow.json; git diff --check
     trigger: auto
-    related_milestone: "M04"
-  - id: "M04-GREEN-C4"
+    related_milestone: M04
+  -
+    id: M04-GREEN-C4
     type: step
-    ref: "C4/M04/run_tests_green"
+    ref: C4/M04/run_tests_green
     status: completed
     timestamp: "2026-05-02T21:25:50+08:00"
-    summary: "Green validation passed for OpenCode workflow-control hooks and regression suite."
-    report: "core/test/opencode-hooks.test.js"
-    tests: "node --test core/test/opencode-hooks.test.js core/test/commands-rules-artifacts.test.js core/test/opencode-panels.test.js; node --test core/test/*.test.js; bash tests/scenarios/v9/s57-opencode-events-auto-continue-file-guard/run.sh; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; claude plugin validate .; node JSON parse .opencode/hypo-workflow.json; git diff --check"
+    summary: Green validation passed for OpenCode workflow-control hooks and regression suite.
+    report: core/test/opencode-hooks.test.js
+    tests: node --test core/test/opencode-hooks.test.js core/test/commands-rules-artifacts.test.js core/test/opencode-panels.test.js; node --test core/test/*.test.js; bash tests/scenarios/v9/s57-opencode-events-auto-continue-file-guard/run.sh; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; claude plugin validate .; node JSON parse .opencode/hypo-workflow.json; git diff --check
     trigger: auto
-    related_milestone: "M04"
-  - id: "M04-IMPLEMENT-C4"
+    related_milestone: M04
+  -
+    id: M04-IMPLEMENT-C4
     type: step
-    ref: "C4/M04/implement"
+    ref: C4/M04/implement
     status: completed
     timestamp: "2026-05-02T21:25:50+08:00"
-    summary: "Implemented OpenCode policy runtime helpers, generated plugin wiring, permission.ask decisions, file guard, auto-continue, stop-equivalent checks, and event redaction."
-    report: "core/src/opencode-hooks/index.js"
+    summary: Implemented OpenCode policy runtime helpers, generated plugin wiring, permission.ask decisions, file guard, auto-continue, stop-equivalent checks, and event redaction.
+    report: core/src/opencode-hooks/index.js
     trigger: auto
-    related_milestone: "M04"
-  - id: "M04-RED-C4"
+    related_milestone: M04
+  -
+    id: M04-RED-C4
     type: step
-    ref: "C4/M04/run_tests_red"
+    ref: C4/M04/run_tests_red
     status: completed
     timestamp: "2026-05-02T21:13:21+08:00"
-    summary: "Red run failed as expected because OpenCode workflow-control helper exports are missing."
-    report: "node --test core/test/opencode-hooks.test.js"
+    summary: Red run failed as expected because OpenCode workflow-control helper exports are missing.
+    report: node --test core/test/opencode-hooks.test.js
     tests: "failed as expected: missing collectOpenCodeToolPaths export"
     trigger: auto
-    related_milestone: "M04"
-  - id: "M04-REVIEW-TESTS-C4"
+    related_milestone: M04
+  -
+    id: M04-REVIEW-TESTS-C4
     type: step
-    ref: "C4/M04/review_tests"
+    ref: C4/M04/review_tests
     status: completed
     timestamp: "2026-05-02T21:11:06+08:00"
-    summary: "Reviewed M04 tests and accepted workflow-control policy scope."
-    report: "core/test/opencode-hooks.test.js"
+    summary: Reviewed M04 tests and accepted workflow-control policy scope.
+    report: core/test/opencode-hooks.test.js
     trigger: auto
-    related_milestone: "M04"
-  - id: "M04-WRITE-TESTS-C4"
+    related_milestone: M04
+  -
+    id: M04-WRITE-TESTS-C4
     type: step
-    ref: "C4/M04/write_tests"
+    ref: C4/M04/write_tests
     status: completed
     timestamp: "2026-05-02T21:08:41+08:00"
-    summary: "Added tests for OpenCode workflow-control policy helpers and generated plugin/runtime integration."
-    report: "core/test/opencode-hooks.test.js"
+    summary: Added tests for OpenCode workflow-control policy helpers and generated plugin/runtime integration.
+    report: core/test/opencode-hooks.test.js
     trigger: auto
-    related_milestone: "M04"
-  - id: "M04-START-C4"
+    related_milestone: M04
+  -
+    id: M04-START-C4
     type: milestone_start
-    ref: "C4/M04"
+    ref: C4/M04
     status: active
     timestamp: "2026-05-02T21:03:31+08:00"
-    summary: "Auto-continued into C4 M04 OpenCode workflow-control hooks in write_tests."
-    report: ".pipeline/prompts/03-opencode-workflow-control-hooks.md"
+    summary: Auto-continued into C4 M04 OpenCode workflow-control hooks in write_tests.
+    report: .pipeline/prompts/03-opencode-workflow-control-hooks.md
     trigger: auto
-    related_milestone: "M04"
-  - id: "M03-COMPLETE-C4"
+    related_milestone: M04
+  -
+    id: M03-COMPLETE-C4
     type: milestone_complete
-    ref: "C4/M03"
+    ref: C4/M03
     status: completed
     timestamp: "2026-05-02T21:03:31+08:00"
-    summary: "Completed Knowledge hook integration with SessionStart context, strict Stop Hook self-check, rule metadata, archive/compact docs, and tests."
-    report: ".pipeline/reports/02-knowledge-hook-integration.report.md"
-    tests: "node --test core/test/knowledge-hooks.test.js core/test/knowledge-ledger.test.js; node --test core/test/*.test.js; bash tests/scenarios/v8.4/s50-rules-system/run.sh; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; claude plugin validate .; node JSON parse .opencode/hypo-workflow.json; git diff --check"
+    summary: Completed Knowledge hook integration with SessionStart context, strict Stop Hook self-check, rule metadata, archive/compact docs, and tests.
+    report: .pipeline/reports/02-knowledge-hook-integration.report.md
+    tests: node --test core/test/knowledge-hooks.test.js core/test/knowledge-ledger.test.js; node --test core/test/*.test.js; bash tests/scenarios/v8.4/s50-rules-system/run.sh; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; claude plugin validate .; node JSON parse .opencode/hypo-workflow.json; git diff --check
     trigger: auto
-    related_milestone: "M03"
-  - id: "M03-REVIEW-CODE-C4"
+    related_milestone: M03
+  -
+    id: M03-REVIEW-CODE-C4
     type: step
-    ref: "C4/M03/review_code"
+    ref: C4/M03/review_code
     status: completed
     timestamp: "2026-05-02T21:03:31+08:00"
-    summary: "Reviewed M03 code for hook speed, raw-record isolation, and rule severity behavior."
-    report: ".pipeline/reports/02-knowledge-hook-integration.report.md"
+    summary: Reviewed M03 code for hook speed, raw-record isolation, and rule severity behavior.
+    report: .pipeline/reports/02-knowledge-hook-integration.report.md
     trigger: auto
-    related_milestone: "M03"
-  - id: "M03-GREEN-C4"
+    related_milestone: M03
+  -
+    id: M03-GREEN-C4
     type: step
-    ref: "C4/M03/run_tests_green"
+    ref: C4/M03/run_tests_green
     status: completed
     timestamp: "2026-05-02T21:01:41+08:00"
-    summary: "Green validation passed for Knowledge hook integration and regression suite."
-    report: "core/test/knowledge-hooks.test.js"
-    tests: "node --test core/test/knowledge-hooks.test.js core/test/knowledge-ledger.test.js; node --test core/test/*.test.js; bash tests/scenarios/v8.4/s50-rules-system/run.sh; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; claude plugin validate .; node JSON parse .opencode/hypo-workflow.json; git diff --check"
+    summary: Green validation passed for Knowledge hook integration and regression suite.
+    report: core/test/knowledge-hooks.test.js
+    tests: node --test core/test/knowledge-hooks.test.js core/test/knowledge-ledger.test.js; node --test core/test/*.test.js; bash tests/scenarios/v8.4/s50-rules-system/run.sh; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; claude plugin validate .; node JSON parse .opencode/hypo-workflow.json; git diff --check
     trigger: auto
-    related_milestone: "M03"
-  - id: "M03-IMPLEMENT-C4"
+    related_milestone: M03
+  -
+    id: M03-IMPLEMENT-C4
     type: step
-    ref: "C4/M03/implement"
+    ref: C4/M03/implement
     status: completed
     timestamp: "2026-05-02T20:54:54+08:00"
-    summary: "Implemented Knowledge Ledger SessionStart context loading, strict Stop Hook self-check, rule metadata, and archive/compact documentation."
-    report: "hooks/session-start.sh"
+    summary: Implemented Knowledge Ledger SessionStart context loading, strict Stop Hook self-check, rule metadata, and archive/compact documentation.
+    report: hooks/session-start.sh
     trigger: auto
-    related_milestone: "M03"
-  - id: "M03-RED-C4"
+    related_milestone: M03
+  -
+    id: M03-RED-C4
     type: step
-    ref: "C4/M03/run_tests_red"
+    ref: C4/M03/run_tests_red
     status: completed
     timestamp: "2026-05-02T20:44:50+08:00"
-    summary: "Red run failed as expected because Knowledge hook integration is not implemented."
-    report: "node --test core/test/knowledge-hooks.test.js"
+    summary: Red run failed as expected because Knowledge hook integration is not implemented.
+    report: node --test core/test/knowledge-hooks.test.js
     tests: "failed as expected: missing SessionStart knowledge context, Stop Hook knowledge gate, and rule metadata"
     trigger: auto
-    related_milestone: "M03"
-  - id: "M03-REVIEW-TESTS-C4"
+    related_milestone: M03
+  -
+    id: M03-REVIEW-TESTS-C4
     type: step
-    ref: "C4/M03/review_tests"
+    ref: C4/M03/review_tests
     status: completed
     timestamp: "2026-05-02T20:42:57+08:00"
-    summary: "Reviewed M03 tests and accepted hook integration scope."
-    report: "core/test/knowledge-hooks.test.js"
+    summary: Reviewed M03 tests and accepted hook integration scope.
+    report: core/test/knowledge-hooks.test.js
     trigger: auto
-    related_milestone: "M03"
-  - id: "M03-WRITE-TESTS-C4"
+    related_milestone: M03
+  -
+    id: M03-WRITE-TESTS-C4
     type: step
-    ref: "C4/M03/write_tests"
+    ref: C4/M03/write_tests
     status: completed
     timestamp: "2026-05-02T20:41:05+08:00"
-    summary: "Added tests for SessionStart knowledge compact/index injection, Stop Hook strict knowledge ledger self-check, and archive/compact/rules documentation."
-    report: "core/test/knowledge-hooks.test.js"
+    summary: Added tests for SessionStart knowledge compact/index injection, Stop Hook strict knowledge ledger self-check, and archive/compact/rules documentation.
+    report: core/test/knowledge-hooks.test.js
     trigger: auto
-    related_milestone: "M06"
-  - id: "P006-CLOSE"
+    related_milestone: M06
+  -
+    id: P006-CLOSE
     type: patch_fix
-    ref: "P006"
+    ref: P006
     status: closed
     timestamp: "2026-05-02T20:40:00+08:00"
     summary: "V4 report and slides full rewrite: 11-chapter report (45 pages) + 29-page slides, restructured from V9 Case Study to version timeline (V4.5→C4d), 14 core commands with independent sections, LaTeX compilation fixes (arrows, underscores)."
-    commit: "cdc62f7, 3d74cbe, 1bbf57a"
-    tests: "make report && make slides — both pass"
-    related_patches: ["P004"]
-  - id: "M0"
+    commit: cdc62f7, 3d74cbe, 1bbf57a
+    tests: make report && make slides — both pass
+    related_patches:
+      - P004
+  -
+    id: M0
     type: milestone
     ref: "/hw:help /hw:reset /hw:log"
     status: completed
     timestamp: "2026-04-24T09:00:00Z"
-    summary: "Established the unified lifecycle log spec and utility command foundations."
-    report: "references/log-spec.md"
+    summary: Established the unified lifecycle log spec and utility command foundations.
+    report: references/log-spec.md
     trigger: auto
-    related_milestone: "M0"
-  - id: "M1"
+    related_milestone: M0
+  -
+    id: M1
     type: milestone
     ref: "/hw:check"
     status: completed
     timestamp: "2026-04-24T09:20:00Z"
-    summary: "Defined the six-surface health check command and its output contract."
-    report: "references/check-spec.md"
+    summary: Defined the six-surface health check command and its output contract.
+    report: references/check-spec.md
     trigger: auto
-    related_milestone: "M1"
-  - id: "M2"
+    related_milestone: M1
+  -
+    id: M2
     type: milestone
     ref: "/hw:init"
     status: completed
     timestamp: "2026-04-24T09:40:00Z"
-    summary: "Defined architecture-aware initialization and upgraded Plan Generate to emit detailed implementation plans."
-    report: "references/init-spec.md"
+    summary: Defined architecture-aware initialization and upgraded Plan Generate to emit detailed implementation plans.
+    report: references/init-spec.md
     trigger: auto
-    related_milestone: "M2"
-  - id: "M3"
+    related_milestone: M2
+  -
+    id: M3
     type: milestone
     ref: "/hw:release"
     status: completed
     timestamp: "2026-04-24T10:00:00Z"
-    summary: "Specified the automated release flow, changelog generation, and release logging."
-    report: "references/release-spec.md"
+    summary: Specified the automated release flow, changelog generation, and release logging.
+    report: references/release-spec.md
     trigger: auto
-    related_milestone: "M3"
-  - id: "M4"
+    related_milestone: M3
+  -
+    id: M4
     type: milestone
     ref: "/hw:audit"
     status: completed
     timestamp: "2026-04-24T10:20:00Z"
-    summary: "Defined deep code auditing dimensions, grading, and report outputs."
-    report: "references/audit-spec.md"
+    summary: Defined deep code auditing dimensions, grading, and report outputs.
+    report: references/audit-spec.md
     trigger: auto
-    related_milestone: "M4"
-  - id: "M5"
+    related_milestone: M4
+  -
+    id: M5
     type: milestone
     ref: "/hw:debug"
     status: completed
     timestamp: "2026-04-24T10:40:00Z"
-    summary: "Defined symptom-driven debugging, hypothesis validation, and guarded auto-fix behavior."
-    report: "references/debug-spec.md"
+    summary: Defined symptom-driven debugging, hypothesis validation, and guarded auto-fix behavior.
+    report: references/debug-spec.md
     trigger: auto
-    related_milestone: "M5"
-  - id: "M6"
+    related_milestone: M5
+  -
+    id: M6
     type: milestone
     ref: "/hw:plan:review migration + regression s19-s30"
     status: completed
     timestamp: "2026-04-24T11:10:00Z"
-    summary: "Completed the V6 compatibility migration, expanded the regression suite to 30 scenarios, and updated public docs."
-    report: "README.md"
+    summary: Completed the V6 compatibility migration, expanded the regression suite to 30 scenarios, and updated public docs.
+    report: README.md
     trigger: auto
-    related_milestone: "M6"
-  - id: "REL-600"
+    related_milestone: M6
+  -
+    id: REL-600
     type: release
-    ref: "v6.0.0"
+    ref: v6.0.0
     status: completed
     timestamp: "2026-04-24T11:15:00Z"
-    summary: "Prepared the V6.0.0 release metadata and lifecycle command surface."
-    report: ".claude-plugin/plugin.json"
+    summary: Prepared the V6.0.0 release metadata and lifecycle command surface.
+    report: .claude-plugin/plugin.json
     trigger: user
-    related_milestone: "M6"
-  - id: "REL-840"
+    related_milestone: M6
+  -
+    id: REL-840
     type: release
-    ref: "v8.4.0"
+    ref: v8.4.0
     status: completed
     timestamp: "2026-04-30T14:22:03+08:00"
-    summary: "Released the Rules dimension with built-in presets, custom Markdown rules, SessionStart injection, and 50/50 regression coverage."
-    report: "CHANGELOG.md"
+    summary: Released the Rules dimension with built-in presets, custom Markdown rules, SessionStart injection, and 50/50 regression coverage.
+    report: CHANGELOG.md
     trigger: user
-    related_milestone: "V8.4"
-  - id: "C1"
+    related_milestone: V8.4
+  -
+    id: C1
     type: cycle_new
-    ref: "C1"
+    ref: C1
     status: active
     timestamp: "2026-04-30T14:33:17+08:00"
-    summary: "Started explicit Cycle C1 for V8.5 with feature type, tdd preset, and empty context sources."
-    report: ".pipeline/cycle.yaml"
+    summary: Started explicit Cycle C1 for V8.5 with feature type, tdd preset, and empty context sources.
+    report: .pipeline/cycle.yaml
     trigger: user
     related_milestone: null
-  - id: "PLAN-V9"
+  -
+    id: PLAN-V9
     type: plan_generate
-    ref: "C1/V9"
+    ref: C1/V9
     status: completed
     timestamp: "2026-04-30T14:48:00+08:00"
-    summary: "Generated V9 OpenCode native adapter plan with 10 milestones, including split regression and release milestones."
-    report: ".pipeline/confirm-summary.md"
+    summary: Generated V9 OpenCode native adapter plan with 10 milestones, including split regression and release milestones.
+    report: .pipeline/confirm-summary.md
     trigger: user
     related_milestone: null
-  - id: "M0-V9"
+  -
+    id: M0-V9
     type: milestone_complete
-    ref: "C1/M0"
+    ref: C1/M0
     status: completed
     timestamp: "2026-04-30T15:25:30+08:00"
-    summary: "Established the V9 OpenCode native adapter architecture baseline and capability matrix with static regression coverage."
-    report: ".pipeline/reports/00-v9-architecture-and-capability-matrix.report.md"
+    summary: Established the V9 OpenCode native adapter architecture baseline and capability matrix with static regression coverage.
+    report: .pipeline/reports/00-v9-architecture-and-capability-matrix.report.md
     trigger: auto
-    related_milestone: "00-v9-architecture-and-capability-matrix"
-  - id: "M1-V9"
+    related_milestone: 00-v9-architecture-and-capability-matrix
+  -
+    id: M1-V9
     type: milestone_complete
-    ref: "C1/M1"
+    ref: C1/M1
     status: completed
     timestamp: "2026-04-30T15:30:00+08:00"
-    summary: "Added the shared core helper for config/profile/platform/command/rules/OpenCode artifact generation without introducing a runner."
-    report: ".pipeline/reports/01-core-shared-config-and-artifact-kernel.report.md"
+    summary: Added the shared core helper for config/profile/platform/command/rules/OpenCode artifact generation without introducing a runner.
+    report: .pipeline/reports/01-core-shared-config-and-artifact-kernel.report.md
     trigger: auto
-    related_milestone: "01-core-shared-config-and-artifact-kernel"
-  - id: "M2-V9"
+    related_milestone: 01-core-shared-config-and-artifact-kernel
+  -
+    id: M2-V9
     type: milestone_complete
-    ref: "C1/M2"
+    ref: C1/M2
     status: completed
     timestamp: "2026-04-30T15:33:30+08:00"
-    summary: "Added the setup-only hypo-workflow CLI for global config, profiles, doctor checks, adapter sync, and project initialization."
-    report: ".pipeline/reports/02-global-cli-tui-setup.report.md"
+    summary: Added the setup-only hypo-workflow CLI for global config, profiles, doctor checks, adapter sync, and project initialization.
+    report: .pipeline/reports/02-global-cli-tui-setup.report.md
     trigger: auto
-    related_milestone: "02-global-cli-tui-setup"
-  - id: "M3-V9"
+    related_milestone: 02-global-cli-tui-setup
+  -
+    id: M3-V9
     type: milestone_complete
-    ref: "C1/M3"
+    ref: C1/M3
     status: completed
     timestamp: "2026-04-30T15:36:45+08:00"
-    summary: "Added the OpenCode plugin scaffold and project-level adapter artifacts generated by init-project/sync."
-    report: ".pipeline/reports/03-opencode-plugin-scaffold-and-project-adapter.report.md"
+    summary: Added the OpenCode plugin scaffold and project-level adapter artifacts generated by init-project/sync.
+    report: .pipeline/reports/03-opencode-plugin-scaffold-and-project-adapter.report.md
     trigger: auto
-    related_milestone: "03-opencode-plugin-scaffold-and-project-adapter"
-  - id: "M4-V9"
+    related_milestone: 03-opencode-plugin-scaffold-and-project-adapter
+  -
+    id: M4-V9
     type: milestone_complete
-    ref: "C1/M4"
+    ref: C1/M4
     status: completed
     timestamp: "2026-04-30T15:42:00+08:00"
-    summary: "Strengthened OpenCode slash-command generation with 30/30 command mapping, skill paths, context guidance, and agent binding docs."
-    report: ".pipeline/reports/04-opencode-slash-command-mapping.report.md"
+    summary: Strengthened OpenCode slash-command generation with 30/30 command mapping, skill paths, context guidance, and agent binding docs.
+    report: .pipeline/reports/04-opencode-slash-command-mapping.report.md
     trigger: auto
-    related_milestone: "04-opencode-slash-command-mapping"
-  - id: "M5-V9"
+    related_milestone: 04-opencode-slash-command-mapping
+  -
+    id: M5-V9
     type: milestone_complete
-    ref: "C1/M5"
+    ref: C1/M5
     status: completed
     timestamp: "2026-04-30T15:44:00+08:00"
-    summary: "Added OpenCode agent generation, Ask/todowrite plan discipline, todo sync scaffold, and the plan-tool-required built-in rule."
-    report: ".pipeline/reports/05-opencode-agents-ask-todowrite-plan-discipline.report.md"
+    summary: Added OpenCode agent generation, Ask/todowrite plan discipline, todo sync scaffold, and the plan-tool-required built-in rule.
+    report: .pipeline/reports/05-opencode-agents-ask-todowrite-plan-discipline.report.md
     trigger: auto
-    related_milestone: "05-opencode-agents-ask-todowrite-plan-discipline"
-  - id: "M6-V9"
+    related_milestone: 05-opencode-agents-ask-todowrite-plan-discipline
+  -
+    id: M6-V9
     type: milestone_complete
-    ref: "C1/M6"
+    ref: C1/M6
     status: completed
     timestamp: "2026-04-30T15:47:00+08:00"
-    summary: "Added OpenCode plugin event policies for command context, auto-continue, compact context restore, file guard, and permission logging."
-    report: ".pipeline/reports/06-opencode-events-auto-continue-context-file-guard.report.md"
+    summary: Added OpenCode plugin event policies for command context, auto-continue, compact context restore, file guard, and permission logging.
+    report: .pipeline/reports/06-opencode-events-auto-continue-context-file-guard.report.md
     trigger: auto
-    related_milestone: "06-opencode-events-auto-continue-context-file-guard"
-  - id: "M7-V9"
+    related_milestone: 06-opencode-events-auto-continue-context-file-guard
+  -
+    id: M7-V9
     type: milestone_complete
-    ref: "C1/M7"
+    ref: C1/M7
     status: completed
     timestamp: "2026-04-30T15:48:00+08:00"
-    summary: "Added OpenCode V8.4 parity command guidance, parity documentation, and smoke coverage."
-    report: ".pipeline/reports/07-opencode-full-v84-parity.report.md"
+    summary: Added OpenCode V8.4 parity command guidance, parity documentation, and smoke coverage.
+    report: .pipeline/reports/07-opencode-full-v84-parity.report.md
     trigger: auto
-    related_milestone: "07-opencode-full-v84-parity"
-  - id: "M8-V9"
+    related_milestone: 07-opencode-full-v84-parity
+  -
+    id: M8-V9
     type: milestone_complete
-    ref: "C1/M8"
+    ref: C1/M8
     status: completed
     timestamp: "2026-04-30T16:00:00+08:00"
-    summary: "Consolidated V9 static/offline regression coverage and verified the full suite at 59/59."
-    report: ".pipeline/reports/08-v9-regression-and-smoke-tests.report.md"
+    summary: Consolidated V9 static/offline regression coverage and verified the full suite at 59/59.
+    report: .pipeline/reports/08-v9-regression-and-smoke-tests.report.md
     trigger: auto
-    related_milestone: "08-v9-regression-and-smoke-tests"
-  - id: "M9-V9"
+    related_milestone: 08-v9-regression-and-smoke-tests
+  -
+    id: M9-V9
     type: milestone_complete
-    ref: "C1/M9"
+    ref: C1/M9
     status: completed
     timestamp: "2026-04-30T16:05:00+08:00"
-    summary: "Completed V9 documentation, version metadata, CHANGELOG, OpenCode bootstrap artifacts, and final validation."
-    report: ".pipeline/reports/09-v9-docs-bootstrap-and-release.report.md"
+    summary: Completed V9 documentation, version metadata, CHANGELOG, OpenCode bootstrap artifacts, and final validation.
+    report: .pipeline/reports/09-v9-docs-bootstrap-and-release.report.md
     trigger: auto
-    related_milestone: "09-v9-docs-bootstrap-and-release"
-  - id: "C1-COMPLETE"
+    related_milestone: 09-v9-docs-bootstrap-and-release
+  -
+    id: C1-COMPLETE
     type: cycle_complete
-    ref: "C1"
+    ref: C1
     status: completed
     timestamp: "2026-04-30T16:05:00+08:00"
-    summary: "Completed all 10 V9 OpenCode Native Adapter milestones with 59/59 regression coverage."
-    report: ".pipeline/PROGRESS.md"
+    summary: Completed all 10 V9 OpenCode Native Adapter milestones with 59/59 regression coverage.
+    report: .pipeline/PROGRESS.md
     trigger: auto
     related_milestone: null
-  - id: "REL-900"
+  -
+    id: REL-900
     type: release
-    ref: "v9.0.0"
+    ref: v9.0.0
     status: completed
     timestamp: "2026-04-30T16:12:00+08:00"
-    summary: "Prepared the V9.0.0 release with OpenCode native adapter scaffold, global setup CLI, core helpers, and 59/59 regression coverage."
-    report: "CHANGELOG.md"
+    summary: Prepared the V9.0.0 release with OpenCode native adapter scaffold, global setup CLI, core helpers, and 59/59 regression coverage.
+    report: CHANGELOG.md
     trigger: user
-    related_milestone: "V9"
-  - id: "P001"
+    related_milestone: V9
+  -
+    id: P001
     type: patch_fix
-    patch: "P001"
+    patch: P001
     status: closed
     timestamp: "2026-04-30T16:28:00+08:00"
-    commit: "self"
-    summary: "Expanded README with Chinese OpenCode installation, setup, project initialization, command mapping, workflows, platform behavior, and validation scope."
-    tests: "python3 tests/run_regression.py (59/59); claude plugin validate .; git diff --check"
-  - id: "P002"
+    commit: self
+    summary: Expanded README with Chinese OpenCode installation, setup, project initialization, command mapping, workflows, platform behavior, and validation scope.
+    tests: python3 tests/run_regression.py (59/59); claude plugin validate .; git diff --check
+  -
+    id: P002
     type: patch_fix
-    patch: "P002"
+    patch: P002
     status: closed
     timestamp: "2026-04-30T16:59:24+08:00"
-    commit: "self"
-    summary: "Restored PROGRESS.md to a board-style summary with milestone, timeline, and patch tables, and added s60 regression coverage for the format contract."
-    tests: "bash tests/scenarios/v9/s60-progress-board-format/run.sh; claude plugin validate .; python3 tests/run_regression.py (60/60); git diff --check"
-  - id: "P003"
+    commit: self
+    summary: Restored PROGRESS.md to a board-style summary with milestone, timeline, and patch tables, and added s60 regression coverage for the format contract.
+    tests: bash tests/scenarios/v9/s60-progress-board-format/run.sh; claude plugin validate .; python3 tests/run_regression.py (60/60); git diff --check
+  -
+    id: P003
     type: patch_fix
-    patch: "P003"
+    patch: P003
     status: closed
     timestamp: "2026-04-30T17:04:04+08:00"
-    commit: "self"
-    summary: "Fixed OpenCode runtime schema compatibility by keeping opencode.json on official keys, moving HW metadata to .opencode/hypo-workflow.json, and rendering agents with permission objects instead of tools strings."
-    tests: "opencode debug config; node --test core/test/*.test.js; python3 tests/run_regression.py (60/60); claude plugin validate .; git diff --check"
-  - id: "C1-ARCHIVE"
+    commit: self
+    summary: Fixed OpenCode runtime schema compatibility by keeping opencode.json on official keys, moving HW metadata to .opencode/hypo-workflow.json, and rendering agents with permission objects instead of tools strings.
+    tests: opencode debug config; node --test core/test/*.test.js; python3 tests/run_regression.py (60/60); claude plugin validate .; git diff --check
+  -
+    id: C1-ARCHIVE
     type: cycle_archive
-    ref: "C1"
+    ref: C1
     status: completed
     timestamp: "2026-04-30T16:17:46+00:00"
-    summary: "Archived Cycle C1 artifacts to .pipeline/archives/C1-v9-opencode-native-adapter before starting the next explicit Cycle."
-    report: ".pipeline/archives/C1-v9-opencode-native-adapter/summary.md"
+    summary: Archived Cycle C1 artifacts to .pipeline/archives/C1-v9-opencode-native-adapter before starting the next explicit Cycle.
+    report: .pipeline/archives/C1-v9-opencode-native-adapter/summary.md
     trigger: user
     related_milestone: null
-  - id: "C2"
+  -
+    id: C2
     type: cycle_new
-    ref: "C2"
+    ref: C2
     status: active
     timestamp: "2026-04-30T16:17:46+00:00"
-    summary: "Started explicit Cycle C2 named New Cycle with feature type, tdd preset, and empty context sources."
-    report: ".pipeline/cycle.yaml"
+    summary: Started explicit Cycle C2 named New Cycle with feature type, tdd preset, and empty context sources.
+    report: .pipeline/cycle.yaml
     trigger: user
     related_milestone: null
-  - id: "M01-C2"
+  -
+    id: M01-C2
     type: milestone_complete
-    ref: "C2/M01"
+    ref: C2/M01
     status: completed
     timestamp: "2026-05-01T02:27:00+08:00"
-    summary: "Defined the README automation contract with managed blocks, data sources, update policy, full-regeneration gates, and spec tests."
-    report: ".pipeline/reports/00-readme-spec-and-data-inventory.report.md"
+    summary: Defined the README automation contract with managed blocks, data sources, update policy, full-regeneration gates, and spec tests.
+    report: .pipeline/reports/00-readme-spec-and-data-inventory.report.md
     trigger: auto
-    related_milestone: "00-readme-spec-and-data-inventory"
-  - id: "M02-C2"
+    related_milestone: 00-readme-spec-and-data-inventory
+  -
+    id: M02-C2
     type: milestone_complete
-    ref: "C2/M02"
+    ref: C2/M02
     status: completed
     timestamp: "2026-05-01T02:52:00+08:00"
-    summary: "Added README update helper, release update_readme/readme-freshness guidance, release.readme defaults, and freshness validation coverage."
-    report: ".pipeline/reports/01-release-readme-automation-freshness.report.md"
+    summary: Added README update helper, release update_readme/readme-freshness guidance, release.readme defaults, and freshness validation coverage.
+    report: .pipeline/reports/01-release-readme-automation-freshness.report.md
     trigger: auto
-    related_milestone: "01-release-readme-automation-freshness"
-  - id: "M03-C2"
+    related_milestone: 01-release-readme-automation-freshness
+  -
+    id: M03-C2
     type: milestone_complete
-    ref: "C2/M03"
+    ref: C2/M03
     status: completed
     timestamp: "2026-05-01T03:10:00+08:00"
-    summary: "Added the Skill asset inventory, command-to-Skill mapping contract, required SKILL.md format, watchdog exception, and Skill quality spec tests."
-    report: ".pipeline/reports/02-skill-asset-audit-quality-spec.report.md"
+    summary: Added the Skill asset inventory, command-to-Skill mapping contract, required SKILL.md format, watchdog exception, and Skill quality spec tests.
+    report: .pipeline/reports/02-skill-asset-audit-quality-spec.report.md
     trigger: auto
-    related_milestone: "02-skill-asset-audit-quality-spec"
-  - id: "M04-C2"
+    related_milestone: 02-skill-asset-audit-quality-spec
+  -
+    id: M04-C2
     type: milestone_complete
-    ref: "C2/M04"
+    ref: C2/M04
     status: completed
     timestamp: "2026-05-01T03:27:00+08:00"
-    summary: "Added skill-quality checker and rule coverage, normalized known Skill heading/review-alias issues, and verified 30 Skill files with 0 quality issues."
-    report: ".pipeline/reports/03-skill-format-normalization-quality-rule.report.md"
+    summary: Added skill-quality checker and rule coverage, normalized known Skill heading/review-alias issues, and verified 30 Skill files with 0 quality issues.
+    report: .pipeline/reports/03-skill-format-normalization-quality-rule.report.md
     trigger: auto
-    related_milestone: "03-skill-format-normalization-quality-rule"
-  - id: "M05-C2"
+    related_milestone: 03-skill-format-normalization-quality-rule
+  -
+    id: M05-C2
     type: milestone_complete
-    ref: "C2/M05"
+    ref: C2/M05
     status: completed
     timestamp: "2026-05-01T03:46:00+08:00"
-    summary: "Added Feature Queue and Metrics contracts, batch defaults/schema/docs, queue and metrics fixtures, and 27/27 core coverage."
-    report: ".pipeline/reports/04-feature-queue-and-metrics-contracts.report.md"
+    summary: Added Feature Queue and Metrics contracts, batch defaults/schema/docs, queue and metrics fixtures, and 27/27 core coverage.
+    report: .pipeline/reports/04-feature-queue-and-metrics-contracts.report.md
     trigger: auto
-    related_milestone: "04-feature-queue-and-metrics-contracts"
-  - id: "M06-C2"
+    related_milestone: 04-feature-queue-and-metrics-contracts
+  -
+    id: M06-C2
     type: milestone_complete
-    ref: "C2/M06"
+    ref: C2/M06
     status: completed
     timestamp: "2026-05-01T04:08:00+08:00"
     summary: "Added batch plan artifact generation, /hw:plan --batch Discover/Decompose semantics, OpenCode guidance, and 30/30 core coverage."
-    report: ".pipeline/reports/05-batch-plan-discover-upfront-decomposition.report.md"
+    report: .pipeline/reports/05-batch-plan-discover-upfront-decomposition.report.md
     trigger: auto
-    related_milestone: "05-batch-plan-discover-upfront-decomposition"
-  - id: "M07-C2"
+    related_milestone: 05-batch-plan-discover-upfront-decomposition
+  -
+    id: M07-C2
     type: milestone_complete
-    ref: "C2/M07"
+    ref: C2/M07
     status: completed
     timestamp: "2026-05-01T04:38:00+08:00"
-    summary: "Added Feature Queue insert operations, auto-chain, confirm gates, JIT decomposition, metrics fallback sync, and 36/36 core coverage."
-    report: ".pipeline/reports/06-queue-insert-auto-chain-jit.report.md"
+    summary: Added Feature Queue insert operations, auto-chain, confirm gates, JIT decomposition, metrics fallback sync, and 36/36 core coverage.
+    report: .pipeline/reports/06-queue-insert-auto-chain-jit.report.md
     trigger: auto
-    related_milestone: "06-queue-insert-auto-chain-jit"
-  - id: "F003-GATE-C2"
+    related_milestone: 06-queue-insert-auto-chain-jit
+  -
+    id: F003-GATE-C2
     type: feature_gate
-    ref: "C2/F003"
+    ref: C2/F003
     status: waiting_confirmation
     timestamp: "2026-05-01T04:38:00+08:00"
     summary: "Auto-chain paused before F003 OpenCode status panels because the Feature Queue entry has gate: confirm."
-    report: ".pipeline/feature-queue.yaml"
+    report: .pipeline/feature-queue.yaml
     trigger: auto
-    related_milestone: "07-opencode-tui-status-data-adapter"
-  - id: "F003-GATE-CONFIRMED-C2"
+    related_milestone: 07-opencode-tui-status-data-adapter
+  -
+    id: F003-GATE-CONFIRMED-C2
     type: feature_gate
-    ref: "C2/F003"
+    ref: C2/F003
     status: confirmed
     timestamp: "2026-05-01T11:35:31+08:00"
-    summary: "User confirmed continuation into F003 OpenCode status panels; M08 status data adapter started."
-    report: ".pipeline/feature-queue.yaml"
+    summary: User confirmed continuation into F003 OpenCode status panels; M08 status data adapter started.
+    report: .pipeline/feature-queue.yaml
     trigger: user
-    related_milestone: "07-opencode-tui-status-data-adapter"
-  - id: "M08-C2"
+    related_milestone: 07-opencode-tui-status-data-adapter
+  -
+    id: M08-C2
     type: milestone_complete
-    ref: "C2/M08"
+    ref: C2/M08
     status: completed
     timestamp: "2026-05-01T13:08:00+08:00"
-    summary: "Added the read-only OpenCode status adapter, runtime .pipeline YAML subset parsing, sidebar/footer summaries, and 42/42 core coverage."
-    report: ".pipeline/reports/07-opencode-tui-status-data-adapter.report.md"
+    summary: Added the read-only OpenCode status adapter, runtime .pipeline YAML subset parsing, sidebar/footer summaries, and 42/42 core coverage.
+    report: .pipeline/reports/07-opencode-tui-status-data-adapter.report.md
     trigger: auto
-    related_milestone: "07-opencode-tui-status-data-adapter"
-  - id: "M09-C2"
+    related_milestone: 07-opencode-tui-status-data-adapter
+  -
+    id: M09-C2
     type: milestone_complete
-    ref: "C2/M09"
+    ref: C2/M09
     status: completed
     timestamp: "2026-05-01T13:25:33+08:00"
-    summary: "Added the OpenCode TUI sidebar/footer panels, generated colocated runtime status modules, fixed duplicated plugin config loading, and verified 45/45 core coverage."
-    report: ".pipeline/reports/08-opencode-sidebar-footer-panels.report.md"
+    summary: Added the OpenCode TUI sidebar/footer panels, generated colocated runtime status modules, fixed duplicated plugin config loading, and verified 45/45 core coverage.
+    report: .pipeline/reports/08-opencode-sidebar-footer-panels.report.md
     trigger: auto
-    related_milestone: "08-opencode-sidebar-footer-panels"
-  - id: "F005-GATE-C2"
+    related_milestone: 08-opencode-sidebar-footer-panels
+  -
+    id: F005-GATE-C2
     type: feature_gate
-    ref: "C2/F005"
+    ref: C2/F005
     status: waiting_confirmation
     timestamp: "2026-05-01T13:25:33+08:00"
     summary: "Auto-chain paused before F005 project technical report and slides because the Feature Queue entry has gate: confirm."
-    report: ".pipeline/feature-queue.yaml"
+    report: .pipeline/feature-queue.yaml
     trigger: auto
-    related_milestone: "09-report-outline-evidence-assets"
-  - id: "PLAN-EXTEND-C2-F006-F008"
+    related_milestone: 09-report-outline-evidence-assets
+  -
+    id: PLAN-EXTEND-C2-F006-F008
     type: plan_extend
-    ref: "C2/M13-M19"
+    ref: C2/M13-M19
     status: completed
     timestamp: "2026-05-01T14:00:39+08:00"
-    summary: "Extended C2 with F006 chat mode, F007 Progressive Discover, and F008 Test Profiles, then rewrote M10-M12 scope so the final report and slides cover the expanded Cycle."
-    report: ".pipeline/PROGRESS.md"
+    summary: Extended C2 with F006 chat mode, F007 Progressive Discover, and F008 Test Profiles, then rewrote M10-M12 scope so the final report and slides cover the expanded Cycle.
+    report: .pipeline/PROGRESS.md
     trigger: user
     related_milestone: null
-  - id: "M13-C2"
+  -
+    id: M13-C2
     type: milestone_complete
-    ref: "C2/M13"
+    ref: C2/M13
     status: completed
     timestamp: "2026-05-01T14:31:00+08:00"
     summary: "Defined the /hw:chat contract, chat state shape, chat_entry logging, PROGRESS chat rows, and SessionStart/Stop Hook boundaries."
-    report: ".pipeline/reports/12-chat-mode-contracts-hooks-and-logging.report.md"
+    report: .pipeline/reports/12-chat-mode-contracts-hooks-and-logging.report.md
     trigger: auto
-    related_milestone: "12-chat-mode-contracts-hooks-and-logging"
-  - id: "M14-C2"
+    related_milestone: 12-chat-mode-contracts-hooks-and-logging
+  -
+    id: M14-C2
     type: milestone_complete
-    ref: "C2/M14"
+    ref: C2/M14
     status: completed
     timestamp: "2026-05-01T14:43:00+08:00"
     summary: "Added chat runtime helpers, /hw:chat command mapping, SessionStart/Stop Hook behavior, Patch escalation hints, and OpenCode chat artifact sync."
-    report: ".pipeline/reports/13-chat-mode-runtime-and-patch-upgrade.report.md"
+    report: .pipeline/reports/13-chat-mode-runtime-and-patch-upgrade.report.md
     trigger: auto
-    related_milestone: "13-chat-mode-runtime-and-patch-upgrade"
-  - id: "M15-C2"
+    related_milestone: 13-chat-mode-runtime-and-patch-upgrade
+  -
+    id: M15-C2
     type: milestone_complete
-    ref: "C2/M15"
+    ref: C2/M15
     status: completed
     timestamp: "2026-05-01T14:53:00+08:00"
-    summary: "Defined Progressive Discover big-question-first structure and added the optional @karpathy/guidelines built-in rule pack."
-    report: ".pipeline/reports/14-progressive-discover-and-rule-pack-spec.report.md"
+    summary: Defined Progressive Discover big-question-first structure and added the optional @karpathy/guidelines built-in rule pack.
+    report: .pipeline/reports/14-progressive-discover-and-rule-pack-spec.report.md
     trigger: auto
-    related_milestone: "14-progressive-discover-and-rule-pack-spec"
-  - id: "M16-C2"
+    related_milestone: 14-progressive-discover-and-rule-pack-spec
+  -
+    id: M16-C2
     type: milestone_complete
-    ref: "C2/M16"
+    ref: C2/M16
     status: completed
     timestamp: "2026-05-01T15:00:00+08:00"
-    summary: "Added Progressive Discover helpers, config/schema defaults, plan guidance wiring, batch metadata enrichment, and OpenCode plan artifact sync."
-    report: ".pipeline/reports/15-progressive-discover-runtime-and-compatibility.report.md"
+    summary: Added Progressive Discover helpers, config/schema defaults, plan guidance wiring, batch metadata enrichment, and OpenCode plan artifact sync.
+    report: .pipeline/reports/15-progressive-discover-runtime-and-compatibility.report.md
     trigger: auto
-    related_milestone: "15-progressive-discover-runtime-and-compatibility"
-  - id: "M17-C2"
+    related_milestone: 15-progressive-discover-runtime-and-compatibility
+  -
+    id: M17-C2
     type: milestone_complete
-    ref: "C2/M17"
+    ref: C2/M17
     status: completed
     timestamp: "2026-05-01T15:06:00+08:00"
-    summary: "Defined Test Profile compose semantics, config surface, plan guidance, and evaluation evidence rules for webapp, agent-service, and research."
-    report: ".pipeline/reports/16-test-profile-contracts-and-plan-guidance.report.md"
+    summary: Defined Test Profile compose semantics, config surface, plan guidance, and evaluation evidence rules for webapp, agent-service, and research.
+    report: .pipeline/reports/16-test-profile-contracts-and-plan-guidance.report.md
     trigger: auto
-    related_milestone: "16-test-profile-contracts-and-plan-guidance"
-  - id: "M18-C2"
+    related_milestone: 16-test-profile-contracts-and-plan-guidance
+  -
+    id: M18-C2
     type: milestone_complete
-    ref: "C2/M18"
+    ref: C2/M18
     status: completed
     timestamp: "2026-05-01T15:10:00+08:00"
-    summary: "Added webapp and agent-service Test Profile evidence helpers, compose-aware selection logic, and Feature Queue profile summaries."
-    report: ".pipeline/reports/17-test-profile-webapp-and-agent-service-runtime.report.md"
+    summary: Added webapp and agent-service Test Profile evidence helpers, compose-aware selection logic, and Feature Queue profile summaries.
+    report: .pipeline/reports/17-test-profile-webapp-and-agent-service-runtime.report.md
     trigger: auto
-    related_milestone: "17-test-profile-webapp-and-agent-service-runtime"
-  - id: "M19-C2"
+    related_milestone: 17-test-profile-webapp-and-agent-service-runtime
+  -
+    id: M19-C2
     type: milestone_complete
-    ref: "C2/M19"
+    ref: C2/M19
     status: completed
     timestamp: "2026-05-01T15:13:22+08:00"
-    summary: "Added research Test Profile baseline/script/delta evidence checks, blocking semantics for missing profile evidence, and verified the full core suite at 70/70."
-    report: ".pipeline/reports/18-test-profile-research-runtime-and-baseline-validation.report.md"
+    summary: Added research Test Profile baseline/script/delta evidence checks, blocking semantics for missing profile evidence, and verified the full core suite at 70/70.
+    report: .pipeline/reports/18-test-profile-research-runtime-and-baseline-validation.report.md
     trigger: auto
-    related_milestone: "18-test-profile-research-runtime-and-baseline-validation"
-  - id: "F005-GATE-REFRESH-C2"
+    related_milestone: 18-test-profile-research-runtime-and-baseline-validation
+  -
+    id: F005-GATE-REFRESH-C2
     type: feature_gate
-    ref: "C2/F005"
+    ref: C2/F005
     status: waiting_confirmation
     timestamp: "2026-05-01T15:13:22+08:00"
     summary: "Auto-chain paused before F005 project technical report and slides after F006-F008 completed because the Feature Queue entry still has gate: confirm."
-    report: ".pipeline/feature-queue.yaml"
+    report: .pipeline/feature-queue.yaml
     trigger: auto
-    related_milestone: "09-report-outline-evidence-assets"
-  - id: "F005-GATE-CONFIRMED-C2"
+    related_milestone: 09-report-outline-evidence-assets
+  -
+    id: F005-GATE-CONFIRMED-C2
     type: feature_gate
-    ref: "C2/F005"
+    ref: C2/F005
     status: confirmed
     timestamp: "2026-05-01T15:13:22+08:00"
-    summary: "User confirmed continuation into F005 final report and slides; M10 started."
-    report: ".pipeline/feature-queue.yaml"
+    summary: User confirmed continuation into F005 final report and slides; M10 started.
+    report: .pipeline/feature-queue.yaml
     trigger: user
-    related_milestone: "09-report-outline-evidence-assets"
-  - id: "M10-C2"
+    related_milestone: 09-report-outline-evidence-assets
+  -
+    id: M10-C2
     type: milestone_complete
-    ref: "C2/M10"
+    ref: C2/M10
     status: completed
     timestamp: "2026-05-01T15:22:00+08:00"
-    summary: "Prepared the technical report outline, evidence inventory, asset plan, demo route, and reusable TikZ/Graphviz figure sources for F005."
-    report: ".pipeline/reports/09-report-outline-evidence-assets.report.md"
+    summary: Prepared the technical report outline, evidence inventory, asset plan, demo route, and reusable TikZ/Graphviz figure sources for F005.
+    report: .pipeline/reports/09-report-outline-evidence-assets.report.md
     trigger: auto
-    related_milestone: "09-report-outline-evidence-assets"
-  - id: "M11-C2"
+    related_milestone: 09-report-outline-evidence-assets
+  -
+    id: M11-C2
     type: milestone_complete
-    ref: "C2/M11"
+    ref: C2/M11
     status: completed
     timestamp: "2026-05-01T15:37:00+08:00"
-    summary: "Completed the Chinese technical report in LaTeX, integrated V9/C2 evidence, and built the report PDF."
-    report: ".pipeline/reports/10-full-technical-report.report.md"
+    summary: Completed the Chinese technical report in LaTeX, integrated V9/C2 evidence, and built the report PDF.
+    report: .pipeline/reports/10-full-technical-report.report.md
     trigger: auto
-    related_milestone: "10-full-technical-report"
-  - id: "M12-C2"
+    related_milestone: 10-full-technical-report
+  -
+    id: M12-C2
     type: milestone_complete
-    ref: "C2/M12"
+    ref: C2/M12
     status: completed
     timestamp: "2026-05-01T15:39:29+08:00"
-    summary: "Completed the 35-page Beamer deck, demo script, showcase metadata, and final C2 validation."
-    report: ".pipeline/reports/11-beamer-slides-demo-cycle-validation.report.md"
+    summary: Completed the 35-page Beamer deck, demo script, showcase metadata, and final C2 validation.
+    report: .pipeline/reports/11-beamer-slides-demo-cycle-validation.report.md
     trigger: auto
-    related_milestone: "11-beamer-slides-demo-cycle-validation"
-  - id: "C2-COMPLETE"
+    related_milestone: 11-beamer-slides-demo-cycle-validation
+  -
+    id: C2-COMPLETE
     type: cycle_complete
-    ref: "C2"
+    ref: C2
     status: completed
     timestamp: "2026-05-01T15:39:29+08:00"
-    summary: "Completed all 19 C2 milestones, including README automation, Skill governance, OpenCode status panels, Batch Plan, Chat Mode, Progressive Discover, Test Profiles, and final showcase delivery."
-    report: ".pipeline/PROGRESS.md"
+    summary: Completed all 19 C2 milestones, including README automation, Skill governance, OpenCode status panels, Batch Plan, Chat Mode, Progressive Discover, Test Profiles, and final showcase delivery.
+    report: .pipeline/PROGRESS.md
     trigger: auto
     related_milestone: null
-  - id: "PLAN-EXTEND-C2-M20"
+  -
+    id: PLAN-EXTEND-C2-M20
     type: plan_extend
-    ref: "C2/M20"
+    ref: C2/M20
     status: completed
     timestamp: "2026-05-01T20:25:34+08:00"
     summary: "Reopened C2 to append F009/M20 after multi-round Discover: expand the report into a long-form narrative book-style draft, rebuild slides with GPT Image 2 visuals, and package showcase sources plus LaTeX dependencies cleanly."
-    report: ".pipeline/prompts/19-book-report-slides-imagegen-and-showcase-packaging.md"
+    report: .pipeline/prompts/19-book-report-slides-imagegen-and-showcase-packaging.md
     trigger: user
     related_milestone: null
-  - id: "M20-START-C2"
+  -
+    id: M20-START-C2
     type: milestone_start
-    ref: "C2/M20"
+    ref: C2/M20
     status: running
     timestamp: "2026-05-01T20:34:23+08:00"
-    summary: "Started M20 at write_tests for the long-form report expansion, GPT Image 2 slide refresh, and showcase packaging cleanup."
-    report: ".pipeline/prompts/19-book-report-slides-imagegen-and-showcase-packaging.md"
+    summary: Started M20 at write_tests for the long-form report expansion, GPT Image 2 slide refresh, and showcase packaging cleanup.
+    report: .pipeline/prompts/19-book-report-slides-imagegen-and-showcase-packaging.md
     trigger: user
-    related_milestone: "19-book-report-slides-imagegen-and-showcase-packaging"
-  - id: "M20-WRITE-TESTS-C2"
+    related_milestone: 19-book-report-slides-imagegen-and-showcase-packaging
+  -
+    id: M20-WRITE-TESTS-C2
     type: step
-    ref: "C2/M20/write_tests"
+    ref: C2/M20/write_tests
     status: done
     timestamp: "2026-05-01T20:36:11+08:00"
-    summary: "Added showcase-report-refresh red tests for docs/showcase source relocation, vendor submodule/gitignore packaging, expanded report narrative anchors, and GPT Image 2 slide evidence requirements."
-    report: "core/test/showcase-report-refresh.test.js"
+    summary: Added showcase-report-refresh red tests for docs/showcase source relocation, vendor submodule/gitignore packaging, expanded report narrative anchors, and GPT Image 2 slide evidence requirements.
+    report: core/test/showcase-report-refresh.test.js
     trigger: auto
-    related_milestone: "19-book-report-slides-imagegen-and-showcase-packaging"
-  - id: "M20-REVIEW-TESTS-C2"
+    related_milestone: 19-book-report-slides-imagegen-and-showcase-packaging
+  -
+    id: M20-REVIEW-TESTS-C2
     type: step
-    ref: "C2/M20/review_tests"
+    ref: C2/M20/review_tests
     status: done
     timestamp: "2026-05-01T20:37:42+08:00"
-    summary: "Reviewed the M20 tests and confirmed they constrain source layout, packaging, narrative anchors, and slide evidence without overfitting the exact implementation."
-    report: "core/test/showcase-report-refresh.test.js"
+    summary: Reviewed the M20 tests and confirmed they constrain source layout, packaging, narrative anchors, and slide evidence without overfitting the exact implementation.
+    report: core/test/showcase-report-refresh.test.js
     trigger: auto
-    related_milestone: "19-book-report-slides-imagegen-and-showcase-packaging"
-  - id: "M20-RED-C2"
+    related_milestone: 19-book-report-slides-imagegen-and-showcase-packaging
+  -
+    id: M20-RED-C2
     type: step
-    ref: "C2/M20/run_tests_red"
+    ref: C2/M20/run_tests_red
     status: done
     timestamp: "2026-05-01T20:38:14+08:00"
     summary: "Red run failed in the expected places: docs/showcase/c2-report is absent, .gitmodules is missing, and the refreshed report/slides sources do not exist yet."
-    report: "node --test core/test/showcase-report-refresh.test.js"
+    report: node --test core/test/showcase-report-refresh.test.js
     trigger: auto
-    related_milestone: "19-book-report-slides-imagegen-and-showcase-packaging"
-  - id: "M20-IMPLEMENT-C2"
+    related_milestone: 19-book-report-slides-imagegen-and-showcase-packaging
+  -
+    id: M20-IMPLEMENT-C2
     type: step
-    ref: "C2/M20/implement"
+    ref: C2/M20/implement
     status: done
     timestamp: "2026-05-01T21:48:00+08:00"
     summary: "Real migration: source files moved to docs/showcase/c2-report/, .gitmodules rewritten to vendor/Hypoxanthine-LaTeX, .gitignore extended, report.tex case-box subsection added, slides.tex visual+evidence frame added."
-    report: "docs/showcase/c2-report/{report,slides}.tex"
+    report: docs/showcase/c2-report/{report,slides}.tex
     trigger: auto
-    related_milestone: "19-book-report-slides-imagegen-and-showcase-packaging"
-  - id: "M20-GREEN-C2"
+    related_milestone: 19-book-report-slides-imagegen-and-showcase-packaging
+  -
+    id: M20-GREEN-C2
     type: step
-    ref: "C2/M20/run_tests_green"
+    ref: C2/M20/run_tests_green
     status: done
     timestamp: "2026-05-01T21:49:30+08:00"
     summary: "Green: node --test core/test/showcase-report-refresh.test.js 3/3; full suite core/test/*.test.js 218/218."
     trigger: auto
-    related_milestone: "19-book-report-slides-imagegen-and-showcase-packaging"
-  - id: "M20-REVIEW-CODE-C2"
+    related_milestone: 19-book-report-slides-imagegen-and-showcase-packaging
+  -
+    id: M20-REVIEW-CODE-C2
     type: step
-    ref: "C2/M20/review_code"
+    ref: C2/M20/review_code
     status: done
     timestamp: "2026-05-01T21:50:00+08:00"
-    summary: "Review accepted; image generation deferred as documented warning."
+    summary: Review accepted; image generation deferred as documented warning.
     trigger: auto
-    related_milestone: "19-book-report-slides-imagegen-and-showcase-packaging"
-  - id: "M20-COMPLETE-C2"
+    related_milestone: 19-book-report-slides-imagegen-and-showcase-packaging
+  -
+    id: M20-COMPLETE-C2
     type: milestone
-    ref: "C2/M20"
+    ref: C2/M20
     status: done
     timestamp: "2026-05-01T21:50:00+08:00"
     summary: "M20 done: showcase source migration + vendor/Hypoxanthine-LaTeX submodule + report/slides anchors. 218/218 tests green; GPT Image 2 actual assets deferred."
-    report: ".pipeline/reports/19-book-report-slides-imagegen-and-showcase-packaging.report.md"
+    report: .pipeline/reports/19-book-report-slides-imagegen-and-showcase-packaging.report.md
     trigger: auto
-    related_milestone: "19-book-report-slides-imagegen-and-showcase-packaging"
-  - id: "C2-PIPELINE-COMPLETE"
+    related_milestone: 19-book-report-slides-imagegen-and-showcase-packaging
+  -
+    id: C2-PIPELINE-COMPLETE
     type: cycle
-    ref: "C2"
+    ref: C2
     status: done
     timestamp: "2026-05-01T21:50:00+08:00"
     summary: "Cycle C2 completed: 20/20 Milestones pass; F001..F009 delivered."
     trigger: auto
-    related_milestone: "19-book-report-slides-imagegen-and-showcase-packaging"
-  - id: "M20-RECOVERY-C2"
+    related_milestone: 19-book-report-slides-imagegen-and-showcase-packaging
+  -
+    id: M20-RECOVERY-C2
     type: recovery
-    ref: "C2/M20"
+    ref: C2/M20
     status: running
     timestamp: "2026-05-01T22:43:10+08:00"
     summary: "Recovered M20 after a false completion from an interrupted handoff: target tests were still red, docs/showcase/c2-report lacked report.tex and slides.tex, and implementation resumed from the real source migration plus report/slides expansion work."
-    report: "node --test core/test/showcase-report-refresh.test.js"
+    report: node --test core/test/showcase-report-refresh.test.js
     trigger: user
-    related_milestone: "19-book-report-slides-imagegen-and-showcase-packaging"
-  - id: "M20-IMPLEMENT-RECOVERED-C2"
+    related_milestone: 19-book-report-slides-imagegen-and-showcase-packaging
+  -
+    id: M20-IMPLEMENT-RECOVERED-C2
     type: step
-    ref: "C2/M20/implement"
+    ref: C2/M20/implement
     status: done
     timestamp: "2026-05-01T23:04:00+08:00"
     summary: "Completed recovered implementation: canonical docs/showcase source directory, root Hypoxanthine-LaTeX submodule, LaTeX ignore/build setup, expanded book report, refreshed 37-page slides, and three Image Gen visual assets."
-    report: "docs/showcase/c2-report/"
+    report: docs/showcase/c2-report/
     trigger: auto
-    related_milestone: "19-book-report-slides-imagegen-and-showcase-packaging"
-  - id: "M20-GREEN-RECOVERED-C2"
+    related_milestone: 19-book-report-slides-imagegen-and-showcase-packaging
+  -
+    id: M20-GREEN-RECOVERED-C2
     type: step
-    ref: "C2/M20/run_tests_green"
+    ref: C2/M20/run_tests_green
     status: done
     timestamp: "2026-05-01T23:08:40+08:00"
     summary: "Green validation: target test 3/3, core suite 73/73, git diff --check pass, make report pass with 30-page PDF, make slides pass with 37-page PDF."
-    report: ".pipeline/reports/19-book-report-slides-imagegen-and-showcase-packaging.report.md"
+    report: .pipeline/reports/19-book-report-slides-imagegen-and-showcase-packaging.report.md
     trigger: auto
-    related_milestone: "19-book-report-slides-imagegen-and-showcase-packaging"
-  - id: "M20-COMPLETE-RECOVERED-C2"
+    related_milestone: 19-book-report-slides-imagegen-and-showcase-packaging
+  -
+    id: M20-COMPLETE-RECOVERED-C2
     type: milestone
-    ref: "C2/M20"
+    ref: C2/M20
     status: done
     timestamp: "2026-05-01T23:09:02+08:00"
-    summary: "M20 completed after recovery with real docs/showcase sources, generated visual assets, LaTeX builds, tests, and packaging cleanup."
-    report: ".pipeline/reports/19-book-report-slides-imagegen-and-showcase-packaging.report.md"
+    summary: M20 completed after recovery with real docs/showcase sources, generated visual assets, LaTeX builds, tests, and packaging cleanup.
+    report: .pipeline/reports/19-book-report-slides-imagegen-and-showcase-packaging.report.md
     trigger: auto
-    related_milestone: "19-book-report-slides-imagegen-and-showcase-packaging"
-  - id: "C2-PIPELINE-COMPLETE-RECOVERED"
+    related_milestone: 19-book-report-slides-imagegen-and-showcase-packaging
+  -
+    id: C2-PIPELINE-COMPLETE-RECOVERED
     type: cycle
-    ref: "C2"
+    ref: C2
     status: done
     timestamp: "2026-05-01T23:09:02+08:00"
     summary: "Cycle C2 completed with 20/20 milestones after M20 recovery; earlier 20:57 completion record is superseded by this verified result."
-    report: ".pipeline/PROGRESS.md"
+    report: .pipeline/PROGRESS.md
     trigger: auto
-    related_milestone: "19-book-report-slides-imagegen-and-showcase-packaging"
-  - id: "RELEASE-V9.1.0"
+    related_milestone: 19-book-report-slides-imagegen-and-showcase-packaging
+  -
+    id: RELEASE-V9.1.0
     type: release
-    ref: "v9.1.0"
+    ref: v9.1.0
     status: done
     timestamp: "2026-05-01T23:50:00+08:00"
     summary: "Released C2 non-Report features: README automation, Skill governance, Batch Plan, Chat Mode, Progressive Discover, Test Profiles, and OpenCode status panels."
-    report: "CHANGELOG.md"
+    report: CHANGELOG.md
     trigger: user
-  - id: "RELEASE-V9.1.1"
+  -
+    id: RELEASE-V9.1.1
     type: release
-    ref: "v9.1.1"
+    ref: v9.1.1
     status: done
     timestamp: "2026-05-02T00:05:00+08:00"
     summary: "Released the Report/Slides packaging layer: canonical docs/showcase/c2-report sources, GPT Image assets, Hypoxanthine-LaTeX submodule, and build verification."
-    report: "docs/showcase/c2-report/README.md"
+    report: docs/showcase/c2-report/README.md
     trigger: user
-  - id: "CHAT-20260502-OPENCODE-MODEL-MATRIX"
+  -
+    id: CHAT-20260502-OPENCODE-MODEL-MATRIX
     type: chat_entry
-    ref: "C3/F001-candidate"
+    ref: C3/F001-candidate
     status: proposed
     timestamp: "2026-05-02T00:29:20+08:00"
     summary: "Recorded the next Cycle first-task candidate: make OpenCode multi-agent model routing first-class, including GPT-5.5 planning, Flash compaction, separate test/code/debug/report subagents, and an effective 900K context compaction target."
-    report: ".pipeline/next-cycle-draft.yaml"
+    report: .pipeline/next-cycle-draft.yaml
     trigger: user
     related_milestone: null
-  - id: "PATCH-P004-FIX"
+  -
+    id: PATCH-P004-FIX
     type: patch_fix
-    patch: "P004"
+    patch: P004
     status: closed
     timestamp: "2026-05-02T00:47:05+08:00"
-    commit: "e3d791c"
-    summary: "Refactored the C2 technical report slides into a 51-page command-oriented deck, fixed cover/section/diagram display issues, and added Harness model-intelligence future work to both slides and report."
-    tests: "make slides pass (51 pages); make report pass (30 pages); git diff --check pass"
+    commit: e3d791c
+    summary: Refactored the C2 technical report slides into a 51-page command-oriented deck, fixed cover/section/diagram display issues, and added Harness model-intelligence future work to both slides and report.
+    tests: make slides pass (51 pages); make report pass (30 pages); git diff --check pass
     trigger: user
-  - id: "RELEASE-V9.1.2"
+  -
+    id: RELEASE-V9.1.2
     type: release
-    ref: "v9.1.2"
+    ref: v9.1.2
     status: done
     timestamp: "2026-05-02T00:56:29+08:00"
     summary: "Released V9.1 patch updates: Feature Queue README documentation, next-cycle OpenCode model-matrix draft, and the optimized 51-page C2 technical report Slides/report future-work refresh."
-    report: "CHANGELOG.md"
+    report: CHANGELOG.md
     trigger: user
-  - id: "C3"
+  -
+    id: C3
     type: cycle_new
-    ref: "C3"
+    ref: C3
     status: active
     timestamp: "2026-05-02T02:02:58+08:00"
-    summary: "Started Cycle C3 for OpenCode Multi-Agent Matrix and V10 Analysis Preset after archiving C2 runtime artifacts."
-    report: ".pipeline/cycle.yaml"
+    summary: Started Cycle C3 for OpenCode Multi-Agent Matrix and V10 Analysis Preset after archiving C2 runtime artifacts.
+    report: .pipeline/cycle.yaml
     trigger: user
     related_milestone: null
-  - id: "PLAN-C3-P3"
+  -
+    id: PLAN-C3-P3
     type: plan_generate
-    ref: "C3"
+    ref: C3
     status: completed
     timestamp: "2026-05-02T02:02:58+08:00"
-    summary: "Generated C3 plan artifacts with 5 auto-gated Features, 12 Milestones, OpenCode model matrix scope, and V10 Analysis Preset scope. Compact files were intentionally left unchanged."
-    report: ".pipeline/confirm-summary.md"
+    summary: Generated C3 plan artifacts with 5 auto-gated Features, 12 Milestones, OpenCode model matrix scope, and V10 Analysis Preset scope. Compact files were intentionally left unchanged.
+    report: .pipeline/confirm-summary.md
     trigger: user
     related_milestone: null
-  - id: "M01-START-C3"
+  -
+    id: M01-START-C3
     type: milestone_start
-    ref: "C3/M01"
+    ref: C3/M01
     status: active
     timestamp: "2026-05-02T02:26:32+08:00"
-    summary: "Started M01 Matrix Contract and Schema under C3."
-    report: ".pipeline/prompts/00-opencode-model-matrix-contract-schema.md"
+    summary: Started M01 Matrix Contract and Schema under C3.
+    report: .pipeline/prompts/00-opencode-model-matrix-contract-schema.md
     trigger: auto
-    related_milestone: "M01"
-  - id: "M01-WRITE-TESTS-C3"
+    related_milestone: M01
+  -
+    id: M01-WRITE-TESTS-C3
     type: step
-    ref: "C3/M01/write_tests"
+    ref: C3/M01/write_tests
     status: active
     timestamp: "2026-05-02T02:26:32+08:00"
-    summary: "Started write_tests for OpenCode multi-agent model matrix and compaction contract."
-    report: ".pipeline/prompts/00-opencode-model-matrix-contract-schema.md"
+    summary: Started write_tests for OpenCode multi-agent model matrix and compaction contract.
+    report: .pipeline/prompts/00-opencode-model-matrix-contract-schema.md
     trigger: auto
-    related_milestone: "M01"
-  - id: "M01-COMPLETE-C3"
+    related_milestone: M01
+  -
+    id: M01-COMPLETE-C3
     type: milestone_complete
-    ref: "C3/M01"
+    ref: C3/M01
     status: completed
     timestamp: "2026-05-02T02:35:59+08:00"
     summary: "Completed OpenCode model matrix contract: defaults, schema, metadata, config spec, OpenCode spec, and targeted tests."
-    report: ".pipeline/reports/00-opencode-model-matrix-contract-schema.report.md"
+    report: .pipeline/reports/00-opencode-model-matrix-contract-schema.report.md
     trigger: auto
-    related_milestone: "M01"
-  - id: "M02-START-C3"
+    related_milestone: M01
+  -
+    id: M02-START-C3
     type: milestone_start
-    ref: "C3/M02"
+    ref: C3/M02
     status: active
     timestamp: "2026-05-02T02:36:30+08:00"
-    summary: "Started M02 OpenCode Artifact Rendering and Sync."
-    report: ".pipeline/prompts/01-opencode-artifact-rendering-sync.md"
+    summary: Started M02 OpenCode Artifact Rendering and Sync.
+    report: .pipeline/prompts/01-opencode-artifact-rendering-sync.md
     trigger: auto
-    related_milestone: "M02"
-  - id: "M02-COMPLETE-C3"
+    related_milestone: M02
+  -
+    id: M02-COMPLETE-C3
     type: milestone_complete
-    ref: "C3/M02"
+    ref: C3/M02
     status: completed
     timestamp: "2026-05-02T12:13:49+08:00"
     summary: "Completed OpenCode artifact rendering and sync: matrix model frontmatter, role agents, command routing, sidecar metadata, config-aware sync, docs, and targeted validation."
-    report: ".pipeline/reports/01-opencode-artifact-rendering-sync.report.md"
+    report: .pipeline/reports/01-opencode-artifact-rendering-sync.report.md
     trigger: auto
-    related_milestone: "M02"
-  - id: "M03-START-C3"
+    related_milestone: M02
+  -
+    id: M03-START-C3
     type: milestone_start
-    ref: "C3/M03"
+    ref: C3/M03
     status: active
     timestamp: "2026-05-02T12:13:49+08:00"
-    summary: "Started M03 Model Matrix Validation and Docs."
-    report: ".pipeline/prompts/02-opencode-model-matrix-validation-docs.md"
+    summary: Started M03 Model Matrix Validation and Docs.
+    report: .pipeline/prompts/02-opencode-model-matrix-validation-docs.md
     trigger: auto
-    related_milestone: "M03"
-  - id: "M03-COMPLETE-C3"
+    related_milestone: M03
+  -
+    id: M03-COMPLETE-C3
     type: milestone_complete
-    ref: "C3/M03"
+    ref: C3/M03
     status: completed
     timestamp: "2026-05-02T12:26:42+08:00"
     summary: "Completed OpenCode model matrix validation and docs: README/spec/parity updates, s61 sync scenario, regression registration, and targeted validations."
-    report: ".pipeline/reports/02-opencode-model-matrix-validation-docs.report.md"
+    report: .pipeline/reports/02-opencode-model-matrix-validation-docs.report.md
     trigger: auto
-    related_milestone: "M03"
-  - id: "F001-COMPLETE-C3"
+    related_milestone: M03
+  -
+    id: F001-COMPLETE-C3
     type: feature_complete
-    ref: "C3/F001"
+    ref: C3/F001
     status: completed
     timestamp: "2026-05-02T12:26:42+08:00"
-    summary: "Completed OpenCode Multi-Agent Model Matrix feature across contract, renderer, sync, command routing, docs, and scenario validation."
-    report: ".pipeline/reports/02-opencode-model-matrix-validation-docs.report.md"
+    summary: Completed OpenCode Multi-Agent Model Matrix feature across contract, renderer, sync, command routing, docs, and scenario validation.
+    report: .pipeline/reports/02-opencode-model-matrix-validation-docs.report.md
     trigger: auto
-    related_milestone: "M03"
-  - id: "F002-START-C3"
+    related_milestone: M03
+  -
+    id: F002-START-C3
     type: feature_start
-    ref: "C3/F002"
+    ref: C3/F002
     status: active
     timestamp: "2026-05-02T12:26:42+08:00"
-    summary: "Auto-continued into F002 Analysis Preset Core Contract with gate=auto."
-    report: ".pipeline/feature-queue.yaml"
+    summary: Auto-continued into F002 Analysis Preset Core Contract with gate=auto.
+    report: .pipeline/feature-queue.yaml
     trigger: auto
-    related_milestone: "M04"
-  - id: "M04-START-C3"
+    related_milestone: M04
+  -
+    id: M04-START-C3
     type: milestone_start
-    ref: "C3/M04"
+    ref: C3/M04
     status: active
     timestamp: "2026-05-02T12:26:42+08:00"
-    summary: "Started M04 Analysis Preset and Workflow Taxonomy."
-    report: ".pipeline/prompts/03-analysis-preset-workflow-taxonomy.md"
+    summary: Started M04 Analysis Preset and Workflow Taxonomy.
+    report: .pipeline/prompts/03-analysis-preset-workflow-taxonomy.md
     trigger: auto
-    related_milestone: "M04"
-  - id: "M04-COMPLETE-C3"
+    related_milestone: M04
+  -
+    id: M04-COMPLETE-C3
     type: milestone_complete
-    ref: "C3/M04"
+    ref: C3/M04
     status: completed
     timestamp: "2026-05-02T12:41:59+08:00"
     summary: "Completed Analysis Preset core contract: analysis spec, step sequence helper, workflow taxonomy, config/schema validation, and discover/batch integration."
-    report: ".pipeline/reports/03-analysis-preset-workflow-taxonomy.report.md"
+    report: .pipeline/reports/03-analysis-preset-workflow-taxonomy.report.md
     trigger: auto
-    related_milestone: "M04"
-  - id: "M05-START-C3"
+    related_milestone: M04
+  -
+    id: M05-START-C3
     type: milestone_start
-    ref: "C3/M05"
+    ref: C3/M05
     status: active
     timestamp: "2026-05-02T12:41:59+08:00"
-    summary: "Started M05 Analysis Interaction Model and Boundaries."
-    report: ".pipeline/prompts/04-analysis-interaction-boundaries.md"
+    summary: Started M05 Analysis Interaction Model and Boundaries.
+    report: .pipeline/prompts/04-analysis-interaction-boundaries.md
     trigger: auto
-    related_milestone: "M05"
-  - id: "M05-COMPLETE-C3"
+    related_milestone: M05
+  -
+    id: M05-COMPLETE-C3
     type: milestone_complete
-    ref: "C3/M05"
+    ref: C3/M05
     status: completed
     timestamp: "2026-05-02T12:56:40+08:00"
     summary: "Completed Analysis interaction model and boundaries: manual/hybrid/auto defaults, boundary normalization, config schema, metadata, and OpenCode guidance."
-    report: ".pipeline/reports/04-analysis-interaction-boundaries.report.md"
+    report: .pipeline/reports/04-analysis-interaction-boundaries.report.md
     trigger: auto
-    related_milestone: "M05"
-  - id: "F002-COMPLETE-C3"
+    related_milestone: M05
+  -
+    id: F002-COMPLETE-C3
     type: feature_complete
-    ref: "C3/F002"
+    ref: C3/F002
     status: completed
     timestamp: "2026-05-02T12:56:40+08:00"
-    summary: "Completed Analysis Preset Core Contract across preset taxonomy and interaction boundary configuration."
-    report: ".pipeline/reports/04-analysis-interaction-boundaries.report.md"
+    summary: Completed Analysis Preset Core Contract across preset taxonomy and interaction boundary configuration.
+    report: .pipeline/reports/04-analysis-interaction-boundaries.report.md
     trigger: auto
-    related_milestone: "M05"
-  - id: "F003-START-C3"
+    related_milestone: M05
+  -
+    id: F003-START-C3
     type: feature_start
-    ref: "C3/F003"
+    ref: C3/F003
     status: active
     timestamp: "2026-05-02T12:56:40+08:00"
-    summary: "Auto-continued into F003 Analysis Runtime, State, and Ledger with gate=auto."
-    report: ".pipeline/feature-queue.yaml"
+    summary: Auto-continued into F003 Analysis Runtime, State, and Ledger with gate=auto.
+    report: .pipeline/feature-queue.yaml
     trigger: auto
-    related_milestone: "M06"
-  - id: "M06-START-C3"
+    related_milestone: M06
+  -
+    id: M06-START-C3
     type: milestone_start
-    ref: "C3/M06"
+    ref: C3/M06
     status: active
     timestamp: "2026-05-02T12:56:40+08:00"
-    summary: "Started M06 Analysis State Summary and Ledger Format."
-    report: ".pipeline/prompts/05-analysis-state-ledger-format.md"
+    summary: Started M06 Analysis State Summary and Ledger Format.
+    report: .pipeline/prompts/05-analysis-state-ledger-format.md
     trigger: auto
-    related_milestone: "M06"
+    related_milestone: M06
+  -
+    id: M03-COMPLETE-C5-20260503T201800+0800
+    type: milestone_complete
+    ref: C5/M03
+    status: completed
+    timestamp: "2026-05-03T20:18:00+08:00"
+    summary: Completed consistent lifecycle commit and derived refresh slice.
+    report: .pipeline/reports/02-consistent-lifecycle-commit-and-derived-refresh-slice.report.md
+    trigger: auto
+    related_milestone: M03
+  -
+    id: F003-COMPLETE-C5-20260503T201800+0800
+    type: feature_complete
+    ref: C5/F003
+    status: completed
+    timestamp: "2026-05-03T20:18:00+08:00"
+    summary: Completed workflow commit helper, invariant checks, derived refresh warnings, and lifecycle command docs.
+    report: .pipeline/reports/02-consistent-lifecycle-commit-and-derived-refresh-slice.report.md
+    trigger: auto
+    related_milestone: M03
+  -
+    id: M04-COMPLETE-C5-20260503T203200+0800
+    type: milestone_complete
+    ref: C5/M04
+    status: completed
+    timestamp: "2026-05-03T20:32:00+08:00"
+    summary: Completed Guide Router, adaptive Grill-Me, and design concept artifacts.
+    report: .pipeline/reports/03-guide-router-adaptive-grill-me-and-design-concept-artifacts.report.md
+    trigger: auto
+    related_milestone: M04
+  -
+    id: F004-COMPLETE-C5-20260503T203200+0800
+    type: feature_complete
+    ref: C5/F004
+    status: completed
+    timestamp: "2026-05-03T20:32:00+08:00"
+    summary: Completed Guide intent routing, adaptive Discover risk decision, glossary, and design concept artifact layering.
+    report: .pipeline/reports/03-guide-router-adaptive-grill-me-and-design-concept-artifacts.report.md
+    trigger: auto
+    related_milestone: M04
+  -
+    id: F005-START-C5-20260503T203201+0800
+    type: feature_start
+    ref: C5/F005
+    status: active
+    timestamp: "2026-05-03T20:32:01+08:00"
+    summary: Auto-continued into F005 Runnable Vertical Slice and TDD Execution Contract.
+    report: .pipeline/feature-queue.yaml
+    trigger: auto
+    related_milestone: M05
+  -
+    id: M05-START-C5-20260503T203201+0800
+    type: milestone_start
+    ref: C5/M05
+    status: active
+    timestamp: "2026-05-03T20:32:01+08:00"
+    summary: Started M05 Runnable Vertical Slice and TDD Execution Contract.
+    report: .pipeline/prompts/04-runnable-vertical-slice-and-tdd-execution-contract.md
+    trigger: auto
+    related_milestone: M05
+  -
+    id: M05-COMPLETE-C5-20260503T220848+0800
+    type: milestone_complete
+    ref: C5/M05
+    status: completed
+    timestamp: "2026-05-03T22:08:48+08:00"
+    summary: Completed Runnable Vertical Slice and TDD Execution Contract.
+    report: .pipeline/reports/04-runnable-vertical-slice-and-tdd-execution-contract.report.md
+    trigger: auto
+    related_milestone: M05
+  -
+    id: F005-COMPLETE-C5-20260503T220848+0800
+    type: feature_complete
+    ref: C5/F005
+    status: completed
+    timestamp: "2026-05-03T22:08:48+08:00"
+    summary: Completed vertical-slice quality assessment, prompt template evidence fields, TDD one-behavior loop guidance, and compact authority guidance.
+    report: .pipeline/reports/04-runnable-vertical-slice-and-tdd-execution-contract.report.md
+    trigger: auto
+    related_milestone: M05
+  -
+    id: F006-START-C5-20260503T220848+0800
+    type: feature_start
+    ref: C5/F006
+    status: active
+    timestamp: "2026-05-03T22:08:48+08:00"
+    summary: Auto-continued into F006 Feature DAG Board for Long-Running Work.
+    report: .pipeline/feature-queue.yaml
+    trigger: auto
+    related_milestone: M06
+  -
+    id: M06-START-C5-20260503T220848+0800
+    type: milestone_start
+    ref: C5/M06
+    status: active
+    timestamp: "2026-05-03T22:08:48+08:00"
+    summary: Started M06 Feature DAG Board for Long-Running Work.
+    report: .pipeline/prompts/05-feature-dag-board-for-long-running-work.md
+    trigger: auto
+    related_milestone: M06
+  -
+    id: M06-COMPLETE-C5-20260503T222100+0800
+    type: milestone_complete
+    ref: C5/M06
+    status: completed
+    timestamp: "2026-05-03T22:21:00+08:00"
+    summary: Completed Feature DAG Board for Long-Running Work.
+    report: .pipeline/reports/05-feature-dag-board-for-long-running-work.report.md
+    trigger: auto
+    related_milestone: M06
+  -
+    id: F006-COMPLETE-C5-20260503T222100+0800
+    type: feature_complete
+    ref: C5/F006
+    status: completed
+    timestamp: "2026-05-03T22:21:00+08:00"
+    summary: Completed Feature-level DAG fields, ready/blocked helpers, dependency graph rendering, and concise status board integration.
+    report: .pipeline/reports/05-feature-dag-board-for-long-running-work.report.md
+    trigger: auto
+    related_milestone: M06
+  -
+    id: F007-START-C5-20260503T222100+0800
+    type: feature_start
+    ref: C5/F007
+    status: active
+    timestamp: "2026-05-03T22:21:00+08:00"
+    summary: Auto-continued into F007 Execution Lease, Recovery, and Platform Handoff.
+    report: .pipeline/feature-queue.yaml
+    trigger: auto
+    related_milestone: M07
+  -
+    id: M07-START-C5-20260503T222100+0800
+    type: milestone_start
+    ref: C5/M07
+    status: active
+    timestamp: "2026-05-03T22:21:00+08:00"
+    summary: Started M07 Execution Lease, Recovery, and Platform Handoff.
+    report: .pipeline/prompts/06-execution-lease-recovery-and-platform-handoff.md
+    trigger: auto
+    related_milestone: M07
+  -
+    id: M07-COMPLETE-C5-20260503T223201+0800
+    type: milestone_complete
+    ref: C5/M07
+    status: completed
+    timestamp: "2026-05-03T22:32:01+08:00"
+    summary: Completed Execution Lease, Recovery, and Platform Handoff.
+    report: .pipeline/reports/06-execution-lease-recovery-and-platform-handoff.report.md
+    trigger: auto
+    related_milestone: M07
+  -
+    id: F007-COMPLETE-C5-20260503T223201+0800
+    type: feature_complete
+    ref: C5/F007
+    status: completed
+    timestamp: "2026-05-03T22:32:01+08:00"
+    summary: Completed structured execution leases, stale takeover semantics, watchdog recovery, status repair guidance, and platform handoff boundaries.
+    report: .pipeline/reports/06-execution-lease-recovery-and-platform-handoff.report.md
+    trigger: auto
+    related_milestone: M07
+  -
+    id: F008-START-C5-20260503T223201+0800
+    type: feature_start
+    ref: C5/F008
+    status: active
+    timestamp: "2026-05-03T22:32:01+08:00"
+    summary: Auto-continued into F008 Layered Global Sync and Derived Artifact Map.
+    report: .pipeline/feature-queue.yaml
+    trigger: auto
+    related_milestone: M08
+  -
+    id: M08-START-C5-20260503T223201+0800
+    type: milestone_start
+    ref: C5/M08
+    status: active
+    timestamp: "2026-05-03T22:32:01+08:00"
+    summary: Started M08 Layered Global Sync and Derived Artifact Map.
+    report: .pipeline/prompts/07-layered-global-sync-and-derived-artifact-map.md
+    trigger: auto
+    related_milestone: M08
+  -
+    id: M08-COMPLETE-C5-20260503T224900+0800
+    type: milestone_complete
+    ref: C5/M08
+    status: completed
+    timestamp: "2026-05-03T22:49:00+08:00"
+    summary: Completed Layered Global Sync and Derived Artifact Map.
+    report: .pipeline/reports/07-layered-global-sync-and-derived-artifact-map.report.md
+    trigger: auto
+    related_milestone: M08
+  -
+    id: F008-COMPLETE-C5-20260503T224900+0800
+    type: feature_complete
+    ref: C5/F008
+    status: completed
+    timestamp: "2026-05-03T22:49:00+08:00"
+    summary: Completed derived artifact map, sync check-only/repair modes, protected authority conflict handling, and status derived health.
+    report: .pipeline/reports/07-layered-global-sync-and-derived-artifact-map.report.md
+    trigger: auto
+    related_milestone: M08
+  -
+    id: F009-START-C5-20260503T224900+0800
+    type: feature_start
+    ref: C5/F009
+    status: active
+    timestamp: "2026-05-03T22:49:00+08:00"
+    summary: Auto-continued into F009 Log Ledger, Recent Feed, and Secret-Safe Evidence.
+    report: .pipeline/feature-queue.yaml
+    trigger: auto
+    related_milestone: M09
+  -
+    id: M09-START-C5-20260503T224900+0800
+    type: milestone_start
+    ref: C5/M09
+    status: active
+    timestamp: "2026-05-03T22:49:00+08:00"
+    summary: Started M09 Log Ledger, Recent Feed, and Secret-Safe Evidence.
+    report: .pipeline/prompts/08-log-ledger-recent-feed-and-secret-safe-evidence.md
+    trigger: auto
+    related_milestone: M09
+  -
+    id: M09-COMPLETE-C5-20260503T230300+0800
+    type: milestone_complete
+    ref: C5/M09
+    status: completed
+    timestamp: "2026-05-03T23:03:00+08:00"
+    summary: Completed Log Ledger, Recent Feed, and Secret-Safe Evidence.
+    report: .pipeline/reports/08-log-ledger-recent-feed-and-secret-safe-evidence.report.md
+    trigger: auto
+    related_milestone: M09
+  -
+    id: F009-COMPLETE-C5-20260503T230300+0800
+    type: feature_complete
+    ref: C5/F009
+    status: completed
+    timestamp: "2026-05-03T23:03:00+08:00"
+    summary: Completed lifecycle log validation, timestamp-sorted Recent feed, internal-noise filtering, and shared secret-safe evidence redaction.
+    report: .pipeline/reports/08-log-ledger-recent-feed-and-secret-safe-evidence.report.md
+    trigger: auto
+    related_milestone: M09
+  -
+    id: F010-START-C5-20260503T230300+0800
+    type: feature_start
+    ref: C5/F010
+    status: active
+    timestamp: "2026-05-03T23:03:00+08:00"
+    summary: Auto-continued into F010 Docs Command and Documentation Information Architecture.
+    report: .pipeline/feature-queue.yaml
+    trigger: auto
+    related_milestone: M10
+  -
+    id: M10-START-C5-20260503T230300+0800
+    type: milestone_start
+    ref: C5/M10
+    status: active
+    timestamp: "2026-05-03T23:03:00+08:00"
+    summary: Started M10 Docs Command and Documentation Information Architecture.
+    report: .pipeline/prompts/09-docs-command-and-documentation-information-architecture.md
+    trigger: auto
+    related_milestone: M10
+  -
+    id: M10-COMPLETE-C5-20260503T232400+0800
+    type: milestone_complete
+    ref: C5/M10
+    status: completed
+    timestamp: "2026-05-03T23:24:00+08:00"
+    summary: Completed Docs Command and Documentation Information Architecture.
+    report: .pipeline/reports/09-docs-command-and-documentation-information-architecture.report.md
+    trigger: auto
+    related_milestone: M10
+  -
+    id: F010-COMPLETE-C5-20260503T232400+0800
+    type: feature_complete
+    ref: C5/F010
+    status: completed
+    timestamp: "2026-05-03T23:24:00+08:00"
+    summary: "Completed /hw:docs, docs map, generated references, concise README, narrative fact checks, and OpenCode docs mapping."
+    report: .pipeline/reports/09-docs-command-and-documentation-information-architecture.report.md
+    trigger: auto
+    related_milestone: M10
+  -
+    id: F011-START-C5-20260503T232400+0800
+    type: feature_start
+    ref: C5/F011
+    status: active
+    timestamp: "2026-05-03T23:24:00+08:00"
+    summary: Auto-continued into F011 Interactive Configuration TUI and Read-Only Progress Dashboard.
+    report: .pipeline/feature-queue.yaml
+    trigger: auto
+    related_milestone: M11
+  -
+    id: M11-START-C5-20260503T232400+0800
+    type: milestone_start
+    ref: C5/M11
+    status: active
+    timestamp: "2026-05-03T23:24:00+08:00"
+    summary: Started M11 Interactive Configuration TUI and Read-Only Progress Dashboard.
+    report: .pipeline/prompts/10-interactive-configuration-tui-and-read-only-progress-dashboard.md
+    trigger: auto
+    related_milestone: M11
+  -
+    id: LEASE-TAKEOVER-C5-20260504T004959+0800
+    type: lease_takeover
+    ref: C5/.pipeline/.lock
+    status: completed
+    timestamp: "2026-05-04T00:49:59+08:00"
+    summary: Resume took over an expired M03 execution lease before final validation.
+    report: .pipeline/.lock
+    trigger: manual
+    related_milestone: M12
+  -
+    id: M11-COMPLETE-C5-20260504T002000+0800
+    type: milestone_complete
+    ref: C5/M11
+    status: completed
+    timestamp: "2026-05-04T00:20:00+08:00"
+    summary: Completed Interactive Configuration TUI and Read-Only Progress Dashboard.
+    report: .pipeline/reports/10-interactive-configuration-tui-and-read-only-progress-dashboard.report.md
+    trigger: auto
+    related_milestone: M11
+  -
+    id: F011-COMPLETE-C5-20260504T002000+0800
+    type: feature_complete
+    ref: C5/F011
+    status: completed
+    timestamp: "2026-05-04T00:20:00+08:00"
+    summary: Completed config TUI target separation, diff/schema/confirm writes, protected lifecycle guards, adapter sync guidance, and read-only progress dashboard.
+    report: .pipeline/reports/10-interactive-configuration-tui-and-read-only-progress-dashboard.report.md
+    trigger: auto
+    related_milestone: M11
+  -
+    id: F012-START-C5-20260504T002000+0800
+    type: feature_start
+    ref: C5/F012
+    status: completed
+    timestamp: "2026-05-04T00:20:00+08:00"
+    summary: Auto-continued into F012 Evidence Contracts, Metrics, and Real Lifecycle Regression.
+    report: .pipeline/feature-queue.yaml
+    trigger: auto
+    related_milestone: M12
+  -
+    id: M12-START-C5-20260504T002000+0800
+    type: milestone_start
+    ref: C5/M12
+    status: completed
+    timestamp: "2026-05-04T00:20:00+08:00"
+    summary: Started M12 Evidence Contracts, Metrics, and Real Lifecycle Regression.
+    report: .pipeline/prompts/11-evidence-contracts-metrics-and-real-lifecycle-regression.md
+    trigger: auto
+    related_milestone: M12
+  -
+    id: M12-COMPLETE-C5-20260504T004959+0800
+    type: milestone_complete
+    ref: C5/M12
+    status: completed
+    timestamp: "2026-05-04T00:49:59+08:00"
+    summary: Completed Evidence Contracts, Metrics, and Real Lifecycle Regression.
+    report: .pipeline/reports/11-evidence-contracts-metrics-and-real-lifecycle-regression.report.md
+    trigger: auto
+    related_milestone: M12
+  -
+    id: F012-COMPLETE-C5-20260504T004959+0800
+    type: feature_complete
+    ref: C5/F012
+    status: completed
+    timestamp: "2026-05-04T00:49:59+08:00"
+    summary: Completed test profile separation, analysis evidence/report contract, telemetry_unavailable metrics, and real lifecycle regression suite.
+    report: .pipeline/reports/11-evidence-contracts-metrics-and-real-lifecycle-regression.report.md
+    trigger: auto
+    related_milestone: M12
+  -
+    id: C5-COMPLETE-20260504T004959+0800
+    type: cycle_complete
+    ref: C5
+    status: completed
+    timestamp: "2026-05-04T00:49:59+08:00"
+    summary: Completed C5 follow-up redesign implementation and final validation.
+    report: .pipeline/reports/11-evidence-contracts-metrics-and-real-lifecycle-regression.report.md
+    trigger: auto
+    related_milestone: M12

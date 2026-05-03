@@ -25,16 +25,23 @@ Use this skill for P3 Generate only.
 2. Generate `.pipeline/config.yaml` with project-specific values and only the overrides that should beat global defaults, including `output.*`, `plan.interactive.*`, and `watchdog.*` only when the project needs explicit overrides.
 3. Generate `.pipeline/prompts/*.md`.
 4. Generate architecture baseline files.
-5. Before writing each prompt, create a detailed implementation plan containing:
+5. Generate or update `.pipeline/cycle.yaml` metadata when a Cycle is being created:
+   - `workflow_kind: build | analysis | showcase`
+   - `analysis_kind` when workflow is analysis
+   - `lifecycle_policy.reject.default_action`, defaulting to `needs_revision`
+   - `lifecycle_policy.accept.next`, using `follow_up_plan` when planned follow-up exists
+   - `continuations[]` for planned follow-up nodes
+6. Before writing each prompt, create a detailed implementation plan containing:
    - ordered steps
    - dependencies
    - verification points
    - test spec
    - constraints
-6. Convert that implementation plan into the final prompt file.
-7. Detect append mode and preserve already executed numbering.
+7. Convert that implementation plan into the final prompt file.
+8. Detect append mode and preserve already executed numbering.
+9. Use the workflow commit helper for any project-cycle write that touches protected lifecycle state so authority facts commit atomically before derived refreshes.
 
-When `execution.steps.preset: analysis` or a Feature has `workflow_kind: analysis`, generated prompts should include the analysis step chain:
+When a Cycle or Feature has `workflow_kind: analysis`, generated prompts should include the analysis step chain and generated config/cycle metadata should use the `analysis` preset:
 
 - `define_question`
 - `gather_context`
@@ -44,6 +51,8 @@ When `execution.steps.preset: analysis` or a Feature has `workflow_kind: analysi
 - `conclude`
 
 Generated analysis prompts should point to `templates/analysis/*`, `references/analysis-spec.md`, and `references/analysis-ledger-spec.md`, and should require an external ledger instead of expanding `state.yaml`.
+
+If derived lifecycle artifacts fail to refresh after a successful authority commit, generated prompts should direct the operator to repair the derived artifact or run `/hw:sync --light` rather than treating the authority write as failed.
 
 ## Interactive Behavior
 

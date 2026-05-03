@@ -40,6 +40,45 @@ Category-specific follow-up:
 - `agent-service`: ask for CLI shape, shared core, and CLI scenario
 - `research`: ask for baseline, expected direction, validation script, and environment constraints
 
+## Adaptive Grill-Me
+
+After the broad questions are answered, decide whether the task needs deep Grill-Me design-concept alignment. Use light Discover for low-risk patches, small incremental features, and narrow docs/config requests.
+
+Escalate to deep Grill-Me only when one or more risk signals are present:
+
+- architecture or source-of-truth changes
+- workflow lifecycle, status, acceptance, sync, recovery, or command semantics
+- user-facing product or UX concepts that need naming and non-goal agreement
+- long-running, batch, DAG, AFK, or HITL coordination
+- unclear ownership between discussion, decision, glossary, architecture, prompt, and Knowledge Ledger layers
+
+Deep Grill-Me should align concepts before P2 decomposition. It should ask focused questions about:
+
+1. stable terms and what they mean
+2. examples and non-examples
+3. source-of-truth ownership
+4. state transitions or lifecycle boundaries
+5. prompt-generation hints and non-goals
+
+Do not force deep Grill-Me for every small task.
+
+## Design Concept Artifacts
+
+When Discover confirms durable design concepts, write or update these layers during or after Generate:
+
+- `.pipeline/design-concepts.yaml`: machine-readable concept records with `id`, `term`, `definition`, `boundaries`, `source_of_truth`, `state_transitions`, `decision_refs`, and `prompt_hints`.
+- `.pipeline/glossary.md`: human-readable terms, examples, non-examples, and common misunderstandings.
+
+Keep layers separate:
+
+- transient discussion stays in conversation or short planning notes
+- confirmed decisions belong in Knowledge Ledger records and decision indexes
+- stable terms belong in glossary/design-concepts artifacts
+- architecture contracts belong in `.pipeline/architecture.md`
+- executable subsets belong in generated prompts
+
+Knowledge Ledger indexes design decisions and references; it must not copy full design-concepts or glossary bodies into every context.
+
 ## Preconditions
 
 - planning mode is active or about to start

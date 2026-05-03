@@ -97,6 +97,8 @@ Cycle acceptance rows use compact lifecycle status labels:
 - `pending_acceptance`: completed work is waiting for `/hw:accept` or `/hw:reject`.
 - `accepted`: the user accepted the Cycle.
 - `rejected`: feedback was captured and the Cycle reopened.
+- `needs_revision`: feedback was captured and `/hw:resume` should continue revision from `acceptance.feedback_ref`.
+- `follow_up_planning`: accepted work has a planned `cycle.continuations[]` follow-up plan ready to start.
 - `timeout accepted`: status/check logic treated pending acceptance as accepted after `acceptance.timeout_hours`.
 
 Rejected feedback should be summarized in the row and stored in `.pipeline/acceptance/`; do not paste full feedback into `PROGRESS.md`.

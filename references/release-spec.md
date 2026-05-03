@@ -38,7 +38,7 @@ Use this reference for `/hw:release`, the automated publishing workflow for Hypo
 - replace managed marker blocks by default
 - obey `release.readme.mode` and `release.readme.full_regen` before full README regeneration
 - run `readme-freshness` after the update and before changelog/commit operations
-- stop in strict mode when version, command count, platform matrix, feature summary, or release summary is stale
+- stop in strict mode when version, command count, platform matrix, feature summary, generated docs references, or narrative docs fact checks are stale
 
 ### Step 6: Changelog
 
@@ -89,5 +89,5 @@ Preferred shape:
 
 - `--dry-run` prints every planned step, file mutation, version bump, and tag without changing files or git state
 - `--skip-tests` is dangerous and requires explicit second confirmation before continuing
-- `readme-freshness` must pass before commit/tag/push unless the user explicitly chooses a documented loose-mode repair path
+- `readme-freshness` and narrative docs fact checks must pass before commit/tag/push unless the user explicitly chooses a documented loose-mode repair path
 - always write a lifecycle entry to `.pipeline/log.yaml` with `type: release`

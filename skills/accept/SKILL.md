@@ -21,14 +21,23 @@ Use this skill when the user invokes `/hw:accept`.
 - Require Cycle acceptance state `pending_acceptance` or `acceptance.state: pending`.
 - Mark `cycle.status: completed`.
 - Mark `cycle.acceptance.state: accepted` and store `accepted_at`.
+- If `cycle.lifecycle_policy.accept.next=follow_up_plan` or a planned `cycle.continuations[]` follow-up plan exists:
+  - mark `cycle.status: follow_up_planning`
+  - mark that continuation `status: active`
+  - set `pipeline.status: stopped`
+  - set `current.phase: follow_up_planning`
+  - mirror only the active continuation in `state.yaml`
+  - status next action is `start_follow_up_plan`
 - Mirror only compact acceptance state in `state.yaml`:
   - `acceptance.scope: cycle`
   - `acceptance.state: accepted`
   - `acceptance.cycle_id`
   - `acceptance.updated_at`
-- Set `pipeline.status: completed` and `current.phase: completed`.
-- Append a `cycle_accept` entry to `.pipeline/log.yaml`.
-- Update `.pipeline/PROGRESS.md` with a compact board row.
+- Without a follow-up continuation, set `pipeline.status: completed` and `current.phase: completed`.
+- Use the workflow commit helper so authority facts are written atomically before derived refreshes.
+- Append a `cycle_accept` entry to `.pipeline/log.yaml` through the derived refresh path.
+- Update `.pipeline/PROGRESS.md` with a compact board row through the derived refresh path.
+- If a derived refresh fails after authority commits, keep the accepted cycle facts, write `.pipeline/derived-refresh.yaml`, and surface a warning with repair guidance.
 - Archive only when the Cycle close/archive flow is explicitly requested or configured; accepting the gate itself is not a separate runner.
 
 Do not store full review notes in `state.yaml`.

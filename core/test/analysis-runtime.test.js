@@ -5,8 +5,10 @@ import {
   ANALYSIS_EVALUATION_CRITERIA,
   ANALYSIS_OUTCOMES,
   buildAnalysisFollowupProposal,
+  buildAnalysisReportContract,
   determineAnalysisOutcome,
   evaluateAnalysisEvidence,
+  normalizeMetricRecord,
   normalizeAnalysisExperimentResult,
   parseYaml,
   renderAnalysisPromptPlan,
@@ -87,6 +89,31 @@ test("analysis evaluation is evidence-oriented and non-code analysis skips chang
   const weak = evaluateAnalysisEvidence({ question: "Why?", hypotheses: [], experiments: [], observations: [] });
   assert.ok(weak.failed_checks.includes("evidence_complete"));
   assert.ok(weak.failed_checks.includes("experiment_executed"));
+});
+
+test("analysis report contract carries ledger evidence and telemetry unavailable metrics", async () => {
+  const ledger = parseYaml(await readFile("core/test/fixtures/analysis/M06-analysis-ledger.yaml", "utf8"));
+  ledger.metrics = normalizeMetricRecord({
+    id: "M06",
+    started_at: "2026-05-03T10:00:00+08:00",
+    finished_at: "2026-05-03T10:02:30+08:00",
+  });
+
+  const contract = buildAnalysisReportContract(ledger, {
+    milestoneId: "M06",
+    reportFile: ".pipeline/reports/M06-analysis.report.md",
+  });
+
+  assert.equal(contract.preset, "analysis");
+  assert.equal(contract.report_type, "analysis");
+  assert.equal(contract.ledger_path, ".pipeline/analysis/M06-analysis-ledger.yaml");
+  assert.equal(contract.metrics.duration_ms, 150000);
+  assert.equal(contract.metrics.token_count, "telemetry_unavailable");
+  assert.equal(contract.metrics.cost, "telemetry_unavailable");
+  assert.equal(contract.evaluation.diff_score, 1);
+  assert.equal(contract.evaluation.failed_checks.length, 0);
+  assert.ok(contract.evidence_refs.includes(".pipeline/analysis/M06-analysis-ledger.yaml"));
+  assert.equal(contract.report_file, ".pipeline/reports/M06-analysis.report.md");
 });
 
 test("analysis templates and planning guidance are discoverable without polluting build reports", async () => {

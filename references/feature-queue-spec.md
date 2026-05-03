@@ -45,6 +45,7 @@ The queue file stores:
 - ordered Feature list
 - per-Feature status, priority, gate, decomposition mode, and milestone summary
 - shallow metric_summary copied from `.pipeline/metrics.yaml`
+- optional Feature-level DAG fields for long-running, batch, AFK, and HITL work
 
 The queue stores summaries only. Detailed timing, token, and cost records belong in `.pipeline/metrics.yaml`.
 
@@ -68,6 +69,12 @@ features:
     status: active
     gate: auto
     decompose_mode: upfront
+    depends_on: []
+    unlocks: []
+    blocked_by: []
+    execution_hint: afk
+    handoff_hint: HITL review
+    ready_reason: dependencies_satisfied
     source: user
     summary: Add /hw:plan --batch and queue execution.
     milestones:
@@ -88,6 +95,30 @@ Status values:
 - `done`: all Feature Milestones passed
 - `deferred`: skipped by failure policy or explicit user decision
 - `blocked`: cannot proceed without user or environment action
+
+## Feature DAG Board
+
+Feature DAG is optional and appears only for long-running, batch, multi-Feature, AFK, or HITL coordination. Ordinary single-feature `/hw:plan` must not require or display DAG concepts.
+
+The first DAG design is Feature-level only:
+
+- `depends_on`: Feature IDs that must be `done` before this Feature is ready.
+- `unlocks`: derived reverse dependency IDs; helpers may compute it from `depends_on`.
+- `blocked_by`: derived unmet dependency IDs.
+- `gate`: `auto` or `confirm`; confirm is a HITL pause, not a scheduler.
+- `execution_hint`: optional `afk`, `hitl`, `parallel`, or `serial` hint.
+- `handoff_hint`: short human-readable note for handoff or review expectations.
+- `ready_reason`: derived reason such as `dependencies_satisfied`, `waiting_on_dependencies`, `active`, or `done`.
+
+Helper behavior:
+
+- compute ready Features when all dependencies are `done`
+- compute blocked Features when dependencies are missing or not done
+- report dependency cycles with a clear planning error
+- expose parallel candidates as ready Features that can be considered together
+- render a concise Feature table and Mermaid dependency graph when DAG fields are present
+
+Milestones remain serial inside each Feature in this version. Feature DAG must not become an automatic runner.
 
 ## Decomposition Modes
 

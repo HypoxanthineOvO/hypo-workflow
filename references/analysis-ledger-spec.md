@@ -45,7 +45,7 @@ Field intent:
 - `hypotheses`: candidate explanations, each with an id, statement, status, and evidence references.
 - `experiments`: concrete checks, scripts, comparisons, log queries, or controlled changes.
 - `observations`: evidence records that support or contradict hypotheses.
-- `metrics`: measured values or `n/a` when telemetry is unavailable.
+- `metrics`: measured values or `telemetry_unavailable` when token/cost telemetry is unavailable.
 - `interpretation`: how observations connect to hypotheses.
 - `outcome`: milestone-level result using `confirmed`, `partial`, `disproved`, `inconclusive`, or `blocked`.
 - `conclusion`: the current answer or root-cause statement.
@@ -139,9 +139,9 @@ experiments:
     evidence_refs:
       - O1
     metrics:
-      before: n/a
-      after: n/a
-      delta: n/a
+      before: telemetry_unavailable
+      after: telemetry_unavailable
+      delta: telemetry_unavailable
     boundary_decision: allow
     blocked_reason: null
     code_change_refs: []

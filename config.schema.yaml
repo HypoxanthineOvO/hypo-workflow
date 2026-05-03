@@ -579,6 +579,8 @@ $defs:
                 $ref: "#/$defs/opencode_agent_model"
               debug:
                 $ref: "#/$defs/opencode_agent_model"
+              docs:
+                $ref: "#/$defs/opencode_agent_model"
               report:
                 $ref: "#/$defs/opencode_agent_model"
             default:
@@ -594,6 +596,8 @@ $defs:
                 model: deepseek-v4-pro
               debug:
                 model: gpt-5.5
+              docs:
+                model: deepseek-v4-pro
               report:
                 model: deepseek-v4-flash
         default:
@@ -614,6 +618,8 @@ $defs:
               model: deepseek-v4-pro
             debug:
               model: gpt-5.5
+            docs:
+              model: deepseek-v4-pro
             report:
               model: deepseek-v4-flash
       release:
@@ -941,6 +947,14 @@ properties:
     description: |
       指定目标平台。auto = 运行时检测。
       影响 Hook 可用性、Subagent 调用方式、指令文件位置。
+  default_workflow_kind:
+    type: string
+    enum:
+      - build
+      - analysis
+      - showcase
+    default: build
+    description: Project default only. Each Cycle may own its own workflow_kind.
   plan:
     type: object
     additionalProperties: false
@@ -1651,6 +1665,8 @@ properties:
             $ref: "#/$defs/opencode_agent_model"
           debug:
             $ref: "#/$defs/opencode_agent_model"
+          docs:
+            $ref: "#/$defs/opencode_agent_model"
           report:
             $ref: "#/$defs/opencode_agent_model"
         default:
@@ -1666,6 +1682,8 @@ properties:
             model: deepseek-v4-pro
           debug:
             model: gpt-5.5
+          docs:
+            model: deepseek-v4-pro
           report:
             model: deepseek-v4-flash
   notion:

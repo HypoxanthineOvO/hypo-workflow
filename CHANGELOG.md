@@ -1,5 +1,26 @@
 # Changelog
 
+## v10.2.0 - 2026-05-04
+
+### Features
+
+- Completed the C5 follow-up redesign across workflow kind policy, lifecycle commit invariants, Guide routing, vertical-slice TDD contracts, Feature DAG board, execution leases, layered sync, log/evidence safety, docs governance, config TUI, metrics, and lifecycle regression coverage.
+- Added `/hw:docs` and reorganized documentation into a concise README, user/developer guides, platform guides, and generated references.
+- Added stale execution lease takeover, heartbeat recovery, Codex/OpenCode handoff boundaries, derived artifact repair, and read-only progress dashboard data.
+- Added config TUI helpers with global/project target separation, staged diffs, schema validation, explicit confirmation, protected-file guards, and sync guidance.
+- Added metrics helpers that compute wall-clock duration and record missing token/cost data as `telemetry_unavailable`.
+
+### Documentation
+
+- Updated README, command references, OpenCode command map, platform docs, Skill inventory, and regression scenarios for 37 user-facing commands.
+- Documented OpenCode model matrix status, generated artifacts, docs governance, lifecycle contracts, and release safety boundaries.
+
+### Tests
+
+- Core Node suite: 217/217 passing.
+- Scenario regression: 62/62 passing.
+- Config validation, docs freshness, OpenCode artifact sync, and `git diff --check` passing.
+
 ## v10.1.0 - 2026-05-03
 
 ### Features

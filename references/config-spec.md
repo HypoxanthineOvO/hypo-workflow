@@ -24,6 +24,8 @@ Resolve every configurable value in this order:
 | Effective value | Project key | Global key | Default |
 |---|---|---|---|
 | agent platform | `platform` | `agent.platform` | `auto` |
+| Cycle-scoped workflow kind | `.pipeline/cycle.yaml cycle.workflow_kind` | n/a | project `default_workflow_kind`, then `build` |
+| project default workflow kind | `default_workflow_kind` | n/a | `build` |
 | execution mode | `execution.mode` | `execution.default_mode` | `self` |
 | subagent provider | `execution.subagent_tool` | `subagent.provider` | `auto` |
 | model pool plan role | `model_pool.roles.plan` | `model_pool.roles.plan` | `primary=gpt-5.5`, fallback `deepseek-v4-pro` |
@@ -54,6 +56,16 @@ Acceptance modes are:
 - `confirm`: legacy compatibility alias for manual user confirmation.
 
 `acceptance.reject_escalation_threshold` controls when repeated Patch rejections should recommend escalation to a Cycle.
+
+Workflow lifecycle policy is Cycle metadata. Project config may define `default_workflow_kind`, but every active Cycle should write `cycle.workflow_kind` during Plan Generate or Cycle start. Defaults are:
+
+- `workflow_kind=build` -> `execution.steps.preset=tdd`
+- `workflow_kind=analysis` -> `execution.steps.preset=analysis`
+- `workflow_kind=showcase` -> `execution.steps.preset=implement-only`
+- `lifecycle_policy.reject.default_action=needs_revision`
+- `lifecycle_policy.accept.next=follow_up_plan` when a `cycle.continuations[]` follow-up plan exists, otherwise `complete`
+
+`cycle.continuations[]` owns planned follow-up nodes; project config must not store live continuation state.
 | watchdog heartbeat timeout | `watchdog.heartbeat_timeout` | `watchdog.heartbeat_timeout` | `300` |
 | history import split method | `history_import.split_method` | `history_import.split_method` | `auto` |
 | history import time gap | `history_import.time_gap_threshold` | `history_import.time_gap_threshold` | `24h` |
@@ -104,6 +116,7 @@ Acceptance modes are:
 | OpenCode code-a model | `opencode.agents.code-a.model` | `opencode.agents.code-a.model` | `mimo-v2.5-pro` |
 | OpenCode code-b model | `opencode.agents.code-b.model` | `opencode.agents.code-b.model` | `deepseek-v4-pro` |
 | OpenCode debug model | `opencode.agents.debug.model` | `opencode.agents.debug.model` | `gpt-5.5` |
+| OpenCode docs model | `opencode.agents.docs.model` | `opencode.agents.docs.model` | `deepseek-v4-pro` |
 | OpenCode report model | `opencode.agents.report.model` | `opencode.agents.report.model` | `deepseek-v4-flash` |
 | test profile enabled | `execution.test_profiles.enabled` | `execution.test_profiles.enabled` | `true` |
 | test profile selection mode | `execution.test_profiles.selection` | `execution.test_profiles.selection` | `auto` |
@@ -122,7 +135,7 @@ Normalize global `agent.platform=claude-code` to the runtime platform value `cla
 |---|---|
 | `plan` | `hw-plan` |
 | `implement` | `hw-build`, `hw-code-a`, `hw-code-b` |
-| `review` | `hw-review`, `hw-debug` |
+| `review` | `hw-review`, `hw-debug`, `hw-docs` |
 | `evaluate` | `hw-test`, `hw-report`, `hw-compact` |
 | `chat` | reserved for Chat Mode defaults |
 
@@ -144,6 +157,32 @@ On save:
 `~/.hypo-workflow/projects.yaml` stores setup-time project summaries for the global TUI and project switcher. `init-project` registers projects automatically when `sync.register_projects=true`.
 
 Registry entries include stable project ID, display name, absolute path, platform, profile, current Cycle, pipeline status, open patch count, acceptance mode/state, and `updated_at`.
+
+## Config TUI Editing Contract
+
+The global TUI may edit configuration, but it is a configuration manager, not a workflow action center.
+
+Targets must be explicit:
+
+| Target | File | Scope |
+|---|---|---|
+| Global defaults | `~/.hypo-workflow/config.yaml` | User-level defaults for future and current projects |
+| Current project | `.pipeline/config.yaml` | Project-local overrides only |
+
+The TUI edit helper must:
+
+- present global and project targets separately before staging changes
+- stage edits into an in-memory proposal first
+- show a field-level diff before writing
+- validate edited fields against the supported schema subset before writing
+- require explicit confirmation for every write
+- write only the selected target config file
+- never write `.pipeline/state.yaml`, `.pipeline/cycle.yaml`, or `.pipeline/rules.yaml`
+- report adapter-affecting edits such as platform, model matrix, sync, or OpenCode fields with guidance to run `/hw:sync --light`
+
+Supported editable domains are platform, model/model pool, approval and acceptance defaults, plan mode, interaction depth, watchdog, compact, sync, docs/release automation, lifecycle defaults, output language/timezone, OpenCode agent matrix, and subagent defaults.
+
+The C5 TUI must not dispatch start/resume/accept/reject/sync/repair actions. Those remain explicit `/hw:*` commands.
 
 For step-specific delegation, resolve in this order:
 
@@ -349,6 +388,8 @@ opencode:
       model: deepseek-v4-pro
     debug:
       model: gpt-5.5
+    docs:
+      model: deepseek-v4-pro
     report:
       model: deepseek-v4-flash
 rules:
@@ -358,6 +399,8 @@ version: "8.4.0"
 created: "2026-04-26T14:00:00+08:00"
 updated: "2026-04-26T14:00:00+08:00"
 ```
+
+Watchdog recovery uses structured execution leases at `.pipeline/.lock`. A fresh lease blocks resume; an expired lease may be taken over with `lease_takeover` evidence. Platform-reported failures use `reported_failure`; heartbeat-only timeout uses `inferred_stall`.
 
 `subagent.codex.base_url` is optional.
 

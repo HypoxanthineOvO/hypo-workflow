@@ -6,6 +6,7 @@ export function renderBatchPlanArtifacts(input = {}, options = {}) {
   const mode = options.decompose_mode || "upfront";
   const failurePolicy = options.failure_policy || "skip_defer";
   const features = normalizeFeatures(input.features || [], mode);
+  const dag = resolveFeatureDagBoard({ features });
   const currentFeature = features.find((feature) => feature.status === "active")?.id || features[0]?.id || null;
 
   const queue = {
@@ -23,8 +24,121 @@ export function renderBatchPlanArtifacts(input = {}, options = {}) {
 
   return {
     queue,
-    markdown: renderFeatureTable(features, mode),
-    mermaid: renderFeatureGraph(features),
+    markdown: renderFeatureTable(features, mode, dag),
+    mermaid: renderFeatureGraph(features, dag),
+    dag,
+  };
+}
+
+export function assessRunnableVerticalSlice(milestone = {}) {
+  const text = collectMilestoneText(milestone);
+  const layers = detectSliceLayers(text);
+  const hasValidation = hasRunnableValidation(milestone, text);
+  const runnableBehavior = hasRunnableBehavior(text, hasValidation);
+  const flags = [];
+
+  if (isHorizontalOnly(text, layers, runnableBehavior)) {
+    flags.push("horizontal_only");
+  }
+  if (!runnableBehavior) {
+    flags.push("missing_runnable_behavior");
+  }
+  if (!hasValidation) {
+    flags.push("missing_real_validation");
+  }
+  if (runnableBehavior && layers.length < 2) {
+    flags.push("single_layer_slice");
+  }
+
+  const status = flags.includes("horizontal_only") || flags.includes("missing_runnable_behavior")
+    ? "weak"
+    : flags.length
+      ? "needs_evidence"
+      : "acceptable";
+
+  return {
+    status,
+    flags,
+    layers,
+    runnable_behavior: runnableBehavior,
+    validation_evidence: hasValidation,
+    summary: status === "acceptable"
+      ? "Acceptable runnable vertical slice with observable behavior and real validation."
+      : "Weak decomposition: define a runnable vertical slice with observable behavior and real validation.",
+  };
+}
+
+export function resolveFeatureDagBoard(queue = {}) {
+  const features = normalizeDagFeatures(queue.features || []);
+  const ids = new Set(features.map((feature) => feature.id));
+  const errors = [];
+
+  for (const feature of features) {
+    for (const dependency of feature.depends_on) {
+      if (!ids.has(dependency)) {
+        errors.push({
+          code: "missing_dependency",
+          feature_id: feature.id,
+          dependency,
+          message: `Feature ${feature.id} depends on missing Feature ${dependency}.`,
+        });
+      }
+    }
+  }
+
+  const cycle = detectDependencyCycle(features);
+  if (cycle.length) {
+    errors.push({
+      code: "dependency_cycle",
+      cycle,
+      message: `Feature dependency cycle detected: ${cycle.join(" -> ")}`,
+    });
+  }
+
+  const doneIds = new Set(features.filter((feature) => isDoneFeature(feature)).map((feature) => feature.id));
+  const featureMap = new Map(features.map((feature) => [feature.id, feature]));
+  const enriched = features.map((feature) => {
+    const blockedBy = feature.depends_on.filter((dependency) => !doneIds.has(dependency));
+    const active = isActiveFeature(feature);
+    const done = isDoneFeature(feature);
+    const ready = !done && !active && blockedBy.length === 0 && isRunnableQueueStatus(feature.status);
+    const computedStatus = done
+      ? "done"
+      : active
+        ? "active"
+        : blockedBy.length
+          ? "blocked"
+          : feature.status;
+    return {
+      ...feature,
+      status: computedStatus,
+      ready,
+      blocked_by: blockedBy,
+      unlocks: features
+        .filter((candidate) => candidate.depends_on.includes(feature.id))
+        .map((candidate) => candidate.id),
+      ready_reason: done
+        ? "done"
+        : active
+          ? "active"
+          : blockedBy.length
+            ? "waiting_on_dependencies"
+            : ready
+              ? "dependencies_satisfied"
+              : "not_runnable_status",
+      depends_on_titles: feature.depends_on.map((dependency) => featureMap.get(dependency)?.title || dependency),
+    };
+  });
+
+  const readyFeatures = enriched.filter((feature) => feature.ready);
+  return {
+    ok: errors.length === 0,
+    visible: shouldShowDag(enriched),
+    errors,
+    features: enriched,
+    ready_features: readyFeatures,
+    blocked_features: enriched.filter((feature) => feature.blocked_by.length > 0),
+    parallel_candidates: readyFeatures.length > 1 ? readyFeatures : [],
   };
 }
 
@@ -184,11 +298,12 @@ function normalizeFeatures(features, mode) {
     const discover = normalizeDiscoverFeature(feature);
     const id = discover.id || `F${String(index + 1).padStart(3, "0")}`;
     const featureMode = discover.decompose_mode || mode;
+    const explicitMilestones = Array.isArray(discover.milestones) && discover.milestones.length;
     return {
       id,
       title: discover.title || id,
       priority: discover.priority ?? (index + 1) * 10,
-      status: index === 0 ? "active" : "queued",
+      status: discover.status ? normalizeFeatureStatus(discover.status) : index === 0 ? "active" : "queued",
       gate: discover.gate || "auto",
       decompose_mode: featureMode,
       source: discover.source || "batch-discover",
@@ -199,7 +314,17 @@ function normalizeFeatures(features, mode) {
       desired_effect: discover.desired_effect,
       verification: discover.verification,
       test_profiles: normalizeTestProfileSelection(discover).profiles,
-      milestones: featureMode === "upfront" ? renderDefaultMilestones(id, discover.title || id) : [],
+      depends_on: normalizeIdList(discover.depends_on || discover.dependsOn || discover.dependencies),
+      unlocks: normalizeIdList(discover.unlocks),
+      blocked_by: normalizeIdList(discover.blocked_by || discover.blockedBy),
+      execution_hint: normalizeExecutionHint(discover.execution_hint || discover.executionHint),
+      handoff_hint: discover.handoff_hint || discover.handoffHint || "",
+      ready_reason: discover.ready_reason || discover.readyReason || "",
+      milestones: explicitMilestones
+        ? normalizeMilestones(discover.milestones, id)
+        : featureMode === "upfront"
+          ? renderDefaultMilestones(id, discover.title || id)
+          : [],
       metric_summary: {
         duration_ms: "n/a",
         token_count: "n/a",
@@ -222,6 +347,22 @@ function renderDefaultMilestones(featureId, title) {
       title: `${title} implementation and validation`,
     },
   ];
+}
+
+function normalizeMilestones(milestones = [], featureId) {
+  return milestones.map((milestone, index) => {
+    const id = milestone.id || `${featureId}-M${String(index + 1).padStart(2, "0")}`;
+    const normalized = {
+      status: "planned",
+      ...milestone,
+      id,
+      title: milestone.title || id,
+    };
+    return {
+      ...normalized,
+      slice_quality: milestone.slice_quality || assessRunnableVerticalSlice(normalized),
+    };
+  });
 }
 
 function validateQueueOperation(queue, operation = {}, options = {}) {
@@ -334,7 +475,13 @@ function normalizeInsertedFeature(queue, feature = {}) {
     desired_effect: discover.desired_effect,
     verification: discover.verification,
     test_profiles: normalizeTestProfileSelection(discover).profiles,
-    milestones: discover.milestones || [],
+    depends_on: normalizeIdList(discover.depends_on || discover.dependsOn || discover.dependencies),
+    unlocks: normalizeIdList(discover.unlocks),
+    blocked_by: normalizeIdList(discover.blocked_by || discover.blockedBy),
+    execution_hint: normalizeExecutionHint(discover.execution_hint || discover.executionHint),
+    handoff_hint: discover.handoff_hint || discover.handoffHint || "",
+    ready_reason: discover.ready_reason || discover.readyReason || "",
+    milestones: Array.isArray(discover.milestones) ? normalizeMilestones(discover.milestones, id) : [],
     metric_summary: {
       duration_ms: fallbackMetric(discover.metric_summary?.duration_ms),
       token_count: fallbackMetric(discover.metric_summary?.token_count),
@@ -395,25 +542,118 @@ function clone(value) {
   return globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
 }
 
-function renderFeatureTable(features, mode) {
+function renderFeatureTable(features, mode, dag = resolveFeatureDagBoard({ features })) {
+  const header = dag.visible
+    ? "| Feature | Priority | Gate | Decompose | Status | Depends On | Ready | Hint | Milestones | Workflow | Analysis Kind | Category | Verification | Profiles |"
+    : "| Feature | Priority | Gate | Decompose | Status | Milestones | Workflow | Analysis Kind | Category | Verification | Profiles |";
+  const separator = dag.visible
+    ? "|---|---:|---|---|---|---|---|---|---|---|---|---|---|---|"
+    : "|---|---:|---|---|---|---|---|---|---|---|---|";
   const lines = [
     `Batch decompose mode: ${mode}`,
     "",
-    "| Feature | Priority | Gate | Decompose | Status | Milestones | Workflow | Analysis Kind | Category | Verification | Profiles |",
-    "|---|---:|---|---|---|---|---|---|---|---|---|",
+    header,
+    separator,
   ];
+  const dagById = new Map(dag.features.map((feature) => [feature.id, feature]));
   for (const feature of features) {
+    const dagFeature = dagById.get(feature.id) || feature;
     const milestones = feature.milestones.length
-      ? feature.milestones.map((milestone) => milestone.id).join(", ")
+      ? feature.milestones.map((milestone) => {
+          const quality = milestone.slice_quality?.status;
+          return quality ? `${milestone.id} (${quality})` : milestone.id;
+        }).join(", ")
       : "JIT decomposition pending";
     const verification = feature.verification?.method || "TBD";
     const profiles = feature.test_profiles?.length ? feature.test_profiles.join("+") : "preset-only";
-    lines.push(`| ${feature.id} ${feature.title} | ${feature.priority} | ${feature.gate} | ${feature.decompose_mode} | ${feature.status} | ${milestones} | ${feature.workflow_kind || "build"} | ${feature.analysis_kind || "n/a"} | ${feature.category || "other"} | ${verification} | ${profiles} |`);
+    if (dag.visible) {
+      lines.push(`| ${feature.id} ${feature.title} | ${feature.priority} | ${feature.gate} | ${feature.decompose_mode} | ${dagFeature.status} | ${formatList(dagFeature.depends_on)} | ${dagFeature.ready ? "yes" : "no"} | ${dagFeature.execution_hint || dagFeature.handoff_hint || "n/a"} | ${milestones} | ${feature.workflow_kind || "build"} | ${feature.analysis_kind || "n/a"} | ${feature.category || "other"} | ${verification} | ${profiles} |`);
+    } else {
+      lines.push(`| ${feature.id} ${feature.title} | ${feature.priority} | ${feature.gate} | ${feature.decompose_mode} | ${feature.status} | ${milestones} | ${feature.workflow_kind || "build"} | ${feature.analysis_kind || "n/a"} | ${feature.category || "other"} | ${verification} | ${profiles} |`);
+    }
   }
   return `${lines.join("\n")}\n`;
 }
 
-function renderFeatureGraph(features) {
+function collectMilestoneText(milestone) {
+  const values = [
+    milestone.id,
+    milestone.title,
+    milestone.summary,
+    milestone.objective,
+    milestone.implementation_scope,
+    milestone.scope,
+    milestone.test_spec,
+    milestone.validation_commands,
+    milestone.evidence,
+    milestone.expected_artifacts,
+  ];
+  return flattenText(values).join(" ").toLowerCase();
+}
+
+function flattenText(values) {
+  const output = [];
+  for (const value of values) {
+    if (!value) {
+      continue;
+    }
+    if (Array.isArray(value)) {
+      output.push(...flattenText(value));
+      continue;
+    }
+    if (typeof value === "object") {
+      output.push(...flattenText(Object.values(value)));
+      continue;
+    }
+    output.push(String(value));
+  }
+  return output;
+}
+
+function detectSliceLayers(text) {
+  const layerPatterns = [
+    ["interface", /\b(cli|command|browser|page|ui|tui|dashboard|status output|user)\b/],
+    ["core", /\b(core|helper|service|api|adapter|router|hook)\b/],
+    ["state", /\b(state|persist|persistence|storage|database|db|ledger|yaml|schema)\b/],
+    ["validation", /\b(test|validation|e2e|node --test|playwright|screenshot|before\/after|evidence)\b/],
+  ];
+  return layerPatterns
+    .filter(([, pattern]) => pattern.test(text))
+    .map(([layer]) => layer);
+}
+
+function hasRunnableValidation(milestone, text) {
+  const commands = Array.isArray(milestone.validation_commands) ? milestone.validation_commands : [];
+  const evidence = Array.isArray(milestone.evidence) ? milestone.evidence : [];
+  return commands.some((command) => String(command).trim())
+    || evidence.some((item) => String(item).trim())
+    || /\b(node --test|npm test|playwright|e2e|real cli|before\/after|screenshot)\b/.test(text);
+}
+
+function hasRunnableBehavior(text, hasValidation) {
+  return /\b(user can|can run|run a|runs?|click|submit|see|writes?|reads?|updates?|creates?|end-to-end|runnable|command|workflow)\b/.test(text)
+    && hasValidation;
+}
+
+function isHorizontalOnly(text, layers, runnableBehavior) {
+  if (runnableBehavior) {
+    return false;
+  }
+  const horizontalSignals = [
+    /\bonly\b/,
+    /\bseparately\b/,
+    /\bschema\b/,
+    /\bapi contracts?\b/,
+    /\binterface only\b/,
+    /\bui shell\b/,
+    /\bskeleton\b/,
+    /\bdocs-only\b/,
+    /\bcore-only\b/,
+  ];
+  return horizontalSignals.some((pattern) => pattern.test(text)) || layers.length < 2;
+}
+
+function renderFeatureGraph(features, dag = resolveFeatureDagBoard({ features })) {
   const lines = ["graph TD"];
   for (const feature of features) {
     lines.push(`  ${sanitizeNode(feature.id)}["${feature.id}: ${escapeLabel(feature.title)}"]`);
@@ -421,10 +661,112 @@ function renderFeatureGraph(features) {
       lines.push(`  ${sanitizeNode(feature.id)} --> ${sanitizeNode(milestone.id)}["${milestone.id}: ${escapeLabel(milestone.title)}"]`);
     }
   }
-  for (let index = 0; index < features.length - 1; index += 1) {
-    lines.push(`  ${sanitizeNode(features[index].id)} -. next .-> ${sanitizeNode(features[index + 1].id)}`);
+  if (dag.visible) {
+    for (const feature of dag.features) {
+      for (const dependency of feature.depends_on) {
+        lines.push(`  ${sanitizeNode(dependency)} --> ${sanitizeNode(feature.id)}`);
+      }
+    }
+  } else {
+    for (let index = 0; index < features.length - 1; index += 1) {
+      lines.push(`  ${sanitizeNode(features[index].id)} -. next .-> ${sanitizeNode(features[index + 1].id)}`);
+    }
   }
   return `${lines.join("\n")}\n`;
+}
+
+function normalizeDagFeatures(features = []) {
+  return features.map((feature, index) => ({
+    ...feature,
+    id: String(feature.id || `F${String(index + 1).padStart(3, "0")}`),
+    title: feature.title || feature.id || `F${String(index + 1).padStart(3, "0")}`,
+    status: normalizeFeatureStatus(feature.status),
+    gate: feature.gate || "auto",
+    depends_on: normalizeIdList(feature.depends_on || feature.dependsOn || feature.dependencies),
+    unlocks: normalizeIdList(feature.unlocks),
+    blocked_by: normalizeIdList(feature.blocked_by || feature.blockedBy),
+    execution_hint: normalizeExecutionHint(feature.execution_hint || feature.executionHint),
+    handoff_hint: feature.handoff_hint || feature.handoffHint || "",
+    ready_reason: feature.ready_reason || feature.readyReason || "",
+  }));
+}
+
+function detectDependencyCycle(features = []) {
+  const graph = new Map(features.map((feature) => [feature.id, feature.depends_on]));
+  const visited = new Set();
+  const visiting = new Set();
+  const stack = [];
+
+  function visit(id) {
+    if (visiting.has(id)) {
+      const index = stack.indexOf(id);
+      return [...stack.slice(index), id];
+    }
+    if (visited.has(id) || !graph.has(id)) {
+      return [];
+    }
+    visiting.add(id);
+    stack.push(id);
+    for (const dependency of graph.get(id)) {
+      const cycle = visit(dependency);
+      if (cycle.length) return cycle;
+    }
+    stack.pop();
+    visiting.delete(id);
+    visited.add(id);
+    return [];
+  }
+
+  for (const feature of features) {
+    const cycle = visit(feature.id);
+    if (cycle.length) return cycle;
+  }
+  return [];
+}
+
+function shouldShowDag(features = []) {
+  return features.length > 1 && features.some((feature) => feature.depends_on.length || feature.unlocks.length || feature.blocked_by.length || feature.execution_hint || feature.handoff_hint);
+}
+
+function isDoneFeature(feature) {
+  return ["done", "completed"].includes(feature.status);
+}
+
+function isActiveFeature(feature) {
+  return ["active", "running", "in_progress"].includes(feature.status);
+}
+
+function isRunnableQueueStatus(status) {
+  return ["queued", "decomposed", "pending"].includes(status);
+}
+
+function normalizeFeatureStatus(value) {
+  const normalized = String(value || "queued").trim().toLowerCase();
+  if (normalized === "completed") return "done";
+  if (normalized === "running" || normalized === "in-progress") return "active";
+  if (["queued", "active", "decomposed", "done", "deferred", "blocked", "pending"].includes(normalized)) {
+    return normalized;
+  }
+  return "queued";
+}
+
+function normalizeIdList(value) {
+  if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
+  if (!value) return [];
+  return String(value)
+    .split(/[, ]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function normalizeExecutionHint(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (["afk", "hitl", "parallel", "serial"].includes(normalized)) return normalized;
+  return normalized;
+}
+
+function formatList(values = []) {
+  return values.length ? values.join(", ") : "none";
 }
 
 function sanitizeNode(value) {

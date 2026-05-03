@@ -10,7 +10,13 @@ environment_snapshot:
 hypotheses: []
 experiments: []
 observations: []
-metrics: {}
+metrics:
+  duration_ms: n/a
+  token_count: telemetry_unavailable
+  cost: telemetry_unavailable
+  telemetry_status:
+    token_count: telemetry_unavailable
+    cost: telemetry_unavailable
 interpretation: ""
 outcome: inconclusive
 conclusion: ""

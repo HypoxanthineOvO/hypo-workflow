@@ -14,10 +14,10 @@ test("OpenCode command and parity docs use matrix role agents", async () => {
   assert.match(parity, /\| Debug \| `\/hw-debug` \| `hw-debug` \|/);
 });
 
-test("README documents OpenCode model matrix defaults and boundaries", async () => {
-  const readme = await readFile("README.md", "utf8");
+test("OpenCode guide documents model matrix defaults and boundaries", async () => {
+  const readme = await readFile("docs/platforms/opencode.md", "utf8");
 
-  for (const agent of ["hw-compact", "hw-test", "hw-code-a", "hw-code-b", "hw-report"]) {
+  for (const agent of ["hw-compact", "hw-test", "hw-code-a", "hw-code-b", "hw-docs", "hw-report"]) {
     assert.ok(readme.includes(`\`${agent}\``), `README missing ${agent}`);
   }
   assert.match(readme, /opencode:\n\s+compaction:\n\s+effective_context_target: 900000/);

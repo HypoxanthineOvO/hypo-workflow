@@ -31,8 +31,9 @@ Use this skill for deep project auditing.
 5. Grade findings as `Critical`, `Warning`, or `Info`.
 6. Write the report to `.pipeline/audits/audit-NNN.md` in `output.language`.
 7. Render report timestamps in `output.timezone`.
-8. Append a lifecycle log entry.
-9. Set `current.phase=lifecycle_audit` when state tracking is used.
+8. Apply the shared secret-safe evidence redaction helper before durable writes; do not store raw API keys, tokens, Authorization headers, cookies, passwords, or private keys.
+9. Append a lifecycle log entry.
+10. Set `current.phase=lifecycle_audit` when state tracking is used.
 
 ## Reference Files
 

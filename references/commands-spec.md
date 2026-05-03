@@ -5,7 +5,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 ## Namespace
 
 - all explicit Hypo-Workflow commands use the `/hw:` prefix
-- V10.1 canonical namespace contains 36 user-facing commands across Setup, Pipeline, Plan, Lifecycle, and Utility groups, plus an internal cron-only watchdog skill
+- V10.1 canonical namespace contains 37 user-facing commands across Setup, Pipeline, Plan, Lifecycle, Docs, and Utility groups, plus an internal cron-only watchdog skill
 - slash commands are exact and namespace-scoped
 - slash commands take precedence over fuzzy natural-language matching
 - natural-language commands remain valid for backward compatibility
@@ -48,11 +48,12 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
    - `/hw:reject`
    - `/hw:explore`
    - `/hw:sync`
+   - `/hw:docs`
    - `/hw:patch`
 3. parse remaining tokens as command arguments
 4. flags are order-independent
 5. if a command is unknown, return exactly:
-   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:accept, /hw:reject, /hw:explore, /hw:sync, /hw:patch, /hw:compact, /hw:knowledge, /hw:guide, /hw:showcase, /hw:rules, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
+   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:accept, /hw:reject, /hw:explore, /hw:sync, /hw:docs, /hw:patch, /hw:compact, /hw:knowledge, /hw:guide, /hw:showcase, /hw:rules, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
 6. if a known command receives an unsupported flag, stop and report the unsupported flag explicitly instead of guessing
 7. if a prompt selector is ambiguous, list the candidates and stop
 8. plan and review commands load `plan/PLAN-SKILL.md` before execution
@@ -62,6 +63,10 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 11. `/hw:review` is a compatibility alias that prints a migration warning instead of running the review directly
 
 ## Command Semantics
+
+Lifecycle-mutating commands must use the workflow commit helper for protected workflow state. This applies to `/hw:accept`, `/hw:reject`, `/hw:start`, `/hw:resume`, `/hw:plan:generate`, prompt skip/stop transitions, and any command that writes `.pipeline/state.yaml`, `.pipeline/cycle.yaml`, or `.pipeline/rules.yaml`.
+
+The command should prepare authoritative writes first, prevalidate invariants, commit authority with temp-file atomic replacement, then refresh derived views such as `.pipeline/log.yaml`, `.pipeline/PROGRESS.md`, metrics mirrors, compact views, `PROJECT-SUMMARY.md`, and OpenCode status inputs. If a derived refresh fails after authority commits, do not roll back authority; report the warning, write `.pipeline/derived-refresh.yaml`, and recommend `/hw:sync --light` or rerunning the lifecycle command after repair.
 
 ### `/hw:start`
 
@@ -84,6 +89,7 @@ Behavior:
 - create `.pipeline/.lock` during active execution
 - update top-level `last_heartbeat` whenever state is persisted
 - if `watchdog.enabled=true`, register cron for `scripts/watchdog.sh`
+- create `.pipeline/.lock` as a structured execution lease with heartbeat and expiry fields
 
 ### `/hw:resume`
 
@@ -104,8 +110,9 @@ Notes:
 Behavior:
 
 - read `state.yaml`
-- stop if `.pipeline/.lock` already exists
-- create `.pipeline/.lock` before active execution
+- parse `.pipeline/.lock` as a structured execution lease when present
+- stop on a fresh foreign lease, take over an expired lease with `lease_takeover` evidence, and stop with repair guidance on a malformed lease
+- create or refresh `.pipeline/.lock` before active execution
 - locate `current.prompt_file` and `current.step`
 - continue from the next runnable step
 - update top-level `last_heartbeat` whenever state is persisted
@@ -196,7 +203,7 @@ Supported forms:
 Behavior:
 
 - read `SKILL.md` command tables as the source of truth
-- `/hw:help` lists all 36 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, and Utility
+- `/hw:help` lists all 37 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, Docs, and Utility
 - `/hw:help --quick` returns a compact cheat sheet
 - `/hw:help <cmd>` returns detailed usage, flags, and examples for the requested command
 
@@ -516,6 +523,8 @@ Behavior:
 Supported flags:
 
 - `--light`
+- `--check-only`
+- `--repair`
 - `--deep`
 - `--platform opencode`
 - `--project <dir>`
@@ -524,9 +533,32 @@ Behavior:
 
 - default standard mode runs light sync, OpenCode adapter sync, config loading check, and compact refresh
 - `--light` refreshes registry status, refreshes Knowledge Ledger compact/index when source records changed, detects external changes, and reports without adapter writes
-- `--deep` runs standard sync plus dependency scan and architecture rescan hints
+- `--check-only` reports external changes and declared derived artifact drift without writing anything
+- `--repair` safely refreshes declared derived artifacts and writes `.pipeline/derived-health.yaml`
+- `--deep` runs standard repair sync plus dependency scan and architecture rescan hints
+- the derived artifact map records authority, `derived_from`, writer commands, refresh triggers, staleness severity, and repair behavior for each generated view
+- protected authority conflicts involving `.pipeline/state.yaml`, `.pipeline/cycle.yaml`, or `.pipeline/rules.yaml` require explicit repair or confirmation and must not be guessed
 - never execute pipeline milestones
 - SessionStart may only perform light external-change detection and prompt before heavier sync
+
+### `/hw:docs`
+
+Supported forms:
+
+- `/hw:docs check`
+- `/hw:docs repair`
+- `/hw:docs generate`
+- `/hw:docs sync`
+
+Behavior:
+
+- load `skills/docs/SKILL.md`
+- check README quality, command/platform freshness, license link policy, generated reference presence, and broken docs references
+- repair managed README blocks and generated references without silently rewriting narrative docs
+- generate or refresh `docs/user-guide.md`, `docs/developer.md`, `docs/platforms/{codex,claude-code,opencode}.md`, and `docs/reference/*.md`
+- keep README as a concise user entrypoint and move test-running, release internals, architecture details, adapter runtime internals, and long changelog content to full docs
+- release-time docs checks must fact-check narrative docs for stale command counts and false platform claims
+- missing `LICENSE` is a documented user-facing gap until a license file exists; do not invent license authority silently
 
 ### `/hw:patch`
 
@@ -589,8 +621,12 @@ Behavior:
 
 - load `skills/guide/SKILL.md`
 - inspect `.pipeline/`, active Cycle, current state, and open Patches
+- use `routeGuideIntent` when available to return one recommended next path with command flow, confidence, reason, and confirmation requirement
+- consider lifecycle phase, continuation, rejected work, dirty worktree, lease/lock state, derived refresh warnings, batch intent, patch/explore suitability, docs/config/sync intent, and architecture/source-of-truth risk
 - ask what the user wants
-- recommend a 1-3 command flow
+- recommend exactly one 1-3 command flow
+- route deep Grill-Me only for architecture, workflow semantic, source-of-truth, product concept, or long-running coordination risk
+- route documentation intent to `/hw:docs`
 - execute the first recommended command only after explicit confirmation
 
 ### `/hw:showcase`

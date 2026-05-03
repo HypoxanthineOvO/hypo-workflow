@@ -161,6 +161,7 @@ test("writeOpenCodeArtifacts renders model matrix into role agent files", async 
         "code-a": { model: "custom-code-a" },
         "code-b": { model: "custom-code-b" },
         debug: { model: "custom-debug" },
+        docs: { model: "custom-docs" },
         report: { model: "custom-report" },
       },
     },
@@ -170,6 +171,7 @@ test("writeOpenCodeArtifacts renders model matrix into role agent files", async 
   const testAgent = await readFile(join(dir, ".opencode", "agents", "hw-test.md"), "utf8");
   const codeAAgent = await readFile(join(dir, ".opencode", "agents", "hw-code-a.md"), "utf8");
   const codeBAgent = await readFile(join(dir, ".opencode", "agents", "hw-code-b.md"), "utf8");
+  const docsAgent = await readFile(join(dir, ".opencode", "agents", "hw-docs.md"), "utf8");
   const reportAgent = await readFile(join(dir, ".opencode", "agents", "hw-report.md"), "utf8");
   const metadata = JSON.parse(await readFile(join(dir, ".opencode", "hypo-workflow.json"), "utf8"));
   const rootConfig = JSON.parse(await readFile(join(dir, "opencode.json"), "utf8"));
@@ -178,6 +180,7 @@ test("writeOpenCodeArtifacts renders model matrix into role agent files", async 
   assert.match(testAgent, /^model: custom-test$/m);
   assert.match(codeAAgent, /^model: custom-code-a$/m);
   assert.match(codeBAgent, /^model: custom-code-b$/m);
+  assert.match(docsAgent, /^model: custom-docs$/m);
   assert.match(reportAgent, /^model: custom-report$/m);
   assert.equal(metadata.compaction.effective_context_target, 777000);
   assert.equal(metadata.agents.compact.model, "custom-compact");
@@ -200,6 +203,7 @@ test("OpenCode metadata carries agent model matrix and compaction settings", () 
       "code-a": { model: "mimo-v2.5-pro" },
       "code-b": { model: "deepseek-v4-pro" },
       debug: { model: "gpt-5.5" },
+      docs: { model: "deepseek-v4-pro" },
       report: { model: "deepseek-v4-flash" },
     },
   });
@@ -211,6 +215,7 @@ test("OpenCode metadata carries agent model matrix and compaction settings", () 
   assert.equal(metadata.agents["code-a"].model, "mimo-v2.5-pro");
   assert.equal(metadata.agents["code-b"].model, "deepseek-v4-pro");
   assert.equal(metadata.agents.debug.model, "gpt-5.5");
+  assert.equal(metadata.agents.docs.model, "deepseek-v4-pro");
   assert.equal(metadata.agents.report.model, "deepseek-v4-flash");
 });
 

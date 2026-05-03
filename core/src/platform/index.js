@@ -6,6 +6,8 @@ export const PLATFORM_CAPABILITIES = Object.freeze({
     subagents: "available",
     events: "limited",
     permissions: "environment",
+    recovery: "lease-heartbeat",
+    handoff_boundaries: "preserve-host-sandbox",
     rules: "skill-files",
   },
   "claude-code": {
@@ -15,6 +17,8 @@ export const PLATFORM_CAPABILITIES = Object.freeze({
     subagents: "available",
     events: "hooks",
     permissions: "claude-settings",
+    recovery: "lease-heartbeat-hooks",
+    handoff_boundaries: "preserve-claude-permissions",
     rules: "skill-files",
   },
   opencode: {
@@ -24,6 +28,8 @@ export const PLATFORM_CAPABILITIES = Object.freeze({
     subagents: "native-agents",
     events: "plugin-events",
     permissions: "native-permissions",
+    recovery: "lease-heartbeat-plugin-events",
+    handoff_boundaries: "preserve-opencode-permissions-auto-continue",
     rules: "AGENTS.md-instructions",
   },
 });

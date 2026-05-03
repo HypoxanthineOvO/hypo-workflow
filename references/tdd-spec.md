@@ -33,6 +33,9 @@ Built-in presets:
 - Work only on the current prompt.
 - Use the current prompt file as the authoritative source for `需求`, `预期测试`, and `预期产出`.
 - Prefer the smallest correct change set.
+- Drive one behavior at a time through a red/green/refactor loop: write the failing test for that behavior, implement the smallest code to pass it, then clean up.
+- Do not batch unrelated tests or unrelated implementation changes into a single loop.
+- Prefer real feedback from runnable validation over proof by inspection.
 - Preserve existing project conventions unless the prompt explicitly requires a structural change.
 - When evidence is missing, stop and record a blocking reason instead of guessing.
 
@@ -46,6 +49,7 @@ Design principles:
 - Add edge cases for empty values, invalid input, and missing resources where relevant.
 - Include error-handling tests when the prompt implies failure behavior.
 - Keep the tests close to observable behavior; do not overfit to internals.
+- Keep each new test scoped to one behavior when practical.
 - Do not add production implementation in this step.
 
 Expected notes:

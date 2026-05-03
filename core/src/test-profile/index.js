@@ -47,6 +47,20 @@ export const TEST_PROFILE_DEFINITIONS = Object.freeze({
   },
 });
 
+const WORKFLOW_OR_PRESET_NAMES = Object.freeze([
+  "analysis",
+  "build",
+  "showcase",
+  "tdd",
+  "implement-only",
+  "custom",
+  "root-cause",
+  "root_cause",
+  "repo-system",
+  "repo_system",
+  "metric",
+]);
+
 export function inferTestProfileFromCategory(category) {
   const normalized = String(category || "").trim().toLowerCase();
   if (normalized === "webapp") return "webapp";
@@ -57,26 +71,28 @@ export function inferTestProfileFromCategory(category) {
 
 export function normalizeTestProfileSelection(input = {}) {
   const preset = input.preset || input.steps?.preset || "tdd";
-  const explicit = toList(
-    input.profiles ||
-      input.test_profiles ||
-      input.testProfiles ||
-      input.execution?.test_profiles?.profiles ||
-      input.execution?.test_profiles?.profile,
-  );
+  const explicit = [
+    ...toList(input.profiles),
+    ...toList(input.test_profiles),
+    ...toList(input.testProfiles),
+    ...toList(input.execution?.test_profiles?.profiles),
+    ...toList(input.execution?.test_profiles?.profile),
+  ];
   const inferred = inferTestProfileFromCategory(input.category);
+  const normalized = explicit.map(normalizeProfileName).filter(Boolean);
   const profiles = dedupe(
-    explicit
-      .map(normalizeProfileName)
-      .filter(Boolean)
+    normalized
+      .filter((profile) => TEST_PROFILE_DEFINITIONS[profile])
       .concat(inferred ? [inferred] : []),
   );
+  const ignored = dedupe(normalized.filter((profile) => !TEST_PROFILE_DEFINITIONS[profile]));
 
   return {
     preset,
     profiles,
     compose: profiles.length ? `${profiles.join("+")}+${preset}` : preset,
     legacy_compatible: profiles.length === 0,
+    ignored,
   };
 }
 
@@ -180,6 +196,7 @@ function normalizeProfileName(value) {
     .replace(/\s+/g, "-");
   if (!normalized) return null;
   if (normalized === "agent" || normalized === "service") return "agent-service";
+  if (WORKFLOW_OR_PRESET_NAMES.includes(normalized)) return normalized;
   return normalized;
 }
 

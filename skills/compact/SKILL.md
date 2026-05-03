@@ -17,6 +17,8 @@ Use this skill when the user invokes `/hw:compact` or `/hypo-workflow:compact`.
 
 Compact files are derived context views. They reduce SessionStart context size while keeping the source files unchanged.
 
+Compact output is recovery and index context. Agents must restart from stable prompt/design artifacts such as `.pipeline/prompts/*.md`, `.pipeline/design-spec.md`, `.pipeline/design-concepts.yaml`, `.pipeline/glossary.md`, and durable Knowledge indexes. Compact summaries are not design authority and must not replace those stable artifacts when making implementation decisions.
+
 ## Paths
 
 All compact files are written next to their source files:

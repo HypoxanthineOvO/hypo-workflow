@@ -15,7 +15,7 @@ description: Interactive onboarding guide that senses the current project state 
 
 Use this skill when the user invokes `/hw:guide` or `/hypo-workflow:guide`.
 
-Guide is an interactive entrypoint for users who are unsure which Hypo-Workflow command to run next. It recommends a short command flow, asks for confirmation, and then executes the first recommended command when the user agrees.
+Guide is an interactive intent router for users who are unsure which Hypo-Workflow command path to run next. It senses project state plus user intent, recommends one next path, asks for confirmation, and then executes only the first recommended command when the user agrees.
 
 ## Step 1: Short Introduction
 
@@ -35,7 +35,10 @@ Check the current working directory:
 - If `.pipeline/` exists:
   - read `.pipeline/state.yaml` or `.pipeline/state.compact.yaml` for current phase, prompt, step, and status
   - read `.pipeline/cycle.yaml` for active Cycle number/name when present
+  - derive the canonical lifecycle phase and next action from Cycle acceptance, continuation, and state facts
   - scan `.pipeline/patches/` and count open Patches only
+  - detect `.pipeline/derived-refresh.yaml` warnings
+  - detect `.pipeline/.lock` or future lease metadata and whether recovery/repair is needed
   - summarize in one short sentence, for example: `你在 C3/M2 implement 步骤，有 2 个 open patch`
 
 Do not mutate any file during sensing.
@@ -50,9 +53,9 @@ Ask one open question:
 
 Wait for the user's answer.
 
-## Step 4: Intent Matching
+## Step 4: Intent Routing
 
-Match the answer to one of the supported scenarios and recommend a 1-3 command path. If the answer is vague, ask 1-2 follow-up questions such as:
+Use the deterministic guide router shape exposed as `routeGuideIntent` in `core/src/guide/index.js` when available. Match the answer to one supported scenario and recommend exactly one 1-3 command path. If the answer is vague, ask 1-2 follow-up questions such as:
 
 - 项目现在是刚开始、开发中，还是准备发布？
 - 你是想修 Bug、规划新功能、查看进度，还是减少上下文占用？
@@ -63,12 +66,22 @@ Match the answer to one of the supported scenarios and recommend a 1-3 command p
 | --- | --- |
 | Start a new project from zero | `/hw:init` → `/hw:plan` → `/hw:start` |
 | Continue an existing managed project | `/hw:resume` when interrupted, or `/hw:cycle new` for a new Cycle |
+| Rejected Cycle revision | `/hw:resume` |
+| Accepted Cycle with follow-up continuation | `/hw:plan --context follow_up` → `/hw:plan:generate` → `/hw:start` |
+| Derived refresh warning or stale lease recovery | `/hw:sync --light` → `/hw:check` |
 | Fix a bug | `/hw:patch "描述"` → `/hw:patch fix P<N>` |
+| Explore a risky approach | `/hw:explore "主题"` → `/hw:plan --context explore:E001` |
+| Plan long-running or multi-Feature work | `/hw:plan --batch` → `/hw:start` |
+| Architecture, workflow semantics, or source-of-truth risk | `/hw:plan` with deep Grill-Me Discover → `/hw:start` |
 | Review code quality | `/hw:audit` → `/hw:plan --context audit` |
 | Check current progress | `/hw:status` or `/hw:dashboard` |
+| Documentation intent | `/hw:docs` |
+| Configuration intent | `/hw:setup` |
 | Bring a legacy Git project under management | `/hw:init --import-history` |
 | Reduce token/context usage | `/hw:compact` |
 | Release a finished project | `/hw:release` |
+
+`/hw:docs` is the documentation workflow route target. Use it for documentation check, repair, generated references, and README/docs IA work.
 
 ## Step 5: Confirm And Execute
 
@@ -87,6 +100,11 @@ If the user declines, leave the recommended command flow visible and stop.
 - recommend command flows, not a single isolated command, unless the scenario naturally has one command
 - do not initialize, plan, resume, compact, audit, release, or patch-fix before user confirmation
 - do not write `.pipeline/state.yaml` from Guide itself
+- do not use Guide as a runner; it only recommends and starts the first confirmed command
+- route deep Grill-Me only for architecture, workflow semantics, product UX, source-of-truth, or long-running coordination risk
+- route Feature DAG concepts only for long-running, batch, multi-Feature, AFK, or HITL coordination
+- do not force deep Grill-Me for low-risk patches or small incremental tasks
+- do not expose Feature DAG concepts for ordinary single-feature planning
 - use `output.language` for all guide prose when config is available
 
 ## Reference Files
@@ -99,4 +117,5 @@ If the user declines, leave the recommended command flow visible and stop.
 - `skills/compact/SKILL.md`
 - `skills/audit/SKILL.md`
 - `skills/release/SKILL.md`
+- `references/progressive-discover-spec.md`
 - `SKILL.md`

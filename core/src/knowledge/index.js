@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { dirname, join, relative } from "node:path";
+import { redactSecrets } from "../evidence/index.js";
 
 export const KNOWLEDGE_RECORD_TYPES = Object.freeze([
   "milestone",
@@ -182,7 +183,11 @@ export function redactKnowledgeSecrets(value, options = {}) {
     ...DEFAULT_KNOWLEDGE_CONFIG.redaction,
     ...(options.redaction || options),
   };
-  return redactValue(value, config, []);
+  if (config.enabled === false) return value;
+  return redactSecrets(value, {
+    replacement: config.replacement,
+    preservePaths: ["secret_refs"],
+  });
 }
 
 export function buildKnowledgeLoadPlan(config = DEFAULT_KNOWLEDGE_CONFIG) {
@@ -278,34 +283,6 @@ export async function loadKnowledgeRecords(projectRoot, options = {}) {
     records.push(normalized);
   }
   return records.sort(compareRecords);
-}
-
-function redactValue(value, config, path) {
-  if (Array.isArray(value)) {
-    return value.map((item, index) => redactValue(item, config, [...path, String(index)]));
-  }
-  if (!isPlainObject(value)) return value;
-
-  const result = {};
-  for (const [key, child] of Object.entries(value)) {
-    const nextPath = [...path, key];
-    if (shouldRedactKey(key, config, nextPath)) {
-      result[key] = config.replacement;
-    } else {
-      result[key] = redactValue(child, config, nextPath);
-    }
-  }
-  return result;
-}
-
-function shouldRedactKey(key, config, path) {
-  if (!config.enabled) return false;
-  if (path.includes("secret_refs")) return false;
-  const normalized = String(key).toLowerCase().replace(/[-\s]+/g, "_");
-  return (config.secret_keys || []).some((secretKey) => {
-    const normalizedSecret = String(secretKey).toLowerCase().replace(/[-\s]+/g, "_");
-    return normalized === normalizedSecret || normalized.includes(normalizedSecret);
-  });
 }
 
 function mergeObjects(base, override) {

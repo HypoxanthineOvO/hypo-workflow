@@ -35,6 +35,7 @@ Use this skill to summarize the latest generated report file.
    - warnings
    - deferred or blocking notes if present
 7. If `.pipeline/PROGRESS.md` exists, keep its summary consistent conceptually, but do not mutate it from a read-only report command.
+8. Before displaying report snippets or summaries, apply the shared secret-safe evidence redaction helper. If generating or marking a report successful, block success when raw secret evidence is detected.
 
 ## Flags
 

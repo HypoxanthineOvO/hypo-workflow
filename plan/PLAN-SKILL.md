@@ -156,6 +156,8 @@ Batch Discover adds:
 - split work into milestones
 - attach test specs and boundary coverage expectations
 - keep milestones serial and reviewable
+- prefer a runnable vertical slice for implementation milestones: one narrow behavior that can be exercised with real validation
+- flag horizontal-only splits such as database/API/UI/schema-only milestones when they do not produce a runnable behavior
 
 Decompose output rules:
 
@@ -165,8 +167,14 @@ Decompose output rules:
   - implementation scope
   - test spec
   - expected artifacts
+- implementation milestones should include a slice quality note:
+  - runnable behavior
+  - touched layers
+  - validation command or evidence
+  - non-goals that keep the slice narrow
 - prefer 3-6 milestones for medium projects
 - prefer narrower milestones when architecture review is likely to change downstream prompts
+- do not split solely by technical layer unless the milestone is explicitly analysis, docs, setup, or migration-only
 
 Persist milestone planning state in `.plan-state/decompose.yaml` when possible.
 
@@ -218,6 +226,7 @@ Preset selection rules:
 - for each milestone, write a concrete implementation plan with ordered steps, dependencies, verification points, test spec, and constraints before rendering the prompt file
 - convert that implementation plan into the final prompt file format instead of freehand summary text
 - preserve the validation intent from the milestone plan in the generated prompt's `预期测试` and constraints sections
+- generated implementation prompts must carry Objective, Boundaries, Non-Goals, Validation Commands, Evidence, and Human QA sections when applicable
 
 Required Generate outputs:
 

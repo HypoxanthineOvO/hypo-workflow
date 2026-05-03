@@ -258,6 +258,12 @@ When a config exists:
 1. show current values for platform, default mode, subagent provider/model, dashboard, and plan mode
 2. ask whether to edit
 3. preserve unspecified existing values
+
+## Config TUI Editing
+
+Interactive config editing must keep global defaults and project config as separate targets. Stage edits first, show a diff, validate supported schema fields, and require confirmation before writing.
+
+Do not write `.pipeline/state.yaml`, `.pipeline/cycle.yaml`, or `.pipeline/rules.yaml` from the setup/config TUI. If adapter-affecting values change, tell the user to run `/hw:sync --light`.
 4. update `updated`
 5. keep the original `created` timestamp
 
