@@ -6,7 +6,7 @@ import { commandMap } from "../commands/index.js";
 import { DEFAULT_GLOBAL_CONFIG, buildModelPoolOpenCodeAgents, mergeConfig } from "../config/index.js";
 import { normalizeProfile, selectProfile } from "../profile/index.js";
 
-const HW_VERSION = "10.2.0";
+const HW_VERSION = "11.0.0";
 const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(MODULE_DIR, "..", "..", "..");
 
@@ -109,6 +109,7 @@ export async function writeOpenCodeArtifacts(outDir, options = {}) {
   await mkdir(join(adapterDir, "tui"), { recursive: true });
   await rm(join(adapterDir, "plugins", "hypo-workflow-status.js"), { force: true });
   await rm(join(adapterDir, "plugins", "hypo-workflow-tui.tsx"), { force: true });
+  await rm(join(adapterDir, "commands", "hw-dashboard.md"), { force: true });
 
   for (const command of commandMap("opencode")) {
     await writeFile(
@@ -178,9 +179,6 @@ function commandSpecificGuidance(command) {
   }
   if (command.canonical === "/hw:sync") {
     return "\nSync lane: support `--light`, standard, and `--deep`; never execute pipeline milestones. SessionStart may only perform light external-change detection and prompt before heavier sync.\n";
-  }
-  if (command.canonical === "/hw:dashboard") {
-    return "\nDashboard lane: dashboard launcher for the existing Hypo-Workflow WebUI; do not reimplement the dashboard in the plugin.\n";
   }
   return "";
 }

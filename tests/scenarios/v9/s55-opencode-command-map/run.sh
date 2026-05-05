@@ -9,8 +9,8 @@ tmp_home="$(mktemp -d)"
 HOME="$tmp_home" node cli/bin/hypo-workflow init-project --platform opencode --project "$tmp_project" >/tmp/hw-s55-init.log
 
 count="$(find "$tmp_project/.opencode/commands" -maxdepth 1 -type f -name 'hw-*.md' | wc -l | tr -d ' ')"
-test "$count" = "37" || {
-  echo "expected 37 command files, found $count" >&2
+test "$count" = "36" || {
+  echo "expected 36 command files, found $count" >&2
   exit 1
 }
 
@@ -41,8 +41,7 @@ for pair in \
   "hw-explore.md:/hw:explore" \
   "hw-sync.md:/hw:sync" \
   "hw-docs.md:/hw:docs" \
-  "hw-knowledge.md:/hw:knowledge" \
-  "hw-dashboard.md:/hw:dashboard"
+  "hw-knowledge.md:/hw:knowledge"
 do
   file="${pair%%:*}"
   command="${pair#*:}"

@@ -5,7 +5,7 @@ import { DEFAULT_ANALYSIS_INTERACTION } from "../analysis/index.js";
 import { DEFAULT_KNOWLEDGE_CONFIG } from "../knowledge/index.js";
 
 export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
-  version: "10.2.0",
+  version: "11.0.0",
   agent: {
     platform: "codex",
     model: "default",
@@ -104,6 +104,67 @@ export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
         model: "deepseek-v4-pro",
       },
       report: {
+        model: "deepseek-v4-flash",
+      },
+    },
+  },
+  claude_code: {
+    profile: "standard",
+    model: "deepseek-v4-pro",
+    api: {
+      base_url: "",
+      base_url_env: "",
+      api_key: "",
+      api_key_env: "",
+    },
+    settings: {
+      local_file: ".claude/settings.local.json",
+      backup: true,
+      managed_marker: "hypo-workflow",
+    },
+    hooks: {
+      stop: {
+        block_on_missing_state: true,
+        block_on_missing_log: true,
+        block_on_missing_progress: true,
+        block_on_missing_report: true,
+        warn_on_metrics_gap: true,
+        warn_on_derived_gap: true,
+      },
+      compact: {
+        inject_resume_context: true,
+      },
+      permission: {
+        follow_effective_config: true,
+      },
+    },
+    status: {
+      surface: "auto",
+      fallback_order: ["monitor", "hw-status", "session-summary", "dashboard"],
+    },
+    agents: {
+      plan: {
+        model: "gpt-5.5",
+      },
+      code: {
+        model: "mimo-v2.5-pro",
+      },
+      test: {
+        model: "mimo-v2.5-pro",
+      },
+      review: {
+        model: "gpt-5.5",
+      },
+      debug: {
+        model: "gpt-5.5",
+      },
+      docs: {
+        model: "deepseek-v4-pro",
+      },
+      report: {
+        model: "deepseek-v4-flash",
+      },
+      compact: {
         model: "deepseek-v4-flash",
       },
     },
@@ -214,6 +275,24 @@ export function buildModelPoolOpenCodeAgents(config = {}) {
   return mergeConfig(derived, explicitOpenCodeAgentOverrides(config.opencode?.agents || {}));
 }
 
+export function buildModelPoolClaudeAgents(config = {}) {
+  const roles = mergeConfig(DEFAULT_GLOBAL_CONFIG.model_pool.roles, config.model_pool?.roles || {});
+  const derived = {
+    plan: { model: roles.plan.primary },
+    code: { model: roles.implement.primary },
+    test: { model: roles.implement.primary },
+    review: { model: roles.review.primary },
+    debug: { model: roles.review.primary },
+    docs: { model: firstModel(roles.review, DEFAULT_GLOBAL_CONFIG.claude_code.agents.docs.model) },
+    report: { model: roles.evaluate.primary },
+    compact: { model: roles.evaluate.primary },
+  };
+  if (!config.model_pool) {
+    return mergeConfig(DEFAULT_GLOBAL_CONFIG.claude_code.agents, config.claude_code?.agents || {});
+  }
+  return mergeConfig(derived, explicitClaudeAgentOverrides(config.claude_code?.agents || {}));
+}
+
 export function projectRegistryId(projectPath) {
   const normalized = normalizeProjectPath(projectPath);
   const hash = createHash("sha256").update(normalized).digest("hex").slice(0, 12);
@@ -282,6 +361,17 @@ function explicitOpenCodeAgentOverrides(agents = {}) {
   for (const [role, value] of Object.entries(agents)) {
     if (!value?.model) continue;
     if (value.model !== DEFAULT_GLOBAL_CONFIG.opencode.agents?.[role]?.model) {
+      overrides[role] = value;
+    }
+  }
+  return overrides;
+}
+
+function explicitClaudeAgentOverrides(agents = {}) {
+  const overrides = {};
+  for (const [role, value] of Object.entries(agents)) {
+    if (!value?.model) continue;
+    if (value.model !== DEFAULT_GLOBAL_CONFIG.claude_code.agents?.[role]?.model) {
       overrides[role] = value;
     }
   }

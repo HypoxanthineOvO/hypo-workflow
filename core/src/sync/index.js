@@ -1,8 +1,10 @@
-import { access, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { access, chmod, copyFile, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { DEFAULT_GLOBAL_CONFIG, loadConfig, parseYaml, stringifyYaml } from "../config/index.js";
 import { writeOpenCodeArtifacts } from "../artifacts/opencode.js";
+import { writeClaudeCodeAgentArtifacts, writeClaudeCodePluginArtifacts } from "../artifacts/claude.js";
+import { renderClaudeCodeSettingsHooks, renderClaudeHookWrapper } from "../claude-hooks/index.js";
 import { refreshProjectRegistryAction } from "../actions/index.js";
 import { rebuildKnowledgeLedger } from "../knowledge/index.js";
 
@@ -16,6 +18,7 @@ export async function runProjectSync(projectRoot = ".", options = {}) {
   const root = resolve(projectRoot);
   const mode = normalizeSyncMode(options);
   const now = options.now || new Date().toISOString();
+  const platform = normalizeSyncPlatform(options.platform || "opencode");
 
   if (options.checkOnly || options.check_only) {
     const externalChanges = await detectExternalChanges(root, options);
@@ -36,13 +39,28 @@ export async function runProjectSync(projectRoot = ".", options = {}) {
   const operations = ["light_sync", ...light.operations];
   const config = await loadConfig(join(root, ".pipeline", "config.yaml")).catch(() => DEFAULT_GLOBAL_CONFIG);
   operations.push("config_check");
+  let claudeCodeSettings = null;
+  let claudeCodeAgents = null;
+  let claudeCodeHooks = null;
+  let claudeCodePlugin = null;
 
-  if ((options.platform || "opencode") === "opencode") {
+  if (platform === "opencode") {
     await writeOpenCodeArtifacts(root, {
       config,
       profile: options.profile,
     });
     operations.push("opencode_artifacts");
+  } else if (platform === "claude-code") {
+    claudeCodePlugin = await writeClaudeCodePluginArtifacts(root, {
+      version: config.version || DEFAULT_GLOBAL_CONFIG.version,
+    });
+    operations.push("claude_code_plugin");
+    claudeCodeAgents = await writeClaudeCodeAgentArtifacts(root, { config });
+    operations.push("claude_code_agents");
+    claudeCodeHooks = await writeClaudeHookArtifacts(root);
+    operations.push("claude_code_hooks");
+    claudeCodeSettings = await syncClaudeCodeSettings(root, { ...options, config, now });
+    operations.push("claude_code_settings");
   }
 
   let compact = { files: [] };
@@ -67,6 +85,10 @@ export async function runProjectSync(projectRoot = ".", options = {}) {
     compact_files: compact.files,
     derived_health: derivedHealth,
   };
+  if (claudeCodePlugin) result.claude_code_plugin = claudeCodePlugin;
+  if (claudeCodeSettings) result.claude_code_settings = claudeCodeSettings;
+  if (claudeCodeAgents) result.claude_code_agents = claudeCodeAgents;
+  if (claudeCodeHooks) result.claude_code_hooks = claudeCodeHooks;
 
   if (mode === "deep") {
     result.dependency_scan = await scanDependencies(root);
@@ -74,6 +96,115 @@ export async function runProjectSync(projectRoot = ".", options = {}) {
     result.operations.push("dependency_scan", "architecture_rescan_hint");
   }
 
+  return result;
+}
+
+const MANAGED_BY = "hypo-workflow";
+const LEGACY_CLAUDE_PLUGIN_REF = "../.claude-plugin/plugin.json";
+
+export async function writeClaudeHookArtifacts(projectRoot = ".", options = {}) {
+  const root = resolve(projectRoot);
+  const relative = "hooks/claude-hook.mjs";
+  const hookFile = join(root, relative);
+  const existing = await readOptionalText(hookFile);
+  if (existing && !/^\/\/ hypo_workflow_managed_hook:\s*true$/m.test(existing)) {
+    return {
+      path: relative,
+      changed: false,
+      conflicts: [{ path: relative, reason: "user-owned-hook-wrapper" }],
+      manual_confirmation_required: true,
+    };
+  }
+
+  const coreImport = options.coreImport || new URL("../index.js", import.meta.url).href;
+  const rendered = renderClaudeHookWrapper({ coreImport });
+  await mkdir(dirname(hookFile), { recursive: true });
+  await writeFile(hookFile, rendered, "utf8");
+  await chmod(hookFile, 0o755);
+  return {
+    path: relative,
+    changed: rendered !== existing,
+    conflicts: [],
+    manual_confirmation_required: false,
+    core_import: coreImport,
+  };
+}
+
+export function mergeClaudeCodeSettings(existing = {}, options = {}) {
+  const settings = deepClone(isPlainObject(existing) ? existing : {});
+  const config = options.config || DEFAULT_GLOBAL_CONFIG;
+  const conflicts = detectClaudeSettingsShapeConflicts(settings);
+  const desiredHooks = renderClaudeCodeSettingsHooks(config);
+  const desiredModel = config.claude_code?.model || DEFAULT_GLOBAL_CONFIG.claude_code.model;
+  const desiredEnv = resolveClaudeCodeApiEnv(config, options.env || process.env);
+  conflicts.push(...detectClaudeManagedTargetConflicts(settings, desiredHooks));
+  conflicts.push(...detectClaudeModelConflict(settings, desiredModel));
+  conflicts.push(...detectClaudeEnvConflicts(settings, desiredEnv));
+
+  if (conflicts.length) {
+    return {
+      settings,
+      changed: false,
+      conflicts,
+      manual_confirmation_required: true,
+      managed_keys: managedClaudeSettingsKeys(desiredEnv),
+    };
+  }
+
+  const next = deepClone(settings);
+  dropLegacyClaudePluginRef(next);
+  next.model = desiredModel;
+  if (Object.keys(desiredEnv).length) {
+    next.env = {
+      ...(isPlainObject(next.env) ? next.env : {}),
+      ...desiredEnv,
+    };
+  }
+  next.hooks = mergeClaudeHooks(next.hooks || {}, desiredHooks);
+  next.hypo_workflow = {
+    managed_by: MANAGED_BY,
+    settings_version: 1,
+    version: config.version || DEFAULT_GLOBAL_CONFIG.version,
+    managed_keys: managedClaudeSettingsKeys(desiredEnv),
+  };
+
+  return {
+    settings: next,
+    changed: stableJson(next) !== stableJson(settings),
+    conflicts: [],
+    manual_confirmation_required: false,
+    managed_keys: managedClaudeSettingsKeys(desiredEnv),
+  };
+}
+
+export async function syncClaudeCodeSettings(projectRoot = ".", options = {}) {
+  const root = resolve(projectRoot);
+  const config = options.config || DEFAULT_GLOBAL_CONFIG;
+  const localFile = config.claude_code?.settings?.local_file || ".claude/settings.local.json";
+  const settingsFile = join(root, localFile);
+  const existingText = await readOptionalText(settingsFile);
+  const existing = existingText ? JSON.parse(existingText) : {};
+  const merged = mergeClaudeCodeSettings(existing, options);
+
+  const result = {
+    path: localFile,
+    changed: false,
+    backups: [],
+    conflicts: merged.conflicts,
+    manual_confirmation_required: merged.manual_confirmation_required,
+    managed_keys: merged.managed_keys,
+  };
+
+  if (merged.conflicts.length || !merged.changed) return result;
+
+  await mkdir(dirname(settingsFile), { recursive: true });
+  if (existingText && config.claude_code?.settings?.backup !== false) {
+    const backup = `${settingsFile}.bak.${formatSyncBackupTimestamp(options.now || new Date().toISOString())}`;
+    await copyFile(settingsFile, backup);
+    result.backups.push(`${localFile}.bak.${formatSyncBackupTimestamp(options.now || new Date().toISOString())}`);
+  }
+  await writeFile(settingsFile, `${JSON.stringify(merged.settings, null, 2)}\n`, "utf8");
+  result.changed = true;
   return result;
 }
 
@@ -280,13 +411,17 @@ async function detectExternalChanges(root, options = {}) {
     changes.push({ type: "git_dirty", files });
   }
 
-  const adapterMetadata = join(root, ".opencode", "hypo-workflow.json");
+  const platform = normalizeSyncPlatform(options.platform || "opencode");
+  const adapterMetadataPath = platform === "claude-code"
+    ? ".claude/settings.local.json"
+    : ".opencode/hypo-workflow.json";
+  const adapterMetadata = join(root, adapterMetadataPath);
   if (!await exists(adapterMetadata)) {
-    changes.push({ type: "adapter_missing", path: ".opencode/hypo-workflow.json" });
+    changes.push({ type: "adapter_missing", path: adapterMetadataPath });
   } else {
     const configFile = join(root, ".pipeline", "config.yaml");
     if (await isNewer(configFile, adapterMetadata)) {
-      changes.push({ type: "adapter_stale", path: ".opencode/hypo-workflow.json", source: ".pipeline/config.yaml" });
+      changes.push({ type: "adapter_stale", path: adapterMetadataPath, source: ".pipeline/config.yaml" });
     }
   }
 
@@ -331,6 +466,220 @@ function normalizeSyncMode(options = {}) {
   const mode = String(options.mode || "standard").replace(/^--/, "");
   if (["light", "standard", "deep"].includes(mode)) return mode;
   throw new Error(`Unsupported sync mode: ${options.mode}`);
+}
+
+function normalizeSyncPlatform(platform) {
+  const value = String(platform || "opencode").toLowerCase();
+  if (value === "claude") return "claude-code";
+  return value;
+}
+
+function managedClaudeSettingsKeys(desiredEnv = {}) {
+  const keys = [
+    "model",
+    "hooks.Stop",
+    "hooks.SessionStart",
+    "hooks.PreCompact",
+    "hooks.PostCompact",
+    "hooks.PostToolUse",
+    "hooks.PostToolBatch",
+    "hooks.UserPromptSubmit",
+    "hooks.PermissionRequest",
+    "hooks.FileChanged",
+    "hypo_workflow",
+  ];
+  for (const key of Object.keys(desiredEnv).sort()) {
+    keys.push(`env.${key}`);
+  }
+  return keys;
+}
+
+function detectClaudeSettingsShapeConflicts(settings) {
+  const conflicts = [];
+  if ("hooks" in settings && !isPlainObject(settings.hooks)) {
+    conflicts.push({
+      code: "hooks-shape-conflict",
+      path: "hooks",
+      message: "Expected hooks to be an object before Hypo-Workflow can merge managed hooks.",
+    });
+  }
+  if ("env" in settings && !isPlainObject(settings.env)) {
+    conflicts.push({
+      code: "env-shape-conflict",
+      path: "env",
+      message: "Expected env to be an object before Hypo-Workflow can merge managed Claude API settings.",
+    });
+  }
+  if ("hypo_workflow" in settings) {
+    const metadata = settings.hypo_workflow;
+    if (!isPlainObject(metadata) || (metadata.managed_by && metadata.managed_by !== MANAGED_BY)) {
+      conflicts.push({
+        code: "managed-key-conflict",
+        path: "hypo_workflow",
+        message: "Existing hypo_workflow metadata is not owned by Hypo-Workflow.",
+      });
+    }
+  }
+  if (isPlainObject(settings.agents)) {
+    const agentKey = settings.agents.hypo_workflow || settings.agents["hypo-workflow"];
+    if (agentKey && !agentKey.hypo_workflow_managed) {
+      conflicts.push({
+        code: "agent-key-conflict",
+        path: "agents.hypo_workflow",
+        message: "Existing Claude agent key overlaps Hypo-Workflow managed namespace.",
+      });
+    }
+  }
+  return conflicts;
+}
+
+function resolveClaudeCodeApiEnv(config = {}, env = process.env) {
+  const api = config.claude_code?.api || {};
+  const desired = {};
+  if (api.base_url) {
+    desired.ANTHROPIC_BASE_URL = String(api.base_url);
+  } else if (api.base_url_env && env?.[api.base_url_env]) {
+    desired.ANTHROPIC_BASE_URL = String(env[api.base_url_env]);
+  }
+  if (api.api_key) {
+    desired.ANTHROPIC_API_KEY = String(api.api_key);
+  } else if (api.api_key_env && env?.[api.api_key_env]) {
+    desired.ANTHROPIC_API_KEY = String(env[api.api_key_env]);
+  }
+  return desired;
+}
+
+function dropLegacyClaudePluginRef(settings) {
+  const wasManagedByHypo = settings.hypo_workflow?.managed_by === MANAGED_BY;
+  if (!wasManagedByHypo || !Array.isArray(settings.plugins)) return;
+  if (!settings.plugins.includes(LEGACY_CLAUDE_PLUGIN_REF)) return;
+
+  const plugins = settings.plugins.filter((plugin) => plugin !== LEGACY_CLAUDE_PLUGIN_REF);
+  if (plugins.length) {
+    settings.plugins = plugins;
+  } else {
+    delete settings.plugins;
+  }
+}
+
+function detectClaudeModelConflict(settings, desiredModel) {
+  if (!desiredModel || !settings.model || settings.model === desiredModel) return [];
+  const managedKeys = settings.hypo_workflow?.managed_keys;
+  const modelManagedByHypo = settings.hypo_workflow?.managed_by === MANAGED_BY
+    && Array.isArray(managedKeys)
+    && managedKeys.includes("model");
+  if (modelManagedByHypo) return [];
+
+  return [{
+    code: "model-conflict",
+    path: "model",
+    existing: settings.model,
+    desired: desiredModel,
+    message: "Existing user-owned Claude model differs from the Hypo-Workflow managed main model.",
+  }];
+}
+
+function detectClaudeEnvConflicts(settings, desiredEnv) {
+  if (!Object.keys(desiredEnv).length) return [];
+  const env = settings.env || {};
+  if (!isPlainObject(env)) return [];
+  const managedKeys = settings.hypo_workflow?.managed_keys;
+  const envManagedByHypo = settings.hypo_workflow?.managed_by === MANAGED_BY
+    && Array.isArray(managedKeys);
+  const conflicts = [];
+  for (const [key, desired] of Object.entries(desiredEnv)) {
+    if (!env[key] || env[key] === desired) continue;
+    if (envManagedByHypo && managedKeys.includes(`env.${key}`)) continue;
+    conflicts.push({
+      code: "env-conflict",
+      path: `env.${key}`,
+      existing: key === "ANTHROPIC_API_KEY" ? "[redacted]" : env[key],
+      desired: key === "ANTHROPIC_API_KEY" ? "[redacted]" : desired,
+      message: "Existing user-owned Claude API env differs from the Hypo-Workflow managed API setting.",
+    });
+  }
+  return conflicts;
+}
+
+function detectClaudeManagedTargetConflicts(settings, desiredHooks) {
+  const conflicts = [];
+  const hooks = settings.hooks || {};
+  if (!isPlainObject(hooks)) return conflicts;
+
+  for (const [event, desiredGroups] of Object.entries(desiredHooks)) {
+    const existingGroups = hooks[event] || [];
+    if (!Array.isArray(existingGroups)) {
+      conflicts.push({
+        code: "hook-shape-conflict",
+        path: `hooks.${event}`,
+        message: `Expected hooks.${event} to be an array before Hypo-Workflow can merge managed hooks.`,
+      });
+      continue;
+    }
+    const desiredCommands = new Set(desiredGroups.flatMap(hookCommands));
+    for (const [index, group] of existingGroups.entries()) {
+      if (isManagedClaudeHookGroup(group)) continue;
+      for (const command of hookCommands(group)) {
+        if (desiredCommands.has(command)) {
+          conflicts.push({
+            code: "hook-command-conflict",
+            path: `hooks.${event}[${index}]`,
+            command,
+            message: "Existing user-owned hook command overlaps a Hypo-Workflow managed hook.",
+          });
+        }
+      }
+    }
+  }
+  return conflicts;
+}
+
+function mergeClaudeHooks(hooks, desiredHooks) {
+  const next = { ...hooks };
+  for (const [event, desiredGroups] of Object.entries(desiredHooks)) {
+    const existingGroups = Array.isArray(next[event]) ? next[event] : [];
+    const userGroups = existingGroups.filter((group) => !isManagedClaudeHookGroup(group));
+    next[event] = [...userGroups, ...deepClone(desiredGroups)];
+  }
+  return next;
+}
+
+function isManagedClaudeHookGroup(group) {
+  return Boolean(group && typeof group === "object" && (
+    group.hypo_workflow_managed === true
+    || group.managed_by === MANAGED_BY
+    || group.hypo_workflow?.managed_by === MANAGED_BY
+  ));
+}
+
+function hookCommands(group) {
+  if (!group || typeof group !== "object" || !Array.isArray(group.hooks)) return [];
+  return group.hooks
+    .map((hook) => hook && typeof hook === "object" ? hook.command : null)
+    .filter(Boolean);
+}
+
+function formatSyncBackupTimestamp(value) {
+  const compact = String(value).replace(/\D/g, "");
+  return compact.slice(0, 14) || "backup";
+}
+
+function stableJson(value) {
+  return JSON.stringify(sortJson(value));
+}
+
+function sortJson(value) {
+  if (Array.isArray(value)) return value.map(sortJson);
+  if (!isPlainObject(value)) return value;
+  return Object.fromEntries(Object.keys(value).sort().map((key) => [key, sortJson(value[key])]));
+}
+
+function deepClone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function isPlainObject(value) {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value));
 }
 
 async function isKnowledgeSourceNewer(root) {

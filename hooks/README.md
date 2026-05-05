@@ -8,8 +8,33 @@ Hooks 为 Hypo-Workflow Pipeline 提供被动安全网。
 |------|-------------|-------|
 | Stop 强制完成 | ✅ decision:block | ❌ 不支持 |
 | SessionStart 上下文注入 | ✅ additionalContext | ❌ 不支持 |
+| Compact 恢复包 | ✅ PreCompact / PostCompact | ❌ 不支持 |
+| PermissionRequest | ✅ profile-aware allow/ask/deny | ❌ 不支持 |
+| Progress refresh | ✅ PostToolUse / PostToolBatch / FileChanged | ❌ 不支持 |
 | InstructionsLoaded 监听 | ✅ 可选 | ❌ 不支持 |
 | 完成通知 | ✅ Notification | ✅ notify |
+
+## Claude Hook Runtime
+
+C6 起，Claude Code 使用统一 wrapper：
+
+```bash
+node hooks/claude-hook.mjs <EventName>
+```
+
+当前注册事件：
+
+- `SessionStart`
+- `Stop`
+- `PreCompact`
+- `PostCompact`
+- `PostToolUse`
+- `PostToolBatch`
+- `UserPromptSubmit`
+- `PermissionRequest`
+- `FileChanged` for `.pipeline/PROGRESS.md`
+
+Stop 会阻止缺失 `state.yaml`、`log.yaml`、`PROGRESS.md`、最终步骤 report 等关键证据；metrics 和 derived refresh gap 只作为 warning。Compact 事件输出 resume packet，明确当前 Cycle/Milestone/step、下一步、自动化边界和最近事件，避免压缩后重放已完成步骤。PermissionRequest 按 `claude_code.profile` 决策：`developer` 本地宽松，`standard` 对破坏性/外部副作用 ask，`strict` 对高风险操作 deny。
 
 ## Chat Recovery
 
@@ -52,4 +77,7 @@ echo '{}' | bash hooks/stop-check.sh
 
 # 测试 session-start（非 Pipeline 目录，应输出空 JSON）
 echo '{}' | bash hooks/session-start.sh startup
+
+# 测试 Claude wrapper（非 Pipeline 目录，应输出空 JSON）
+echo '{}' | node hooks/claude-hook.mjs SessionStart
 ```

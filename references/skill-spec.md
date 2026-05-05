@@ -22,7 +22,6 @@ The repository currently has 37 local Skill files under `skills/*/SKILL.md`:
 | `skills/check/SKILL.md` | User-facing health-check command |
 | `skills/compact/SKILL.md` | User-facing compact view command |
 | `skills/cycle/SKILL.md` | User-facing Cycle lifecycle command |
-| `skills/dashboard/SKILL.md` | User-facing dashboard command |
 | `skills/debug/SKILL.md` | User-facing debug command |
 | `skills/docs/SKILL.md` | User-facing documentation governance command |
 | `skills/explore/SKILL.md` | User-facing isolated exploration worktree command |
@@ -57,7 +56,7 @@ The repository currently has 37 local Skill files under `skills/*/SKILL.md`:
 Additional inventory notes:
 
 - Root `SKILL.md` is the aggregate Hypo-Workflow router and system reference. It is not counted as a child Skill in the 37 local Skill files.
-- The OpenCode command map exposes 37 user-facing commands and 36 user-facing Skill paths because `/hw:patch` and `/hw:patch fix` intentionally share `skills/patch/SKILL.md`.
+- The OpenCode command map exposes 36 user-facing commands and 35 user-facing Skill paths because `/hw:patch` and `/hw:patch fix` intentionally share `skills/patch/SKILL.md`.
 - `skills/watchdog/SKILL.md` is internal and cron-only. It is intentionally not part of the user-facing command map.
 - The installed Codex copy under `$CODEX_HOME/skills/hypo-workflow` should mirror the same root plus child Skill layout after sync or installation.
 
@@ -177,7 +176,6 @@ Canonical user-facing command map:
 | `/hw:reset` | `/hw-reset` | `hw-status` | `skills/reset/SKILL.md` |
 | `/hw:log` | `/hw-log` | `hw-status` | `skills/log/SKILL.md` |
 | `/hw:setup` | `/hw-setup` | `hw-status` | `skills/setup/SKILL.md` |
-| `/hw:dashboard` | `/hw-dashboard` | `hw-status` | `skills/dashboard/SKILL.md` |
 
 Traceability rules:
 
@@ -208,7 +206,7 @@ Current status after M04:
 - `skills/showcase/SKILL.md` now uses the canonical `## Output Language Rules` heading.
 - Stale `/hw:review` V7 compatibility wording has been replaced in root `SKILL.md`, `references/plan-review-spec.md`, and `references/commands-spec.md`. The current canonical command is `/hw:plan:review`; `/hw:review` is only a legacy compatibility alias.
 - `skill-quality` exists as a built-in rule/checking surface for frontmatter, output-language heading, reference paths, command-map traceability, and internal Skill exceptions.
-- `skills/watchdog/SKILL.md` is a valid internal exception: it is cron-only, should not be user-invocable, and should not be counted among the 36 user-facing Skill paths.
+- `skills/watchdog/SKILL.md` is a valid internal exception: it is cron-only, should not be user-invocable, and should not be counted among the 35 user-facing Skill paths.
 - Some long command semantics remain in Skill bodies instead of shared references. This should be improved incrementally without changing trigger behavior.
 - C2 explicitly allows cleanup, formatting, and documentation improvements, but no merge or delete of existing Skills.
 

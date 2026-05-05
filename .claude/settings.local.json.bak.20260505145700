@@ -1,0 +1,162 @@
+{
+  "model": "deepseek-v4-pro",
+  "hooks": {
+    "Stop": [
+      {
+        "hypo_workflow_managed": true,
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/claude-hook.mjs Stop",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hypo_workflow_managed": true,
+        "matcher": "startup|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/claude-hook.mjs SessionStart startup",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "hypo_workflow_managed": true,
+        "matcher": "resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/claude-hook.mjs SessionStart resume",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "hypo_workflow_managed": true,
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/claude-hook.mjs SessionStart compact",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hypo_workflow_managed": true,
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/claude-hook.mjs PreCompact",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hypo_workflow_managed": true,
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/claude-hook.mjs PostCompact",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hypo_workflow_managed": true,
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/claude-hook.mjs PostToolUse",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "PostToolBatch": [
+      {
+        "hypo_workflow_managed": true,
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/claude-hook.mjs PostToolBatch",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hypo_workflow_managed": true,
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/claude-hook.mjs UserPromptSubmit",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hypo_workflow_managed": true,
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/claude-hook.mjs PermissionRequest",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "FileChanged": [
+      {
+        "hypo_workflow_managed": true,
+        "matcher": ".pipeline/PROGRESS.md",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/claude-hook.mjs FileChanged",
+            "timeout": 3000
+          }
+        ]
+      }
+    ]
+  },
+  "hypo_workflow": {
+    "managed_by": "hypo-workflow",
+    "settings_version": 1,
+    "version": "10.2.0",
+    "managed_keys": [
+      "model",
+      "hooks.Stop",
+      "hooks.SessionStart",
+      "hooks.PreCompact",
+      "hooks.PostCompact",
+      "hooks.PostToolUse",
+      "hooks.PostToolBatch",
+      "hooks.UserPromptSubmit",
+      "hooks.PermissionRequest",
+      "hooks.FileChanged",
+      "hypo_workflow"
+    ]
+  }
+}

@@ -345,7 +345,7 @@ function renderGeneratedArtifactsReference() {
 }
 
 function userCommandCount() {
-  return CANONICAL_COMMANDS.filter((command) => command.canonical !== "/hw:watchdog").length;
+  return CANONICAL_COMMANDS.length;
 }
 
 async function writeGenerated(projectRoot, relativePath, content) {

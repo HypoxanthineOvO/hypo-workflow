@@ -1,0 +1,52 @@
+{
+  "source": "model_pool+claude_code",
+  "routing": "declaration-first",
+  "dynamic_selection": {
+    "task_category": {
+      "documentation": "docs",
+      "implementation": "code",
+      "testing": "test",
+      "review": "review",
+      "debug": "debug",
+      "report": "report",
+      "compact": "compact"
+    },
+    "test_profile": {
+      "webapp": "test",
+      "agent-service": "test",
+      "research": "docs"
+    },
+    "failure_state": {
+      "test_failure": "debug",
+      "runtime_error": "debug",
+      "docs_gap": "docs"
+    }
+  },
+  "agents": {
+    "plan": {
+      "model": "gpt-5.5"
+    },
+    "code": {
+      "model": "mimo-v2.5-pro"
+    },
+    "test": {
+      "model": "mimo-v2.5-pro"
+    },
+    "review": {
+      "model": "gpt-5.5"
+    },
+    "debug": {
+      "model": "gpt-5.5"
+    },
+    "docs": {
+      "model": "deepseek-v4-pro"
+    },
+    "report": {
+      "model": "deepseek-v4-flash"
+    },
+    "compact": {
+      "model": "deepseek-v4-flash"
+    }
+  },
+  "conflicts": []
+}

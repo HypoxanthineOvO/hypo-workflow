@@ -13,7 +13,7 @@ import {
 } from "../src/index.js";
 
 test("docs command is exposed and mapped to OpenCode", async () => {
-  assert.equal(commandMap("opencode").length, 37);
+  assert.equal(commandMap("opencode").length, 36);
   assert.equal(commandByCanonical("/hw:docs").opencode, "/hw-docs");
   assert.equal(commandByCanonical("/hw:docs").agent, "hw-docs");
   assert.equal(commandByCanonical("/hw:docs").skill, "skills/docs/SKILL.md");
@@ -68,7 +68,7 @@ test("docs repair writes docs IA and generated references without silently rewri
   assert.ok(result.generated.includes("docs/platforms/opencode.md"));
   assert.ok(result.managed_blocks.includes("command-count"));
   assert.match(await readFile(join(root, "README.md"), "utf8"), /Manual README/);
-  assert.match(await readFile(join(root, "README.md"), "utf8"), /37 个用户指令/);
+  assert.match(await readFile(join(root, "README.md"), "utf8"), /36 个用户指令/);
   assert.match(await readFile(join(root, "docs/reference/commands.md"), "utf8"), /\/hw:docs/);
 });
 

@@ -20,7 +20,7 @@ test("defaultReadmeConfig exposes loose marker-safe defaults", () => {
 
 test("renderReadmeBlock derives command and platform content from assets", async () => {
   const commandCount = renderReadmeBlock("command-count");
-  assert.match(commandCount, /37 个用户指令/);
+  assert.match(commandCount, /36 个用户指令/);
   assert.match(commandCount, /1 个内部 watchdog/);
 
   const commandReference = renderReadmeBlock("command-reference");
@@ -95,6 +95,33 @@ test("checkReadmeFreshness detects stale managed facts", async () => {
   assert.ok(result.failures.some((failure) => failure.check === "command-count"));
 });
 
+test("checkReadmeFreshness detects stale narrative command counts", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "hw-readme-stale-count-"));
+  await mkdir(join(dir, ".claude-plugin"), { recursive: true });
+  await mkdir(join(dir, "core", "src", "commands"), { recursive: true });
+  await writeFile(join(dir, ".claude-plugin", "plugin.json"), JSON.stringify({ version: "10.2.0" }), "utf8");
+  await writeFile(
+    join(dir, "core", "src", "commands", "index.js"),
+    Array.from({ length: 36 }, (_, index) => `{ canonical: '/hw:test-${index}' }`).join("\n"),
+    "utf8",
+  );
+  await writeFile(
+    join(dir, "README.md"),
+    [
+      "v10.2.0",
+      "当前版本提供 **36 个用户指令**",
+      "| Commands Reference | 37 个 canonical 命令和 OpenCode 映射 |",
+      "Codex Claude Code OpenCode",
+    ].join("\n"),
+    "utf8",
+  );
+
+  const result = await checkReadmeFreshness(join(dir, "README.md"), { projectRoot: dir });
+
+  assert.equal(result.fresh, false);
+  assert.ok(result.failures.some((failure) => failure.check === "stale-command-count" && failure.actual === 37));
+});
+
 test("updateReadme replaces requested managed blocks and reports a summary", async () => {
   const dir = await mkdtemp(join(tmpdir(), "hw-readme-update-"));
   const file = join(dir, "README.md");
@@ -120,6 +147,6 @@ test("updateReadme replaces requested managed blocks and reports a summary", asy
   assert.deepEqual(summary.changedBlocks, ["command-count"]);
   assert.equal(summary.fullRegenerated, false);
   assert.match(updated, /manual intro/);
-  assert.match(updated, /37 个用户指令/);
+  assert.match(updated, /36 个用户指令/);
   assert.match(updated, /manual outro/);
 });

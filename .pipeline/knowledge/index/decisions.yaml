@@ -2,6 +2,45 @@ schema_version: 1
 category: decisions
 entries:
   -
+    record_id: C6-SYNC-claude-opencode-codex-interface-map-20260505
+    type: sync
+    source: C6-claude-opencode-codex-interface-map
+    created_at: "2026-05-05T00:19:25+08:00"
+    summary: Claude Code / OpenCode / Codex interface map for adapter planning
+    tags:
+      - claude-code
+      - opencode
+      - codex
+      - hooks
+      - plugins
+      - commands
+      - ui
+      - adapter
+    refs:
+      files:
+        - references/knowledge-spec.md
+        - references/opencode-spec.md
+        - references/commands-spec.md
+      urls:
+        - "https://code.claude.com/docs/en/plugins"
+        - "https://code.claude.com/docs/en/plugins-reference"
+        - "https://docs.anthropic.com/en/docs/claude-code/hooks"
+        - "https://docs.anthropic.com/en/docs/claude-code/hooks-guide"
+        - "https://opencode.ai/docs/plugins/"
+        - "https://opencode.ai/docs/commands/"
+        - "https://opencode.ai/docs/tui/"
+        - "https://developers.openai.com/codex/use-cases/"
+    items:
+      -
+        title: Seed Knowledge with an interface map first
+        rationale: keeps follow-up planning fast without duplicating full docs.
+      -
+        title: Treat UI/status surfaces as adapter-specific rather than core-neutral
+        rationale: Claude Code, OpenCode, and Codex expose different extension points and UI affordances.
+      -
+        title: Model Codex as commands and skills plus workflow guidance
+        rationale: the official docs emphasize composable CLI commands and reusable skills more than a hook-first plugin stack.
+  -
     record_id: C4-M05-f001-knowledge-and-opencode-integration-gate-18c2eaab
     type: milestone
     source: C4/M05

@@ -2,6 +2,68 @@ schema_version: 1
 category: references
 entries:
   -
+    record_id: C6-SYNC-claude-opencode-codex-interface-map-20260505
+    type: sync
+    source: C6-claude-opencode-codex-interface-map
+    created_at: "2026-05-05T00:19:25+08:00"
+    summary: Claude Code / OpenCode / Codex interface map for adapter planning
+    tags:
+      - claude-code
+      - opencode
+      - codex
+      - hooks
+      - plugins
+      - commands
+      - ui
+      - adapter
+    refs:
+      files:
+        - references/knowledge-spec.md
+        - references/opencode-spec.md
+        - references/commands-spec.md
+      urls:
+        - "https://code.claude.com/docs/en/plugins"
+        - "https://code.claude.com/docs/en/plugins-reference"
+        - "https://docs.anthropic.com/en/docs/claude-code/hooks"
+        - "https://docs.anthropic.com/en/docs/claude-code/hooks-guide"
+        - "https://opencode.ai/docs/plugins/"
+        - "https://opencode.ai/docs/commands/"
+        - "https://opencode.ai/docs/tui/"
+        - "https://developers.openai.com/codex/use-cases/"
+    items:
+      -
+        title: Claude Code plugins
+        url: "https://code.claude.com/docs/en/plugins"
+        note: official plugin structure and skill/agent/hook/MCP surface
+      -
+        title: Claude Code plugins reference
+        url: "https://code.claude.com/docs/en/plugins-reference"
+        note: technical component specification and validation guidance
+      -
+        title: Claude Code hooks reference
+        url: "https://docs.anthropic.com/en/docs/claude-code/hooks"
+        note: hook events, input schema, output contracts, and CLAUDE_PROJECT_DIR
+      -
+        title: Claude Code hooks quickstart
+        url: "https://docs.anthropic.com/en/docs/claude-code/hooks-guide"
+        note: deterministic shell hook workflow and security considerations
+      -
+        title: OpenCode plugins
+        url: "https://opencode.ai/docs/plugins/"
+        note: local/npm plugin loading, load order, events, and compaction hooks
+      -
+        title: OpenCode commands
+        url: "https://opencode.ai/docs/commands/"
+        note: file-based custom command surface for the TUI
+      -
+        title: OpenCode TUI
+        url: "https://opencode.ai/docs/tui/"
+        note: slash-command entry surface for interactive work
+      -
+        title: Codex use cases
+        url: "https://developers.openai.com/codex/use-cases/"
+        note: composable CLI commands and saved workflows-as-skills
+  -
     record_id: C4-M05-f001-knowledge-and-opencode-integration-gate-18c2eaab
     type: milestone
     source: C4/M05

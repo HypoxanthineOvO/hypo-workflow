@@ -19,7 +19,6 @@ node --test core/test/*.test.js
 node core/bin/hw-core commands --platform opencode > /tmp/hw-core-commands.json
 grep -Fq '"canonical": "/hw:plan"' /tmp/hw-core-commands.json
 grep -Fq '"opencode": "/hw-plan"' /tmp/hw-core-commands.json
-grep -Fq '"canonical": "/hw:dashboard"' /tmp/hw-core-commands.json
 
 node core/bin/hw-core rules --project . > /tmp/hw-core-rules.txt
 grep -Fq 'Rules:' /tmp/hw-core-rules.txt

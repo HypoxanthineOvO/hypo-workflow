@@ -6,7 +6,7 @@
 
 Plan -> Execute -> Review -> Report -> Recover
 
-[![Version](https://img.shields.io/badge/version-10.2.0-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-11.0.0-blue)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex%20%7C%20OpenCode-purple)](docs/reference/platforms.md)
 
@@ -14,7 +14,7 @@ Plan -> Execute -> Review -> Report -> Recover
 
 Hypo-Workflow 把长周期 AI coding 工作拆成可规划、可恢复、可审查的本地流程。它不是 runner，也不是后台服务；实际编码、测试、审查仍由 Codex、Claude Code 或 OpenCode Agent 执行，`.pipeline/` 是项目内的状态、prompt、报告、日志和派生上下文来源。
 
-当前版本提供 **37 个用户指令**，另有 **1 个内部 watchdog** skill。
+当前版本提供 **36 个用户指令**，另有 **1 个内部 watchdog** skill。
 
 ## 快速开始
 
@@ -65,7 +65,7 @@ Feature Queue 用于长规划和 AFK/HITL 协调。核心文件是 `.pipeline/fe
 |---|---|
 | [User Guide](docs/user-guide.md) | 常见工作流、恢复、Feature Queue、使用建议 |
 | [Developer Guide](docs/developer.md) | 核心 helper、权限边界、派生物和测试约定 |
-| [Commands Reference](docs/reference/commands.md) | 37 个 canonical 命令和 OpenCode 映射 |
+| [Commands Reference](docs/reference/commands.md) | 36 个 canonical 命令和 OpenCode 映射 |
 | [Platforms Reference](docs/reference/platforms.md) | Codex、Claude Code、OpenCode 能力表 |
 | [Generated Artifacts](docs/reference/generated-artifacts.md) | OpenCode 适配、compact、docs reference 的生成来源 |
 | [OpenCode Guide](docs/platforms/opencode.md) | OpenCode 命令、Agent roles、model matrix 和边界 |
@@ -80,7 +80,7 @@ Feature Queue 用于长规划和 AFK/HITL 协调。核心文件是 `.pipeline/fe
 | Plan | `/hw:plan`, `/hw:plan:discover`, `/hw:plan:decompose`, `/hw:plan:generate`, `/hw:plan:confirm`, `/hw:plan:extend`, `/hw:plan:review` |
 | Lifecycle | `/hw:init`, `/hw:cycle`, `/hw:accept`, `/hw:reject`, `/hw:patch`, `/hw:patch fix`, `/hw:release` |
 | Analysis/Review | `/hw:check`, `/hw:audit`, `/hw:debug` |
-| Utility | `/hw:sync`, `/hw:docs`, `/hw:compact`, `/hw:knowledge`, `/hw:guide`, `/hw:showcase`, `/hw:rules`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, `/hw:dashboard`, `/hw:explore` |
+| Utility | `/hw:sync`, `/hw:docs`, `/hw:compact`, `/hw:knowledge`, `/hw:guide`, `/hw:showcase`, `/hw:rules`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, `/hw:explore` |
 
 完整表见 [Commands Reference](docs/reference/commands.md) 和 [OpenCode Command Map](references/opencode-command-map.md)。
 

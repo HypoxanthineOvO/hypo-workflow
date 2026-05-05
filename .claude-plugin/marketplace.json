@@ -8,10 +8,10 @@
   },
   "plugins": [
     {
-      "name": "hypo-workflow",
+      "name": "hw",
       "source": "./",
-      "version": "10.2.0",
-      "description": "Serialized prompt workflow with OpenCode native adapter scaffold, V10 Analysis Preset, Knowledge Ledger, Explore Mode, global setup CLI/TUI, acceptance loops, explicit sync, docs governance, and 37 user-facing skills covering setup, planning, execution, cycles, patches, compact, guide, showcase, rules, debugging, auditing, release, watchdog, and dashboard.",
+      "version": "11.0.0",
+      "description": "Hypo-Workflow Claude Code plugin. Uses the `hw` namespace so skills are invoked as /hw:*.",
       "author": {
         "name": "Hypoxanthine",
         "url": "https://github.com/HypoxanthineOvO"
@@ -19,6 +19,8 @@
       "license": "MIT",
       "homepage": "https://github.com/HypoxanthineOvO/Hypo-Workflow",
       "tags": [
+        "hypo-workflow",
+        "claude-code",
         "workflow",
         "planning",
         "tdd",

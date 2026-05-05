@@ -79,7 +79,7 @@ The V9 scaffold templates live under `plugins/opencode/templates/` and are rende
 
 ## Codex and Claude Code Path
 
-Codex keeps using `SKILL.md` and `/hw:*`. Claude Code keeps using `.claude-plugin` and `/hypo-workflow:*`. Any shared text moved into `core/` must be rendered back into these surfaces, not replaced by OpenCode-only files.
+Codex keeps using `SKILL.md` and `/hw:*`. Claude Code uses `.claude-plugin` with the plugin namespace `hw`, so existing Hypo-Workflow skills surface as `/hw:*`. Any shared text moved into `core/` must be rendered back into these surfaces, not replaced by OpenCode-only files.
 
 ## Milestone Boundary After M0
 

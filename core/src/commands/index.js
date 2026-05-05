@@ -35,7 +35,6 @@ export const CANONICAL_COMMANDS = Object.freeze([
   { canonical: "/hw:reset", opencode: "/hw-reset", agent: "hw-status", route: "lifecycle", skill: "skills/reset/SKILL.md" },
   { canonical: "/hw:log", opencode: "/hw-log", agent: "hw-status", route: "read", skill: "skills/log/SKILL.md" },
   { canonical: "/hw:setup", opencode: "/hw-setup", agent: "hw-status", route: "setup", skill: "skills/setup/SKILL.md" },
-  { canonical: "/hw:dashboard", opencode: "/hw-dashboard", agent: "hw-status", route: "tool", skill: "skills/dashboard/SKILL.md" },
 ]);
 
 export function commandMap(platform = "opencode") {

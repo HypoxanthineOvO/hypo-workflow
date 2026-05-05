@@ -1,5 +1,33 @@
 # Changelog
 
+## v11.0.0 - 2026-05-05
+
+### Features
+
+- Added the Claude Code adapter plugin contract with the `hw` namespace, project-local settings merge, managed hooks, subagent model routing, and a Progress-style status surface.
+- Added project-local Claude Code API overrides through `claude_code.api`, including `ANTHROPIC_BASE_URL` / `ANTHROPIC_API_KEY` env rendering for Anthropic-compatible DeepSeek gateways.
+- Added Claude hook runtime coverage for SessionStart, UserPromptSubmit, Stop, compact resume, PermissionRequest, tool/batch refresh, and Progress updates.
+- Added Claude subagent artifacts and routing metadata for docs, code, test, review, debug, report, and compact roles.
+- Added deterministic Claude smoke fixture and live manual smoke guidance covering `/hw:status`, `/hw:resume`, Stop hook behavior, DeepSeek routing, and Mimo role routing.
+
+### Fixes
+
+- Removed legacy `skills/hw-*` Claude alias skills so the `hw` plugin namespace exposes canonical commands such as `/hw:status` instead of duplicate `/hw:hw-status` entries.
+- Fixed Claude Code hook schema compliance for warning-only Stop responses and permission decisions.
+- Fixed Claude live smoke hook installation by generating project-local `hooks/claude-hook.mjs` during `sync --platform claude-code`.
+
+### Documentation
+
+- Added and restored the Claude Code platform guide with API/env override, hook, agent, status, safety-profile, and manual-smoke details.
+- Updated README, command count checks, OpenCode parity wording, Skill inventory tests, and release readiness docs for the 36-command contract.
+- Recorded C6 live-smoke lessons in PROGRESS/log evidence, including plugin namespace behavior, project-local API configuration, and status read-only boundaries.
+
+### Tests
+
+- Core Node suite: 256/256 passing.
+- Scenario regression: 62/62 passing.
+- Claude plugin validation, deterministic Claude smoke fixture, config validation, docs/readme freshness, release narrative checks, sync check-only, and `git diff --check` passing.
+
 ## v10.2.0 - 2026-05-04
 
 ### Features

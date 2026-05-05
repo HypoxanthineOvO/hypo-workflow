@@ -1,6 +1,6 @@
 # Commands Reference
 
-Generated from `core/src/commands/index.js`. Current user command count: 37.
+Generated from `core/src/commands/index.js`. Current user command count: 36.
 
 | Canonical | OpenCode | Agent | Skill |
 |---|---|---|---|
@@ -40,4 +40,3 @@ Generated from `core/src/commands/index.js`. Current user command count: 37.
 | `/hw:reset` | `/hw-reset` | `hw-status` | `skills/reset/SKILL.md` |
 | `/hw:log` | `/hw-log` | `hw-status` | `skills/log/SKILL.md` |
 | `/hw:setup` | `/hw-setup` | `hw-status` | `skills/setup/SKILL.md` |
-| `/hw:dashboard` | `/hw-dashboard` | `hw-status` | `skills/dashboard/SKILL.md` |

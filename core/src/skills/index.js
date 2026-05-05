@@ -108,7 +108,7 @@ function isReferencePathCheckable(referencePath) {
   if (/^[a-z]+:\/\//i.test(referencePath)) return false;
   const normalized = normalize(referencePath);
   if (normalized.startsWith("..")) return false;
-  return /^(SKILL\.md|skills\/|references\/|rules\/|scripts\/|hooks\/|dashboard\/|plan\/|templates\/|config\.schema\.yaml$)/.test(referencePath);
+  return /^(SKILL\.md|skills\/|references\/|rules\/|scripts\/|hooks\/|plan\/|templates\/|config\.schema\.yaml$)/.test(referencePath);
 }
 
 function issue(code, path, message) {

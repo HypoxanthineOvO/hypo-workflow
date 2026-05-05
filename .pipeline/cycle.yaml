@@ -1,22 +1,28 @@
 cycle:
-  number: 5
-  name: Hypo-Workflow C5 Follow-Up AI Coding Workflow Redesign
+  number: 6
+  name: Claude Code Adapter Plugin and Full Workflow Takeover
   type: feature
+  workflow_kind: build
   status: completed
-  started: "2026-05-03T13:31:30+08:00"
-  finished: "2026-05-04T00:49:59+08:00"
+  started: "2026-05-04T23:25:15+08:00"
   preset: tdd
   context_sources:
-    - audit
-  previous_cycle: 4
-  summary: Completed the C5 follow-up redesign implementation for workflow trust, recovery, docs, sync, config TUI, metrics, and lifecycle regression coverage.
-  lessons: C5/M01 audit was accepted; follow-up Discover/P2/P3 generated 11 implementation prompts. User requested automatic continuation without milestone-by-milestone interruption.
+  previous_cycle: 5
+  summary: Build a comprehensive Claude Code adapter plugin enhancement so Hypo-Workflow can govern Claude Code workflow commands, hooks, settings merge, model routing, status display, recovery, and manual smoke validation.
+  lifecycle_policy:
+    reject:
+      default_action: needs_revision
+    accept:
+      next: complete
+    resume:
+      default_action: continue_current
+    gates:
+      acceptance: confirm
+    auto_continue: true
   acceptance:
-    mode: auto
+    mode: manual
     state: accepted
-    requested_at: "2026-05-03T14:41:25+08:00"
-    rejected_at: "2026-05-03T14:54:39+08:00"
-    accepted_at: "2026-05-04T00:49:59+08:00"
-    feedback_ref: .pipeline/acceptance/cycle-C5-rejection-20260503T145439+0800.yaml
-    report: .pipeline/audits/audit-001.md
-    updated_at: "2026-05-04T00:49:59+08:00"
+    requested_at: "2026-05-05T16:30:15+08:00"
+    accepted_at: "2026-05-05T23:05:00+08:00"
+  lessons: null
+  finished: "2026-05-05T23:05:00+08:00"

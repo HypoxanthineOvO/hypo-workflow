@@ -2,6 +2,56 @@ schema_version: 1
 category: config-notes
 entries:
   -
+    record_id: C6-SYNC-claude-opencode-codex-interface-map-20260505
+    type: sync
+    source: C6-claude-opencode-codex-interface-map
+    created_at: "2026-05-05T00:19:25+08:00"
+    summary: Claude Code / OpenCode / Codex interface map for adapter planning
+    tags:
+      - claude-code
+      - opencode
+      - codex
+      - hooks
+      - plugins
+      - commands
+      - ui
+      - adapter
+    refs:
+      files:
+        - references/knowledge-spec.md
+        - references/opencode-spec.md
+        - references/commands-spec.md
+      urls:
+        - "https://code.claude.com/docs/en/plugins"
+        - "https://code.claude.com/docs/en/plugins-reference"
+        - "https://docs.anthropic.com/en/docs/claude-code/hooks"
+        - "https://docs.anthropic.com/en/docs/claude-code/hooks-guide"
+        - "https://opencode.ai/docs/plugins/"
+        - "https://opencode.ai/docs/commands/"
+        - "https://opencode.ai/docs/tui/"
+        - "https://developers.openai.com/codex/use-cases/"
+    items:
+      -
+        key: claude_code.settings.paths
+        value: ~/.claude/settings.json,.claude/settings.json,.claude/settings.local.json
+        reason: hook registration lives in settings files, not only in plugin manifests.
+      -
+        key: claude_code.hooks.env
+        value: CLAUDE_PROJECT_DIR
+        reason: hooks can reference project scripts portably.
+      -
+        key: opencode.plugin.paths
+        value: .opencode/plugins/; ~/.config/opencode/plugins/
+        reason: project and global plugins auto-load.
+      -
+        key: opencode.command.paths
+        value: .opencode/commands/
+        reason: custom commands are file-based and surface in the TUI.
+      -
+        key: codex.workflow.entrypoints
+        value: CLI commands; saved skills
+        reason: official docs call out composable commands and reusable skills.
+  -
     record_id: C4-M05-f001-knowledge-and-opencode-integration-gate-18c2eaab
     type: milestone
     source: C4/M05

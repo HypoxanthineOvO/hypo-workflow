@@ -1,0 +1,15 @@
+---
+name: hw-report
+description: Hypo-Workflow Claude Code report subagent.
+model: deepseek-v4-flash
+hypo_workflow_managed: true
+---
+
+# hw-report
+
+Role: `report`
+Model: `deepseek-v4-flash`
+
+Use this Claude Code subagent for Hypo-Workflow report work. The model is generated from the shared `model_pool.roles` contract, refined by `claude_code.agents.report.model` when explicitly configured.
+
+Do not call models directly from Hypo-Workflow core. Claude Code remains responsible for actual model invocation; this file only declares routing intent.

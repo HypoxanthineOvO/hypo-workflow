@@ -1,12 +1,12 @@
 ---
 name: hypo-workflow
-version: 10.2.0
-description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:chat`, `/hw:plan`, `/hw:plan:extend`, `/hw:plan:review`, `/hw:cycle`, `/hw:accept`, `/hw:reject`, `/hw:explore`, `/hw:sync`, `/hw:docs`, `/hw:patch`, `/hw:compact`, `/hw:knowledge`, `/hw:guide`, `/hw:showcase`, `/hw:rules`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, `/hw:log`, `/hw:setup`, or `/hw:dashboard`.
+version: 11.0.0
+description: Run a serialized prompt execution pipeline from a local `.pipeline/` workspace. Use this skill whenever the user says "开始执行", "继续 pipeline", "执行下一步", "pipeline status", "跳过当前步骤", "skip step", "中止", "abort", or invokes `/hw:start`, `/hw:resume`, `/hw:status`, `/hw:skip`, `/hw:stop`, `/hw:report`, `/hw:chat`, `/hw:plan`, `/hw:plan:extend`, `/hw:plan:review`, `/hw:cycle`, `/hw:accept`, `/hw:reject`, `/hw:explore`, `/hw:sync`, `/hw:docs`, `/hw:patch`, `/hw:compact`, `/hw:knowledge`, `/hw:guide`, `/hw:showcase`, `/hw:rules`, `/hw:init`, `/hw:check`, `/hw:audit`, `/hw:release`, `/hw:debug`, `/hw:help`, `/hw:reset`, or `/hw:log`.
 ---
 
-# Hypo-Workflow v10.2.0
+# Hypo-Workflow v11.0.0
 
-> **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 37 个用户指令。
+> **Claude Code 用户**：请使用 `/hypo-workflow:<command>` 调用具体指令。输入 `/hypo-workflow:help` 查看全部 36 个用户指令。
 >
 > **Codex 用户**：本文件是完整的 Skill 入口，继续使用 `/hw:*` 指令。
 
@@ -50,7 +50,6 @@ description: Run a serialized prompt execution pipeline from a local `.pipeline/
 | `/hw:reset` | Reset pipeline runtime state with safe, full, or hard modes |
 | `/hw:log` | Read the unified lifecycle log; use `--full` to bypass compact log context |
 | `/hw:setup` | Create or update `~/.hypo-workflow/config.yaml` for environment, execution, subagent, plan, and dashboard defaults |
-| `/hw:dashboard` | Start or reopen the Hypo-Workflow WebUI dashboard server |
 
 Internal runtime skill: `/hw:watchdog` is cron-only and should not be presented as a normal user command.
 
@@ -219,9 +218,7 @@ Handle these commands directly:
 - `/hw:log`
   Read `.pipeline/log.compact.yaml` when available, otherwise `.pipeline/log.yaml`; show the latest 10 entries by default, and support `--all`, `--type <type>`, `--since <milestone>`, and `--full` filters. If the file is missing, say `暂无日志，执行 Pipeline 后自动生成`.
 - `/hw:setup`
-  Configure the plugin itself: create or update `~/.hypo-workflow/config.yaml`, detect environment, choose plan mode, choose execution/subagent mode, and decide whether dashboard support should be enabled.
-- `/hw:dashboard`
-  Launch the background WebUI server, verify `/health`, and open the browser to the live dashboard.
+  Configure the plugin itself: create or update `~/.hypo-workflow/config.yaml`, detect environment, choose plan mode, and choose execution/subagent mode.
 - `/hw:check`
   Run health checks for config, workspace completeness, state consistency, prompts, Notion connectivity, and architecture. Without `.pipeline/`, respond with `请先运行 /hw:init`.
 - `/hw:init`
@@ -257,7 +254,7 @@ Handle these commands directly:
 
 If a command starts with `/hw:` and is not listed above, return:
 
-`Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:chat, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:accept, /hw:reject, /hw:explore, /hw:sync, /hw:patch, /hw:compact, /hw:knowledge, /hw:guide, /hw:showcase, /hw:rules, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
+`Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:chat, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:accept, /hw:reject, /hw:explore, /hw:sync, /hw:patch, /hw:compact, /hw:knowledge, /hw:guide, /hw:showcase, /hw:rules, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup`
 
 Slash commands are exact and take precedence over fuzzy natural-language matching. Detailed parsing and option semantics live in [`references/commands-spec.md`](./references/commands-spec.md).
 
@@ -415,7 +412,6 @@ Planning now supports two modes through `plan.mode`:
 
 The dashboard is an optional WebUI for `.pipeline/` state, config, progress, and reports.
 
-- start it manually through `/hypo-workflow:dashboard` in Claude Code or `/hw:dashboard` in Codex compatibility mode
 - treat it as a background service that must not block normal agent execution
 - keep its configuration under the `dashboard` config block and plugin-level setup defaults
 - resolve the preferred port as project `dashboard.port` > global `dashboard.port` > `7700`

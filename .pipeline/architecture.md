@@ -1,246 +1,195 @@
-# Architecture Baseline - C5 Follow-Up AI Coding Workflow Redesign
+# Architecture Baseline - C6 Claude Code Adapter Plugin and Full Workflow Takeover
 
 ## Current Baseline
 
-- Active planning target: C5 follow-up after the full workflow architecture audit.
-- Previous C5/M01 produced `.pipeline/audits/audit-001.md` and discussion records under `.pipeline/audits/audit-001-discussion-plan.md`.
-- `.pipeline/` remains the source of truth for Cycle, state, rules, progress, logs, patches, prompts, reports, queues, metrics, knowledge, explorations, audits, and archives.
-- `hypo-workflow` remains a setup, sync, planning, and global-management CLI. It is not a pipeline runner.
-- Agent execution remains inside Codex, Claude Code, or OpenCode.
-- OpenCode adapter artifacts are generated from core artifact helpers and templates.
-- `.pipeline/state.yaml`, `.pipeline/cycle.yaml`, and `.pipeline/rules.yaml` are protected workflow files. This P3 Generate pass does not mutate them.
+- Active Cycle: C6, "Claude Code Adapter Plugin and Full Workflow Takeover".
+- Workflow kind: build.
+- Preset: tdd.
+- Existing Claude Code support already exists through `.claude-plugin/plugin.json` and the Hypo-Workflow skill tree.
+- C6 is not a rewrite of the existing Claude Code skill surface. It is an enhancement layer around the current plugin/skill model.
+- `.pipeline/` remains the source of truth for Cycle, state, rules, progress, logs, prompts, reports, metrics, Knowledge, patches, and archives.
+- Hypo-Workflow remains a setup, planning, sync, and adapter-generation system. It is not a runner; Claude Code performs the actual project work.
+- Existing OpenCode and Codex behavior must not regress while Claude Code support improves.
 
 ## Product Direction
 
-C5 follow-up focuses on AI Coding and code-running/software delivery workflows. Research and PhD daily workflow support remains a future major direction and is not implemented in this Cycle.
+C6 makes Claude Code feel like a first-class Hypo-Workflow host:
 
-The target user experience is a simpler main path:
+1. The user can keep invoking existing `/hypo-workflow:*` skills.
+2. High-frequency `/hw:*` aliases are generated as thin Claude Code skill wrappers.
+3. `hypo-workflow sync --platform claude-code` installs or refreshes project-local Claude Code artifacts.
+4. Existing `.claude/` configuration is preserved through managed blocks, backups, and conflict reporting.
+5. Claude Code hooks reinforce the workflow state machine, especially SessionStart, Stop, compact recovery, permission flow, and progress/status refresh.
+6. Claude subagents/agents are generated from the shared model role contract, with declaration-first and dynamic-selection support.
+7. Status display shows a compact Progress-style view inside Claude Code where possible, with documented fallbacks.
 
-1. initialize or inspect a project
-2. use Guide or Plan to decide the route
-3. start or resume work
-4. see one status phase and one next action
-5. accept, reject, revise, or enter planned follow-up
+## User Decisions From Discover
 
-Advanced lanes such as Feature DAG, Patch, Explore, Docs, Sync, and Config TUI are routed by Guide when they match the task.
+- Primary goal is workflow command and lifecycle takeover, not full proxying of every ordinary Claude Code tool call.
+- Ordinary tool hooks should optimize workflow correctness: state sync, progress refresh, protected file guard, compact recovery, Stop enforcement, and permission continuity.
+- Stop gates should be strict for workflow-critical evidence and state updates.
+- `metrics` and derived refresh files are warnings, not hard Stop blockers.
+- Subagent model routing must be first-class.
+- Model defaults:
+  - docs: `deepseek-v4-pro`
+  - code/test: `mimo-v2.5-pro`
+  - report/compact: `deepseek-v4-flash`
+  - plan/review/debug: use model pool or configured Claude Code role overrides.
+- Local developer profile may be permissive. Published defaults should remain conservative for destructive or external side effects.
+- Safety profiles: `developer`, `standard`, and `strict`; published default is `standard`.
+- Status view should show a Progress-like milestone table, basic automation/profile settings, and recent events.
+- If Claude Code monitor or panel APIs are insufficient, C6 must report the limitation and provide validated alternatives.
+- Final acceptance includes a manual Claude Code smoke run in a temporary fixture project, including DeepSeek and Mimo model routing.
 
-## Design Principles
+## Adapter Layers
 
-- Prefer runnable vertical slices over horizontal schema/core/docs-only cuts.
-- Human owns design, source-of-truth choices, acceptance, and QA.
-- Agent implements bounded tasks with clear prompt inputs, tests, non-goals, and validation evidence.
-- Stable artifacts beat compressed conversation context. Compact views are recovery/index aids, not design authority.
-- Durable design output is layered:
-  - transient discussion
-  - confirmed decisions
-  - glossary/design concepts
-  - architecture
-  - prompt inputs
-  - Knowledge Ledger indexes
+### Plugin And Skill Layer
 
-## Core Contracts To Implement
+- `.claude-plugin/plugin.json` remains the package entrypoint.
+- Existing `/hypo-workflow:*` skills stay authoritative.
+- `/hw:*` aliases are thin wrappers that load the matching existing skill and invoke the same semantics.
+- Alias generation must not duplicate or fork command behavior.
+- Marketplace metadata should be complete enough for validation and future publication, but C6 does not perform the actual publish action.
 
-### Cycle-Scoped Workflow Kind
+### Settings Merge Layer
 
-`workflow_kind` is Cycle-scoped. A project may have defaults, but each Cycle owns one workflow kind that drives Plan, Decompose, Generate, Start, Report, Acceptance, Status, platform boundaries, and docs.
+- Project-level `.claude/settings.local.json` is the main auto-write target.
+- Existing user settings are preserved.
+- Hypo-Workflow writes only managed blocks or clearly marked entries.
+- First mutation writes a timestamped backup.
+- Re-running sync should be idempotent.
+- Conflicting user-defined hooks, agents, or plugin entries should produce a diff/conflict report rather than overwrite silently.
 
-Initial workflow kinds:
+### Hook Runtime Layer
 
-- `build`
-- `analysis`
-- `showcase`
+Use shared core policy with Claude-specific wrappers.
 
-Future workflow kind:
+Initial hook events:
 
-- `research`
+- `SessionStart`
+- `Stop`
+- `PreCompact`
+- `PostCompact`
+- `PostToolUse`
+- `PostToolBatch`
+- `UserPromptSubmit`
+- `PermissionRequest`
+- `FileChanged` for `.pipeline/PROGRESS.md`
 
-`cycle.type` must not remain a competing user-facing taxonomy. If retained, it should be a legacy/internal alias derived from `workflow_kind`.
+Compact hooks must inject a short recovery packet:
 
-### Lifecycle Policy And Continuations
+- current Cycle/Milestone/step
+- next action
+- required `.pipeline` files to re-read
+- warning not to replay completed steps
+- current automation and permission profile
+- recent events
 
-Cycle lifecycle policy is generated at Cycle start or Plan Generate time. Commands must not guess defaults later.
+Stop hooks should block when workflow-critical evidence is missing:
 
-Required policy concepts:
+- `.pipeline/state.yaml` not updated for the current step or transition
+- `.pipeline/log.yaml` missing relevant lifecycle evidence
+- `.pipeline/PROGRESS.md` stale after a lifecycle transition
+- current milestone report missing at the final step
+- Test Profile evidence missing when a profile requires it
 
-- reject default action
-- accept next action
-- resume default action
-- gates
-- auto-continue
-- planned continuations
+Stop hooks should warn, not block, for:
 
-Planned follow-up planning uses `cycle.continuations[]`. `state.yaml` only mirrors the currently active continuation state.
+- `metrics.yaml` gaps
+- stale compact/derived views
+- monitor/status refresh failure when the underlying `PROGRESS.md` is correct
 
-Canonical user-facing phases include:
+### Permission And Safety Layer
 
-- `planning`
-- `ready_to_start`
-- `executing`
-- `pending_acceptance`
-- `needs_revision`
-- `accepted`
-- `follow_up_planning`
-- `blocked`
-- `completed`
+The effective automation decision comes from Hypo-Workflow configuration:
 
-### Consistent Lifecycle Commit
+1. project `.pipeline/config.yaml`
+2. global `~/.hypo-workflow/config.yaml`
+3. defaults
 
-Lifecycle-mutating commands must update authoritative state and affected derived views in one consistent command flow.
+Claude Code permission settings are the host-level execution boundary.
 
-The command flow must support:
+Safety profiles:
 
-- prevalidation
-- temp-file atomic writes
-- post-write invariant checks
-- derived refresh
-- explicit failure or warning when refresh fails
-- repair/sync guidance
+- `developer`: permissive local development; prefer progress over friction.
+- `standard`: published default; destructive or external side effects require confirmation.
+- `strict`: team/CI profile; conservative asks and stronger file guard.
 
-If authoritative lifecycle facts commit but a derived view refresh fails, authority remains committed and the derived failure is reported. Derived views can be rebuilt; authority must not be rolled back only because README, compact, or status-summary refresh failed.
+### Agent And Model Routing Layer
 
-### Guide And Adaptive Discover
+- Shared model pool remains the canonical role contract.
+- Claude Code generated agents/subagents map to model roles.
+- Declarations are preferred; dynamic selection refines the declared role when the milestone, Test Profile, retry/failure state, or documentation/code task type justifies it.
+- Model routing must be visible in generated metadata and smoke evidence.
 
-Guide is the routing surface for uncertain users. It should sense current state and recommend one next path.
+### Status Surface Layer
 
-Plan Discover starts broad, then enters deep Grill-Me only when the task has high product, architecture, source-of-truth, or workflow semantic risk.
+Preferred order:
 
-Durable design artifacts:
+1. Claude Code monitor or native status surface if available and validated.
+2. `/hw:status` alias output rendered from the same Progress/status model.
+3. SessionStart/Stop summary injection.
+4. External Hypo-Workflow dashboard link or launch guidance.
 
-- `.pipeline/design-concepts.yaml` for machine-readable concept records.
-- `.pipeline/glossary.md` for human-readable terms, examples, non-examples, and common misunderstandings.
+The status model should expose:
 
-Knowledge Ledger indexes decisions and references; it does not replace architecture, glossary, or prompts.
+- C6/Milestone progress table
+- current phase and next action
+- automation/profile settings
+- recent lifecycle events
+- fallback status when monitor APIs are unavailable
 
-### Feature DAG Board
+## Expected Code Areas
 
-Feature Queue becomes a Feature-level DAG/board for long-running, batch, AFK, and HITL work.
-
-Feature nodes may record:
-
-- dependencies
-- unlocks
-- blocked_by
-- gates
-- HITL/AFK hints
-- ready/blocked/running/done/needs_human/deferred states
-
-Milestones remain serial inside a Feature by default. Milestone-level DAG scheduling is out of scope for this Cycle.
-
-### Execution Recovery And Platform Handoff
-
-The one-line `.pipeline/.lock` model is replaced by a structured execution lease.
-
-The lease must include enough information to decide whether takeover is safe:
-
-- platform
-- session or agent id
-- owner
-- command
-- workflow phase
-- cycle id
-- created_at
-- heartbeat_at
-- expires_at
-- handoff_allowed
-
-Clearly stale leases are automatically taken over and logged. Fresh foreign leases still block resume.
-
-Platform failure hooks are best-effort evidence. Heartbeat/lease expiry is the portable recovery signal. Codex, Claude Code, and OpenCode handoff must preserve the same authorization, protected-file, gate, auto-continue, network, restart, and external-side-effect boundaries from `.pipeline` policy and generated adapters.
-
-### Layered Global Sync
-
-`/hw:sync` keeps its existing config, registry, adapter, context, Knowledge, and compact refresh role.
-
-It also gains:
-
-- authority/derived map checks
-- safe derived artifact refresh
-- `--check-only`
-- repair/deep mode
-- refresh failure reporting
-
-Protected authority conflicts require repair or confirmation. Sync does not casually mutate `.pipeline/state.yaml`, `.pipeline/cycle.yaml`, or `.pipeline/rules.yaml`.
-
-### Log, Recent, And Secret-Safe Evidence
-
-`.pipeline/log.yaml` is the complete lifecycle audit ledger. Status/dashboard Recent Events are a filtered user activity feed.
-
-Readers must sort by timestamp and not depend on file order.
-
-Debug, audit, report, log, status, dashboard, and Knowledge surfaces share one conservative redaction pipeline. Suspected API keys, tokens, passwords, Authorization headers, cookies, private keys, and provider credentials are redacted or blocked before durable writes.
-
-### Documentation Governance
-
-README is a concise user entrypoint. Full docs are split into:
-
-- user guide
-- developer guide
-- platform guides
-- generated references
-- changelog
-- license
-
-`/hw:docs` is the explicit documentation workflow for generate/check/repair/sync.
-
-Docs automation has three update classes:
-
-- managed blocks can auto-update
-- generated references can regenerate
-- narrative docs require explicit repair/confirmation
-
-Release must fact-check narrative docs for stale or false claims.
-
-### Config TUI And Progress Dashboard
-
-TUI is a configuration management interface, not a full workflow action center.
-
-Editable domains include:
-
-- default platform and model/model pool
-- approval and sandbox defaults
-- plan mode and interaction depth
-- watchdog settings
-- compact policy
-- sync mode
-- docs automation policy
-- lifecycle defaults
-- output language and timezone
-- subagent defaults
-
-TUI writes must show diffs, validate schema, confirm target layer, and avoid protected lifecycle files. A progress dashboard may display phase, next action, lease, recent events, derived health, and active config summary.
+- `core/src/platform/index.js`
+- `core/src/config/index.js`
+- `core/src/sync/index.js`
+- new Claude artifact helper under `core/src/artifacts/`
+- new Claude hook policy/helper under `core/src/claude-hooks/` or equivalent
+- `core/src/commands/index.js`
+- `.claude-plugin/`
+- generated `.claude/` fixture outputs
+- `hooks/` Claude wrapper scripts where shell entrypoints are needed
+- `docs/platforms/claude-code.md`
+- `references/platform-claude.md`
+- `references/platform-capabilities.md`
+- `references/config-spec.md`
+- `references/external-docs-index.md`
 
 ## Milestone Strategy
 
-C5 follow-up uses 11 implementation milestones:
+C6 uses one Feature and seven serial Milestones:
 
-1. Workflow Kind, Lifecycle Policy, and Follow-Up Continuation Slice.
-2. Consistent Lifecycle Commit and Derived Refresh Slice.
-3. Guide Router, Adaptive Grill-Me, and Design Concept Artifacts.
-4. Runnable Vertical Slice and TDD Execution Contract.
-5. Feature DAG Board for Long-Running Work.
-6. Execution Lease, Recovery, and Platform Handoff.
-7. Layered Global Sync and Derived Artifact Map.
-8. Log Ledger, Recent Feed, and Secret-Safe Evidence.
-9. Docs Command and Documentation Information Architecture.
-10. Interactive Configuration TUI and Read-Only Progress Dashboard.
-11. Evidence Contracts, Metrics, and Real Lifecycle Regression.
+1. Claude Adapter Contract and Config.
+2. Plugin Skill Alias and Marketplace Package.
+3. Claude Settings Merge and Sync.
+4. Claude Hook Runtime.
+5. Claude Subagent Model Routing.
+6. Claude Progress Status Surface.
+7. Manual Smoke and Release Readiness.
 
 ## Validation Strategy
 
-Each milestone must include focused tests for its own contract. M11 adds real lifecycle regression coverage across the whole redesign.
+Each milestone must include focused tests before implementation. The final milestone adds a temporary-project smoke scenario.
 
-Expected final validation:
+Expected validation families:
 
-- `bash scripts/validate-config.sh .pipeline/config.yaml`
-- `node --test core/test/*.test.js`
-- `python3 tests/run_regression.py`
-- `git diff --check`
+- config/schema tests
+- artifact rendering tests
+- settings merge and conflict fixture tests
+- Claude hook input/output fixture tests
+- status model tests
+- model routing tests with `deepseek-v4-pro` and `mimo-v2.5-pro`
+- `claude plugin validate .`
+- core regression suite
+- manual Claude Code smoke checklist
 
 ## Cross-Cutting Constraints
 
-- Do not turn Hypo-Workflow into a runner.
-- Keep deterministic logic in `core/`; keep judgment and execution in the host Agent.
-- Keep large evidence and knowledge outside `state.yaml`.
-- Treat `.pipeline/state.yaml`, `.pipeline/cycle.yaml`, and `.pipeline/rules.yaml` as protected workflow state.
-- Secret values must not be committed or written into reports, logs, status surfaces, compact context, or Knowledge records.
-- Network, service restart, system dependency installation, destructive commands, and external side effects require the configured boundary or explicit confirmation.
+- Do not degrade Codex or OpenCode behavior.
+- Do not turn Hypo-Workflow into a model-calling runner.
+- Do not overwrite user `.claude/` configuration without backup and conflict handling.
+- Keep protected authority in `.pipeline/state.yaml`, `.pipeline/cycle.yaml`, and `.pipeline/rules.yaml`.
+- Keep durable facts in `.pipeline` files, not in transient chat context.
+- Do not store raw secrets in logs, reports, status surfaces, or Knowledge records.
+- Network, service restart, system dependency installation, destructive commands, and external side effects follow the configured safety profile or require explicit confirmation.

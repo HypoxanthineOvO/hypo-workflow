@@ -400,6 +400,65 @@ created: "2026-04-26T14:00:00+08:00"
 updated: "2026-04-26T14:00:00+08:00"
 ```
 
+## Claude Code Adapter
+
+`claude_code` is the first-class adapter contract for Claude Code. It complements the existing plugin Skill package; it does not replace the `/hw:*` skill namespace and does not turn Hypo-Workflow into a runner.
+
+Contract keys include `settings.local_file` for the project-local settings merge target and `compact.inject_resume_context` for compact recovery.
+
+Key defaults:
+
+```yaml
+claude_code:
+  profile: standard
+  settings:
+    local_file: .claude/settings.local.json
+    backup: true
+    managed_marker: hypo-workflow
+  hooks:
+    stop:
+      block_on_missing_state: true
+      block_on_missing_log: true
+      block_on_missing_progress: true
+      block_on_missing_report: true
+      warn_on_metrics_gap: true
+      warn_on_derived_gap: true
+    compact:
+      inject_resume_context: true
+    permission:
+      follow_effective_config: true
+  status:
+    surface: auto
+    fallback_order:
+      - monitor
+      - hw-status
+      - session-summary
+      - dashboard
+  agents:
+    docs:
+      model: deepseek-v4-pro
+    code:
+      model: mimo-v2.5-pro
+    test:
+      model: mimo-v2.5-pro
+    report:
+      model: deepseek-v4-flash
+    compact:
+      model: deepseek-v4-flash
+```
+
+Safety profiles:
+
+- `developer`: local developer profile; permissive, can allow destructive actions when the user explicitly chooses it.
+- `standard`: published default; workflow automation can continue, but destructive or external side effects require confirmation.
+- `strict`: team/CI profile; conservative permission and auto-continue behavior.
+
+Model routing is declaration-first. Claude Code agents are derived from `model_pool.roles`, then refined by `claude_code.agents.*` overrides. The defaults keep docs on DeepSeek V4 Pro and code/test on Mimo V2.5 Pro for the C6 smoke path.
+
+Generated Claude agent files live under `.claude/agents/hw-*.md`; `.claude/hypo-workflow-agents.json` records the resolved role-to-model map, dynamic selection hints, and any user-owned file conflicts.
+
+Status surface configuration is read-only. `surface=auto` attempts monitor packaging when available, then falls back to `/hw:status`, hook-injected summaries, and dashboard guidance. The compact output should include milestone rows, current phase/next action, automation/profile basics, and recent events without raw secrets.
+
 Watchdog recovery uses structured execution leases at `.pipeline/.lock`. A fresh lease blocks resume; an expired lease may be taken over with `lease_takeover` evidence. Platform-reported failures use `reported_failure`; heartbeat-only timeout uses `inferred_stall`.
 
 `subagent.codex.base_url` is optional.

@@ -12,7 +12,7 @@ import {
 
 const metadata = {
   name: "hypo-workflow",
-  version: "10.2.0",
+  version: "11.0.0",
   commandMap: [
   {
     "canonical": "/hw:start",
@@ -265,13 +265,6 @@ const metadata = {
     "agent": "hw-status",
     "route": "setup",
     "skill": "skills/setup/SKILL.md"
-  },
-  {
-    "canonical": "/hw:dashboard",
-    "opencode": "/hw-dashboard",
-    "agent": "hw-status",
-    "route": "tool",
-    "skill": "skills/dashboard/SKILL.md"
   }
 ],
 };

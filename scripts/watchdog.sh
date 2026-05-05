@@ -211,7 +211,7 @@ fi
 resume_cmd="${HYPO_WORKFLOW_RESUME_CMD:-}"
 if [[ -z "$resume_cmd" ]]; then
   if command -v claude >/dev/null 2>&1; then
-    resume_cmd='claude -p "/hypo-workflow:resume"'
+    resume_cmd='claude -p "/hw:resume"'
   elif command -v codex >/dev/null 2>&1; then
     resume_cmd='codex exec "/hw:resume"'
   else

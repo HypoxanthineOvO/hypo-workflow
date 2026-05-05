@@ -1,5 +1,5 @@
 pipeline:
-  name: "Hypo-Workflow C5 Follow-Up AI Coding Workflow Redesign"
+  name: "Claude Code Adapter Plugin and Full Workflow Takeover"
   source: local
   output: local
   prompts_dir: .pipeline/prompts

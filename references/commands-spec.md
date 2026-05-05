@@ -5,7 +5,9 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 ## Namespace
 
 - all explicit Hypo-Workflow commands use the `/hw:` prefix
-- V10.1 canonical namespace contains 37 user-facing commands across Setup, Pipeline, Plan, Lifecycle, Docs, and Utility groups, plus an internal cron-only watchdog skill
+- Claude Code exposes canonical commands through a plugin whose namespace is `hw`; the existing workflow skills remain authoritative and must not be duplicated into a second implementation
+- Claude Code `/hw:*` entries are plugin-skill entrypoints for the existing Hypo-Workflow skill files
+- V10.1 canonical namespace contains 36 user-facing commands across Setup, Pipeline, Plan, Lifecycle, Docs, and Utility groups, plus an internal cron-only watchdog skill
 - slash commands are exact and namespace-scoped
 - slash commands take precedence over fuzzy natural-language matching
 - natural-language commands remain valid for backward compatibility
@@ -24,7 +26,6 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
    - `/hw:reset`
    - `/hw:log`
    - `/hw:setup`
-   - `/hw:dashboard`
    - `/hw:knowledge`
    - `/hw:compact`
    - `/hw:guide`
@@ -53,7 +54,7 @@ Use this reference when the user's message starts with `/hw:` or when exact comm
 3. parse remaining tokens as command arguments
 4. flags are order-independent
 5. if a command is unknown, return exactly:
-   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:accept, /hw:reject, /hw:explore, /hw:sync, /hw:docs, /hw:patch, /hw:compact, /hw:knowledge, /hw:guide, /hw:showcase, /hw:rules, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup, /hw:dashboard`
+   `Unknown command: /hw:xxx. Available: /hw:start, /hw:resume, /hw:status, /hw:skip, /hw:stop, /hw:report, /hw:plan, /hw:plan:discover, /hw:plan:decompose, /hw:plan:generate, /hw:plan:confirm, /hw:plan:extend, /hw:plan:review, /hw:cycle, /hw:accept, /hw:reject, /hw:explore, /hw:sync, /hw:docs, /hw:patch, /hw:compact, /hw:knowledge, /hw:guide, /hw:showcase, /hw:rules, /hw:init, /hw:check, /hw:audit, /hw:release, /hw:debug, /hw:help, /hw:reset, /hw:log, /hw:setup`
 6. if a known command receives an unsupported flag, stop and report the unsupported flag explicitly instead of guessing
 7. if a prompt selector is ambiguous, list the candidates and stop
 8. plan and review commands load `plan/PLAN-SKILL.md` before execution
@@ -203,7 +204,7 @@ Supported forms:
 Behavior:
 
 - read `SKILL.md` command tables as the source of truth
-- `/hw:help` lists all 37 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, Docs, and Utility
+- `/hw:help` lists all 36 user-facing commands grouped under Setup, Pipeline, Plan, Lifecycle, Docs, and Utility
 - `/hw:help --quick` returns a compact cheat sheet
 - `/hw:help <cmd>` returns detailed usage, flags, and examples for the requested command
 
@@ -250,24 +251,9 @@ Behavior:
 - create `~/.hypo-workflow/` if it is missing
 - create or update `~/.hypo-workflow/config.yaml`
 - detect or confirm `agent.platform` as `claude-code` or `codex`
-- configure `execution.default_mode`, `subagent.provider`, provider model settings, `dashboard.enabled`, `dashboard.port`, `plan.default_mode`, optional output defaults, and optional watchdog defaults
+- configure `execution.default_mode`, `subagent.provider`, provider model settings, `plan.default_mode`, optional output defaults, and optional watchdog defaults
 - preserve `created` on existing configs and update `updated`
 - write plugin-level configuration outside the project pipeline state
-
-### `/hw:dashboard`
-
-Supported flags:
-
-- none
-- `--context audit,patches,deferred,debug,explore:E001`
-
-Behavior:
-
-- ensure dashboard dependencies are installed
-- resolve preferred port as project `dashboard.port` > global `dashboard.port` > `7700`
-- start or reuse the background dashboard server
-- verify `/health`
-- open the browser when possible
 
 ### `/hw:check`
 
@@ -527,11 +513,13 @@ Supported flags:
 - `--repair`
 - `--deep`
 - `--platform opencode`
+- `--platform claude-code`
 - `--project <dir>`
 
 Behavior:
 
 - default standard mode runs light sync, OpenCode adapter sync, config loading check, and compact refresh
+- `--platform claude-code` runs light sync, Claude plugin metadata refresh, safe `.claude/settings.local.json` hook merge, config loading check, derived checks, and compact refresh
 - `--light` refreshes registry status, refreshes Knowledge Ledger compact/index when source records changed, detects external changes, and reports without adapter writes
 - `--check-only` reports external changes and declared derived artifact drift without writing anything
 - `--repair` safely refreshes declared derived artifacts and writes `.pipeline/derived-health.yaml`

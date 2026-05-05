@@ -8,7 +8,7 @@ const DEFAULT_README_CONFIG = Object.freeze({
   full_regen: "auto",
 });
 
-const USER_COMMANDS = CANONICAL_COMMANDS.filter((command) => command.canonical !== "/hw:watchdog");
+const USER_COMMANDS = CANONICAL_COMMANDS;
 
 export function defaultReadmeConfig() {
   return { ...DEFAULT_README_CONFIG };
@@ -109,6 +109,7 @@ export async function checkReadmeFreshness(readmeFile = "README.md", options = {
 
   const commandPatterns = [
     `${commandCount} 个用户指令`,
+    `${commandCount} 个 canonical 命令`,
     `${commandCount} user`,
     `${commandCount} commands`,
   ];
@@ -118,6 +119,18 @@ export async function checkReadmeFreshness(readmeFile = "README.md", options = {
       expected: commandCount,
       message: `README command count does not match ${commandCount}`,
     });
+  }
+
+  for (const match of readme.matchAll(/(\d+)\s*个\s*(?:用户指令|canonical\s*命令)|(\d+)\s+(?:user-facing\s+)?commands?/gi)) {
+    const count = Number(match[1] || match[2]);
+    if (Number.isFinite(count) && count !== commandCount) {
+      failures.push({
+        check: "stale-command-count",
+        expected: commandCount,
+        actual: count,
+        message: `README contains stale command count ${count}`,
+      });
+    }
   }
 
   for (const platform of ["Codex", "Claude Code", "OpenCode"]) {

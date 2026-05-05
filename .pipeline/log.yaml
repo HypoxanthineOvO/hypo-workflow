@@ -1,5 +1,13 @@
 entries:
   -
+    id: CYCLE-ACCEPTED-C6-20260505T230500+0800
+    type: cycle_accept
+    ref: C6
+    status: completed
+    timestamp: "2026-05-05T23:05:00+08:00"
+    summary: Cycle C6 accepted.
+    trigger: manual
+  -
     id: M03-START-C5-20260503T200447+0800
     type: milestone_start
     ref: C5/M03
@@ -2400,3 +2408,694 @@ entries:
     report: .pipeline/reports/11-evidence-contracts-metrics-and-real-lifecycle-regression.report.md
     trigger: auto
     related_milestone: M12
+  -
+    id: C5-ARCHIVE-20260504T232515+0800
+    type: cycle_archive
+    ref: C5
+    status: completed
+    timestamp: "2026-05-04T23:25:15+08:00"
+    summary: Archived completed C5 artifacts before starting the Claude Code adapter Cycle.
+    report: .pipeline/archives/C5-hypo-workflow-c5-follow-up-ai-coding-workflow-redesign/summary.md
+    trigger: user
+    related_milestone: null
+  -
+    id: C6-NEW-20260504T232515+0800
+    type: cycle_new
+    ref: C6
+    status: active
+    timestamp: "2026-05-04T23:25:15+08:00"
+    summary: Started explicit Cycle C6 named Claude Code Adapter Plugin and Full Workflow Takeover with feature type, tdd preset, and empty context sources.
+    report: .pipeline/cycle.yaml
+    trigger: user
+    related_milestone: null
+  -
+    id: C6-PLAN-GENERATE-20260505T140449+0800
+    type: step
+    ref: C6/plan/generate
+    status: completed
+    timestamp: "2026-05-05T14:04:49+08:00"
+    summary: Generated C6 planning artifacts with one Claude Code adapter enhancement Feature, seven TDD Milestones, hook/model/status/smoke validation scope, and P4 confirmation gate.
+    report: .pipeline/confirm-summary.md
+    trigger: user
+    related_milestone: M01
+  -
+    id: M01-START-C6-20260505T142934+0800
+    type: milestone_start
+    ref: C6/M01
+    status: active
+    timestamp: "2026-05-05T14:29:34+08:00"
+    summary: Started M01 Claude Adapter Contract and Config in write_tests.
+    report: .pipeline/prompts/00-claude-adapter-contract-and-config.md
+    trigger: user
+    related_milestone: M01
+  -
+    id: M01-WRITE-TESTS-C6-20260505T143232+0800
+    type: step
+    ref: C6/M01/write_tests
+    status: completed
+    timestamp: "2026-05-05T14:32:32+08:00"
+    summary: Added Claude adapter config tests for defaults, safety profiles, model pool role mapping, platform capabilities, and schema/docs contract.
+    report: core/test/claude-adapter-config.test.js
+    trigger: auto
+    related_milestone: M01
+  -
+    id: M01-REVIEW-TESTS-C6-20260505T143347+0800
+    type: step
+    ref: C6/M01/review_tests
+    status: completed
+    timestamp: "2026-05-05T14:33:47+08:00"
+    summary: Reviewed M01 tests for coverage of Claude config defaults, safety profiles, role model mapping, platform capabilities, and docs/schema contract.
+    report: core/test/claude-adapter-config.test.js
+    trigger: auto
+    related_milestone: M01
+  -
+    id: M01-RED-C6-20260505T143511+0800
+    type: step
+    ref: C6/M01/run_tests_red
+    status: completed
+    timestamp: "2026-05-05T14:35:11+08:00"
+    summary: Red validation failed as expected because the new Claude model-role helper is not exported yet.
+    report: core/test/claude-adapter-config.test.js
+    tests: node --test core/test/claude-adapter-config.test.js
+    trigger: auto
+    related_milestone: M01
+  -
+    id: M01-IMPLEMENT-C6-20260505T144241+0800
+    type: step
+    ref: C6/M01/implement
+    status: completed
+    timestamp: "2026-05-05T14:42:41+08:00"
+    summary: Implemented Claude Code adapter config defaults, safety profiles, model pool role mapping, platform capability fields, schema descriptors, and platform docs.
+    report: core/src/config/index.js
+    trigger: auto
+    related_milestone: M01
+  -
+    id: M01-GREEN-C6-20260505T144607+0800
+    type: step
+    ref: C6/M01/run_tests_green
+    status: completed
+    timestamp: "2026-05-05T14:46:07+08:00"
+    summary: Green validation passed for Claude adapter config tests, profile/platform tests, config validation, global config regression, full core suite, and diff check.
+    report: core/test/claude-adapter-config.test.js
+    tests: node --test core/test/claude-adapter-config.test.js; node --test core/test/profile-platform.test.js; bash scripts/validate-config.sh .pipeline/config.yaml; node --test core/test/config.test.js core/test/global-config-registry.test.js; node --test core/test/*.test.js; git diff --check
+    trigger: auto
+    related_milestone: M01
+  -
+    id: M01-REVIEW-CODE-C6-20260505T145245+0800
+    type: step
+    ref: C6/M01/review_code
+    status: completed
+    timestamp: "2026-05-05T14:52:45+08:00"
+    summary: "Reviewed M01 implementation: contract-layer changes are aligned with prompt, low side-effect, and compatible with OpenCode/Codex tests."
+    report: .pipeline/reports/00-claude-adapter-contract-and-config.report.md
+    trigger: auto
+    related_milestone: M01
+  -
+    id: M01-COMPLETE-C6-20260505T145245+0800
+    type: milestone_complete
+    ref: C6/M01
+    status: completed
+    timestamp: "2026-05-05T14:52:45+08:00"
+    summary: Completed Claude Adapter Contract and Config with config/schema/profile/model-role/platform-docs contract and full core validation.
+    report: .pipeline/reports/00-claude-adapter-contract-and-config.report.md
+    tests: node --test core/test/claude-adapter-config.test.js; node --test core/test/profile-platform.test.js; bash scripts/validate-config.sh .pipeline/config.yaml; node --test core/test/config.test.js core/test/global-config-registry.test.js; node --test core/test/*.test.js; git diff --check
+    trigger: auto
+    related_milestone: M01
+  -
+    id: M02-START-C6-20260505T145245+0800
+    type: milestone_start
+    ref: C6/M02
+    status: active
+    timestamp: "2026-05-05T14:52:45+08:00"
+    summary: Auto-continued into M02 Plugin Skill Alias and Marketplace Package in write_tests.
+    report: .pipeline/prompts/01-claude-plugin-skill-alias-and-marketplace-package.md
+    trigger: auto
+    related_milestone: M02
+  -
+    id: M02-WRITE-TESTS-C6-20260505T145637+0800
+    type: step
+    ref: C6/M02/write_tests
+    status: completed
+    timestamp: "2026-05-05T14:56:37+08:00"
+    summary: "Added Claude plugin alias tests for thin `/hw:*` wrappers, plugin/marketplace metadata, and docs command contract."
+    report: core/test/claude-plugin-alias.test.js
+    trigger: auto
+    related_milestone: M02
+  -
+    id: M02-REVIEW-TESTS-C6-20260505T145730+0800
+    type: step
+    ref: C6/M02/review_tests
+    status: completed
+    timestamp: "2026-05-05T14:57:30+08:00"
+    summary: Reviewed M02 tests for alias-to-skill mapping, thin wrapper constraints, plugin metadata, marketplace tags, and docs contract.
+    report: core/test/claude-plugin-alias.test.js
+    trigger: auto
+    related_milestone: M02
+  -
+    id: M02-RED-C6-20260505T145852+0800
+    type: step
+    ref: C6/M02/run_tests_red
+    status: completed
+    timestamp: "2026-05-05T14:58:52+08:00"
+    summary: Red validation failed as expected because Claude alias rendering helpers are not exported yet.
+    report: core/test/claude-plugin-alias.test.js
+    tests: node --test core/test/claude-plugin-alias.test.js
+    trigger: auto
+    related_milestone: M02
+  -
+    id: M02-IMPLEMENT-C6-20260505T150257+0800
+    type: step
+    ref: C6/M02/implement
+    status: completed
+    timestamp: "2026-05-05T15:02:57+08:00"
+    summary: "Implemented Claude Code alias artifact writer, generated 36 thin `/hw:*` alias skills, and refreshed plugin/marketplace metadata."
+    report: core/src/artifacts/claude.js
+    trigger: auto
+    related_milestone: M02
+  -
+    id: M02-GREEN-C6-20260505T150536+0800
+    type: step
+    ref: C6/M02/run_tests_green
+    status: completed
+    timestamp: "2026-05-05T15:05:36+08:00"
+    summary: Green validation passed for Claude alias artifacts, command artifact regressions, Claude plugin validation, full core suite, and diff check.
+    report: core/test/claude-plugin-alias.test.js
+    tests: node --test core/test/claude-plugin-alias.test.js; node --test core/test/commands-rules-artifacts.test.js; claude plugin validate .; node --test core/test/*.test.js; git diff --check
+    trigger: auto
+    related_milestone: M02
+  -
+    id: M02-REVIEW-CODE-C6-20260505T151453+0800
+    type: step
+    ref: C6/M02/review_code
+    status: completed
+    timestamp: "2026-05-05T15:14:53+08:00"
+    summary: Reviewed M02 implementation, corrected alias generation to plugin-root skills per Claude Code plugin structure, and reran validation.
+    report: .pipeline/reports/01-claude-plugin-skill-alias-and-marketplace-package.report.md
+    tests: node --test core/test/claude-plugin-alias.test.js core/test/commands-rules-artifacts.test.js core/test/skill-quality.test.js; claude plugin validate .; node --test core/test/*.test.js; git diff --check
+    trigger: auto
+    related_milestone: M02
+  -
+    id: M02-COMPLETE-C6-20260505T151533+0800
+    type: milestone_complete
+    ref: C6/M02
+    status: completed
+    timestamp: "2026-05-05T15:15:33+08:00"
+    summary: Completed Plugin Skill Alias and Marketplace Package with 36 root skills/hw-* thin aliases, Claude plugin metadata, marketplace metadata, and full validation.
+    report: .pipeline/reports/01-claude-plugin-skill-alias-and-marketplace-package.report.md
+    tests: node --test core/test/claude-plugin-alias.test.js core/test/commands-rules-artifacts.test.js core/test/skill-quality.test.js; claude plugin validate .; node --test core/test/*.test.js; git diff --check
+    trigger: auto
+    related_milestone: M02
+  -
+    id: M03-START-C6-20260505T151533+0800
+    type: milestone_start
+    ref: C6/M03
+    status: active
+    timestamp: "2026-05-05T15:15:33+08:00"
+    summary: Auto-continued into M03 Claude Settings Merge and Sync in write_tests.
+    report: .pipeline/prompts/02-claude-settings-merge-and-sync.md
+    trigger: auto
+    related_milestone: M03
+  -
+    id: M03-WRITE-TESTS-C6-20260505T152158+0800
+    type: step
+    ref: C6/M03/write_tests
+    status: completed
+    timestamp: "2026-05-05T15:21:58+08:00"
+    summary: Added Claude settings sync tests for safe merge, user setting preservation, managed replacement, conflicts, backups, idempotency, and CLI platform routing.
+    report: core/test/claude-settings-sync.test.js
+    trigger: auto
+    related_milestone: M03
+  -
+    id: M03-REVIEW-TESTS-C6-20260505T152205+0800
+    type: step
+    ref: C6/M03/review_tests
+    status: completed
+    timestamp: "2026-05-05T15:22:05+08:00"
+    summary: Reviewed M03 tests for alignment with safe .claude/settings.local.json merge, backups, conflicts, idempotency, CLI path, and OpenCode sync preservation.
+    report: core/test/claude-settings-sync.test.js
+    trigger: auto
+    related_milestone: M03
+  -
+    id: M03-RED-C6-20260505T152211+0800
+    type: step
+    ref: C6/M03/run_tests_red
+    status: completed
+    timestamp: "2026-05-05T15:22:11+08:00"
+    summary: Red validation failed as expected because mergeClaudeCodeSettings is not exported yet.
+    report: core/test/claude-settings-sync.test.js
+    tests: node --test core/test/claude-settings-sync.test.js
+    trigger: auto
+    related_milestone: M03
+  -
+    id: M03-IMPLEMENT-C6-20260505T152840+0800
+    type: step
+    ref: C6/M03/implement
+    status: completed
+    timestamp: "2026-05-05T15:28:40+08:00"
+    summary: Implemented Claude Code safe settings merge, marker-based managed hooks, plugin alias refresh, backup creation, conflict blocking, platform-specific drift checks, CLI routing, and docs.
+    report: core/src/sync/index.js
+    trigger: auto
+    related_milestone: M03
+  -
+    id: M03-GREEN-C6-20260505T153052+0800
+    type: step
+    ref: C6/M03/run_tests_green
+    status: completed
+    timestamp: "2026-05-05T15:30:52+08:00"
+    summary: Green validation passed for Claude settings sync, sync standardization regression, config validation, full core suite, and diff check.
+    report: core/test/claude-settings-sync.test.js
+    tests: node --test core/test/claude-settings-sync.test.js core/test/sync-standardization.test.js; bash scripts/validate-config.sh .pipeline/config.yaml; node --test core/test/*.test.js; git diff --check
+    trigger: auto
+    related_milestone: M03
+  -
+    id: M03-REVIEW-CODE-C6-20260505T153219+0800
+    type: step
+    ref: C6/M03/review_code
+    status: completed
+    timestamp: "2026-05-05T15:32:19+08:00"
+    summary: "Reviewed M03 implementation: settings merge is marker-scoped, backs up existing settings before writes, blocks user-owned command conflicts, and preserves OpenCode sync behavior."
+    report: .pipeline/reports/02-claude-settings-merge-and-sync.report.md
+    trigger: auto
+    related_milestone: M03
+  -
+    id: M03-COMPLETE-C6-20260505T153219+0800
+    type: milestone_complete
+    ref: C6/M03
+    status: completed
+    timestamp: "2026-05-05T15:32:19+08:00"
+    summary: Completed Claude Settings Merge and Sync with safe .claude/settings.local.json merge, backups, conflicts, plugin refresh, CLI routing, and full validation.
+    report: .pipeline/reports/02-claude-settings-merge-and-sync.report.md
+    tests: node --test core/test/claude-settings-sync.test.js core/test/sync-standardization.test.js; bash scripts/validate-config.sh .pipeline/config.yaml; node --test core/test/*.test.js; git diff --check
+    trigger: auto
+    related_milestone: M03
+  -
+    id: M04-START-C6-20260505T153219+0800
+    type: milestone_start
+    ref: C6/M04
+    status: active
+    timestamp: "2026-05-05T15:32:19+08:00"
+    summary: Auto-continued into M04 Claude Hook Runtime in write_tests.
+    report: .pipeline/prompts/03-claude-hook-runtime.md
+    trigger: auto
+    related_milestone: M04
+  -
+    id: M04-WRITE-TESTS-C6-20260505T153535+0800
+    type: step
+    ref: C6/M04/write_tests
+    status: completed
+    timestamp: "2026-05-05T15:35:35+08:00"
+    summary: Added Claude hook runtime tests for SessionStart, Stop, compact resume packets, PermissionRequest profiles, tool/progress refresh hooks, settings registration, and Node wrapper JSON output.
+    report: core/test/claude-hooks.test.js
+    trigger: auto
+    related_milestone: M04
+  -
+    id: M04-REVIEW-TESTS-C6-20260505T153543+0800
+    type: step
+    ref: C6/M04/review_tests
+    status: completed
+    timestamp: "2026-05-05T15:35:43+08:00"
+    summary: Reviewed M04 tests for event coverage, hard blockers, warning-only gaps, compact resume context, and profile-based permission behavior.
+    report: core/test/claude-hooks.test.js
+    trigger: auto
+    related_milestone: M04
+  -
+    id: M04-RED-C6-20260505T153549+0800
+    type: step
+    ref: C6/M04/run_tests_red
+    status: completed
+    timestamp: "2026-05-05T15:35:49+08:00"
+    summary: Red validation failed as expected because evaluateClaudeHookEvent is not exported yet.
+    report: core/test/claude-hooks.test.js
+    tests: node --test core/test/claude-hooks.test.js
+    trigger: auto
+    related_milestone: M04
+  -
+    id: M04-IMPLEMENT-C6-20260505T154000+0800
+    type: step
+    ref: C6/M04/implement
+    status: completed
+    timestamp: "2026-05-05T15:40:00+08:00"
+    summary: Implemented Claude hook policy core, Node wrapper, settings registration for initial events, Stop/compact/permission/progress behavior, and docs.
+    report: core/src/claude-hooks/index.js
+    trigger: auto
+    related_milestone: M04
+  -
+    id: M04-GREEN-C6-20260505T154241+0800
+    type: step
+    ref: C6/M04/run_tests_green
+    status: completed
+    timestamp: "2026-05-05T15:42:41+08:00"
+    summary: Green validation passed for Claude hooks, legacy hook regressions, settings sync, full core suite, shell syntax, and diff check.
+    report: core/test/claude-hooks.test.js
+    tests: node --test core/test/claude-hooks.test.js core/test/knowledge-hooks.test.js core/test/opencode-hooks.test.js; bash -n hooks/*.sh; node --test core/test/claude-settings-sync.test.js; node --test core/test/*.test.js; git diff --check
+    trigger: auto
+    related_milestone: M04
+  -
+    id: M04-REVIEW-CODE-C6-20260505T154241+0800
+    type: step
+    ref: C6/M04/review_code
+    status: completed
+    timestamp: "2026-05-05T15:42:41+08:00"
+    summary: "Reviewed M04 implementation: wrapper is thin, policy is covered by unit tests, settings registration is marker-managed, and existing OpenCode/Knowledge hook behavior remains green."
+    report: .pipeline/reports/03-claude-hook-runtime.report.md
+    trigger: auto
+    related_milestone: M04
+  -
+    id: M04-COMPLETE-C6-20260505T154241+0800
+    type: milestone_complete
+    ref: C6/M04
+    status: completed
+    timestamp: "2026-05-05T15:42:41+08:00"
+    summary: Completed Claude Hook Runtime with shared policy helper, Node wrapper, settings registration, docs, and full validation.
+    report: .pipeline/reports/03-claude-hook-runtime.report.md
+    tests: node --test core/test/claude-hooks.test.js core/test/knowledge-hooks.test.js core/test/opencode-hooks.test.js; bash -n hooks/*.sh; node --test core/test/claude-settings-sync.test.js; node --test core/test/*.test.js; git diff --check
+    trigger: auto
+    related_milestone: M04
+  -
+    id: M05-START-C6-20260505T154241+0800
+    type: milestone_start
+    ref: C6/M05
+    status: active
+    timestamp: "2026-05-05T15:42:41+08:00"
+    summary: Auto-continued into M05 Claude Subagent Model Routing in write_tests.
+    report: .pipeline/prompts/04-claude-subagent-model-routing.md
+    trigger: auto
+    related_milestone: M05
+  -
+    id: M05-WRITE-TESTS-C6-20260505T155316+0800
+    type: step
+    ref: C6/M05/write_tests
+    status: completed
+    timestamp: "2026-05-05T15:53:16+08:00"
+    summary: Added Claude model routing tests for defaults, rendered agents, metadata, user-owned conflict handling, overrides, and dynamic role selection.
+    report: core/test/claude-model-routing.test.js
+    trigger: auto
+    related_milestone: M05
+  -
+    id: M05-REVIEW-TESTS-C6-20260505T155324+0800
+    type: step
+    ref: C6/M05/review_tests
+    status: completed
+    timestamp: "2026-05-05T15:53:24+08:00"
+    summary: Reviewed M05 tests for DeepSeek docs, Mimo code/test, explicit overrides, inspectable metadata, dynamic selection, and safe agent artifact writes.
+    report: core/test/claude-model-routing.test.js
+    trigger: auto
+    related_milestone: M05
+  -
+    id: M05-RED-C6-20260505T155330+0800
+    type: step
+    ref: C6/M05/run_tests_red
+    status: completed
+    timestamp: "2026-05-05T15:53:30+08:00"
+    summary: Red validation failed as expected because Claude agent routing helpers are not exported yet.
+    report: core/test/claude-model-routing.test.js
+    tests: node --test core/test/claude-model-routing.test.js
+    trigger: auto
+    related_milestone: M05
+  -
+    id: M05-IMPLEMENT-C6-20260505T155630+0800
+    type: step
+    ref: C6/M05/implement
+    status: completed
+    timestamp: "2026-05-05T15:56:30+08:00"
+    summary: Implemented Claude agent routing metadata, managed .claude/agents writer, dynamic role selection, sync integration, and docs.
+    report: core/src/artifacts/claude.js
+    trigger: auto
+    related_milestone: M05
+  -
+    id: M05-GREEN-C6-20260505T155819+0800
+    type: step
+    ref: C6/M05/run_tests_green
+    status: completed
+    timestamp: "2026-05-05T15:58:19+08:00"
+    summary: Green validation passed for Claude model routing, model pool actions, OpenCode model docs, Claude adapter/settings regressions, full core suite, and diff check.
+    report: core/test/claude-model-routing.test.js
+    tests: node --test core/test/claude-model-routing.test.js core/test/model-pool-actions.test.js core/test/opencode-model-matrix-docs.test.js; node --test core/test/claude-settings-sync.test.js core/test/claude-adapter-config.test.js; node --test core/test/*.test.js; git diff --check
+    trigger: auto
+    related_milestone: M05
+  -
+    id: M05-REVIEW-CODE-C6-20260505T160028+0800
+    type: step
+    ref: C6/M05/review_code
+    status: completed
+    timestamp: "2026-05-05T16:00:28+08:00"
+    summary: "Reviewed M05 implementation: Claude subagent files are marker-managed, user-owned agent files are preserved with conflict metadata, and declaration-first model routing remains inspectable."
+    report: .pipeline/reports/04-claude-subagent-model-routing.report.md
+    trigger: auto
+    related_milestone: M05
+  -
+    id: M05-COMPLETE-C6-20260505T160028+0800
+    type: milestone_complete
+    ref: C6/M05
+    status: completed
+    timestamp: "2026-05-05T16:00:28+08:00"
+    summary: Completed Claude Subagent Model Routing with generated agents, routing metadata, dynamic role selection, sync integration, docs, and full validation.
+    report: .pipeline/reports/04-claude-subagent-model-routing.report.md
+    tests: node --test core/test/claude-model-routing.test.js core/test/model-pool-actions.test.js core/test/opencode-model-matrix-docs.test.js; node --test core/test/claude-settings-sync.test.js core/test/claude-adapter-config.test.js; node --test core/test/*.test.js; git diff --check
+    trigger: auto
+    related_milestone: M05
+  -
+    id: M06-START-C6-20260505T160028+0800
+    type: milestone_start
+    ref: C6/M06
+    status: active
+    timestamp: "2026-05-05T16:00:28+08:00"
+    summary: Auto-continued into M06 Claude Progress Status Surface in write_tests.
+    report: .pipeline/prompts/05-claude-progress-status-surface.md
+    trigger: auto
+    related_milestone: M06
+  -
+    id: M06-WRITE-TESTS-C6-20260505T160516+0800
+    type: step
+    ref: C6/M06/write_tests
+    status: completed
+    timestamp: "2026-05-05T16:05:16+08:00"
+    summary: Added Claude status surface and Progress table parser tests covering compact display, automation/profile basics, monitor fallback metadata, recent events, redaction, and hook refresh snapshots.
+    report: core/test/claude-status-surface.test.js
+    trigger: auto
+    related_milestone: M06
+  -
+    id: M06-REVIEW-TESTS-C6-20260505T160516+0800
+    type: step
+    ref: C6/M06/review_tests
+    status: completed
+    timestamp: "2026-05-05T16:05:16+08:00"
+    summary: "Reviewed M06 tests against expected evidence: milestone table rows, automation/profile basics, secret-safe recent events, monitor limitation report, shared /hw:status model, and event-driven refresh."
+    report: core/test/claude-status-surface.test.js
+    trigger: auto
+    related_milestone: M06
+  -
+    id: M06-RED-C6-20260505T160516+0800
+    type: step
+    ref: C6/M06/run_tests_red
+    status: completed
+    timestamp: "2026-05-05T16:05:16+08:00"
+    summary: Red validation failed as expected because Claude status/progress parser helpers are not exported yet.
+    report: core/test/claude-status-surface.test.js
+    tests: node --test core/test/claude-status-surface.test.js; node --test core/test/progress-table.test.js
+    trigger: auto
+    related_milestone: M06
+  -
+    id: M06-IMPLEMENT-C6-20260505T161539+0800
+    type: step
+    ref: C6/M06/implement
+    status: completed
+    timestamp: "2026-05-05T16:15:39+08:00"
+    summary: "Implemented Progress table parsing, Claude status surface helpers, plugin monitor artifact, /hw:status alias guidance, hook refresh snapshots, and docs."
+    report: core/src/claude-status/index.js
+    trigger: auto
+    related_milestone: M06
+  -
+    id: M06-GREEN-C6-20260505T161539+0800
+    type: step
+    ref: C6/M06/run_tests_green
+    status: completed
+    timestamp: "2026-05-05T16:15:39+08:00"
+    summary: Green validation passed for Claude status/progress/OpenCode status, Claude plugin/hook/settings regressions, full core suite, plugin validate, and diff check.
+    report: core/test/claude-status-surface.test.js
+    tests: node --test core/test/claude-status-surface.test.js core/test/progress-table.test.js core/test/opencode-status.test.js; node --test core/test/claude-plugin-alias.test.js core/test/claude-hooks.test.js core/test/claude-settings-sync.test.js; node --test core/test/*.test.js; claude plugin validate .; git diff --check
+    trigger: auto
+    related_milestone: M06
+  -
+    id: M06-REVIEW-CODE-C6-20260505T161736+0800
+    type: step
+    ref: C6/M06/review_code
+    status: completed
+    timestamp: "2026-05-05T16:17:36+08:00"
+    summary: "Reviewed M06 implementation: status surface is read-only, monitor is a notification/fallback layer, hook snapshots are compact and secret-safe, and docs state fallback limits clearly."
+    report: .pipeline/reports/05-claude-progress-status-surface.report.md
+    trigger: auto
+    related_milestone: M06
+  -
+    id: M06-COMPLETE-C6-20260505T161736+0800
+    type: milestone_complete
+    ref: C6/M06
+    status: completed
+    timestamp: "2026-05-05T16:17:36+08:00"
+    summary: Completed Claude Progress Status Surface with compact Progress parsing, Claude status helpers, monitor/fallback artifact, hook refresh integration, docs, and full validation.
+    report: .pipeline/reports/05-claude-progress-status-surface.report.md
+    tests: node --test core/test/claude-status-surface.test.js core/test/progress-table.test.js core/test/opencode-status.test.js; node --test core/test/claude-plugin-alias.test.js core/test/claude-hooks.test.js core/test/claude-settings-sync.test.js; node --test core/test/*.test.js; claude plugin validate .; git diff --check
+    trigger: auto
+    related_milestone: M06
+  -
+    id: M07-START-C6-20260505T161736+0800
+    type: milestone_start
+    ref: C6/M07
+    status: active
+    timestamp: "2026-05-05T16:17:36+08:00"
+    summary: Auto-continued into M07 Claude Manual Smoke and Release Readiness in write_tests.
+    report: .pipeline/prompts/06-claude-manual-smoke-and-release-readiness.md
+    trigger: auto
+    related_milestone: M07
+  -
+    id: M07-WRITE-TESTS-C6-20260505T162343+0800
+    type: step
+    ref: C6/M07/write_tests
+    status: completed
+    timestamp: "2026-05-05T16:23:43+08:00"
+    summary: Added Claude smoke readiness tests covering the manual checklist, deterministic fixture outputs, settings backup, hooks, status, profile permissions, and model routing.
+    report: core/test/claude-smoke-readiness.test.js
+    trigger: auto
+    related_milestone: M07
+  -
+    id: M07-REVIEW-TESTS-C6-20260505T162343+0800
+    type: step
+    ref: C6/M07/review_tests
+    status: completed
+    timestamp: "2026-05-05T16:23:43+08:00"
+    summary: Reviewed M07 tests against the required smoke coverage and release-readiness evidence.
+    report: core/test/claude-smoke-readiness.test.js
+    trigger: auto
+    related_milestone: M07
+  -
+    id: M07-RED-C6-20260505T162343+0800
+    type: step
+    ref: C6/M07/run_tests_red
+    status: completed
+    timestamp: "2026-05-05T16:23:43+08:00"
+    summary: Red validation failed as expected because the smoke checklist docs and deterministic fixture script are not present yet.
+    report: core/test/claude-smoke-readiness.test.js
+    tests: node --test core/test/claude-smoke-readiness.test.js
+    trigger: auto
+    related_milestone: M07
+  -
+    id: M07-IMPLEMENT-C6-20260505T163015+0800
+    type: step
+    ref: C6/M07/implement
+    status: completed
+    timestamp: "2026-05-05T16:30:15+08:00"
+    summary: Implemented deterministic smoke fixture, manual Claude Code smoke checklist, release readiness docs, and synchronized legacy regression scenarios with the current 36-command contract.
+    report: scripts/claude-smoke-fixture.mjs
+    trigger: auto
+    related_milestone: M07
+  -
+    id: M07-GREEN-C6-20260505T163015+0800
+    type: step
+    ref: C6/M07/run_tests_green
+    status: completed
+    timestamp: "2026-05-05T16:30:15+08:00"
+    summary: Green validation passed for M07 focused tests, deterministic smoke, plugin validate, config validation, full Node suite, full Python regression suite, and diff check.
+    report: core/test/claude-smoke-readiness.test.js
+    tests: node --test core/test/claude-smoke-readiness.test.js; node scripts/claude-smoke-fixture.mjs; claude plugin validate .; bash scripts/validate-config.sh .pipeline/config.yaml; node --test core/test/*.test.js; python3 tests/run_regression.py; git diff --check
+    trigger: auto
+    related_milestone: M07
+  -
+    id: M07-REVIEW-CODE-C6-20260505T163015+0800
+    type: step
+    ref: C6/M07/review_code
+    status: completed
+    timestamp: "2026-05-05T16:30:15+08:00"
+    summary: "Reviewed M07 implementation: fixture stays temporary/local, global Claude settings are not mutated, and docs clearly separate deterministic checks from live Claude Code manual QA."
+    report: .pipeline/reports/06-claude-manual-smoke-and-release-readiness.report.md
+    trigger: auto
+    related_milestone: M07
+  -
+    id: M07-COMPLETE-C6-20260505T163015+0800
+    type: milestone_complete
+    ref: C6/M07
+    status: completed
+    timestamp: "2026-05-05T16:30:15+08:00"
+    summary: Completed Claude Manual Smoke and Release Readiness with smoke fixture, manual QA docs, release checklist, final regression validation, and readiness evidence.
+    report: .pipeline/reports/06-claude-manual-smoke-and-release-readiness.report.md
+    tests: node --test core/test/claude-smoke-readiness.test.js; node scripts/claude-smoke-fixture.mjs; claude plugin validate .; bash scripts/validate-config.sh .pipeline/config.yaml; node --test core/test/*.test.js; python3 tests/run_regression.py; git diff --check
+    trigger: auto
+    related_milestone: M07
+  -
+    id: CYCLE-PENDING-C6-20260505T163015+0800
+    type: cycle_pending_acceptance
+    ref: C6
+    status: pending_acceptance
+    timestamp: "2026-05-05T16:30:15+08:00"
+    summary: Cycle C6 completed automated execution and is pending user acceptance after manual Claude Code smoke.
+    report: .pipeline/reports/06-claude-manual-smoke-and-release-readiness.report.md
+    trigger: auto
+  -
+    id: C6-LIVE-SMOKE-FIX-20260505T201630+0800
+    type: patch
+    ref: C6/live-claude-smoke
+    status: completed
+    timestamp: "2026-05-05T20:16:30+08:00"
+    summary: Fixed live Claude Code smoke failure by generating project-local hooks/claude-hook.mjs during claude-code sync; verified the user's temporary project hook now returns resume context.
+    report: scripts/claude-smoke-fixture.mjs
+    tests: node --test core/test/claude-settings-sync.test.js core/test/claude-smoke-readiness.test.js core/test/claude-hooks.test.js; node scripts/claude-smoke-fixture.mjs; claude plugin validate .; git diff --check
+    trigger: manual-smoke
+  -
+    id: C6-CLAUDE-HW-NAMESPACE-FIX-20260505T204613+0800
+    type: patch
+    ref: C6/live-claude-smoke
+    status: completed
+    timestamp: "2026-05-05T20:46:13+08:00"
+    summary: Fixed live Claude Code slash-command recognition by making the Claude plugin namespace `hw`, documenting `claude --plugin-dir <repo>` for local smoke, and removing managed settings plugin-path injection.
+    report: docs/platforms/claude-code-smoke.md
+    tests: node --test core/test/claude-settings-sync.test.js core/test/claude-smoke-readiness.test.js core/test/claude-plugin-alias.test.js core/test/claude-hooks.test.js; node scripts/claude-smoke-fixture.mjs; claude plugin validate .; git diff --check
+    trigger: manual-smoke
+  -
+    id: C6-CLAUDE-MAIN-MODEL-SYNC-20260505T205700+0800
+    type: patch
+    ref: C6/live-claude-smoke
+    status: completed
+    timestamp: "2026-05-05T20:57:00+08:00"
+    summary: Added managed Claude Code main-session model sync through claude_code.model, defaulting to deepseek-v4-pro, while preserving/conflicting on user-owned model settings.
+    report: docs/platforms/claude-code-smoke.md
+    tests: node --test core/test/claude-adapter-config.test.js core/test/claude-settings-sync.test.js core/test/claude-smoke-readiness.test.js core/test/claude-hooks.test.js core/test/claude-model-routing.test.js; node scripts/claude-smoke-fixture.mjs; claude plugin validate .; git diff --check
+    trigger: manual-smoke
+  -
+    id: C6-CLAUDE-API-ENV-SYNC-20260505T213409+0800
+    type: patch
+    ref: C6/live-claude-smoke
+    status: completed
+    timestamp: "2026-05-05T21:34:09+08:00"
+    summary: Added managed Claude Code API env sync through claude_code.api, supporting project-local ANTHROPIC_BASE_URL and ANTHROPIC_API_KEY overrides from direct values or environment-variable references for Anthropic-compatible DeepSeek gateways while preserving/conflicting on user-owned env settings.
+    report: docs/platforms/claude-code-smoke.md
+    tests: node --test core/test/claude-settings-sync.test.js core/test/claude-adapter-config.test.js core/test/claude-smoke-readiness.test.js core/test/claude-hooks.test.js core/test/claude-model-routing.test.js; node scripts/claude-smoke-fixture.mjs
+    trigger: manual-smoke
+  -
+    id: C6-CLAUDE-HOOK-SCHEMA-FIX-20260505T222100+0800
+    type: patch
+    ref: C6/live-claude-smoke
+    status: completed
+    timestamp: "2026-05-05T22:21:00+08:00"
+    summary: Interpreted live DeepSeek smoke output as successful workflow-resume behavior, then fixed Claude Code hook schema compliance for warning-only Stop and PermissionRequest responses.
+    report: docs/platforms/claude-code-smoke.md
+    tests: node --test core/test/claude-hooks.test.js core/test/claude-smoke-readiness.test.js core/test/claude-settings-sync.test.js; node scripts/claude-smoke-fixture.mjs; hypo-workflow sync --platform claude-code --project /tmp/hw-claude-live-zNqc11; printf '{}' | node hooks/claude-hook.mjs Stop; git diff --check
+    trigger: manual-smoke
+  -
+    id: C6-CLAUDE-DUPLICATE-ALIAS-CLEANUP-20260505T223528+0800
+    type: patch
+    ref: C6/live-claude-smoke
+    status: completed
+    timestamp: "2026-05-05T22:35:28+08:00"
+    summary: "Removed legacy Claude Code `skills/hw-*` alias generation and cleaned existing generated alias skill directories so the hw plugin namespace exposes canonical commands such as /hw:status instead of duplicate /hw:hw-status entries; strengthened status read-only instructions."
+    report: docs/platforms/claude-code.md
+    tests: node --test core/test/claude-plugin-alias.test.js core/test/claude-smoke-readiness.test.js core/test/claude-hooks.test.js core/test/claude-settings-sync.test.js; node scripts/claude-smoke-fixture.mjs; claude plugin validate .; git diff --check
+    trigger: manual-smoke
+  -
+    id: RELEASE-PREPARED-v11.0.0-20260505T230800+0800
+    type: release
+    ref: v11.0.0
+    status: prepared
+    timestamp: "2026-05-05T23:08:00+08:00"
+    summary: Prepared v11.0.0 release after accepting C6; updated versioned files, CHANGELOG, OpenCode and Claude Code adapters, and release docs. Commit, tag, push, and remote release entry are still pending explicit user confirmation.
+    report: CHANGELOG.md
+    tests: node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh; claude plugin validate .; node scripts/claude-smoke-fixture.mjs; docs/readme/narrative checks; git diff --check
+    trigger: manual

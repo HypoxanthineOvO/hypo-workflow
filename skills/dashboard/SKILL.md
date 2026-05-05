@@ -1,6 +1,6 @@
 ---
 name: dashboard
-description: Launch or manage the Hypo-Workflow WebUI when the user wants a live browser dashboard for pipeline state, logs, config, and reports.
+description: Internal legacy dashboard launcher removed from the active command surface.
 ---
 
 # /hypo-workflow:dashboard
@@ -13,57 +13,18 @@ description: Launch or manage the Hypo-Workflow WebUI when the user wants a live
 - auto：跟随用户对话语言
 内部日志（log.yaml、state.yaml）始终英文。
 
-Use this skill to launch the Hypo-Workflow dashboard server in the background.
+This Skill is deprecated and kept only for compatibility notes.
 
 ## Preconditions
 
-- the repo contains the `dashboard/` directory
-- `uv` is available
-- the current project has a `.pipeline/` directory to visualize
+- none
 
-## Startup Flow
+## Execution Flow
 
-1. Read `~/.hypo-workflow/config.yaml` if present.
-2. Read `.pipeline/config.yaml` if present.
-3. Resolve dashboard defaults as project > global > defaults:
-   - `dashboard.enabled`: project value > global value > `false`
-   - `dashboard.port`: project value > global value > `7700`
-4. Check whether dashboard dependencies are installed.
-5. If not, install them with:
-   - `uv pip install -r dashboard/requirements.txt`
-6. Check whether a dashboard instance is already listening on the preferred port.
-7. If one is already running:
-   - tell the user
-   - open the browser if possible
-8. Otherwise start the server in the background with `nohup` and `&`.
-9. Wait briefly, then check `/health`.
-10. Open the browser to the running dashboard.
-
-## Runtime Behavior
-
-- the server must not block Claude or Codex
-- it should run in the background
-- if all websocket clients disconnect, the server should auto-exit after 30 seconds with no reconnection
-- default port is `7700`
-- global setup can override the default port through `~/.hypo-workflow/config.yaml`
-- if `7700` is busy, probe upward until a free port is found
-- dashboard progress/status surfaces are read-only projections over `.pipeline/`
-- show phase, next action, lease, Recent Events, derived health, and active config summary from the canonical status model
-- do not dispatch start/resume/accept/reject/sync/repair actions from the dashboard in C5
-
-## Troubleshooting
-
-- dependency missing:
-  - run `uv pip install -r dashboard/requirements.txt`
-- port already in use:
-  - try the next free port
-- browser open command unavailable:
-  - print the dashboard URL instead
+1. Inform the user that `/hw:dashboard` has been removed from the active command surface.
+2. Direct the user to `/hw:start`, `/hw:resume`, or `/hw:status` for current workflow control.
+3. If the user needs browser-based status later, defer to the planned Claude Code plugin/Web surface.
 
 ## Reference Files
 
-- `dashboard/server.py` — backend routes, websocket logic, and file watching
-- `dashboard/__main__.py` — CLI entrypoint
-- `dashboard/requirements.txt` — dependencies
-- `references/config-spec.md` — dashboard config fallback rules
 - `SKILL.md` — broader pipeline context if needed

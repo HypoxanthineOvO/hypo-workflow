@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { DEFAULT_GLOBAL_CONFIG, mergeConfig, parseYaml, writeConfig } from "../config/index.js";
+import { appendProgressEvent } from "../progress/index.js";
 import {
   commitWorkflowUpdate,
   resolveCycleLifecyclePolicy,
@@ -353,14 +354,7 @@ function appendLifecycleLogSource(source, entry) {
 }
 
 function appendProgressRowSource(source, timestamp, type, event, result) {
-  const row = `| ${formatProgressTime(timestamp)} | ${type} | ${event} | ${result} |`;
-  if (source.includes("| 时间 | 类型 | 事件 | 结果 |")) {
-    const marker = "|---|---|---|---|";
-    const index = source.indexOf(marker);
-    const insertAt = index === -1 ? source.length : index + marker.length;
-    return `${source.slice(0, insertAt)}\n${row}${source.slice(insertAt)}`;
-  }
-  return `${source.trimEnd()}\n\n## 时间线\n\n| 时间 | 类型 | 事件 | 结果 |\n|---|---|---|---|\n${row}\n`;
+  return appendProgressEvent(source, { timestamp, type, name: event, result });
 }
 
 function compactAcceptanceState(value) {
@@ -414,11 +408,6 @@ function compactTimestamp(value) {
     .replace(/\.\d+/, "")
     .replace(/\+/, "+")
     .replace(/Z$/, "Z");
-}
-
-function formatProgressTime(value) {
-  const match = /T(\d{2}:\d{2})/.exec(String(value));
-  return match?.[1] || String(value);
 }
 
 function toProjectPath(file, projectRoot) {

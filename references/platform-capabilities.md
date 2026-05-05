@@ -6,7 +6,7 @@ Hypo-Workflow remains a single workflow system with platform adapters. V9 adds O
 
 | Capability | Codex | Claude Code | OpenCode | V9 decision |
 |---|---|---|---|---|
-| User command surface | `/hw:*` skill invocation | `/hypo-workflow:*` plugin commands | `/hw-*` native slash commands | Keep canonical HW names in docs; generate platform aliases. |
+| User command surface | `/hw:*` skill invocation | `/hw:*` plugin-skill namespace | `/hw-*` native slash commands | Keep canonical HW names in docs; generate platform aliases where the host syntax requires it. |
 | Skill loading | Native Codex skills | Claude plugin skills | OpenCode command/agent files plus plugin context | Core content stays shared; adapters render it. |
 | Interactive questions | Direct chat or Codex UI prompts where available | Direct chat / tool prompts where available | Native `question` tool | Plan gates prefer OpenCode Ask, fallback to explicit chat elsewhere. |
 | Plan tool / todos | Codex plan tool, best-effort discipline | Prompt-managed plan/checklists | Native `todowrite` | Add shared plan-discipline prompts; OpenCode gets enforced todo usage. |
@@ -24,7 +24,7 @@ Hypo-Workflow remains a single workflow system with platform adapters. V9 adds O
 
 V9 must not degrade Codex or Claude Code.
 
-- Existing `/hw:*` and `/hypo-workflow:*` command behavior remains valid.
+- Existing `/hw:*` command behavior remains valid across hosts; Claude Code gets that namespace from the plugin name.
 - Shared workflow semantics stay in common specs and generated skill content, not in an OpenCode-only runner.
 - OpenCode-only features are additive adapter capabilities. They may improve Ask, todowrite, hooks, and permissions on OpenCode, but cannot become required for Codex/Claude execution.
 - Codex/OpenCode/Claude handoff must preserve the strictest permission, network, destructive/external-side-effect, and auto-continue boundaries. Handoff may not widen permissions without explicit confirmation.

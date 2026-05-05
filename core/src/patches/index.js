@@ -2,6 +2,7 @@ import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { parseYaml, writeConfig } from "../config/index.js";
 import { createRejectionFeedbackTemplate } from "../acceptance/index.js";
+import { appendProgressEvent } from "../progress/index.js";
 
 export async function readPatch(projectRoot = ".", patchId) {
   const file = await findPatchFile(projectRoot, patchId);
@@ -204,15 +205,14 @@ async function appendProgressRow(projectRoot, timestamp, type, event, result) {
   } catch (error) {
     if (error.code !== "ENOENT") throw error;
   }
-  const row = `| ${formatProgressTime(timestamp)} | ${type} | ${event} | ${result} |`;
-  if (source.includes("| 时间 | 类型 | 事件 | 结果 |")) {
-    const marker = "|---|---|---|---|";
-    const index = source.indexOf(marker);
-    const insertAt = index === -1 ? source.length : index + marker.length;
-    await writeFile(file, `${source.slice(0, insertAt)}\n${row}${source.slice(insertAt)}`, "utf8");
-    return;
-  }
-  await writeFile(file, `${source.trimEnd()}\n\n## 时间线\n\n| 时间 | 类型 | 事件 | 结果 |\n|---|---|---|---|\n${row}\n`, "utf8");
+  const next = appendProgressEvent(source, {
+    timestamp,
+    type,
+    name: event,
+    result,
+    patch: event.match(/^(P\d+)/)?.[1] || null,
+  });
+  await writeFile(file, next, "utf8");
 }
 
 function normalizeMetadataKey(key) {
@@ -252,8 +252,4 @@ function compactTimestamp(value) {
     .replace(/\.\d+/, "")
     .replace(/\+/, "+")
     .replace(/Z$/, "Z");
-}
-
-function formatProgressTime(value) {
-  return /T(\d{2}:\d{2})/.exec(String(value))?.[1] || String(value);
 }

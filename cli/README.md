@@ -9,6 +9,7 @@ hypo-workflow setup
 hypo-workflow tui --snapshot
 hypo-workflow doctor
 hypo-workflow sync --platform opencode --project .
+hypo-workflow sync --platform claude-code --project .
 hypo-workflow sync --light --project .
 hypo-workflow sync --deep --project .
 hypo-workflow profile list

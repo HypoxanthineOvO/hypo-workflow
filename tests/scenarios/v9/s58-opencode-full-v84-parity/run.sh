@@ -8,7 +8,7 @@ tmp_project="$(mktemp -d)"
 tmp_home="$(mktemp -d)"
 HOME="$tmp_home" node cli/bin/hypo-workflow init-project --platform opencode --project "$tmp_project" >/tmp/hw-s58-init.log
 
-for command in cycle patch patch-fix compact showcase release dashboard audit debug check reset log report status guide rules; do
+for command in cycle patch patch-fix compact showcase release audit debug check reset log report status guide rules; do
   test -f "$tmp_project/.opencode/commands/hw-$command.md" || {
     echo "missing OpenCode command hw-$command" >&2
     exit 1
@@ -27,7 +27,6 @@ grep -Fq 'git push' "$tmp_project/.opencode/commands/hw-release.md"
 
 grep -Fq 'session.compacted' "$tmp_project/.opencode/commands/hw-compact.md"
 grep -Fq 'Agent generates showcase artifacts' "$tmp_project/.opencode/commands/hw-showcase.md"
-grep -Fq 'dashboard launcher' "$tmp_project/.opencode/commands/hw-dashboard.md"
 
 test -f references/opencode-parity.md
 grep -Fq '| Cycle |' references/opencode-parity.md

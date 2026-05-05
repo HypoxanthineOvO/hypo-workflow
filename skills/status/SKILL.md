@@ -15,6 +15,8 @@ description: Show current Hypo-Workflow progress when the user wants a concise s
 
 Use this skill to inspect pipeline progress only.
 
+Status is strictly read-only. If state, logs, progress, or step pointers are inconsistent, report the inconsistency and the recommended repair command; do not repair files, do not advance the current step, and do not make Stop hooks pass as a side effect of showing status.
+
 ## Preconditions
 
 - none; if `.pipeline/state.yaml` is missing, report that no active pipeline exists
@@ -43,6 +45,7 @@ Use this skill to inspect pipeline progress only.
 10. Include derived health from `.pipeline/derived-health.yaml` when present and route stale derived views to `/hw:sync --repair` or `/hw:docs repair` as appropriate.
 11. Show Recent Events from `.pipeline/log.yaml` sorted by timestamp newest-first, filtered to user-relevant lifecycle events, and redacted through the shared secret-safe evidence helper.
 12. If project-root `PROJECT-SUMMARY.md` exists, include its top summary line and Open Patches / Deferred counts.
+13. When running through Claude Code or `/hw:status`, prefer the shared Claude status surface shape: compact milestone table, current phase/next action, automation/profile basics, and recent events. Do not dump the full raw `PROGRESS.md` unless `--full` is requested.
 
 Status must expose one user-facing canonical phase and one next action. Derive these from `.pipeline/cycle.yaml`, `.pipeline/state.yaml`, acceptance state, and active continuation state. Important phases:
 
@@ -61,7 +64,9 @@ Do not make the user reconcile separate execution, acceptance, continuation, and
 
 - do not mutate `state.yaml`
 - do not mutate logs or reports
+- do not create missing log/progress files
 - do not advance any step or milestone
+- do not repair workflow inconsistencies during status display
 - do not display raw secrets from logs, reports, Knowledge records, or status sources
 
 ## Reference Files

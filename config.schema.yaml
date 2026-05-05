@@ -12,6 +12,154 @@ $defs:
       model:
         type: string
         minLength: 1
+  claude_agent_model:
+    type: object
+    additionalProperties: false
+    required:
+      - model
+    properties:
+      model:
+        type: string
+        minLength: 1
+  claude_code_config:
+    type: object
+    additionalProperties: false
+    description: "Claude Code adapter contract; includes settings.local_file and compact.inject_resume_context defaults."
+    properties:
+      profile:
+        type: string
+        enum:
+          - developer
+          - standard
+          - strict
+        default: standard
+      model:
+        type: string
+        minLength: 1
+        default: deepseek-v4-pro
+      api:
+        type: object
+        additionalProperties: false
+        description: "Project-local Claude Code API override. Values are rendered into settings env as ANTHROPIC_* variables."
+        properties:
+          base_url:
+            type: string
+            minLength: 1
+          base_url_env:
+            type: string
+            minLength: 1
+            description: "Read the Anthropic-compatible base URL from this environment variable during sync."
+          api_key:
+            type: string
+            minLength: 1
+          api_key_env:
+            type: string
+            minLength: 1
+            description: "Read the API key from this environment variable during sync, then write it into project-local Claude settings."
+        default: {}
+      settings:
+        type: object
+        additionalProperties: false
+        description: "settings.local_file controls the project-local Claude settings merge target."
+        properties:
+          local_file:
+            type: string
+            minLength: 1
+            default: .claude/settings.local.json
+          backup:
+            type: boolean
+            default: true
+          managed_marker:
+            type: string
+            minLength: 1
+            default: hypo-workflow
+        default:
+          local_file: .claude/settings.local.json
+          backup: true
+          managed_marker: hypo-workflow
+      hooks:
+        type: object
+        additionalProperties: false
+        properties:
+          stop:
+            type: object
+            additionalProperties: false
+            properties:
+              block_on_missing_state:
+                type: boolean
+                default: true
+              block_on_missing_log:
+                type: boolean
+                default: true
+              block_on_missing_progress:
+                type: boolean
+                default: true
+              block_on_missing_report:
+                type: boolean
+                default: true
+              warn_on_metrics_gap:
+                type: boolean
+                default: true
+              warn_on_derived_gap:
+                type: boolean
+                default: true
+          compact:
+            type: object
+            additionalProperties: false
+            description: "compact.inject_resume_context keeps Claude Code aligned after context compaction."
+            properties:
+              inject_resume_context:
+                type: boolean
+                default: true
+          permission:
+            type: object
+            additionalProperties: false
+            properties:
+              follow_effective_config:
+                type: boolean
+                default: true
+      status:
+        type: object
+        additionalProperties: false
+        properties:
+          surface:
+            type: string
+            enum:
+              - auto
+              - monitor
+              - skill
+              - dashboard
+            default: auto
+          fallback_order:
+            type: array
+            items:
+              type: string
+              minLength: 1
+            default:
+              - monitor
+              - hw-status
+              - session-summary
+              - dashboard
+      agents:
+        type: object
+        additionalProperties: false
+        properties:
+          plan:
+            $ref: "#/$defs/claude_agent_model"
+          code:
+            $ref: "#/$defs/claude_agent_model"
+          test:
+            $ref: "#/$defs/claude_agent_model"
+          review:
+            $ref: "#/$defs/claude_agent_model"
+          debug:
+            $ref: "#/$defs/claude_agent_model"
+          docs:
+            $ref: "#/$defs/claude_agent_model"
+          report:
+            $ref: "#/$defs/claude_agent_model"
+          compact:
+            $ref: "#/$defs/claude_agent_model"
   opencode_provider_model:
     type: object
     additionalProperties: true
@@ -622,6 +770,8 @@ $defs:
               model: deepseek-v4-pro
             report:
               model: deepseek-v4-flash
+      claude_code:
+        $ref: "#/$defs/claude_code_config"
       release:
         type: object
         additionalProperties: false
@@ -1686,6 +1836,8 @@ properties:
             model: deepseek-v4-pro
           report:
             model: deepseek-v4-flash
+  claude_code:
+    $ref: "#/$defs/claude_code_config"
   notion:
     type: object
     additionalProperties: false

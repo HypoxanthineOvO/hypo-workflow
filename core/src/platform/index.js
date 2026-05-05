@@ -20,6 +20,8 @@ export const PLATFORM_CAPABILITIES = Object.freeze({
     recovery: "lease-heartbeat-hooks",
     handoff_boundaries: "preserve-claude-permissions",
     rules: "skill-files",
+    model_routing: "claude-agents-from-model-pool",
+    settings_merge: "managed-settings-local-json",
   },
   opencode: {
     commands: "native-slash",

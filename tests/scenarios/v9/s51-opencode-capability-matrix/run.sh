@@ -45,8 +45,8 @@ mapping_count="$(
   ' references/opencode-spec.md
 )"
 
-test "$mapping_count" = "37" || {
-  echo "expected 37 OpenCode command mappings, found $mapping_count" >&2
+test "$mapping_count" = "36" || {
+  echo "expected 36 OpenCode command mappings, found $mapping_count" >&2
   exit 1
 }
 
@@ -57,7 +57,7 @@ for cmd in \
   "/hw:accept" "/hw:reject" "/hw:explore" "/hw:sync" "/hw:docs" \
   "/hw:patch" "/hw:patch fix" "/hw:compact" "/hw:knowledge" "/hw:guide" "/hw:showcase" \
   "/hw:rules" "/hw:init" "/hw:check" "/hw:audit" "/hw:release" "/hw:debug" \
-  "/hw:help" "/hw:reset" "/hw:log" "/hw:setup" "/hw:dashboard"
+  "/hw:help" "/hw:reset" "/hw:log" "/hw:setup"
 do
   grep -Fq "| \`$cmd\` |" references/opencode-spec.md || {
     echo "missing command mapping for $cmd" >&2
@@ -84,7 +84,7 @@ for term in "not a runner" "hypo-workflow" "plugins/opencode" "core/"; do
   }
 done
 
-grep -Fq "37 个用户指令" README.md || {
+grep -Fq "36 个用户指令" README.md || {
   echo "README.md missing current command count" >&2
   exit 1
 }

@@ -92,7 +92,6 @@ See also [`external-docs-index.md`](./external-docs-index.md) for the cross-plat
 | `/hw:reset` | `/hw-reset` | `hw-status` | Native slash command, guarded reset. |
 | `/hw:log` | `/hw-log` | `hw-status` | Native slash command, lifecycle log view. |
 | `/hw:setup` | `/hw-setup` | `hw-status` | Native slash command, delegates to global setup profile guidance. |
-| `/hw:dashboard` | `/hw-dashboard` | `hw-status` | Native slash command, dashboard launcher. |
 
 ## OpenCode Agent Plan
 

@@ -512,6 +512,10 @@ function parseKnowledgeYaml(source) {
         value.push(index < lines.length && lines[index].indent > indent ? parseNode(lines[index].indent) : null);
         continue;
       }
+      if (rest.startsWith('"') || rest.startsWith("'") || rest.startsWith("[")) {
+        value.push(parseScalar(rest));
+        continue;
+      }
       const pair = parseYamlKeyValue(rest);
       if (!pair) {
         value.push(parseScalar(rest));

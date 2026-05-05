@@ -40,7 +40,6 @@ OpenCode uses dash-style native slash commands. Each command remains traceable t
 | `/hw:reset` | `/hw-reset` | `hw-status` | `skills/reset/SKILL.md` |
 | `/hw:log` | `/hw-log` | `hw-status` | `skills/log/SKILL.md` |
 | `/hw:setup` | `/hw-setup` | `hw-status` | `skills/setup/SKILL.md` |
-| `/hw:dashboard` | `/hw-dashboard` | `hw-status` | `skills/dashboard/SKILL.md` |
 
 Agent policy:
 
