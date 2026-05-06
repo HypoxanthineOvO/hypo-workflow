@@ -2,6 +2,24 @@
 
 Use this reference when a step may delegate work to another agent runtime.
 
+## Codex Preference
+
+Codex should strongly prefer concrete Subagent delegation for substantial work when `execution.mode=subagent` and an eligible step override allows delegation. Codex Subagents are Codex/GPT runtime workers; do not treat Claude, DeepSeek, Mimo, or other external models as Codex Subagent routing choices.
+
+Trivial one-file edits, pure inspection, or tasks where the Subagent tool is unavailable may stay local. Substantial local execution must leave a non-delegation rationale in the report, Patch file, or lifecycle log.
+
+Documentation and README tasks should prefer docs-specific assistance when available.
+
+## Implementation and Validation Separation
+
+Implementation and validation separation is mandatory for non-trivial delegated work:
+
+- use an implementation Subagent only for scoped edits or concrete production work
+- use a separate test/review Subagent for test design, failure evidence, final diff review, or assumption challenge
+- an implementation Subagent must not be the sole validator of its own changes
+- the main agent remains responsible for integration, state/log/report updates, and final judgment
+- use a lightweight proposer/challenger pass for contract, runtime-gate, adapter, or onboarding changes
+
 ## Mode Switch
 
 - `execution.mode=self`
@@ -35,7 +53,7 @@ Effective `subagent_tool` resolution:
 Explicit modes:
 
 - `claude`
-  Prefer Claude subagent definitions or `claude -p`
+  Prefer Claude subagent definitions or `claude -p`. This is a Claude/cross-tool path, not Codex Subagent external model selection.
 - `codex`
   Prefer `codex exec`
 

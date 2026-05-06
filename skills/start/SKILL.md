@@ -13,7 +13,7 @@ description: Start Hypo-Workflow execution when the user wants to begin running 
 - auto：跟随用户对话语言
 内部日志（log.yaml、state.yaml）始终英文。
 
-Use this skill to start execution from a local `.pipeline/` workspace. This is the Claude Code native entrypoint for the same behavior described by the root `SKILL.md` `/hw:start` command.
+Use this skill to start execution from a local `.pipeline/` workspace. This is the platform-specific entrypoint for the same behavior described by the root `SKILL.md` `/hw:start` command.
 
 ## Preconditions
 
@@ -30,17 +30,20 @@ Use this skill to start execution from a local `.pipeline/` workspace. This is t
    - `execution.subagent_tool` falls back to global `subagent.provider`, then `auto`
    - `dashboard.*` and `plan.*` use the same priority when relevant
 4. Read `.pipeline/state.yaml` if present; otherwise initialize state from `assets/state-init.yaml`.
-5. Read `.pipeline/cycle.yaml` when present and derive Cycle behavior from `cycle.workflow_kind` and `cycle.lifecycle_policy`.
-6. Default step preset from workflow kind when no explicit compatible preset exists: `build -> tdd`, `analysis -> analysis`, `showcase -> implement-only`.
-7. If `watchdog.enabled=true`, register the project watchdog cron entry before long-running execution begins.
-8. Create a structured execution lease at `.pipeline/.lock` before entering active execution. The lease must include platform, session id, owner, command, phase, created_at, heartbeat_at, expires_at, workflow kind, cycle id, and handoff_allowed.
-9. Set `current.phase=executing` and update top-level `last_heartbeat` with an ISO-8601 timestamp before running milestones.
-10. Use the workflow commit helper for any protected lifecycle write so authority facts commit atomically before derived refreshes.
-11. Treat Claude as the orchestrator:
-   - Claude plans the current step
-   - Claude delegates concrete sub-work to serial subagent tasks when appropriate
-   - Claude verifies results, updates state, logging, and progress artifacts
-12. Execute the active milestone serially:
+5. Read `.pipeline/continuation.yaml` when present. If it has `status: active`, prefer its `next_action`, `reason`, and `safe_resume_command` before falling back to generic `current.*` state.
+6. Read `.pipeline/cycle.yaml` when present and derive Cycle behavior from `cycle.workflow_kind` and `cycle.lifecycle_policy`.
+7. Default step preset from workflow kind when no explicit compatible preset exists: `build -> tdd`, `analysis -> analysis`, `showcase -> implement-only`.
+8. If `watchdog.enabled=true`, register the project watchdog cron entry before long-running execution begins.
+9. Create a structured execution lease at `.pipeline/.lock` before entering active execution. The lease must include platform, session id, owner, command, phase, created_at, heartbeat_at, expires_at, workflow kind, cycle id, and handoff_allowed.
+10. Set `current.phase=executing` and update top-level `last_heartbeat` with an ISO-8601 timestamp before running milestones.
+11. Use the workflow commit helper for any protected lifecycle write so authority facts commit atomically before derived refreshes.
+12. Treat the main agent as the orchestrator:
+   - the main agent coordinates the current step
+   - the main agent delegates concrete sub-work to serial Subagent tasks when appropriate
+   - Codex should prefer Codex Subagents for substantial work when available, without external model routing
+   - testing/review and implementation should be separated when practical
+   - the main agent verifies results, updates state, logging, and progress artifacts
+13. Execute the active milestone serially:
    - `write_tests`
    - `review_tests`
    - `run_tests_red`
@@ -48,32 +51,42 @@ Use this skill to start execution from a local `.pipeline/` workspace. This is t
    - `run_tests_green`
    - `review_code`
    - report and commit work if the prompt requires it
-13. After every meaningful step, update:
+14. After every meaningful step, update:
    - `.pipeline/state.yaml`
    - `.pipeline/log.yaml`
    - `.pipeline/PROGRESS.md`
    - top-level `last_heartbeat`
-14. After a Milestone report is generated and the Milestone reaches a final state, resolve `compact.auto` from project > global > defaults. If `compact.auto=true`, run the `/hw:compact` generation rules before advancing to the next Milestone.
-15. If `.pipeline/feature-queue.yaml` exists, apply batch auto-chain after a Feature's final Milestone passes:
+15. Before declaring a milestone complete, run the Codex preflight/runtime checklist when platform is Codex or hooks are unavailable: protected authority writes, YAML/JSON/Markdown validity, stale derived artifacts, README freshness, output language, secret markers, and report/progress/log evidence.
+16. After a Milestone report is generated and the Milestone reaches a final state, resolve `compact.auto` from project > global > defaults. If `compact.auto=true`, run the `/hw:compact` generation rules before advancing to the next Milestone.
+17. If `.pipeline/feature-queue.yaml` exists, apply batch auto-chain after a Feature's final Milestone passes:
    - mark the completed Feature `done`
    - advance to the next queued Feature when `auto_chain=true`
    - pause before the next Feature when it has `gate: confirm`
    - when the next Feature uses `just_in_time`, decompose its Milestones before starting execution
    - sync queue metric summaries from `.pipeline/metrics.yaml`, using `n/a` when token/cost telemetry is unavailable
-16. When `execution.test_profiles` or Feature-level Test Profiles are active, require the matching profile evidence before declaring GREEN:
+18. When `execution.test_profiles` or Feature-level Test Profiles are active, require the matching profile evidence before declaring GREEN:
    - `webapp`: E2E + browser interaction + visual evidence
    - `agent-service`: CLI plan + shared core + real CLI run
    - `research`: baseline + script execution + before/after/delta
-17. On failure, Claude must choose one of:
+19. On failure, the main agent must choose one of:
    - `retry`: revise instructions and rerun the failed step
    - `deferred`: mark the milestone deferred if downstream work can continue safely
    - `stop`: stop and surface the blocking reason to the user
-18. If a derived refresh fails after authority commits, keep the authoritative fact committed, write `.pipeline/derived-refresh.yaml`, and surface repair guidance instead of rolling back the lifecycle write.
-19. If a Feature fails and the resolved `failure_policy=skip_defer`, mark the Feature `deferred`, preserve its report and metrics, then auto-chain to the next queued Feature unless blocked by `gate: confirm`.
-20. Keep moving automatically between milestones while unfinished work remains.
-21. Remove `.pipeline/.lock` when the execution turn completes, stops, blocks, aborts, or finishes.
-22. If the pipeline completes or stops intentionally, unregister the watchdog cron entry.
-23. Only allow the turn to end naturally when all milestones are complete or Claude has explicitly chosen the `stop` outcome.
+20. If a derived refresh fails after authority commits, keep the authoritative fact committed, write `.pipeline/derived-refresh.yaml`, and surface repair guidance instead of rolling back the lifecycle write.
+21. If a Feature fails and the resolved `failure_policy=skip_defer`, mark the Feature `deferred`, preserve its report and metrics, then auto-chain to the next queued Feature unless blocked by `gate: confirm`.
+22. Keep moving automatically between milestones while unfinished work remains.
+23. Before any natural turn end with unfinished work, write or refresh `.pipeline/continuation.yaml` with `status: active`, `next_action`, `reason`, `updated_at`, `safe_resume_command: /hw:resume`, and focused `context`.
+24. Remove `.pipeline/.lock` when the execution turn completes, stops, blocks, aborts, or finishes.
+25. If the pipeline completes or stops intentionally, unregister the watchdog cron entry.
+26. Only allow the turn to end naturally when all milestones are complete or the main agent has explicitly chosen the `stop` outcome.
+
+## Continuation And Preflight
+
+- `.pipeline/continuation.yaml` is a recovery pointer for Codex turns and other environments without Stop hooks.
+- `safe_resume_command` must be `/hw:resume` or another documented natural-language resume alias, never a shell command.
+- `notify` may display the continuation `next_action`; it must not execute the resume command.
+- Preflight blocking checks: uncommitted protected authority writes, invalid authority YAML/JSON, secret markers, missing required report/progress/log evidence, malformed leases, and invalid resume pointers.
+- Preflight warning checks: stale derived artifacts, README freshness gaps, optional Codex notify absence, adapter staleness, and non-final output language mismatches.
 
 ## Watchdog Integration
 
@@ -88,7 +101,7 @@ Use this skill to start execution from a local `.pipeline/` workspace. This is t
 
 ## Failure Handling
 
-- `retry` is allowed without a fixed numeric cap when Claude believes another strategy can work
+- `retry` is allowed without a fixed numeric cap when the main agent believes another strategy can work
 - `deferred` requires writing `milestones[].status=deferred` and `deferred_reason`
 - `stop` should leave a clear reason in state, log, and progress summary
 

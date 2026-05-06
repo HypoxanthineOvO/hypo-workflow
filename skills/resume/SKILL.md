@@ -24,34 +24,39 @@ Use this skill to continue from `.pipeline/state.yaml` without restarting comple
 
 1. Read `~/.hypo-workflow/config.yaml` if present.
 2. Read `.pipeline/config.yaml` and `.pipeline/state.yaml`.
-3. Resolve effective execution and subagent defaults as project > global > defaults before selecting the next step.
-4. If `current.phase=needs_revision`, resume the revision path using `acceptance.feedback_ref` as input; do not continue from a previously completed step.
-5. If `current.phase=follow_up_planning`, start the active `continuation` or the matching `cycle.continuations[]` follow-up plan.
-6. Validate that `current.prompt_file`, `current.step`, and `current.step_index` still point to a valid prompt and step for ordinary execution phases.
-7. If `.pipeline/.lock` exists, parse it as an execution lease.
+3. Read `.pipeline/continuation.yaml` when present. If it has `status: active`, choose its `next_action`, `reason`, and `safe_resume_command` before falling back to generic `current.*` state.
+4. Resolve effective execution and subagent defaults as project > global > defaults before selecting the next step.
+5. If `current.phase=needs_revision`, resume the revision path using `acceptance.feedback_ref` as input; do not continue from a previously completed step.
+6. If `current.phase=follow_up_planning`, start the active `continuation` or the matching `cycle.continuations[]` follow-up plan.
+7. Validate that `current.prompt_file`, `current.step`, and `current.step_index` still point to a valid prompt and step for ordinary execution phases.
+8. If `.pipeline/.lock` exists, parse it as an execution lease.
    - fresh foreign lease: stop and report that another execution is active
    - expired lease: take over, write `lease_takeover` evidence, and record `inferred_stall`
    - lease with `reported_failure`: take over and preserve the failure evidence
    - malformed lease: stop with repair guidance instead of deleting it silently
-8. Create or refresh the structured execution lease before resuming active execution.
-9. Set `current.phase=executing` and update top-level `last_heartbeat`.
-10. Use the workflow commit helper for any protected lifecycle write so authority facts commit atomically before derived refreshes.
-10. Continue from the next runnable step instead of replaying completed steps.
-11. Use the same serial orchestration model as `/hypo-workflow:start`:
-   - Claude coordinates
-   - subagent tasks execute concrete work
-   - Claude validates, scores, and updates artifacts
-12. Update `.pipeline/PROGRESS.md`, `.pipeline/log.yaml`, `.pipeline/state.yaml`, and `last_heartbeat` after each meaningful transition.
-13. If a derived refresh fails after authority commits, keep the authoritative fact committed, write `.pipeline/derived-refresh.yaml`, and surface repair guidance instead of rolling back the lifecycle write.
-14. After a Milestone report is generated and the Milestone reaches a final state, run `/hw:compact` automatically when `compact.auto=true`; skip it when `compact.auto=false`.
-15. If `.pipeline/feature-queue.yaml` exists, resume batch auto-chain from the saved state:
+9. Create or refresh the structured execution lease before resuming active execution.
+10. Set `current.phase=executing` and update top-level `last_heartbeat`.
+11. Use the workflow commit helper for any protected lifecycle write so authority facts commit atomically before derived refreshes.
+12. Continue from the next runnable step instead of replaying completed steps.
+13. Use the same serial orchestration model as `/hypo-workflow:start`:
+   - the main agent coordinates
+   - Subagent tasks execute concrete work
+   - Codex should prefer Codex Subagents for substantial work when available, without external model routing
+   - testing/review and implementation should be separated when practical
+   - the main agent validates, scores, and updates artifacts
+14. Update `.pipeline/PROGRESS.md`, `.pipeline/log.yaml`, `.pipeline/state.yaml`, and `last_heartbeat` after each meaningful transition.
+15. Before declaring completion, run the Codex preflight/runtime checklist when platform is Codex or hooks are unavailable.
+16. If a derived refresh fails after authority commits, keep the authoritative fact committed, write `.pipeline/derived-refresh.yaml`, and surface repair guidance instead of rolling back the lifecycle write.
+17. After a Milestone report is generated and the Milestone reaches a final state, run `/hw:compact` automatically when `compact.auto=true`; skip it when `compact.auto=false`.
+18. If `.pipeline/feature-queue.yaml` exists, resume batch auto-chain from the saved state:
    - honor `gate: confirm` by pausing before the next Feature
    - when a queued Feature uses `just_in_time`, decompose it only after it becomes current
    - sync queue duration, token/cost, and metric summaries from `.pipeline/metrics.yaml`, preserving `n/a` for unavailable telemetry
-16. When Test Profiles are active, do not treat missing profile evidence as a soft warning; block until the required evidence contract is satisfied or an explicit blocker is recorded.
-17. Apply the same `retry` / `deferred` / `stop` decision model on failures.
-18. Remove `.pipeline/.lock` when the resume turn completes, stops, blocks, aborts, or finishes.
-19. If the pipeline completes or stops intentionally, unregister the watchdog cron entry.
+19. When Test Profiles are active, do not treat missing profile evidence as a soft warning; block until the required evidence contract is satisfied or an explicit blocker is recorded.
+20. Apply the same `retry` / `deferred` / `stop` decision model on failures.
+21. Before any natural turn end with unfinished work, write or refresh `.pipeline/continuation.yaml` with `safe_resume_command: /hw:resume`.
+22. Remove `.pipeline/.lock` when the resume turn completes, stops, blocks, aborts, or finishes.
+23. If the pipeline completes or stops intentionally, unregister the watchdog cron entry.
 
 ## Safety Rules
 
@@ -59,6 +64,15 @@ Use this skill to continue from `.pipeline/state.yaml` without restarting comple
 - never resume when a fresh `.pipeline/.lock` lease says another execution is active
 - if state references a missing prompt, stop and explain the inconsistency
 - if the current step is already complete, advance to the next runnable step rather than rerunning it blindly
+- active `.pipeline/continuation.yaml` has priority over generic state pointers, but unsafe `safe_resume_command` values must be rejected instead of executed
+
+## Continuation And Preflight
+
+- `.pipeline/continuation.yaml` is file-backed recovery state for Codex and other environments without Stop hooks.
+- Active continuation records `next_action`, `reason`, `updated_at`, `safe_resume_command`, and focused `context`.
+- `/hw:resume` should resolve active continuation first, then fall back to `state.current`.
+- `safe_resume_command` is a display/resume hint only; never shell-execute it.
+- Blocking preflight findings must be fixed before declaring completion. Warning findings should be recorded with repair hints and may continue when correctness is otherwise preserved.
 
 ## Watchdog Integration
 

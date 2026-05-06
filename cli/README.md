@@ -16,8 +16,10 @@ hypo-workflow profile list
 hypo-workflow profile use opencode
 hypo-workflow profile edit opencode --model qwen
 hypo-workflow install opencode
-hypo-workflow init-project --platform opencode --project .
+hypo-workflow init-project --platform opencode --project . --automation balanced
 ```
+
+`init-project` works in non-Git directories. Use `--automation manual|balanced|full` to write the stable project `automation.level`; interactive `/hw:init` shows the Chinese labels 稳妥模式, 自动模式, and 全自动模式.
 
 When no command is provided, the CLI runs `setup` on first use and opens the global read-only Ink TUI afterwards. The `hw` bin alias points to the same entrypoint when the CLI package is installed or linked.
 

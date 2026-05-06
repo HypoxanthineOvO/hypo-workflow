@@ -9,6 +9,42 @@ const DEFAULT_README_CONFIG = Object.freeze({
 });
 
 const USER_COMMANDS = CANONICAL_COMMANDS;
+const ALLOWED_README_TERMS = Object.freeze([
+  "Hypo-Workflow",
+  "AI",
+  "Agent",
+  "IDE",
+  "Codex",
+  "Claude Code",
+  "OpenCode",
+  "Cursor",
+  "GitHub Copilot",
+  "Trae",
+  "Subagents",
+  "Codex/GPT",
+  "GPT",
+  "watchdog",
+  "Feature",
+  "Feature Queue",
+  "MIT License",
+  "License",
+  "README",
+]);
+const DISALLOWED_README_PROSE = Object.freeze([
+  /\bAI coding\b/i,
+  /\brunner\b/i,
+  /\bbackground service\b/i,
+  /\brepository instructions\b/i,
+  /\bsource of truth\b/i,
+  /\blifecycle enforcement\b/i,
+  /\bpreflight\b/i,
+  /\bruntime\b/i,
+  /\bstate\b/i,
+  /\brules\b/i,
+  /\bprompts\b/i,
+  /\breports\b/i,
+  /\blogs\b/i,
+]);
 
 export function defaultReadmeConfig() {
   return { ...DEFAULT_README_CONFIG };
@@ -133,12 +169,95 @@ export async function checkReadmeFreshness(readmeFile = "README.md", options = {
     }
   }
 
-  for (const platform of ["Codex", "Claude Code", "OpenCode"]) {
+  for (const platform of platformDisplayNames()) {
     if (!readme.includes(platform)) {
       failures.push({
-        check: "platform-matrix",
+        check: "platform-entry",
         expected: platform,
-        message: `README platform matrix is missing ${platform}`,
+        message: `README platform entry is missing ${platform}`,
+      });
+    }
+  }
+
+  if (!readme.includes("HypoxanthineOvO/Hypo-Workflow")) {
+    failures.push({
+      check: "repository-import",
+      expected: "HypoxanthineOvO/Hypo-Workflow",
+      message: "README is missing shared repository install/import wording",
+    });
+  }
+
+  if (!/快速开始|Quick Start/.test(readme)) {
+    failures.push({
+      check: "quick-start",
+      expected: "快速开始",
+      message: "README is missing a Chinese Quick Start entrypoint",
+    });
+  }
+
+  if (!/\/hw:init[\s\S]*\/hw:plan[\s\S]*\/hw:start/.test(readme)) {
+    failures.push({
+      check: "start-flow",
+      expected: "/hw:init -> /hw:plan -> /hw:start",
+      message: "README is missing the primary start flow",
+    });
+  }
+
+  if (!/\/hw:status[\s\S]*\/hw:resume/.test(readme)) {
+    failures.push({
+      check: "resume-flow",
+      expected: "/hw:status -> /hw:resume",
+      message: "README is missing the status/resume flow",
+    });
+  }
+
+  if (!/Subagents?[\s\S]*(测试|审查|review)|(?:测试|审查|review)[\s\S]*Subagents?/i.test(readme)) {
+    failures.push({
+      check: "subagent-guidance",
+      expected: "Subagents and testing/review separation",
+      message: "README is missing high-level Subagent and validation separation guidance",
+    });
+  }
+
+  if (!/Codex Subagents?[\s\S]*优先[\s\S]*(测试|审查)|(?:测试|审查)[\s\S]*Codex Subagents?[\s\S]*优先/i.test(readme)) {
+    failures.push({
+      check: "codex-subagent-priority",
+      expected: "Codex Subagents 优先 and 测试/审查分离",
+      message: "README is missing explicit Codex Subagents priority guidance",
+    });
+  }
+
+  if (/Codex Subagents?[\s\S]*(DeepSeek|Mimo|Claude model|外部模型|外部 provider|external model)/i.test(readme)) {
+    failures.push({
+      check: "codex-external-model-routing",
+      expected: "no external model routing for Codex Subagents",
+      message: "README must not describe external model routing for Codex Subagents",
+    });
+  }
+
+  const firstScreen = readme.split(/\n## 常用命令\b/)[0] || readme;
+  const firstScreenChecks = [
+    ["HypoxanthineOvO/Hypo-Workflow", /HypoxanthineOvO\/Hypo-Workflow/],
+    ["/hw:init -> /hw:plan -> /hw:start", /\/hw:init[\s\S]*\/hw:plan[\s\S]*\/hw:start/],
+    ["/hw:status -> /hw:resume", /\/hw:status[\s\S]*\/hw:resume/],
+    ["six platforms", new RegExp(platformDisplayNames().map(escapeRegExp).join("[\\s\\S]*"))],
+  ];
+  for (const [expected, pattern] of firstScreenChecks) {
+    if (!pattern.test(firstScreen)) {
+      failures.push({
+        check: "first-screen-entrypoint",
+        expected,
+        message: `README first screen is missing ${expected}`,
+      });
+    }
+  }
+
+  for (const pattern of DISALLOWED_README_PROSE) {
+    if (pattern.test(stripAllowedReadmeTokens(readme))) {
+      failures.push({
+        check: "chinese-entrypoint",
+        expected: "Chinese-first README prose",
+        message: `README contains English prose matching ${pattern}`,
       });
     }
   }
@@ -154,7 +273,7 @@ function renderBadges(context) {
   return [
     `[![Version](https://img.shields.io/badge/version-${version}-blue)](.claude-plugin/plugin.json)`,
     "[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)",
-    "[![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex%20%7C%20OpenCode-purple)](#平台支持)",
+    "[![Platform](https://img.shields.io/badge/platform-Codex%20%7C%20Claude%20Code%20%7C%20OpenCode%20%7C%20Cursor%20%7C%20Copilot%20%7C%20Trae-purple)](#平台入口)",
   ].join("\n");
 }
 
@@ -166,7 +285,7 @@ function renderFeatureSummary() {
     "| Plan Mode | Discover -> Decompose -> Generate -> Confirm 的交互式规划闭环 |",
     "| Lifecycle | init、check、audit、debug、release、cycle、patch、compact、showcase |",
     "| Rules | 使用内置和自定义规则固化 Agent 行为约束 |",
-    "| 多平台 | Codex、Claude Code、OpenCode 共享 `.pipeline/` 文件协议 |",
+    "| 多平台 | Codex、Claude Code、OpenCode、Cursor、GitHub Copilot、Trae 共享 `.pipeline/` 文件协议 |",
   ].join("\n");
 }
 
@@ -185,22 +304,26 @@ function renderPlatformMatrix() {
   const rows = Object.entries(PLATFORM_CAPABILITIES).map(([platform, capability]) => (
     `| ${displayPlatform(platform)} | ${capability.commands} | ${capability.ask} | ${capability.plan} | ${capability.events} |`
   ));
-  return ["| Platform | Commands | Ask | Plan | Events |", "|---|---|---|---|---|", ...rows].join("\n");
+  return ["| 平台 | Commands | Ask | Plan | Events |", "|---|---|---|---|---|", ...rows].join("\n");
 }
 
 function renderReleaseSummary() {
   return [
-    "Release flow: preflight -> regression -> version update -> update_readme -> readme-freshness -> changelog -> commit/tag/push gates.",
+    "发布流程：交付前检查 -> 回归 -> 版本更新 -> update_readme -> readme-freshness -> changelog -> commit/tag/push Gate。",
     "",
-    "- `update_readme` runs after versioned files are updated and before the release commit.",
-    "- `readme-freshness` checks version, command count, platform matrix, feature summary, and release summary.",
-    "- tag and push remain gated by explicit confirmation.",
+    "- `update_readme` 在版本文件更新后、release commit 前执行。",
+    "- `readme-freshness` 检查版本、命令数量、平台入口、功能摘要和发布摘要。",
+    "- tag 和 push 保持显式确认 Gate。",
   ].join("\n");
 }
 
 function renderVersionHistory(context) {
   const version = context.version || "10.0.1";
-  return `Current release: v${version}. See CHANGELOG and README changelog section for recent milestone history.`;
+  return `当前版本：v${version}。近期变更见 CHANGELOG。`;
+}
+
+export function platformDisplayNames() {
+  return Object.keys(PLATFORM_CAPABILITIES).map(displayPlatform);
 }
 
 async function readVersion(projectRoot) {
@@ -224,9 +347,25 @@ async function readCommandCount(projectRoot) {
 function displayPlatform(platform) {
   if (platform === "claude-code") return "Claude Code";
   if (platform === "opencode") return "OpenCode";
+  if (platform === "cursor") return "Cursor";
+  if (platform === "copilot") return "GitHub Copilot";
+  if (platform === "trae") return "Trae";
   return "Codex";
 }
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function stripAllowedReadmeTokens(readme) {
+  let text = readme
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/`[^`\n]+`/g, "")
+    .replace(/https?:\/\/\S+/g, "")
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, "")
+    .replace(/\[[^\]]+\]\([^)]+\)/g, "");
+  for (const term of ALLOWED_README_TERMS) {
+    text = text.replace(new RegExp(escapeRegExp(term), "g"), "");
+  }
+  return text;
 }

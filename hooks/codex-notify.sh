@@ -3,6 +3,7 @@
 #
 # 触发时机：Codex config.toml 的 notify 配置
 # 这是 Codex 唯一支持的 Hook 事件
+# observability, not a runner: do not resume, advance state, delete locks, or execute workflow commands here.
 
 set -euo pipefail
 
@@ -11,6 +12,7 @@ scripts_dir="$script_dir/../scripts"
 cwd="$(pwd)"
 pipeline_dir="$cwd/.pipeline"
 state_file="$pipeline_dir/state.yaml"
+continuation_file="$pipeline_dir/continuation.yaml"
 
 if [[ ! -f "$state_file" ]]; then
   exit 0
@@ -27,7 +29,19 @@ if [[ "$status" != "running" ]]; then
 fi
 
 current="$(printf '%s\n' "$summary" | sed -n 's/^Current: //p' | head -n1)"
+next_action=""
+safe_resume_command=""
+if [[ -f "$continuation_file" ]]; then
+  next_action="$(sed -nE 's/^next_action:[[:space:]]*"?([^"]*)"?[[:space:]]*$/\1/p' "$continuation_file" | head -n1 || true)"
+  safe_resume_command="$(sed -nE 's/^safe_resume_command:[[:space:]]*"?([^"]*)"?[[:space:]]*$/\1/p' "$continuation_file" | head -n1 || true)"
+fi
 message="agent-turn-complete; ${current}"
+if [[ -n "$next_action" ]]; then
+  message="${message}; next_action=${next_action}"
+fi
+if [[ -n "$safe_resume_command" ]]; then
+  message="${message}; safe_resume_command=${safe_resume_command}"
+fi
 
 bash "$scripts_dir/log-append.sh" \
   --pipeline-dir "$pipeline_dir" \

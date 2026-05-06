@@ -1,5 +1,27 @@
 # Changelog
 
+## v11.1.0 - 2026-05-06
+
+### Features
+
+- Added Codex automation governance with stable `automation.level` values, protected planning/destructive/release gates, and config validation.
+- Added Codex continuation and preflight helpers for safe resume targets, protected-file checks, README/docs freshness, generated artifact freshness, evidence checks, and secret-marker blocking.
+- Added Cursor, GitHub Copilot, and Trae repository instruction adapters with `sync --platform cursor|copilot|trae`.
+- Added non-Git `init-project` bootstrap with `--automation manual|balanced|full`.
+
+### Documentation
+
+- Rewrote README as a Chinese-first Quick Start with six platform entry points and repository import guidance.
+- Strengthened Codex Subagent guidance across shared skills and references: Codex/GPT runtime only, prefer Subagents for non-trivial Codex work, and keep implementation separate from testing/review.
+- Updated platform guides, generated artifact references, README governance, setup/help guidance, and C7 lifecycle reports.
+
+### Tests
+
+- Core Node suite: 281/281 passing.
+- Scenario regression: 63/63 passing.
+- C7 focused tests: 52/52 passing.
+- Config validation, README freshness, docs checks, generated adapter smoke, derived repair, and `git diff --check` passing.
+
 ## v11.0.0 - 2026-05-05
 
 ### Features

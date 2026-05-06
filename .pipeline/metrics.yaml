@@ -1,22 +1,17 @@
-cycle_id: C6
+cycle_id: C7
 cycles:
   -
-    id: C6
+    id: C7
     status: pending_acceptance
-    duration_ms: 7241000
+    updated_at: "2026-05-06T14:40:34+08:00"
     token_count: telemetry_unavailable
     cost: telemetry_unavailable
     currency: telemetry_unavailable
-    updated_at: "2026-05-05T16:30:15+08:00"
-    telemetry_status:
-      token_count: telemetry_unavailable
-      cost: telemetry_unavailable
 features:
   -
     id: F001
-    title: Claude Code Adapter Plugin Enhancement
+    title: Codex Service Effectiveness and Workflow Governance
     status: pending_acceptance
-    duration_ms: 7241000
     token_count: telemetry_unavailable
     cost: telemetry_unavailable
 milestones:
@@ -24,48 +19,41 @@ milestones:
     id: M01
     feature_id: F001
     status: done
-    duration_ms: 1391000
     token_count: telemetry_unavailable
     cost: telemetry_unavailable
   -
     id: M02
     feature_id: F001
     status: done
-    duration_ms: 1368000
     token_count: telemetry_unavailable
     cost: telemetry_unavailable
   -
     id: M03
     feature_id: F001
     status: done
-    duration_ms: 1006000
     token_count: telemetry_unavailable
     cost: telemetry_unavailable
   -
     id: M04
     feature_id: F001
     status: done
-    duration_ms: 622000
     token_count: telemetry_unavailable
     cost: telemetry_unavailable
   -
     id: M05
     feature_id: F001
     status: done
-    duration_ms: 1067000
     token_count: telemetry_unavailable
     cost: telemetry_unavailable
   -
     id: M06
     feature_id: F001
     status: done
-    duration_ms: 1028000
     token_count: telemetry_unavailable
     cost: telemetry_unavailable
   -
     id: M07
     feature_id: F001
     status: done
-    duration_ms: 759000
     token_count: telemetry_unavailable
     cost: telemetry_unavailable

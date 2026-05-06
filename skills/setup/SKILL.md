@@ -242,14 +242,14 @@ Claude Code users:
 Codex users:
 
 - invoke the compatibility commands as `/hw:*`
-- configure Claude as a subagent by installing `@anthropic-ai/claude-code` and choosing `subagent.provider=claude`
+- keep Codex Subagents inside the Codex/GPT runtime; do not configure Claude, DeepSeek, Mimo, or other external model routing as a Codex Subagent backend
 - keep project-specific overrides in `.pipeline/config.yaml`
 
 Mixed mode:
 
 - keep `execution.mode=self` for the main orchestrator
 - delegate individual steps with `step_overrides.<step>.executor=subagent`
-- set `step_overrides.<step>.subagent=codex` or `claude`
+- choose a subagent backend only when it is native to the active platform or explicitly documented as a non-Codex handoff path
 
 ## Existing Config Behavior
 

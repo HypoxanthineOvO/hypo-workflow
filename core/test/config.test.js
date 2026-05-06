@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 import {
   DEFAULT_GLOBAL_CONFIG,
   loadConfig,
+  normalizeAutomationPolicy,
   parseYaml,
   writeConfig,
 } from "../src/config/index.js";
@@ -82,4 +83,43 @@ test("loadConfig accepts project overrides for OpenCode model matrix", async () 
   assert.equal(loaded.opencode.agents.compact.model, "custom-flash");
   assert.equal(loaded.opencode.agents.test.model, "custom-test");
   assert.equal(loaded.opencode.agents["code-a"].model, "mimo-v2.5-pro");
+});
+
+test("default config exposes automation policy levels and safe gates", () => {
+  assert.equal(DEFAULT_GLOBAL_CONFIG.automation.level, "balanced");
+  assert.deepEqual(
+    Object.keys(DEFAULT_GLOBAL_CONFIG.automation.levels),
+    ["manual", "balanced", "full"],
+  );
+  assert.equal(DEFAULT_GLOBAL_CONFIG.automation.levels.manual.label, "稳妥模式");
+  assert.equal(DEFAULT_GLOBAL_CONFIG.automation.levels.balanced.label, "自动模式");
+  assert.equal(DEFAULT_GLOBAL_CONFIG.automation.levels.full.label, "全自动模式");
+  assert.equal(DEFAULT_GLOBAL_CONFIG.automation.gates.planning, "confirm");
+  assert.equal(DEFAULT_GLOBAL_CONFIG.automation.gates.destructive_external, "confirm");
+  assert.equal(DEFAULT_GLOBAL_CONFIG.automation.gates.execution, "auto");
+});
+
+test("normalizeAutomationPolicy preserves planning gates under full automation", () => {
+  const policy = normalizeAutomationPolicy({
+    level: "full",
+    gates: {
+      planning: "auto",
+      execution: "auto",
+      destructive_external: "auto",
+      release_publish: "auto",
+    },
+  });
+
+  assert.equal(policy.level, "full");
+  assert.equal(policy.gates.planning, "confirm");
+  assert.equal(policy.gates.destructive_external, "confirm");
+  assert.equal(policy.gates.release_publish, "confirm");
+  assert.equal(policy.gates.execution, "auto");
+});
+
+test("normalizeAutomationPolicy rejects invalid automation levels", () => {
+  assert.throws(
+    () => normalizeAutomationPolicy({ level: "reckless" }),
+    /Unsupported automation level/,
+  );
 });

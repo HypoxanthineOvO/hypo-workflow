@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 import {
   checkReadmeFreshness,
   defaultReadmeConfig,
+  platformDisplayNames,
   renderReadmeBlock,
   replaceManagedBlock,
   updateReadme,
@@ -32,9 +33,9 @@ test("renderReadmeBlock derives command and platform content from assets", async
   assert.match(commandReference, /skills\/chat\/SKILL\.md/);
 
   const platformMatrix = renderReadmeBlock("platform-matrix");
-  assert.match(platformMatrix, /Codex/);
-  assert.match(platformMatrix, /Claude Code/);
-  assert.match(platformMatrix, /OpenCode/);
+  for (const platform of platformDisplayNames()) {
+    assert.match(platformMatrix, new RegExp(escapeRegExp(platform)));
+  }
 });
 
 test("replaceManagedBlock replaces only managed content", () => {
@@ -122,6 +123,74 @@ test("checkReadmeFreshness detects stale narrative command counts", async () => 
   assert.ok(result.failures.some((failure) => failure.check === "stale-command-count" && failure.actual === 37));
 });
 
+test("checkReadmeFreshness requires Chinese Quick Start and six platform entries", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "hw-readme-platform-entrypoint-"));
+  await mkdir(join(dir, ".claude-plugin"), { recursive: true });
+  await mkdir(join(dir, "core", "src", "commands"), { recursive: true });
+  await writeFile(join(dir, ".claude-plugin", "plugin.json"), JSON.stringify({ version: "11.0.0" }), "utf8");
+  await writeFile(
+    join(dir, "core", "src", "commands", "index.js"),
+    Array.from({ length: 36 }, (_, index) => `{ canonical: '/hw:test-${index}' }`).join("\n"),
+    "utf8",
+  );
+  await writeFile(
+    join(dir, "README.md"),
+    [
+      "# Hypo-Workflow",
+      "version-11.0.0",
+      "当前版本提供 **36 个用户指令**",
+      "Codex Claude Code OpenCode",
+      "/hw:init /hw:plan /hw:start",
+    ].join("\n"),
+    "utf8",
+  );
+
+  const result = await checkReadmeFreshness(join(dir, "README.md"), { projectRoot: dir });
+
+  assert.equal(result.fresh, false);
+  assert.ok(result.failures.some((failure) => failure.check === "repository-import"));
+  assert.ok(result.failures.some((failure) => failure.check === "quick-start"));
+  assert.ok(result.failures.some((failure) => failure.check === "platform-entry" && failure.expected === "Cursor"));
+  assert.ok(result.failures.some((failure) => failure.check === "platform-entry" && failure.expected === "GitHub Copilot"));
+  assert.ok(result.failures.some((failure) => failure.check === "platform-entry" && failure.expected === "Trae"));
+  assert.ok(result.failures.some((failure) => failure.check === "first-screen-entrypoint"));
+  assert.ok(result.failures.some((failure) => failure.check === "resume-flow"));
+  assert.ok(result.failures.some((failure) => failure.check === "subagent-guidance"));
+});
+
+test("checkReadmeFreshness rejects English prose and external model routing claims", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "hw-readme-language-"));
+  await mkdir(join(dir, ".claude-plugin"), { recursive: true });
+  await mkdir(join(dir, "core", "src", "commands"), { recursive: true });
+  await writeFile(join(dir, ".claude-plugin", "plugin.json"), JSON.stringify({ version: "11.0.0" }), "utf8");
+  await writeFile(
+    join(dir, "core", "src", "commands", "index.js"),
+    Array.from({ length: 36 }, (_, index) => `{ canonical: '/hw:test-${index}' }`).join("\n"),
+    "utf8",
+  );
+  await writeFile(
+    join(dir, "README.md"),
+    [
+      "# Hypo-Workflow",
+      "version-11.0.0",
+      "Hypo-Workflow 是 AI coding workflow runner。",
+      "`HypoxanthineOvO/Hypo-Workflow`",
+      "/hw:init -> /hw:plan -> /hw:start",
+      "/hw:status -> /hw:resume",
+      "Codex Claude Code OpenCode Cursor GitHub Copilot Trae",
+      "Codex Subagents 优先，测试/审查分离，可以 route 到 DeepSeek。",
+      "当前版本提供 **36 个用户指令**",
+    ].join("\n"),
+    "utf8",
+  );
+
+  const result = await checkReadmeFreshness(join(dir, "README.md"), { projectRoot: dir });
+
+  assert.equal(result.fresh, false);
+  assert.ok(result.failures.some((failure) => failure.check === "chinese-entrypoint"));
+  assert.ok(result.failures.some((failure) => failure.check === "codex-external-model-routing"));
+});
+
 test("updateReadme replaces requested managed blocks and reports a summary", async () => {
   const dir = await mkdtemp(join(tmpdir(), "hw-readme-update-"));
   const file = join(dir, "README.md");
@@ -150,3 +219,7 @@ test("updateReadme replaces requested managed blocks and reports a summary", asy
   assert.match(updated, /36 个用户指令/);
   assert.match(updated, /manual outro/);
 });
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}

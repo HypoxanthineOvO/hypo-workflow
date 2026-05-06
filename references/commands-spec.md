@@ -82,6 +82,7 @@ Behavior:
 - read `~/.hypo-workflow/config.yaml` if present
 - resolve effective config as project > global > defaults before selecting execution mode or subagent provider
 - validate config before mutating state
+- read `.pipeline/continuation.yaml` when present; active continuation records `next_action`, `reason`, `updated_at`, `safe_resume_command`, and focused `context`
 - if `--clean` is present, treat the action as a restart and reinitialize from `assets/state-init.yaml`
 - if unfinished state exists and `--clean` is absent, resume that state instead of silently discarding it
 - if `--from <prompt>` is present, resolve against prompt filename or prompt stem prefix
@@ -91,6 +92,8 @@ Behavior:
 - update top-level `last_heartbeat` whenever state is persisted
 - if `watchdog.enabled=true`, register cron for `scripts/watchdog.sh`
 - create `.pipeline/.lock` as a structured execution lease with heartbeat and expiry fields
+- before natural turn end with unfinished work, write or refresh `.pipeline/continuation.yaml` with `safe_resume_command: /hw:resume`
+- before declaring completion in Codex or hook-limited environments, run preflight checks for protected writes, format validity, derived artifacts, README freshness, output language, secret markers, and required evidence
 
 ### `/hw:resume`
 
@@ -111,12 +114,33 @@ Notes:
 Behavior:
 
 - read `state.yaml`
+- read `.pipeline/continuation.yaml`; if `status: active`, choose its `next_action` before falling back to `state.current`
+- accept only safe resume commands such as `/hw:resume` or documented natural-language resume aliases; never execute `safe_resume_command` through a shell
 - parse `.pipeline/.lock` as a structured execution lease when present
 - stop on a fresh foreign lease, take over an expired lease with `lease_takeover` evidence, and stop with repair guidance on a malformed lease
 - create or refresh `.pipeline/.lock` before active execution
 - locate `current.prompt_file` and `current.step`
 - continue from the next runnable step
 - update top-level `last_heartbeat` whenever state is persisted
+- run the same Codex preflight checks before declaring a resumed milestone complete
+
+### Continuation And Preflight Contract
+
+`.pipeline/continuation.yaml` is a file-backed recovery pointer, not a background runner:
+
+```yaml
+schema_version: "1"
+status: active
+next_action: continue_execution
+reason: agent_turn_completed_with_unfinished_milestone
+updated_at: 2026-05-06T14:00:00+08:00
+safe_resume_command: /hw:resume
+context:
+  prompt_file: .pipeline/prompts/02-codex-continuation-and-preflight-runtime.md
+  step: implement
+```
+
+Blocking preflight findings include uncommitted protected authority writes, invalid authority YAML/JSON, malformed leases, invalid resume pointers, secret markers, and missing required report/progress/log evidence. Warning findings include stale derived artifacts, README freshness gaps, missing optional Codex notify, adapter staleness, and non-final output language mismatches.
 
 ### `/hw:status`
 
@@ -280,13 +304,17 @@ Supported flags:
 - `--single`
 - `--import-history`
 - `--interactive` with `--import-history`
+- `--automation manual|balanced|full`
 
 Behavior:
 
 - detect whether the repo is empty, is an existing codebase without `.pipeline/`, or already has a pipeline
+- normal `/hw:init` does not require git
 - follow the exploration and output rules in `references/init-spec.md`
+- ask for automation level in interactive contexts: 稳妥模式 (`manual`), 自动模式 (`balanced`), 全自动模式 (`full`)
+- write the chosen stable `automation.level` into generated project config; non-interactive init defaults to `balanced` unless `--automation` is provided
 - on existing pipelines, check completeness first and use `--rescan` to refresh architecture
-- with `--import-history`, scan Git first-parent history and create `.pipeline/archives/cycle-0-legacy/`
+- with `--import-history`, scan Git first-parent history and create `.pipeline/archives/cycle-0-legacy/`; `/hw:init --import-history` requires git and must fail clearly outside a Git worktree
 - with `--import-history --interactive`, show the proposed split and wait for explicit user confirmation before writing history archive files
 - `--import-history` must not change normal init behavior when omitted
 

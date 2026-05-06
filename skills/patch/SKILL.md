@@ -113,6 +113,14 @@ When a milestone resolves one or more Patches, update `resolved_by` with `C{N}/M
 
 Use `/hw:patch fix P001` to repair one Patch immediately, or `/hw:patch fix P001 P003 P007` to repair several Patches in sequence. Patch fix is a lightweight execution lane, not a Milestone and not a TDD pipeline run.
 
+Patch fix is lightweight, but non-trivial Codex repairs should keep implementation and validation separated when Subagents are available:
+
+- prefer a separate review/test Subagent to validate tests, failure evidence, final diffs, or assumptions
+- prefer docs-specific assistance for README, guide, or adapter-documentation Patches
+- keep the main agent responsible for the final edit decision, commit, Patch metadata, and lifecycle log
+- if no report is generated, record delegation evidence or a non-delegation rationale in the Patch file or `.pipeline/log.yaml`
+- trivial one-file repairs may stay local without Subagent escalation
+
 ### ⚠️ Patch Fix 执行约束
 
 ❌ 绝对禁止：

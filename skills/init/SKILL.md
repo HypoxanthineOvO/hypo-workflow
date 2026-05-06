@@ -13,11 +13,12 @@ description: Initialize or rescan a Hypo-Workflow project when the user wants ar
 - auto：跟随用户对话语言
 内部日志（log.yaml、state.yaml）始终英文。
 
-Use this skill to bootstrap `.pipeline/` and the architecture baseline. V8.1 also lets init import pre-Workflow Git history into a closed Legacy Cycle.
+Use this skill to bootstrap `.pipeline/` and the architecture baseline. normal `/hw:init` does not require git. V8.1 also lets init import pre-Workflow Git history into a closed Legacy Cycle.
 
 ## Preconditions
 
 - the repo is either empty, already contains source code, or already contains a partial pipeline
+- Git is optional for ordinary init. It is required only when `--import-history` is present.
 
 ## Supported Flags
 
@@ -26,6 +27,7 @@ Use this skill to bootstrap `.pipeline/` and the architecture baseline. V8.1 als
 - `--single`: force single-file architecture output.
 - `--import-history`: scan current Git first-parent history and import it as Cycle 0 Legacy.
 - `--interactive`: when used with `--import-history`, show the split plan and wait for explicit confirmation before writing archive files.
+- `--automation manual|balanced|full`: non-interactive automation level override for generated project config.
 
 ## Execution Flow
 
@@ -39,9 +41,17 @@ Use this skill to bootstrap `.pipeline/` and the architecture baseline. V8.1 als
    - structure scan
    - deep reading when needed
    - output generation
-4. Generate `.pipeline/config.yaml` with only project-specific values and overrides that differ from global defaults.
-5. Generate architecture in single-file or folder mode based on project size unless forced.
-6. Initialize rules configuration unless the user explicitly skips it:
+4. Ask for automation level in interactive contexts, then write the stable key to `.pipeline/config.yaml`:
+   ```text
+   ⚙️ 自动化程度
+     [1] 稳妥模式 (`manual`) — 多确认，适合高风险或探索任务
+     [2] 自动模式 (`balanced`) — 普通执行自动继续，规划和高风险 Gate 保留确认
+     [3] 全自动模式 (`full`) — 尽量自动推进，但规划、破坏性/外部副作用、发布仍需确认
+   ```
+   In non-interactive contexts, use `balanced` unless `--automation` provides `manual`, `balanced`, or `full`.
+5. Generate `.pipeline/config.yaml` with only project-specific values and overrides that differ from global defaults, including `automation.level` when chosen during init.
+6. Generate architecture in single-file or folder mode based on project size unless forced.
+7. Initialize rules configuration unless the user explicitly skips it:
    - show the preset choice in interactive contexts:
      ```text
      📏 Rules 配置
@@ -53,13 +63,13 @@ Use this skill to bootstrap `.pipeline/` and the architecture baseline. V8.1 als
    - create `.pipeline/rules.yaml` with `extends: recommended` by default
    - create `.pipeline/rules/custom/` for future custom rules
    - do not create explicit Cycle metadata during init
-7. After creating `.pipeline/` directories and before initializing `state.yaml`, branch into History Import if `--import-history` is present.
-8. Use `--rescan` to refresh architecture for an existing pipeline.
-9. Set `current.phase=lifecycle_init` when tracking this command through state.
+8. After creating `.pipeline/` directories and before initializing `state.yaml`, branch into History Import if `--import-history` is present.
+9. Use `--rescan` to refresh architecture for an existing pipeline.
+10. Set `current.phase=lifecycle_init` when tracking this command through state.
 
 ## History Import
 
-`/hw:init --import-history` imports commits that happened before Hypo-Workflow started tracking the project. It must not change normal init behavior when the flag is absent.
+`/hw:init --import-history` imports commits that happened before Hypo-Workflow started tracking the project. `/hw:init --import-history` requires git, but it must not change normal init behavior when the flag is absent.
 
 ### Template Language
 

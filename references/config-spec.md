@@ -37,6 +37,11 @@ Resolve every configurable value in this order:
 | acceptance user confirm | `acceptance.require_user_confirm` | `acceptance.require_user_confirm` | `false` |
 | acceptance timeout hours | `acceptance.timeout_hours` | `acceptance.timeout_hours` | `72` |
 | rejection escalation threshold | `acceptance.reject_escalation_threshold` | `acceptance.reject_escalation_threshold` | `3` |
+| automation level | `automation.level` | `automation.level` | `balanced` |
+| automation planning gate | `automation.gates.planning` | `automation.gates.planning` | `confirm` |
+| automation execution gate | `automation.gates.execution` | `automation.gates.execution` | `auto` |
+| automation destructive/external gate | `automation.gates.destructive_external` | `automation.gates.destructive_external` | `confirm` |
+| automation release publish gate | `automation.gates.release_publish` | `automation.gates.release_publish` | `confirm` |
 | plan mode | `plan.mode` | `plan.default_mode` | `interactive` |
 | plan interaction depth | `plan.interaction_depth` | `plan.interaction_depth` | `medium` |
 | plan interactive min rounds | `plan.interactive.min_rounds` | `plan.interactive.min_rounds` | `3` |
@@ -56,6 +61,36 @@ Acceptance modes are:
 - `confirm`: legacy compatibility alias for manual user confirmation.
 
 `acceptance.reject_escalation_threshold` controls when repeated Patch rejections should recommend escalation to a Cycle.
+
+Automation levels are stable internal keys with Chinese UI labels:
+
+- `manual` / 稳妥模式: ask more often; suitable for high-risk or exploratory work.
+- `balanced` / 自动模式: automatically continue ordinary execution while preserving planning and high-risk gates.
+- `full` / 全自动模式: continue as much as possible except planning confirmation and dangerous external side effects.
+
+Hard gates are never downgraded by automation level:
+
+- `automation.gates.planning=confirm` is mandatory for P2 milestone split and P4 final plan confirmation.
+- `automation.gates.destructive_external=confirm` is mandatory for destructive or external side effects.
+- `automation.gates.release_publish=confirm` is the default for tag/push/publish operations unless a command receives explicit user confirmation.
+
+Compatibility fields such as `evaluation.auto_continue`, `batch.auto_chain`, `batch.default_gate`, and `opencode.auto_continue` remain supported. Commands should resolve the explicit `automation.*` policy first, then use legacy fields as compatibility hints for ordinary execution gates only. They must not use legacy fields to skip planning, destructive/external, or release publish gates.
+
+Codex delegation policy under `automation.codex` is instruction-level and runtime-level guidance:
+
+- `prefer_subagents=true`: substantial Codex work should explicitly use Subagents when available.
+- `separate_test_and_implementation=true`: testing/review should be separated from implementation where practical.
+- `external_model_routing=false`: Codex Subagents are treated as Codex/GPT runtime workers; Hypo-Workflow must not require DeepSeek, Mimo, Claude, or other external model routing for Codex delegation.
+
+`automation.quality_pass.proposer_challenger=true` enables the lightweight C7 proposer/challenger pattern. It is not a full debate framework.
+
+`/hw:init` asks for the project automation level in interactive contexts and writes the stable key to project config:
+
+- 稳妥模式 (`manual`)
+- 自动模式 (`balanced`)
+- 全自动模式 (`full`)
+
+Non-interactive init uses `balanced` unless `--automation manual|balanced|full` is supplied.
 
 Workflow lifecycle policy is Cycle metadata. Project config may define `default_workflow_kind`, but every active Cycle should write `cycle.workflow_kind` during Plan Generate or Cycle start. Defaults are:
 
@@ -180,7 +215,7 @@ The TUI edit helper must:
 - never write `.pipeline/state.yaml`, `.pipeline/cycle.yaml`, or `.pipeline/rules.yaml`
 - report adapter-affecting edits such as platform, model matrix, sync, or OpenCode fields with guidance to run `/hw:sync --light`
 
-Supported editable domains are platform, model/model pool, approval and acceptance defaults, plan mode, interaction depth, watchdog, compact, sync, docs/release automation, lifecycle defaults, output language/timezone, OpenCode agent matrix, and subagent defaults.
+Supported editable domains are platform, model/model pool, approval and acceptance defaults, automation level/gates, plan mode, interaction depth, watchdog, compact, sync, docs/release automation, lifecycle defaults, output language/timezone, OpenCode agent matrix, and subagent defaults.
 
 The C5 TUI must not dispatch start/resume/accept/reject/sync/repair actions. Those remain explicit `/hw:*` commands.
 

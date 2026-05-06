@@ -1,0 +1,33 @@
+<!-- HYPO-WORKFLOW:MANAGED:BEGIN -->
+# Hypo-Workflow for Trae
+
+## 安装与导入
+
+- 当用户要求安装、导入或学习 Hypo-Workflow 时，读取仓库 `HypoxanthineOvO/Hypo-Workflow` 的 `README.md` 和对应平台 Quick Start。
+- 这个规则文件只是仓库级指引，不声明平台会自动执行安装。需要写文件或运行命令时，遵守当前 IDE 的权限和确认机制。
+
+## Runtime Contract
+
+- Hypo-Workflow is not a runner. 当前 IDE Agent 执行实际工作。
+- `.pipeline/` 是 state、Cycle、Patch、rules、PROGRESS、prompts、reports、logs 的 source of truth。
+- 常用入口：`/hw:init` 初始化或重扫，`/hw:plan` 规划，`/hw:start` 开始执行，`/hw:resume` 继续，`/hw:status` 查看状态。
+- 如果平台不支持原生 slash commands，把用户的 `/hw:*` 意图映射到同名 Hypo-Workflow skill / README 语义。
+
+## Protected Files And Preflight
+
+- Treat protected files `.pipeline/state.yaml`, `.pipeline/cycle.yaml`, and `.pipeline/rules.yaml` as lifecycle authority files.
+- 写入 protected files 前必须确认当前命令确实拥有生命周期写入语义；意外写入需要停下来说明原因。
+- 完成任务前做 preflight：格式检查、派生产物新鲜度、README/文档同步、secret marker、测试证据和报告证据。
+- 第三方平台的规则文件不能替代 Hook；如果平台没有对应 Hook，只能作为执行前后的检查清单。
+
+## Codex Subagents
+
+- Codex Subagents stay inside the Codex/GPT runtime. Do not route them to external model providers.
+- 复杂任务中尽量拆分 Subagent 工作；implementation and testing/review should be separated whenever practical.
+- 当无法调用 Subagent 时，在最终报告里写明原因，并补充本地测试或审查证据。
+
+## Automation Boundary
+
+- 自动化等级来自 `.pipeline/config.yaml` 的 `automation.level`，不能靠平台猜测升级。
+- `manual` 保守确认，`balanced` 常规自动化，`full` 尽量连续推进；破坏性、外部副作用、发布动作仍按配置 Gate 执行。
+<!-- HYPO-WORKFLOW:MANAGED:END -->

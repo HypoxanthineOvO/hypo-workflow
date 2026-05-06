@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import { DEFAULT_GLOBAL_CONFIG, loadConfig, parseYaml, stringifyYaml } from "../config/index.js";
 import { writeOpenCodeArtifacts } from "../artifacts/opencode.js";
 import { writeClaudeCodeAgentArtifacts, writeClaudeCodePluginArtifacts } from "../artifacts/claude.js";
+import { writeThirdPartyAdapterArtifacts } from "../artifacts/third-party.js";
 import { renderClaudeCodeSettingsHooks, renderClaudeHookWrapper } from "../claude-hooks/index.js";
 import { refreshProjectRegistryAction } from "../actions/index.js";
 import { rebuildKnowledgeLedger } from "../knowledge/index.js";
@@ -43,6 +44,7 @@ export async function runProjectSync(projectRoot = ".", options = {}) {
   let claudeCodeAgents = null;
   let claudeCodeHooks = null;
   let claudeCodePlugin = null;
+  let thirdPartyAdapter = null;
 
   if (platform === "opencode") {
     await writeOpenCodeArtifacts(root, {
@@ -61,6 +63,9 @@ export async function runProjectSync(projectRoot = ".", options = {}) {
     operations.push("claude_code_hooks");
     claudeCodeSettings = await syncClaudeCodeSettings(root, { ...options, config, now });
     operations.push("claude_code_settings");
+  } else if (isThirdPartyAdapterPlatform(platform)) {
+    thirdPartyAdapter = await writeThirdPartyAdapterArtifacts(root, { platform });
+    operations.push(`${platform}_adapter`);
   }
 
   let compact = { files: [] };
@@ -89,6 +94,7 @@ export async function runProjectSync(projectRoot = ".", options = {}) {
   if (claudeCodeSettings) result.claude_code_settings = claudeCodeSettings;
   if (claudeCodeAgents) result.claude_code_agents = claudeCodeAgents;
   if (claudeCodeHooks) result.claude_code_hooks = claudeCodeHooks;
+  if (thirdPartyAdapter) result.third_party_adapter = thirdPartyAdapter;
 
   if (mode === "deep") {
     result.dependency_scan = await scanDependencies(root);
@@ -97,6 +103,10 @@ export async function runProjectSync(projectRoot = ".", options = {}) {
   }
 
   return result;
+}
+
+function isThirdPartyAdapterPlatform(platform) {
+  return platform === "cursor" || platform === "copilot" || platform === "trae";
 }
 
 const MANAGED_BY = "hypo-workflow";

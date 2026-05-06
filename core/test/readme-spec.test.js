@@ -10,13 +10,13 @@ test("README spec defines managed dynamic blocks and data sources", async () => 
 
   for (const heading of [
     "# README Spec",
-    "## README Structure",
+    "## README 结构",
     "## Managed Dynamic Blocks",
-    "## Data Sources",
-    "## Update Policy",
+    "## 数据来源",
+    "## 更新策略",
     "## Full Regeneration Policy",
     "## Freshness Checks",
-    "## M02 Implementation Notes",
+    "## 实现说明",
   ]) {
     assert.match(spec, new RegExp(`^${escapeRegExp(heading)}$`, "m"));
   }
@@ -76,7 +76,7 @@ test("README spec gates full regeneration behind profile/config policy", async (
   assert.match(spec, /auto/);
   assert.match(spec, /ask/);
   assert.match(spec, /deny/);
-  assert.match(spec, /English/i);
+  assert.match(spec, /中文优先/);
   assert.match(spec, /marker/i);
 });
 

@@ -38,7 +38,7 @@ export function docsMap() {
         narrative_update_policy: "explicit_repair",
         must_not_include: [],
       },
-      ...["codex", "claude-code", "opencode"].map((platform) => ({
+      ...["codex", "claude-code", "opencode", "cursor", "copilot", "trae"].map((platform) => ({
         path: `docs/platforms/${platform}.md`,
         role: "platform_guide",
         platform,
@@ -70,7 +70,7 @@ export function docsMap() {
         path: "docs/reference/generated-artifacts.md",
         role: "generated_artifacts_reference",
         update_class: "generated_reference",
-        sources: ["core/src/artifacts/opencode.js", "core/src/sync/index.js"],
+        sources: ["core/src/artifacts/opencode.js", "core/src/artifacts/third-party.js", "core/src/sync/index.js"],
         managed_blocks: [],
         narrative_update_policy: "generated",
         must_not_include: [],
@@ -134,7 +134,7 @@ export async function repairDocs(projectRoot = ".", options = {}) {
   generated.push("docs/user-guide.md");
   await writeGenerated(projectRoot, "docs/developer.md", renderDeveloperGuide());
   generated.push("docs/developer.md");
-  for (const platform of ["codex", "claude-code", "opencode"]) {
+  for (const platform of ["codex", "claude-code", "opencode", "cursor", "copilot", "trae"]) {
     const path = `docs/platforms/${platform}.md`;
     await writeGenerated(projectRoot, path, renderPlatformGuide(platform));
     generated.push(path);
@@ -246,7 +246,7 @@ function renderDeveloperGuide() {
 }
 
 function renderPlatformGuide(platform) {
-  const title = platform === "claude-code" ? "Claude Code" : platform === "opencode" ? "OpenCode" : "Codex";
+  const title = platformTitle(platform);
   const capability = PLATFORM_CAPABILITIES[platform] || {};
   const base = [
     `# ${title} Guide`,
@@ -257,6 +257,33 @@ function renderPlatformGuide(platform) {
     "",
     "Hypo-Workflow does not run project work itself; the host agent performs the work using `.pipeline/` files.",
   ];
+
+  if (["cursor", "copilot", "trae"].includes(platform)) {
+    base.push(
+      "",
+      "## Repository Instructions",
+      "",
+      `Adapter target: \`${capability.adapter_target || capability.rules}\`.`,
+      "",
+      "These adapters are repository instruction files. They tell the host IDE Agent to read `HypoxanthineOvO/Hypo-Workflow` and follow README Quick Start guidance; they do not provide native Hook or lifecycle enforcement.",
+      "",
+      "Keep protected files guarded, run preflight checks before completion, and keep implementation separate from testing/review when the host supports delegated work.",
+    );
+  }
+
+  if (platform === "claude-code") {
+    base.push(
+      "",
+      "## Plugin Namespace",
+      "",
+      "The Claude Code plugin name is intentionally `hw`, so existing workflow skills surface as `/hw:*` commands.",
+      "",
+      "- The adapter uses the root `skills/` directory and existing workflow skills.",
+      "- It does not generate `skills/hw-*` alias skills.",
+      "- Settings are merged through project-local `settings.local_file` policy.",
+      "- DeepSeek and Mimo may be used through Claude Code agent routing when configured; this is separate from Codex Subagents.",
+    );
+  }
 
   if (platform === "opencode") {
     base.push(
@@ -302,6 +329,15 @@ function renderPlatformGuide(platform) {
   return base.join("\n") + "\n";
 }
 
+function platformTitle(platform) {
+  if (platform === "claude-code") return "Claude Code";
+  if (platform === "opencode") return "OpenCode";
+  if (platform === "cursor") return "Cursor";
+  if (platform === "copilot") return "GitHub Copilot";
+  if (platform === "trae") return "Trae";
+  return "Codex";
+}
+
 function renderCommandsReference() {
   const rows = CANONICAL_COMMANDS.map((command) => (
     `| \`${command.canonical}\` | \`${command.opencode}\` | \`${command.agent}\` | \`${command.skill}\` |`
@@ -338,6 +374,9 @@ function renderGeneratedArtifactsReference() {
     "|---|---|---|",
     "| `.opencode/commands/hw-*.md` | command registry | `/hw:sync` |",
     "| `.opencode/agents/hw-*.md` | OpenCode artifact helper | `/hw:sync` |",
+    "| `.cursor/rules/hypo-workflow.mdc` | third-party adapter helper | `/hw:sync --platform cursor` |",
+    "| `.github/copilot-instructions.md` | third-party adapter helper | `/hw:sync --platform copilot` |",
+    "| `.trae/rules/project_rules.md` | third-party adapter helper | `/hw:sync --platform trae` |",
     "| `.pipeline/*.compact.*` | `.pipeline/` authority files | `/hw:sync --repair` |",
     "| `docs/reference/*.md` | docs map | `/hw:docs repair` |",
     "| README managed blocks | command/platform helpers | `/hw:docs repair` |",

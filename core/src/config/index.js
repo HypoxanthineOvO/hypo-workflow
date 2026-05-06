@@ -5,7 +5,7 @@ import { DEFAULT_ANALYSIS_INTERACTION } from "../analysis/index.js";
 import { DEFAULT_KNOWLEDGE_CONFIG } from "../knowledge/index.js";
 
 export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
-  version: "11.0.0",
+  version: "11.1.0",
   agent: {
     platform: "codex",
     model: "default",
@@ -53,6 +53,38 @@ export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
     default_state: "pending",
     timeout_hours: 72,
     reject_escalation_threshold: 3,
+  },
+  automation: {
+    level: "balanced",
+    levels: {
+      manual: {
+        label: "稳妥模式",
+        description: "Ask more often; suitable for high-risk or exploratory work.",
+      },
+      balanced: {
+        label: "自动模式",
+        description: "Automatically continue ordinary execution while preserving planning and high-risk gates.",
+      },
+      full: {
+        label: "全自动模式",
+        description: "Continue as much as possible except planning confirmation and dangerous external side effects.",
+      },
+    },
+    gates: {
+      planning: "confirm",
+      execution: "auto",
+      destructive_external: "confirm",
+      release_publish: "confirm",
+    },
+    codex: {
+      prefer_subagents: true,
+      separate_test_and_implementation: true,
+      external_model_routing: false,
+    },
+    quality_pass: {
+      proposer_challenger: true,
+      full_debate_framework: false,
+    },
   },
   dashboard: {
     enabled: true,
@@ -197,7 +229,11 @@ export const DEFAULT_GLOBAL_CONFIG = Object.freeze({
 
 export async function loadConfig(file, defaults = DEFAULT_GLOBAL_CONFIG) {
   const raw = await readFile(file, "utf8");
-  return mergeConfig(defaults, parseYaml(raw));
+  const merged = mergeConfig(defaults, parseYaml(raw));
+  return {
+    ...merged,
+    automation: normalizeAutomationPolicy(merged.automation),
+  };
 }
 
 export async function writeConfig(file, config) {
@@ -253,7 +289,37 @@ export function migrateGlobalConfigShape(config = {}, defaults = DEFAULT_GLOBAL_
   }
   return {
     ...merged,
+    automation: normalizeAutomationPolicy(merged.automation),
     version: DEFAULT_GLOBAL_CONFIG.version,
+  };
+}
+
+export function normalizeAutomationPolicy(policy = {}) {
+  const merged = mergeConfig(DEFAULT_GLOBAL_CONFIG.automation, policy || {});
+  const level = String(merged.level || "balanced");
+  if (!Object.prototype.hasOwnProperty.call(DEFAULT_GLOBAL_CONFIG.automation.levels, level)) {
+    throw new Error(`Unsupported automation level: ${level}`);
+  }
+  return {
+    ...merged,
+    level,
+    levels: DEFAULT_GLOBAL_CONFIG.automation.levels,
+    gates: {
+      ...DEFAULT_GLOBAL_CONFIG.automation.gates,
+      ...(merged.gates || {}),
+      planning: "confirm",
+      destructive_external: "confirm",
+      release_publish: "confirm",
+    },
+    codex: {
+      ...DEFAULT_GLOBAL_CONFIG.automation.codex,
+      ...(merged.codex || {}),
+      external_model_routing: false,
+    },
+    quality_pass: {
+      ...DEFAULT_GLOBAL_CONFIG.automation.quality_pass,
+      ...(merged.quality_pass || {}),
+    },
   };
 }
 

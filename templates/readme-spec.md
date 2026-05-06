@@ -1,29 +1,21 @@
 # README Spec
 
-This file defines the managed structure, data sources, and update policy for
-`README.md`. It is the contract that M02 will use to implement release-time
-README updates. The current milestone only defines the contract; it does not
-implement the renderer.
+本文件定义 `README.md` 的结构、数据来源和更新策略。README 是中文优先入口，英文仅保留在稳定术语、路径、命令、产品名和代码片段中。
 
-## README Structure
+## README 结构
 
-The README keeps a human-written narrative, but selected dynamic regions are
-managed by Hypo-Workflow. The preferred structure is:
+README 保留人工维护的叙述，但部分动态区域可由 Hypo-Workflow 管理。推荐结构：
 
-1. Project title, badges, and short positioning.
-2. Overview and capability summary.
-3. Quick start by platform.
-4. Command reference.
-5. Common workflows, including Feature Queue / Batch Plan for long-range multi-feature planning.
-6. Architecture and internal details.
-7. Configuration.
-8. Platform support matrix.
-9. Validation.
-10. Changelog or version history summary.
-11. License.
+1. 项目标题、badges 和一句话定位。
+2. 首屏快速开始：说明 Hypo-Workflow 是什么、如何导入 `HypoxanthineOvO/Hypo-Workflow`、六个平台入口。
+3. 主路径 `/hw:init -> /hw:plan -> /hw:start` 和恢复路径 `/hw:status -> /hw:resume`。
+4. 平台入口：Codex、Claude Code、OpenCode、Cursor、GitHub Copilot、Trae。
+5. 高层工作原则：protected files、Subagents、测试/审查分离、preflight、automation level。
+6. 常用命令。
+7. 文档入口。
+8. 许可证。
 
-Dynamic regions must be surrounded by explicit marker comments. Content outside
-those markers is user-owned and must not be changed by the automatic update path.
+长篇内部实现、完整测试矩阵、release 细节和 changelog 应放入 docs 或 references。动态区域必须使用显式 marker；marker 外内容属于用户维护，自动更新路径不得擅自改写。
 
 ## Managed Dynamic Blocks
 
@@ -55,7 +47,7 @@ Canonical command groups, OpenCode aliases, agents, and Skill paths.
 <!-- HW:README:END command-reference -->
 
 <!-- HW:README:BEGIN platform-matrix -->
-Codex, Claude Code, and OpenCode capability matrix.
+Codex, Claude Code, OpenCode, Cursor, GitHub Copilot, and Trae capability matrix.
 <!-- HW:README:END platform-matrix -->
 
 <!-- HW:README:BEGIN release-summary -->
@@ -69,7 +61,7 @@ Current version, recent release notes, and milestone history summary.
 Optional future blocks may be added with the same prefix. Unknown blocks should
 be preserved unless a future spec revision explicitly marks them deprecated.
 
-## Data Sources
+## 数据来源
 
 | README fact | Primary source | Fallback or validation source |
 |---|---|---|
@@ -88,9 +80,9 @@ The updater should prefer structured sources when available. Markdown reference
 files may be used as fallbacks for prose summaries, but the renderer should not
 scrape arbitrary README text to discover command or platform counts.
 
-## Update Policy
+## 更新策略
 
-Default behavior is marker-block replacement:
+默认行为是 marker-block replacement：
 
 - Replace only content between matching `<!-- HW:README:BEGIN name -->` and
   `<!-- HW:README:END name -->` markers.
@@ -102,7 +94,7 @@ Default behavior is marker-block replacement:
 - In loose local mode, missing markers may create a full-regeneration candidate,
   but the updater must still record why that candidate is safe.
 
-The update order for `/hw:release` should be:
+`/hw:release` 的 README 更新顺序：
 
 1. release preflight and regression checks;
 2. version calculation;
@@ -138,11 +130,10 @@ Policy matrix:
 | strict | ask | Ask before full regeneration and include a before/after summary. |
 | strict | deny | Never regenerate the full README; fail freshness if required markers are absent. |
 
-The automatic English/stale detection is intentionally conservative. A README is
-a candidate only when at least one of these is true:
+自动检测旧版 README 时必须保守。只有满足以下至少一项，才可认为存在 full regeneration candidate：
 
 - it has no Hypo-Workflow marker comments;
-- it is mostly English while `output.language` is `zh-CN` or `zh`;
+- it is not 中文优先 while `output.language` is `zh-CN` or `zh`;
 - it contains obsolete command counts, platform claims, or version badges that
   conflict with structured sources;
 - it looks like an old scaffold with no project-specific manual prose.
@@ -157,8 +148,10 @@ in the release log or report. When the decision is ambiguous, it must ask.
 - version badge and release summary match `.claude-plugin/plugin.json`;
 - command count matches `core/src/commands/index.js`;
 - OpenCode command table remains traceable to `references/opencode-command-map.md`;
-- platform matrix mentions Codex, Claude Code, and OpenCode consistently with
+- platform matrix mentions Codex, Claude Code, OpenCode, Cursor, GitHub Copilot, and Trae consistently with
   `references/platform-capabilities.md` and `core/src/platform/index.js`;
+- Chinese Quick Start includes `HypoxanthineOvO/Hypo-Workflow`, `/hw:init -> /hw:plan -> /hw:start`, and `/hw:status -> /hw:resume`;
+- README mentions Subagents and testing/review separation at a product-guidance level without external model routing for Codex Subagents;
 - Skill count and internal watchdog wording stay consistent with `skills/`;
 - release flow summary mentions regression, version update, changelog, commit,
   tag, push, and confirmation gates according to `references/release-spec.md`.
@@ -167,10 +160,9 @@ Freshness failures should be surfaced before release commit creation. In strict
 mode, release should stop. In loose mode, the updater may repair managed blocks
 and continue when no user-owned prose is at risk.
 
-## M02 Implementation Notes
+## 实现说明
 
-M02 should implement a small README generation helper instead of scattering
-string manipulation inside release command logic.
+README 生成 helper 应集中处理结构化数据，不要把字符串拼接散落在 release command 逻辑里。
 
 Recommended helper responsibilities:
 

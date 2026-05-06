@@ -1,5 +1,13 @@
 entries:
   -
+    id: CYCLE-ACCEPTED-C7-20260506T150559+0800
+    type: cycle_accept
+    ref: C7
+    status: completed
+    timestamp: "2026-05-06T15:05:59+08:00"
+    summary: Cycle C7 accepted.
+    trigger: manual
+  -
     id: CYCLE-ACCEPTED-C6-20260505T230500+0800
     type: cycle_accept
     ref: C6
@@ -3093,9 +3101,197 @@ entries:
     id: RELEASE-PREPARED-v11.0.0-20260505T230800+0800
     type: release
     ref: v11.0.0
-    status: prepared
+    status: completed
     timestamp: "2026-05-05T23:08:00+08:00"
     summary: Prepared v11.0.0 release after accepting C6; updated versioned files, CHANGELOG, OpenCode and Claude Code adapters, and release docs. Commit, tag, push, and remote release entry are still pending explicit user confirmation.
     report: CHANGELOG.md
     tests: node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh; claude plugin validate .; node scripts/claude-smoke-fixture.mjs; docs/readme/narrative checks; git diff --check
     trigger: manual
+  -
+    id: CYCLE-ARCHIVED-C6-20260506T002449+0800
+    type: cycle_archive
+    ref: C6
+    status: completed
+    timestamp: "2026-05-06T00:24:49+08:00"
+    summary: Archived completed Cycle C6 before creating C7.
+    report: .pipeline/archives/C6-claude-code-adapter-plugin-and-full-workflow-takeover/summary.md
+    trigger: manual
+  -
+    id: CYCLE-CREATED-C7-20260506T002449+0800
+    type: cycle_new
+    ref: C7
+    status: active
+    timestamp: "2026-05-06T00:24:49+08:00"
+    summary: Created C7 New Cycle with feature type and tdd preset.
+    trigger: manual
+  -
+    id: PLAN-GENERATED-C7-20260506T011926+0800
+    type: plan_generate
+    ref: C7
+    status: waiting_confirmation
+    timestamp: "2026-05-06T01:19:26+08:00"
+    summary: Generated C7 plan artifacts for Codex service effectiveness, automation governance, third-party IDE adapters, and Chinese onboarding.
+    report: .pipeline/confirm-summary.md
+    trigger: manual
+  -
+    id: M01-COMPLETE-C7-20260506T134606+0800
+    type: milestone_complete
+    ref: C7/M01
+    status: completed
+    timestamp: "2026-05-06T13:46:06+08:00"
+    summary: Completed automation policy, gate, Codex Subagent runtime, third-party adapter target, and proposer/challenger contract.
+    report: .pipeline/reports/00-governance-spec-and-automation-policy-contract.report.md
+    tests: node --test core/test/config.test.js core/test/profile-platform.test.js core/test/log-evidence.test.js; bash scripts/validate-config.sh .pipeline/config.yaml
+    trigger: auto
+    related_milestone: M01
+  -
+    id: M02-START-C7-20260506T134606+0800
+    type: milestone_start
+    ref: C7/M02
+    status: active
+    timestamp: "2026-05-06T13:46:06+08:00"
+    summary: Auto-continued to Codex Subagent and Execution Discipline after M01 passed focused validation.
+    report: .pipeline/prompts/01-codex-subagent-and-execution-discipline.md
+    trigger: auto
+    related_milestone: M02
+  -
+    id: M02-COMPLETE-C7-20260506T135116+0800
+    type: milestone_complete
+    ref: C7/M02
+    status: completed
+    timestamp: "2026-05-06T13:51:16+08:00"
+    summary: Strengthened Codex Subagent discipline across shared skills, start/resume, Patch lane, subagent spec, and Codex platform guidance with explicit test/review separation and no external model routing.
+    report: .pipeline/reports/01-codex-subagent-and-execution-discipline.report.md
+    tests: node --test core/test/codex-subagent-discipline.test.js; node --test core/test/skill-spec.test.js core/test/commands-rules-artifacts.test.js core/test/codex-subagent-discipline.test.js; node --test core/test/*.test.js; bash scripts/validate-config.sh .pipeline/config.yaml; git diff --check
+    trigger: auto
+    related_milestone: M02
+  -
+    id: M03-START-C7-20260506T135116+0800
+    type: milestone_start
+    ref: C7/M03
+    status: active
+    timestamp: "2026-05-06T13:51:16+08:00"
+    summary: Auto-continued to Codex Continuation and Preflight Runtime after M02 passed full validation.
+    report: .pipeline/prompts/02-codex-continuation-and-preflight-runtime.md
+    trigger: auto
+    related_milestone: M03
+  -
+    id: M03-COMPLETE-C7-20260506T140047+0800
+    type: milestone_complete
+    ref: C7/M03
+    status: completed
+    timestamp: "2026-05-06T14:00:47+08:00"
+    summary: Added file-backed continuation and Codex preflight runtime with safe resume command allowlist, not-runner notify guidance, derived/docs/evidence checks, and secret-marker blocking.
+    report: .pipeline/reports/02-codex-continuation-and-preflight-runtime.report.md
+    tests: node --test core/test/codex-continuation-preflight.test.js; node --test core/test/codex-continuation-preflight.test.js core/test/execution-lease.test.js core/test/sync-derived-map.test.js core/test/docs-governance.test.js; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; git diff --check
+    trigger: auto
+    related_milestone: M03
+  -
+    id: M04-START-C7-20260506T140047+0800
+    type: milestone_start
+    ref: C7/M04
+    status: active
+    timestamp: "2026-05-06T14:00:47+08:00"
+    summary: Auto-continued to Init Automation Levels and Non-Git Bootstrap after M03 passed full validation.
+    report: .pipeline/prompts/03-init-automation-levels-and-non-git-bootstrap.md
+    trigger: auto
+    related_milestone: M04
+  -
+    id: M04-COMPLETE-C7-20260506T141503+0800
+    type: milestone_complete
+    ref: C7/M04
+    status: completed
+    timestamp: "2026-05-06T14:15:03+08:00"
+    summary: Updated init and CLI bootstrap so normal init works without Git, automation levels are stored as stable keys, release publish remains confirm-gated, and config validation rejects invalid automation levels.
+    report: .pipeline/reports/03-init-automation-levels-and-non-git-bootstrap.report.md
+    tests: node --test core/test/config.test.js core/test/init-automation-contract.test.js; bash tests/scenarios/v11/s63-init-automation-non-git/run.sh; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; git diff --check
+    trigger: auto
+    related_milestone: M04
+  -
+    id: M05-START-C7-20260506T141503+0800
+    type: milestone_start
+    ref: C7/M05
+    status: active
+    timestamp: "2026-05-06T14:15:03+08:00"
+    summary: Auto-continued to Cursor Copilot Trae Adapter Generation after M04 passed full validation.
+    report: .pipeline/prompts/04-cursor-copilot-trae-adapter-generation.md
+    trigger: auto
+    related_milestone: M05
+  -
+    id: M05-COMPLETE-C7-20260506T142235+0800
+    type: milestone_complete
+    ref: C7/M05
+    status: completed
+    timestamp: "2026-05-06T14:22:35+08:00"
+    summary: Added Cursor, GitHub Copilot, and Trae repository instruction adapters with conservative managed blocks, sync platform selection, generated platform docs, and adapter tests.
+    report: .pipeline/reports/04-cursor-copilot-trae-adapter-generation.report.md
+    tests: node --test core/test/sync-standardization.test.js; node --test core/test/platform-adapters.test.js; node --test core/test/*.test.js; git diff --check
+    trigger: auto
+    related_milestone: M05
+  -
+    id: M06-START-C7-20260506T142235+0800
+    type: milestone_start
+    ref: C7/M06
+    status: active
+    timestamp: "2026-05-06T14:22:35+08:00"
+    summary: Auto-continued to Chinese README and Platform Quick Start after M05 passed full validation.
+    report: .pipeline/prompts/05-chinese-readme-and-platform-quick-start.md
+    trigger: auto
+    related_milestone: M06
+  -
+    id: M06-COMPLETE-C7-20260506T143032+0800
+    type: milestone_complete
+    ref: C7/M06
+    status: completed
+    timestamp: "2026-05-06T14:30:32+08:00"
+    summary: Rewrote README as a Chinese-first platform Quick Start, added six-platform and repository import freshness checks, and strengthened Codex Subagents priority wording without external model routing.
+    report: .pipeline/reports/05-chinese-readme-and-platform-quick-start.report.md
+    tests: node --test core/test/readme-spec.test.js core/test/readme-update.test.js core/test/docs-governance.test.js; readme-freshness; node --test core/test/*.test.js; git diff --check
+    trigger: auto
+    related_milestone: M06
+  -
+    id: M07-START-C7-20260506T143032+0800
+    type: milestone_start
+    ref: C7/M07
+    status: active
+    timestamp: "2026-05-06T14:30:32+08:00"
+    summary: Auto-continued to Full Regression and Cross-Platform Smoke Readiness after M06 passed full validation.
+    report: .pipeline/prompts/06-full-regression-and-cross-platform-smoke-readiness.md
+    trigger: auto
+    related_milestone: M07
+  -
+    id: M07-COMPLETE-C7-20260506T144034+0800
+    type: milestone_complete
+    ref: C7/M07
+    status: completed
+    timestamp: "2026-05-06T14:40:34+08:00"
+    summary: Completed full C7 regression and cross-platform smoke readiness; fixed final review blockers in help/setup subagent wording and derived summary freshness.
+    report: .pipeline/reports/06-full-regression-and-cross-platform-smoke-readiness.report.md
+    tests: node --test focused C7 tests; node --test core/test/*.test.js; python3 tests/run_regression.py; bash scripts/validate-config.sh .pipeline/config.yaml; README freshness; generated adapter smoke; git diff --check
+    trigger: auto
+    related_milestone: M07
+  -
+    id: CYCLE-PENDING-ACCEPTANCE-C7-20260506T144034+0800
+    type: cycle_pending_acceptance
+    ref: C7
+    status: pending_acceptance
+    timestamp: "2026-05-06T14:40:34+08:00"
+    summary: C7 automated work completed and is waiting for user acceptance or rejection.
+    report: .pipeline/reports/06-full-regression-and-cross-platform-smoke-readiness.report.md
+    trigger: auto
+  -
+    id: RELEASE-v11.1.0-20260506T151615+0800
+    type: release
+    ref: v11.1.0
+    status: completed
+    timestamp: "2026-05-06T15:16:15+08:00"
+    summary: Accepted C7 and prepared Hypo-Workflow v11.1.0 with Codex automation governance, continuation/preflight checks, third-party IDE adapters, non-Git init automation levels, and Chinese platform Quick Start documentation.
+    trigger: user
+    details:
+      tests:
+        - "node --test core/test/*.test.js: 281/281 passing"
+        - "python3 tests/run_regression.py: 63/63 passing"
+        - "bash scripts/validate-config.sh .pipeline/config.yaml: passing"
+        - "claude plugin validate .: passing"
+        - "docs/readme freshness checks: passing"
+        - "git diff --check: passing"

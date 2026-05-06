@@ -1,116 +1,60 @@
-# C6 Design Spec - Claude Code Adapter Plugin and Full Workflow Takeover
+# C7 Design Spec - Codex Service Effectiveness and Workflow Governance
 
 ## Product Scope
 
-C6 upgrades Claude Code support from a thin plugin/skill compatibility surface into a first-class Hypo-Workflow host integration. The Cycle focuses on existing Claude Code plugin support, `/hw:*` aliases, project-local settings merge, hooks, subagent model routing, Progress-style status display, and a manual smoke flow.
-
-Out of scope for the main path:
-
-- replacing the existing `/hypo-workflow:*` skill tree
-- turning Hypo-Workflow into an independent runner
-- full proxying of every Claude Code tool call
-- marketplace publication as an external side effect
-- MCP/LSP deep integration beyond documenting future paths
-- Worktree hook automation beyond initial notes
+C7 upgrades Hypo-Workflow's Codex-facing and shared behavior. The Cycle focuses on stronger subagent discipline, safe automatic execution continuation, Codex-compatible preflight checks, init automation policy, third-party IDE adapter files, and Chinese-first onboarding.
 
 ## Primary Experience
 
-The desired user experience is:
-
-1. A user installs or syncs the Claude Code adapter.
-2. Existing `/hypo-workflow:*` skills continue to work.
-3. The user can also use familiar `/hw:*` aliases.
-4. Project `.claude/settings.local.json` is updated safely and idempotently.
-5. Claude hooks keep the workflow recoverable across session start, stop, permission decisions, and compact events.
-6. Claude subagents use configured role models, including DeepSeek and Mimo.
-7. Claude Code can show a compact Progress-like status view or a documented fallback.
-8. A temporary fixture project can be manually run to verify the whole adapter.
+1. A user installs or imports `HypoxanthineOvO/Hypo-Workflow` from any supported host.
+2. The README immediately shows platform install/import paths and a shared `/hw:init -> /hw:plan -> /hw:start` quick start.
+3. `/hw:init` works in non-git folders, asks for an automation level, and stores clear configuration.
+4. Planning confirmations remain explicit user gates.
+5. Ordinary execution continues automatically when the selected automation level allows it.
+6. Codex runs stronger completion checks before ending work and records continuation state when there is more work to do.
+7. Cursor, GitHub Copilot, and Trae receive generated project instruction files that point back to the repository and explain `/hw:*` usage.
 
 ## Confirmed Decisions
 
-- Use a single Feature with seven Milestones rather than a Feature Queue.
-- Keep current Claude plugin/Skill behavior and enhance it.
-- Generate `/hw:*` aliases as lightweight wrappers around the existing skills.
-- Use `.claude/settings.local.json` as the main project-local auto-write target.
-- Preserve existing `.claude/` settings through backups, managed blocks, idempotent merge, and conflict reporting.
-- Use shared core policy plus Claude-specific hook wrappers.
-- Stop hook should block strict workflow-critical gaps.
-- `metrics` and derived refresh gaps are warnings.
-- Compact hooks must inject resume-oriented state so Claude Code continues from saved workflow state.
-- Permission hooks should continue automation when effective Hypo-Workflow config allows it.
-- Local developer profile may be permissive; published default should require confirmation for destructive or important external side effects.
-- Safety profiles are `developer`, `standard`, and `strict`.
-- Status display should include the milestone table, automation/profile basics, and recent events.
-- If Claude Code monitor or panel APIs are limited, report the limitation and validate fallback options.
-- Final validation includes a user-run manual smoke in a temporary fixture project.
+- Treat Codex guidance as shared/global guidance because Codex primarily consumes `SKILL.md`.
+- Codex must be explicitly encouraged to use Subagents for substantial work.
+- Codex delegation must keep testing/review and implementation separated when practical.
+- Codex subagents should be treated as Codex/GPT runtime workers; do not require external model routing for Codex.
+- Keep planning gates interactive.
+- Add automation levels:
+  - `manual` / 稳妥模式
+  - `balanced` / 自动模式
+  - `full` / 全自动模式
+- Strengthen instructions and add file-backed runtime support instead of relying on instructions only.
+- Preflight checks should cover protected authority files, format/schema contracts, stale derived artifacts, README freshness, output language, secret safety, and release documentation.
+- Normal init must not require git; only `--import-history` remains git-bound.
+- Generate third-party adapter files by default with managed blocks and user-content preservation.
+- README is fully Chinese except stable terms, commands, file paths, and product names.
+- Include a lightweight proposer/challenger quality pass in C7 where it naturally fits; defer a full adversarial debate framework to C8 or later.
 
-## Model Routing Policy
+## Gate Policy
 
-Declaration first, dynamic refinement second.
+Must ask:
 
-Default role mapping:
+- P2 milestone split confirmation.
+- P4 final plan confirmation.
+- Destructive commands and external side effects.
+- Release tag/push unless explicitly confirmed.
 
-| Role | Default model |
-|---|---|
-| docs | `deepseek-v4-pro` |
-| code/test | `mimo-v2.5-pro` |
-| report/compact | `deepseek-v4-flash` |
-| plan/review/debug | shared model pool or explicit Claude Code override |
+Should continue automatically when safe:
 
-Dynamic selection may use:
+- Milestone-to-milestone execution.
+- Resume from continuation state.
+- Safe derived artifact repair.
+- Skip/defer behavior when the configured failure policy allows it.
 
-- Milestone category
-- Test Profile
-- failure/retry state
-- documentation vs implementation vs validation step
-- context-size or compact pressure
+## Third-Party Adapter Targets
 
-Dynamic selection must be visible in generated metadata or smoke evidence.
-
-## Hook Policy
-
-Initial hook events:
-
-- `SessionStart`
-- `Stop`
-- `PreCompact`
-- `PostCompact`
-- `PostToolUse`
-- `PostToolBatch`
-- `UserPromptSubmit`
-- `PermissionRequest`
-- `FileChanged(.pipeline/PROGRESS.md)`
-
-Hard Stop blockers:
-
-- missing or stale authoritative state for an active transition
-- missing lifecycle log evidence
-- stale Progress after a lifecycle transition
-- missing final milestone report
-- missing required Test Profile evidence
-
-Warnings:
-
-- metrics gaps
-- stale compact/derived files
-- status/monitor refresh failure when core Progress is correct
-
-## Status Surface
-
-The first usable surface must render:
-
-- current Cycle and phase
-- milestone/progress table equivalent to the useful part of `PROGRESS.md`
-- automation settings and safety profile
-- recent events
-- next action
-
-Fallback order:
-
-1. Claude Code monitor/status surface.
-2. `/hw:status` alias output.
-3. SessionStart/Stop injected summary.
-4. External dashboard link or launch guidance.
+| Platform | Target file | Strategy |
+|---|---|---|
+| Cursor | `.cursor/rules/hypo-workflow.mdc` | Project rule with managed content and install/import guidance. |
+| GitHub Copilot | `.github/copilot-instructions.md` | Repository custom instructions with `/hw:*` workflow contract. |
+| Trae | `.trae/rules/project_rules.md` | Conservative Markdown rule file with MCP/rules guidance and repository import path. |
 
 ## Validation Strategy
 
@@ -123,21 +67,25 @@ Every implementation Milestone follows TDD:
 5. run green
 6. review code and evidence
 
+For C7, each Milestone should also apply Codex quality discipline:
+
+- Use a Subagent for a focused test, review, docs, or challenger task when available.
+- Keep implementation separate from validation.
+- Record a concise reason when no Subagent is used for substantial work.
+- Treat Codex Subagents as Codex/GPT runtime workers; do not add external model routing requirements for Codex.
+- Use lightweight proposer/challenger checks where the Milestone changes instructions, runtime gates, adapters, or onboarding language.
+
 Final validation must include:
 
-- `bash scripts/validate-config.sh .pipeline/config.yaml`
-- focused `node --test core/test/<claude-*.test.js>` suites
 - `node --test core/test/*.test.js`
 - `python3 tests/run_regression.py`
-- `claude plugin validate .`
-- JSON/YAML parse checks
+- `bash scripts/validate-config.sh .pipeline/config.yaml`
+- generated adapter checks for Codex/Cursor/Copilot/Trae surfaces
+- README freshness and Chinese entrypoint checks
 - `git diff --check`
-- manual Claude Code smoke checklist in a temporary fixture project
 
 ## Open Risks
 
-- Claude Code monitor/panel APIs may not support a true live panel. C6 must validate and document fallback behavior.
-- Claude Code plugin alias naming may have constraints; aliases must be validated rather than assumed.
-- Claude Code hook output contracts are event-sensitive and exit-code-sensitive.
-- User `.claude/` config must not be overwritten or reordered destructively.
-- Provider/model IDs can drift; C6 should preserve configured IDs and avoid hardcoded provider assumptions where possible.
+- Codex currently lacks Claude-style Stop hooks, so continuation must combine instructions, notification hooks, and file-backed state.
+- Cursor and Copilot adapter targets are well documented; Trae rules behavior is less formally specified and should stay conservative.
+- README full rewrite can invalidate freshness tests unless tests and managed block behavior are updated together.

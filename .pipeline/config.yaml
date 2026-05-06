@@ -1,5 +1,5 @@
 pipeline:
-  name: "Claude Code Adapter Plugin and Full Workflow Takeover"
+  name: "Codex Service Effectiveness and Workflow Governance"
   source: local
   output: local
   prompts_dir: .pipeline/prompts

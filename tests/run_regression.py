@@ -80,6 +80,7 @@ TARGET_SCENARIOS = {
     "s60-progress-board-format",
     "s61-opencode-model-matrix-sync",
     "s62-analysis-preset-runtime",
+    "s63-init-automation-non-git",
 }
 
 
@@ -277,6 +278,7 @@ def scenario_specific(scene: Path, result: ScenarioResult) -> None:
         "s60-progress-board-format",
         "s61-opencode-model-matrix-sync",
         "s62-analysis-preset-runtime",
+        "s63-init-automation-non-git",
     }:
         proc = run(f'bash "{scene / "run.sh"}"', cwd=scene)
         add(result, "run_sh", proc.returncode == 0, (proc.stdout + proc.stderr).strip())

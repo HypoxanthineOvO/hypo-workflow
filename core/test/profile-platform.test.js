@@ -22,3 +22,17 @@ test("capabilityFor exposes OpenCode native primitives", () => {
   assert.equal(capabilities.recovery, "lease-heartbeat-plugin-events");
   assert.match(capabilities.handoff_boundaries, /permissions/);
 });
+
+test("capabilityFor exposes third-party IDE adapter targets", () => {
+  assert.equal(capabilityFor("cursor").rules, ".cursor/rules/hypo-workflow.mdc");
+  assert.equal(capabilityFor("copilot").rules, ".github/copilot-instructions.md");
+  assert.equal(capabilityFor("trae").rules, ".trae/rules/project_rules.md");
+});
+
+test("capabilityFor keeps Codex subagents inside Codex runtime assumptions", () => {
+  const capabilities = capabilityFor("codex");
+  assert.equal(capabilities.subagents, "codex-gpt-runtime");
+  assert.equal(capabilities.model_routing, "host-gpt-runtime");
+  assert.match(capabilities.delegation_policy, /testing\/review/);
+  assert.doesNotMatch(JSON.stringify(capabilities), /deepseek|mimo|claude/i);
+});

@@ -14,6 +14,7 @@
 # 7. 如果 hooks.enabled=true，hooks/ 目录必须存在
 # 8. platform 如果存在，必须是 auto|claude|codex 之一
 # 9. 如果 source/output 使用 notion，必须提供 notion 段并满足最小字段要求
+# 10. automation.level 如果存在，必须是 manual|balanced|full 之一
 #
 # 输出：每条错误一行。退出码：0=通过, 1=有错误
 #
@@ -69,6 +70,7 @@ notion_source_database_id="$(extract_section notion source_database_id)"
 notion_source_page_id="$(extract_section notion source_page_id)"
 notion_output_parent_page_id="$(extract_section notion output_parent_page_id)"
 notion_output_database_id="$(extract_section notion output_database_id)"
+automation_level="$(extract_section automation level)"
 
 if [[ -z "$pipeline_name" ]]; then
   echo "pipeline.name must not be empty"
@@ -114,6 +116,16 @@ if [[ -n "$platform" ]]; then
     auto|claude|codex) ;;
     *)
       echo "platform must be one of: auto, claude, codex"
+      errors=1
+      ;;
+  esac
+fi
+
+if [[ -n "$automation_level" ]]; then
+  case "$automation_level" in
+    manual|balanced|full) ;;
+    *)
+      echo "automation.level must be one of: manual, balanced, full"
       errors=1
       ;;
   esac
