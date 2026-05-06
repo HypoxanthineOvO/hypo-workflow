@@ -3289,9 +3289,24 @@ entries:
     trigger: user
     details:
       tests:
-        - "node --test core/test/*.test.js: 281/281 passing"
-        - "python3 tests/run_regression.py: 63/63 passing"
-        - "bash scripts/validate-config.sh .pipeline/config.yaml: passing"
-        - "claude plugin validate .: passing"
-        - "docs/readme freshness checks: passing"
-        - "git diff --check: passing"
+        -
+          "node --test core/test/*.test.js: 281/281 passing"
+        -
+          "python3 tests/run_regression.py: 63/63 passing"
+        -
+          "bash scripts/validate-config.sh .pipeline/config.yaml: passing"
+        -
+          "claude plugin validate .: passing"
+        -
+          "docs/readme freshness checks: passing"
+        -
+          "git diff --check: passing"
+  -
+    id: CYCLE-CLOSED-C7-20260506T153000+0800
+    type: cycle_close
+    ref: C7
+    status: closed
+    timestamp: "2026-05-06T15:30:00+08:00"
+    summary: Closed and archived Cycle C7 to .pipeline/archives/C7-codex-service-effectiveness-and-workflow-governance.
+    report: .pipeline/archives/C7-codex-service-effectiveness-and-workflow-governance/summary.md
+    trigger: user
